@@ -54,6 +54,7 @@ from __future__ import annotations
 import argparse
 import ast
 import fcntl
+from fractions import Fraction
 import hashlib
 import json
 import math
@@ -174,6 +175,12 @@ def load_plan(path: pathlib.Path) -> dict:
             raise PlanError(
                 f"arm {name}: acceptance_source 只能是 gate_visible 或 exam:<KIND>：{asrc!r}"
             )
+        apr = arm.get("acceptance_pass_ratio")
+        if apr is not None:
+            if isinstance(apr, bool) or not isinstance(apr, (int, float)) or not (math.isfinite(float(apr)) and 0.0 < float(apr) <= 1.0):
+                raise PlanError(
+                    f"arm {name}: acceptance_pass_ratio 必須是 (0, 1] 內的浮點數：{apr!r}"
+                )
     if len(set(plan["tasks"])) != len(plan["tasks"]):
         raise PlanError("tasks 有重複")
     acfg = plan.get("acceptance", {})
@@ -842,25 +849,54 @@ def _acceptance_external(tdir: pathlib.Path, final_ws: pathlib.Path, cfg: dict, 
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def _apply_pass_ratio(acc: dict, pass_ratio: float | None) -> dict:
+    """When pass_ratio is set, decide accept = (passed / total >= pass_ratio) using per-test units.
+
+    Status/load errors or 0 collected tests always fail closed with pass_ratio=0.0.
+    When pass_ratio is None, returns acc untouched (byte-identical legacy behaviour).
+    """
+    if pass_ratio is None:
+        return acc
+    ratio_f = float(pass_ratio)
+    if acc.get("status") != "ok":
+        return {**acc, "accept": False, "pass_ratio": 0.0, "acceptance_pass_ratio": ratio_f}
+    tr = acc.get("test_results") or {}
+    if tr:
+        total_u = len(tr)
+        passed_u = sum(1 for v in tr.values() if v)
+    else:
+        total_u = int(acc["run"]) if isinstance(acc.get("run"), int) else 0
+        passed_u = int(acc["passed"]) if isinstance(acc.get("passed"), int) else 0
+    if total_u <= 0:
+        return {**acc, "accept": False, "pass_ratio": 0.0, "acceptance_pass_ratio": ratio_f}
+    achieved = round(passed_u / total_u, 6)
+    ok = Fraction(passed_u, total_u) >= Fraction(str(ratio_f))
+    return {**acc, "accept": ok, "pass_ratio": achieved, "acceptance_pass_ratio": ratio_f}
+
+
 def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict, *,
-               tdir: pathlib.Path | None = None, source: str | None = None) -> dict:
+               tdir: pathlib.Path | None = None, source: str | None = None,
+               pass_ratio: float | None = None) -> dict:
     """在最後工作區的**副本**裡、把題目原本的測試檔還原之後，跑那些測試。
 
     回傳 `{"accept": bool, "passed": int|None, ...}`。驗收自己壞掉（逾時、沒有輸出、沒有測試檔）
     ＝ `accept=False` 且 `status` 寫明原因——**壞掉的驗收不是通過**（I-4）。
     """
     if source is not None:
-        return _acceptance_external(tdir if tdir is not None else origin.parent, final_ws, cfg, source)
+        return _apply_pass_ratio(
+            _acceptance_external(tdir if tdir is not None else origin.parent, final_ws, cfg, source),
+            pass_ratio,
+        )
     kind = cfg.get("kind", "workspace_tests")
     if kind == "command":
-        return _acceptance_command(origin, final_ws, cfg)
+        return _apply_pass_ratio(_acceptance_command(origin, final_ws, cfg), pass_ratio)
     patterns = cfg.get("patterns", ["*_test.py", "test_*.py"])
     tests = test_files(origin, patterns)
     base = {"accept": False, "kind": kind, "tests": tests, "passed": None, "run": None,
             "tests_tampered": [], "status": None, "first_problem": None,
             "test_results": {}, "failing_tests": []}
     if not tests:
-        return {**base, "status": "no_tests_in_origin"}
+        return _apply_pass_ratio({**base, "status": "no_tests_in_origin"}, pass_ratio)
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="redo-acc-"))
     try:
         work = tmp / "w"
@@ -883,11 +919,17 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict, *,
             rc, out = _run_quiet([sys.executable, "-B", "-c", _UNITTEST_RUNNER, *mods], work / d if d else work,
                                  _clean_env(tmp), float(cfg.get("timeout_s", 120)))
             if "@@REDO_RESULT@@" not in out:
-                return {**base, "status": "timeout" if out == "timeout" else "runner_no_output",
-                        "first_problem": out[-800:]}
+                return _apply_pass_ratio(
+                    {**base, "status": "timeout" if out == "timeout" else "runner_no_output",
+                     "first_problem": out[-800:]},
+                    pass_ratio,
+                )
             r = json.loads(out.rsplit("@@REDO_RESULT@@", 1)[1].strip().splitlines()[0])
             if r["load_error"]:
-                return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
+                return _apply_pass_ratio(
+                    {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]},
+                    pass_ratio,
+                )
             for k in agg:
                 agg[k] += r[k]
             for tid, passed_flag in (r.get("test_results") or {}).items():
@@ -896,9 +938,10 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict, *,
             first = first or r["first_problem"]
         bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
         failing_tests = sorted(k for k, ok in test_results.items() if not ok)
-        return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
-                "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first,
-                "test_results": test_results, "failing_tests": failing_tests}
+        res = {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
+               "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first,
+               "test_results": test_results, "failing_tests": failing_tests}
+        return _apply_pass_ratio(res, pass_ratio)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -1048,8 +1091,12 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
             write_json(adir / "attempt.json", {**meta, "void": why})
             return {**meta, "void": why}
         arm_source = arm.get("acceptance_source")
+        arm_ratio = arm.get("acceptance_pass_ratio")
         if arm_source is not None:
-            acc = acceptance(origin, ws, plan.get("acceptance", {}), tdir=tdir, source=arm_source)
+            acc = acceptance(origin, ws, plan.get("acceptance", {}), tdir=tdir, source=arm_source,
+                             pass_ratio=arm_ratio)
+        elif arm_ratio is not None:
+            acc = acceptance(origin, ws, plan.get("acceptance", {}), pass_ratio=arm_ratio)
         else:
             acc = acceptance(origin, ws, plan.get("acceptance", {}))
         gr = grade(tdir, origin, ws, plan.get("grader", {}), acc)
@@ -1416,6 +1463,7 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
     cell["wall_s"] = round(time.time() - t0, 1)
     cell["agent_wall_s"] = round(spent, 1)
     arm_source = arm.get("acceptance_source")
+    arm_ratio = arm.get("acceptance_pass_ratio")
     has_exam_fields = arm_source is not None or any(
         a.get("acceptance_source") is not None for a in plan["arms"].values()
     )
@@ -1432,6 +1480,12 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
                     "test_results": dict(a["acc"].get("test_results") or {}),
                 }
                 if has_exam_fields else {}
+            ),
+            **(
+                {
+                    "acc_pass_ratio": a["acc"].get("pass_ratio"),
+                }
+                if arm_ratio is not None else {}
             ),
             **(
                 {
@@ -1462,6 +1516,8 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
             cell["infra_void"] = "grader_failed"
         elif has_exam_fields:
             cell["acceptance_source"] = arm_source
+            if arm_ratio is not None:
+                cell["acceptance_pass_ratio"] = float(arm_ratio)
             if arm_source is not None:
                 cell["false_accept"] = bool(cell["accepted"] and cell["pass"] is False)
                 cell["false_reject"] = bool(
@@ -1851,13 +1907,21 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         # 起點必須是紅的：原封不動的工作區不可以通過驗收（否則「通過」沒有資訊）
         t0 = plan["tasks"][0]
         if arm_sources:
-            for src in arm_sources:
-                acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg, tdir=bank / t0, source=src)
+            src_ratios: list[tuple[str, float | None]] = []
+            for a_cfg in plan["arms"].values():
+                if a_cfg.get("acceptance_source"):
+                    pair_sr = (a_cfg["acceptance_source"], a_cfg.get("acceptance_pass_ratio"))
+                    if pair_sr not in src_ratios:
+                        src_ratios.append(pair_sr)
+            for src, pr in src_ratios:
+                acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg,
+                                  tdir=bank / t0, source=src, pass_ratio=pr)
                 neg_ok = (not acc0["accept"]) and acc0["status"] not in (
                     "no_tests_in_source", "no_tests_in_origin", "runner_no_output", "timeout"
                 )
-                say(neg_ok, f"負控制（{src}）：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
-                    if neg_ok else f"負控制失敗（{src}）：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
+                label = f"{src}" if pr is None else f"{src}, ratio>={pr}"
+                say(neg_ok, f"負控制（{label}）：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
+                    if neg_ok else f"負控制失敗（{label}）：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
         else:
             acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg)
             neg_ok = (not acc0["accept"] and acc0["status"] == "ok") if acfg.get("kind") == "command" else (not acc0["accept"])

@@ -27,6 +27,9 @@ REDO_PY = ROOT / "ops" / "redo" / "redo.py"
 IMPORTER_PY = ROOT / "ops" / "redo" / "banks" / "import_exams.py"
 METRICS_PY = ROOT / "ops" / "redo" / "analysis" / "exam_metrics.py"
 PLAN_EXAM37 = ROOT / "ops" / "redo" / "plans" / "exam37_colab_e4b.json"
+PLAN_EXAM37_PART1 = ROOT / "ops" / "redo" / "plans" / "exam37_colab_e4b_part1.json"
+PLAN_EXAM37_PART2 = ROOT / "ops" / "redo" / "plans" / "exam37_colab_e4b_part2.json"
+REF_OK_JSON = ROOT / "ops" / "redo" / "analysis" / "exam37_xm_reference_ok.json"
 PLAN_CTL12 = ROOT / "ops" / "redo" / "plans" / "ctl12_colab_e4b.json"
 
 
@@ -601,6 +604,372 @@ class TestExamPilot(unittest.TestCase):
             self.assertEqual(res["per_arm"]["EX"]["false_accept_cells"], 1)
             self.assertFalse(res["qualification"]["EX"]["qualifies"])
             self.assertTrue(res["qualification"]["XM"]["qualifies"])
+
+    def test_acceptance_pass_ratio_threshold_errors_and_hint(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = pathlib.Path(td)
+            bank = tmp / "bank"
+            tdir = _make_toy_exam_task(bank, "t_ratio")
+            # Build a 20-test exam in exams/XMT where test_i checks solve(i) == i * 10
+            lines = ["from sol import solve\n"]
+            for i in range(1, 21):
+                lines.append(f"def test_case_{i:02d}():\n    inp = {i}\n    expected = {i * 10}\n    assert solve(inp) == expected\n")
+            (tdir / "exams" / "XMT").mkdir(parents=True, exist_ok=True)
+            (tdir / "exams" / "XMT" / "test_xmt.py").write_text("\n".join(lines), encoding="utf-8")
+
+            # Also build a degenerate exam with 0 test functions (module-level assert like ex_series XMV)
+            (tdir / "exams" / "ZERO").mkdir(parents=True, exist_ok=True)
+            (tdir / "exams" / "ZERO" / "test_zero.py").write_text("from sol import solve\nassert solve(1) == 10\n", encoding="utf-8")
+
+            ws = tmp / "ws"
+            ws.mkdir()
+
+            # 1) 17/20 pass = 0.85 -> accepted under ratio 0.85, rejected under strict (None)
+            (ws / "sol.py").write_text("def solve(x):\n    return x * 10 if x <= 17 else -1\n", encoding="utf-8")
+            acc_strict = self.redo.acceptance(tdir / "workspace", ws, {}, tdir=tdir, source="exam:XMT")
+            self.assertFalse(acc_strict["accept"])
+            self.assertNotIn("pass_ratio", acc_strict)
+            self.assertNotIn("acceptance_pass_ratio", acc_strict)
+
+            acc_85 = self.redo.acceptance(tdir / "workspace", ws, {}, tdir=tdir, source="exam:XMT", pass_ratio=0.85)
+            self.assertEqual(acc_85["status"], "ok")
+            self.assertEqual(acc_85["passed"], 17)
+            self.assertEqual(acc_85["run"], 20)
+            self.assertAlmostEqual(acc_85["pass_ratio"], 0.85)
+            self.assertEqual(acc_85["acceptance_pass_ratio"], 0.85)
+            self.assertTrue(acc_85["accept"])
+
+            # 2) 16/20 pass = 0.80 < 0.85 -> rejected, hint keeps failing test + input, strips expected
+            (ws / "sol.py").write_text("def solve(x):\n    return x * 10 if x <= 16 else -1\n", encoding="utf-8")
+            acc_80 = self.redo.acceptance(tdir / "workspace", ws, {}, tdir=tdir, source="exam:XMT", pass_ratio=0.85)
+            self.assertFalse(acc_80["accept"])
+            self.assertAlmostEqual(acc_80["pass_ratio"], 0.8)
+            hint = self.redo.make_hint_failing_tests_noexpect(acc_80)
+            self.assertIn("test_case_17", hint)
+            self.assertIn("inp = 17", hint)
+            self.assertNotIn("170", hint)
+            self.assertLessEqual(len(hint.encode("utf-8")), 400)
+
+            # 3) load_error (syntax error in sol.py) -> fail with pass_ratio=0.0
+            (ws / "sol.py").write_text("def solve(x):\n    return (\n", encoding="utf-8")
+            acc_err = self.redo.acceptance(tdir / "workspace", ws, {}, tdir=tdir, source="exam:XMT", pass_ratio=0.85)
+            self.assertEqual(acc_err["status"], "load_error")
+            self.assertFalse(acc_err["accept"])
+            self.assertEqual(acc_err["pass_ratio"], 0.0)
+
+            # 4) 0 collected test functions -> fail closed with pass_ratio=0.0
+            (ws / "sol.py").write_text("def solve(x):\n    return x * 10\n", encoding="utf-8")
+            acc_zero = self.redo.acceptance(tdir / "workspace", ws, {}, tdir=tdir, source="exam:ZERO", pass_ratio=0.85)
+            self.assertEqual(acc_zero["run"], 0)
+            self.assertFalse(acc_zero["accept"])
+            self.assertEqual(acc_zero["pass_ratio"], 0.0)
+
+            # 5) load_plan validation rejects bad acceptance_pass_ratio values
+            base_plan = {
+                "schema": self.redo.SCHEMA, "id": "bad_ratio", "tasks": ["t_ratio"], "reps": 1,
+                "arms": {
+                    "A": {"policy": "single", "attempt_timeout_s": 5},
+                    "XMT": {"policy": "restart", "acceptance_source": "exam:XMT", "acceptance_pass_ratio": 0.0},
+                },
+                "pair": ["A", "XMT"], "attempt_timeout_s": 5,
+                "agent": {"argv": ["true"]}, "providers": [{"name": "p", "jobs": 1}],
+            }
+            pf = tmp / "bad.json"
+            for bad_val in (0.0, -0.1, 1.01, True, "0.85"):
+                base_plan["arms"]["XMT"]["acceptance_pass_ratio"] = bad_val
+                self.redo.write_json(pf, base_plan)
+                with self.assertRaises(self.redo.PlanError):
+                    self.redo.load_plan(pf)
+
+    def test_exam_metrics_false_block_stratification_and_combined_roots(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = pathlib.Path(td)
+            root1 = tmp / "part1"
+            root2 = tmp / "part2"
+            tasks = ["t_ok_1", "t_ok_2", "t_fail_1", "t_fail_2"]
+            ref_ok = {
+                "xm_reference_ok": ["t_ok_1", "t_ok_2"],
+                "xm_reference_fail": ["t_fail_1", "t_fail_2"],
+            }
+            ref_ok_path = tmp / "ref_ok.json"
+            ref_ok_path.write_text(json.dumps(ref_ok), encoding="utf-8")
+
+            plan1 = {
+                "id": "mock_part1", "tasks": tasks, "reps": 1,
+                "arms": {
+                    "A": {"policy": "single"},
+                    "N3": {"policy": "continue", "hint": "review", "deliver": "last"},
+                    "GT": {"policy": "restart", "acceptance_source": "gate_visible"},
+                    "XM": {"policy": "restart", "acceptance_source": "exam:XM"},
+                },
+            }
+            plan2 = {
+                "id": "mock_part2", "tasks": tasks, "reps": 1,
+                "arms": {
+                    "XMV": {"policy": "restart", "acceptance_source": "exam:XMV"},
+                    "PB": {"policy": "restart", "acceptance_source": "exam:PB"},
+                    "XMT": {"policy": "restart", "acceptance_source": "exam:XMT", "acceptance_pass_ratio": 0.85},
+                },
+            }
+            root1.mkdir(parents=True)
+            root2.mkdir(parents=True)
+            (root1 / "RUN.json").write_text(json.dumps({"plan_sha256": "sha1", "plan": plan1}), encoding="utf-8")
+            (root2 / "RUN.json").write_text(json.dumps({"plan_sha256": "sha2", "plan": plan2}), encoding="utf-8")
+
+            def write_cell(root: pathlib.Path, sha: str, task: str, arm: str, *,
+                           attempts: list[dict], delivered_idx: int, gated: bool) -> None:
+                cdir = root / "cells" / task / "r1" / arm
+                cdir.mkdir(parents=True, exist_ok=True)
+                d = attempts[delivered_idx]
+                fa = (bool(d["accept"]) and d["grade_pass"] is False) if gated else None
+                fr = any((not bool(a["accept"])) and a["grade_pass"] is True for a in attempts) if gated else None
+                cell = {
+                    "cell": f"{task}/r1/{arm}", "task": task, "rep": 1, "arm": arm,
+                    "plan_sha256": sha, "infra_void": None, "n_attempts": len(attempts),
+                    "delivered_attempt": delivered_idx + 1, "accepted": bool(d["accept"]),
+                    "pass": bool(d["grade_pass"]), "wall_s": 10.0, "agent_wall_s": 9.0,
+                    "false_accept": fa, "false_reject": fr, "attempts": attempts,
+                }
+                (cdir / "cell.json").write_text(json.dumps(cell), encoding="utf-8")
+
+            def att(k: int, acc: bool, gp: bool) -> dict:
+                return {"k": k, "accept": acc, "grade_pass": gp, "timed_out": False,
+                        "wall_s": 4.0, "usage": {"calls": 1, "input": 50, "output": 20}}
+
+            # Part 1:
+            # A:  [F, F, F, F] (0/4)
+            # N3: [T, F, F, F] (1/4)
+            # GT: [T, T, T, T] (4/4) -> GT-N3 = 0.75
+            # XM: ok tasks [T, T], fail tasks [F (false-blocked on att1!), F] -> 2/4; ok=1.0, fail=0.0; FB=1/4 cells, 1/5 atts
+            for i, t in enumerate(tasks):
+                write_cell(root1, "sha1", t, "A", attempts=[att(1, False, False)], delivered_idx=0, gated=False)
+                write_cell(root1, "sha1", t, "N3", attempts=[att(1, False, i == 0)], delivered_idx=0, gated=False)
+                write_cell(root1, "sha1", t, "GT", attempts=[att(1, True, True)], delivered_idx=0, gated=True)
+                if t == "t_fail_1":
+                    # Attempt 1 passes hidden but XM gate rejects (false_block!), attempt 2 fails hidden
+                    write_cell(root1, "sha1", t, "XM", attempts=[att(1, False, True), att(2, False, False)], delivered_idx=1, gated=True)
+                else:
+                    p = t.startswith("t_ok")
+                    write_cell(root1, "sha1", t, "XM", attempts=[att(1, p, p)], delivered_idx=0, gated=True)
+
+            # Part 2:
+            # XMV: [T, T, F (false-blocked twice!), F] -> 2/4; FB cells=1/4, FB atts=2/6
+            # PB:  [T, T, T, F] -> 3/4 (gain_share = (0.75 - 0.25)/0.75 = 0.6667, FA=0 -> qualifies!)
+            # XMT: [T, T, T, F (FA)] -> 3/4, FA=0.25 > 2*0 -> does not qualify
+            for t in tasks:
+                if t == "t_fail_1":
+                    write_cell(root2, "sha2", t, "XMV",
+                               attempts=[att(1, False, True), att(2, False, True), att(3, False, False)],
+                               delivered_idx=2, gated=True)
+                else:
+                    p = t.startswith("t_ok")
+                    write_cell(root2, "sha2", t, "XMV", attempts=[att(1, p, p)], delivered_idx=0, gated=True)
+                p_pb = t != "t_fail_2"
+                write_cell(root2, "sha2", t, "PB", attempts=[att(1, p_pb, p_pb)], delivered_idx=0, gated=True)
+                if t == "t_fail_2":
+                    write_cell(root2, "sha2", t, "XMT", attempts=[att(1, True, False)], delivered_idx=0, gated=True)
+                else:
+                    write_cell(root2, "sha2", t, "XMT", attempts=[att(1, True, True)], delivered_idx=0, gated=True)
+
+            # Combine via CLI
+            proc = subprocess.run(
+                [sys.executable, str(METRICS_PY), str(root1), str(root2), "--reference-ok-json", str(ref_ok_path), "--json"],
+                capture_output=True, text=True, timeout=30,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            res = json.loads(proc.stdout)
+
+            self.assertEqual(list(res["per_arm"].keys()), ["A", "N3", "GT", "XM", "XMV", "PB", "XMT"])
+            self.assertEqual(len(res["roots"]), 2)
+            self.assertTrue(res["discriminable"])
+            # False-block (per-cell and per-attempt)
+            self.assertEqual(res["per_arm"]["XM"]["false_block_cells"], 1)
+            self.assertAlmostEqual(res["per_arm"]["XM"]["false_block_cell_rate"], 0.25)
+            self.assertEqual(res["per_arm"]["XM"]["false_block_attempts"], 1)
+            self.assertAlmostEqual(res["per_arm"]["XM"]["false_block_attempt_rate"], 0.2)
+            self.assertEqual(res["per_arm"]["XMV"]["false_block_cells"], 1)
+            self.assertAlmostEqual(res["per_arm"]["XMV"]["false_block_cell_rate"], 0.25)
+            self.assertEqual(res["per_arm"]["XMV"]["false_block_attempts"], 2)
+            self.assertAlmostEqual(res["per_arm"]["XMV"]["false_block_attempt_rate"], round(2 / 6, 4))
+            # Part-2 arms compared against Part-1's N3 and GT
+            for arm in ("XMV", "PB", "XMT"):
+                self.assertIn(arm, res["paired_vs_N3"])
+                self.assertIn(arm, res["paired_vs_A"])
+                self.assertIn(arm, res["qualification"])
+            self.assertTrue(res["qualification"]["PB"]["qualifies"])
+            self.assertFalse(res["qualification"]["XMT"]["qualifies"])
+            self.assertAlmostEqual(res["per_arm"]["XMT"]["acceptance_pass_ratio"], 0.85)
+
+            # Stratified table (2 ok vs 2 fail)
+            strat = res["stratified_by_xm_reference_ok"]
+            self.assertIsNotNone(strat)
+            self.assertEqual(strat["xm_ref_ok"]["n_tasks"], 2)
+            self.assertEqual(strat["xm_ref_fail"]["n_tasks"], 2)
+            self.assertAlmostEqual(strat["xm_ref_ok"]["per_arm"]["XM"]["hidden_success_rate"], 1.0)
+            self.assertAlmostEqual(strat["xm_ref_fail"]["per_arm"]["XM"]["hidden_success_rate"], 0.0)
+            self.assertAlmostEqual(strat["xm_ref_fail"]["per_arm"]["PB"]["hidden_success_rate"], 0.5)
+            self.assertAlmostEqual(strat["xm_ref_fail"]["per_arm"]["XMV"]["false_block_cell_rate"], 0.5)
+
+            md = self.metrics.render_report(res)
+            self.assertIn("Combined roots (2)", md)
+            self.assertIn("Stratified by XM Exam Correctness", md)
+            self.assertIn("False-Block (cell)", md)
+
+            # Duplicate arm name across roots must raise ValueError
+            with self.assertRaises(ValueError):
+                self.metrics.analyse([root1, root1])
+
+    def test_plan_exam37_colab_e4b_part2_and_reference_ok_json(self) -> None:
+        p1 = self.redo.load_plan(PLAN_EXAM37_PART1)
+        p2 = self.redo.load_plan(PLAN_EXAM37_PART2)
+        for field in ("schema", "seed", "bank", "bank_candidates", "attempt_timeout_s",
+                      "agent", "providers", "acceptance", "grader", "tasks", "reps"):
+            self.assertEqual(p2[field], p1[field], f"part2 {field} differs from part1")
+        self.assertEqual(list(p2["arms"].keys()), ["XMV", "PB", "XMT"])
+        self.assertEqual(p2["arms"]["XMV"]["acceptance_source"], "exam:XMV")
+        self.assertNotIn("acceptance_pass_ratio", p2["arms"]["XMV"])
+        self.assertEqual(p2["arms"]["PB"]["acceptance_source"], "exam:PB")
+        self.assertNotIn("acceptance_pass_ratio", p2["arms"]["PB"])
+        self.assertEqual(p2["arms"]["XMT"]["acceptance_source"], "exam:XMT")
+        self.assertEqual(p2["arms"]["XMT"]["acceptance_pass_ratio"], 0.85)
+        for arm in ("XMV", "PB", "XMT"):
+            self.assertEqual(p2["arms"][arm]["hint"], "failing_tests_noexpect")
+            self.assertEqual(p2["arms"][arm]["budget_s"], 1800)
+            self.assertEqual(p2["arms"][arm]["attempt_timeout_s"], 600)
+            self.assertEqual(p2["arms"][arm]["max_attempts"], 3)
+
+        prereg_txt = json.dumps(p2["prereg"], ensure_ascii=False)
+        for must_have in ("EX", "ex_luhn", "ex_say", "ex_series", "40", "0.85", "28/37", "26/37",
+                          "false-accept", "false-block", "28", "9", "vacant-cloud", "Haiku", "87%", "85%", "73%"):
+            self.assertIn(must_have, prereg_txt)
+
+        ref = json.loads(REF_OK_JSON.read_text(encoding="utf-8"))
+        self.assertEqual(len(ref["xm_reference_ok"]), 28)
+        self.assertEqual(len(ref["xm_reference_fail"]), 9)
+        self.assertEqual(len(ref["xmv_reference_ok"]), 26)
+        self.assertEqual(len(ref["xmv_reference_fail"]), 11)
+        self.assertEqual(len(ref["pb_reference_ok"]), 26)
+        self.assertEqual(len(ref["pb_reference_fail"]), 11)
+        self.assertEqual(set(ref["xm_reference_ok"]) | set(ref["xm_reference_fail"]), set(p1["tasks"]))
+        self.assertEqual(set(ref["xm_reference_ok"]) & set(ref["xm_reference_fail"]), set())
+
+    def test_local_smoke_part2_combined_with_part1(self) -> None:
+        """Fake-agent local smoke of part2 (XMV, PB, XMT@0.85) combined with part1 (A, N3, GT, XM) on 1 task."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as td:
+            tmp = pathlib.Path(td)
+            bank, state = tmp / "bank", tmp / "state"
+            tdir = _make_toy_exam_task(bank, "ex_luhn")
+            # XM/XMT has 10 tests: 9 pass on GOOD_SOL, 1 is a flawed exam test (simulating ~10% flawed exam assertions)
+            xm_lines = ["from sol import solve\n"]
+            for i in range(1, 10):
+                xm_lines.append(f"def test_ok_{i}():\n    assert solve(10) == 101\n")
+            xm_lines.append("def test_flawed_10():\n    assert solve(10) == -999\n")
+            xm_code = "\n".join(xm_lines)
+            (tdir / "exams" / "XM" / "test_xm.py").write_text(xm_code, encoding="utf-8")
+            (tdir / "exams" / "XMT").mkdir(parents=True, exist_ok=True)
+            (tdir / "exams" / "XMT" / "test_xm.py").write_text(xm_code, encoding="utf-8")
+            (tdir / "exams" / "XMV" / "test_xmv.py").write_text(
+                "from sol import solve\ndef test_xmv():\n    assert solve(10) == 101 and solve(99) == 999\n",
+                encoding="utf-8",
+            )
+            (tdir / "exams" / "PB" / "test_pb.py").write_text(
+                "from sol import solve\ndef test_pb():\n    assert solve(10) == 101 and solve(99) == 999\n",
+                encoding="utf-8",
+            )
+
+            stub = tmp / "part2_smoke_agent.py"
+            stub.write_text(
+                "import json, os, pathlib\n"
+                "cell = os.environ['REDO_CELL']; arm = cell.split('/')[2]\n"
+                "att = int(os.environ['REDO_ATTEMPT'])\n"
+                "GOOD = 'def solve(x):\\n    return {10: 101, 20: 202, 99: 999}.get(x, 0)\\n'\n"
+                "BAD = 'def solve(x):\\n    return 0\\n'\n"
+                "if arm in ('A', 'N3'):\n"
+                "    pathlib.Path('sol.py').write_text(BAD)\n"
+                "elif arm in ('XM', 'XMT'):\n"
+                # Attempt 1 writes GOOD (9/10 on XM -> strict XM rejects & false-blocks; XMT@0.85 accepts 0.9 >= 0.85!)
+                "    pathlib.Path('sol.py').write_text(GOOD if att == 1 else BAD)\n"
+                "else:\n"
+                "    pathlib.Path('sol.py').write_text(GOOD if att >= 2 else BAD)\n"
+                "print(json.dumps({'type': 'message_end', 'message': {'role': 'assistant', 'usage': {'input': 50, 'output': 20}}}))\n",
+                encoding="utf-8",
+            )
+            common = {
+                "schema": self.redo.SCHEMA, "seed": 20261127, "bank": str(bank), "tasks": ["ex_luhn"], "reps": 1,
+                "attempt_timeout_s": 5, "backoff_scale": 0.0,
+                "agent": {"argv": [sys.executable, str(stub), "{prompt}"], "env": {"STUB_STATE": str(state)},
+                          "export_cell_env": True, "usage": "pi_json"},
+                "providers": [{"name": "stub", "provider": "p", "model": "m", "jobs": 1}],
+                "acceptance": {"kind": "workspace_tests", "timeout_s": 30},
+                "grader": {"timeout_s": 30, "visible_equals_grader": False},
+            }
+            p1 = {
+                **common, "id": "smoke_part1", "pair": ["N3", "GT"],
+                "arms": {
+                    "A": {"policy": "single", "attempt_timeout_s": 10},
+                    "N3": {"policy": "continue", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                           "min_attempt_s": 0.5, "hint": "review", "deliver": "last"},
+                    "GT": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                           "min_attempt_s": 0.5, "acceptance_source": "gate_visible", "hint": "failing_tests_noexpect"},
+                    "XM": {"policy": "restart", "max_attempts": 2, "attempt_timeout_s": 5, "budget_s": 10,
+                           "min_attempt_s": 0.5, "acceptance_source": "exam:XM", "hint": "failing_tests_noexpect"},
+                },
+            }
+            p2 = {
+                **common, "id": "smoke_part2", "pair": ["XMV", "XMT"],
+                "arms": {
+                    "XMV": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                            "min_attempt_s": 0.5, "acceptance_source": "exam:XMV", "hint": "failing_tests_noexpect"},
+                    "PB": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                           "min_attempt_s": 0.5, "acceptance_source": "exam:PB", "hint": "failing_tests_noexpect"},
+                    "XMT": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                            "min_attempt_s": 0.5, "acceptance_source": "exam:XMT", "acceptance_pass_ratio": 0.85,
+                            "hint": "failing_tests_noexpect"},
+                },
+            }
+            pf1, pf2 = tmp / "p1.json", tmp / "p2.json"
+            self.redo.write_json(pf1, p1)
+            self.redo.write_json(pf2, p2)
+            r1, r2 = tmp / "r1", tmp / "r2"
+            for pf, rr in ((pf1, r1), (pf2, r2)):
+                rc = subprocess.run(
+                    [sys.executable, str(REDO_PY), "run", "--plan", str(pf), "--root", str(rr), "--allow-uncommitted-plan"],
+                    capture_output=True, text=True, timeout=120,
+                )
+                self.assertEqual(rc.returncode, 0, rc.stdout + rc.stderr)
+
+            c_xm = self.redo.read_json(r1 / "cells" / "ex_luhn" / "r1" / "XM" / "cell.json")
+            c_xmt = self.redo.read_json(r2 / "cells" / "ex_luhn" / "r1" / "XMT" / "cell.json")
+            # Strict XM rejected att 1 (9/10) -> false_reject=True, ran 2 attempts
+            self.assertFalse(c_xm["accepted"])
+            self.assertTrue(c_xm["false_reject"])
+            self.assertEqual(c_xm["n_attempts"], 2)
+            # XMT@0.85 accepted att 1 (9/10 = 0.9 >= 0.85) -> 1 attempt, passed hidden, 0 false_block!
+            self.assertTrue(c_xmt["accepted"])
+            self.assertTrue(c_xmt["pass"])
+            self.assertFalse(c_xmt["false_reject"])
+            self.assertEqual(c_xmt["n_attempts"], 1)
+            self.assertAlmostEqual(c_xmt["attempts"][0]["acc_pass_ratio"], 0.9)
+
+            met = subprocess.run(
+                [sys.executable, str(METRICS_PY), str(r1), str(r2), "--json"],
+                capture_output=True, text=True, timeout=30,
+            )
+            self.assertEqual(met.returncode, 0, met.stdout + met.stderr)
+            res = json.loads(met.stdout)
+            self.assertEqual(res["per_arm"]["XM"]["false_block_cells"], 1)
+            self.assertEqual(res["per_arm"]["XMT"]["false_block_cells"], 0)
+            self.assertTrue(res["qualification"]["XMT"]["qualifies"])
+            self.assertTrue(res["qualification"]["XMV"]["qualifies"])
+            self.assertTrue(res["qualification"]["PB"]["qualifies"])
+            self.assertIsNotNone(res["stratified_by_xm_reference_ok"])
+            self.assertEqual(res["stratified_by_xm_reference_ok"]["xm_ref_ok"]["n_tasks"], 1)
 
 
 if __name__ == "__main__":

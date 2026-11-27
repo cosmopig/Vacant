@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 """Analysis for the external-exam pilot (exam37).
 
-Computes from a redo.py run root:
+Computes from one or more redo.py run roots (e.g., part-1 + part-2 combined):
   - Per-arm success on independent hidden grading (+ hidden satisfaction ratio).
   - Paired exact two-sided McNemar on (task, rep): every arm vs N3 (main) and vs A.
   - Gain share = (arm - N3) / (GT - N3). If GT - N3 <= 0, prints "題組無法區分".
   - Qualification check per frozen prereg: gain_share >= 0.5 AND false_accept_rate <= 2 * GT's.
-  - False-accept and false-reject rates per arm (cell-level and attempt-level).
+  - False-accept and false-block (false-reject) rates per arm (cell-level and attempt-level).
+  - Stratified success-rate table by XM exam correctness (reference-pass 28 vs 9 tasks).
   - Tokens (total, mean/cell, per success) and wall clock per arm.
   - Per-stream tok/s and timeout counts from agent logs (session jsonl / agent.log).
 
 Usage:
-    python3 ops/redo/analysis/exam_metrics.py <root> [--json] [--json-out PATH]
-    python3 ops/redo/analysis/exam_metrics.py <root> --false-block-json <path>
+    python3 ops/redo/analysis/exam_metrics.py <root> [<part2_root> ...] [--json] [--json-out PATH]
+    python3 ops/redo/analysis/exam_metrics.py <part1_root> <part2_root> --reference-ok-json <path>
 """
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 import datetime as _dt
 import json
 import math
 import pathlib
 import statistics
 from typing import Any
+
+DEFAULT_REFERENCE_OK_JSON = pathlib.Path(__file__).resolve().parent / "exam37_xm_reference_ok.json"
 
 
 def mcnemar_exact(b: int, c: int) -> float:
@@ -336,6 +340,7 @@ def compute_arm_metrics(arm_name: str, arm_cfg: dict[str, Any], cells: list[dict
         "arm": arm_name,
         "policy": arm_cfg.get("policy"),
         "acceptance_source": arm_cfg.get("acceptance_source"),
+        "acceptance_pass_ratio": arm_cfg.get("acceptance_pass_ratio"),
         "gated": gated,
         "cells": len(cells),
         "scored": n_scored,
@@ -354,6 +359,12 @@ def compute_arm_metrics(arm_name: str, arm_cfg: dict[str, Any], cells: list[dict
         "false_reject_attempts": fr_att if gated else None,
         "false_reject_attempt_rate": round(fr_att / total_atts, 4) if (gated and total_atts) else None,
         "false_reject_among_hidden_pass_attempts": round(fr_att / hid_pass_atts, 4) if (gated and hid_pass_atts) else None,
+        "false_block_cells": fr_cells if gated else None,
+        "false_block_cell_rate": round(fr_cells / n_scored, 4) if (gated and n_scored) else None,
+        "false_block_rate": round(fr_cells / n_scored, 4) if (gated and n_scored) else None,
+        "false_block_attempts": fr_att if gated else None,
+        "false_block_attempt_rate": round(fr_att / total_atts, 4) if (gated and total_atts) else None,
+        "false_block_among_hidden_pass_attempts": round(fr_att / hid_pass_atts, 4) if (gated and hid_pass_atts) else None,
         "total_tokens": sum(toks_tot) if toks_tot else None,
         "mean_tokens_per_cell": round(sum(toks_tot) / len(toks_tot), 1) if toks_tot else None,
         "mean_input_tokens": round(sum(toks_in) / len(toks_in), 1) if toks_in else None,
@@ -421,9 +432,165 @@ def paired_mcnemar(
     }
 
 
-def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = None) -> dict[str, Any]:
-    run, cells = _load_cells(root)
-    plan = run["plan"]
+def _normalize_roots(
+    root: pathlib.Path | str | Sequence[pathlib.Path | str],
+    extra_roots: Sequence[pathlib.Path | str] | None = None,
+) -> list[pathlib.Path]:
+    if isinstance(root, (pathlib.Path, str)):
+        roots = [pathlib.Path(root)]
+    else:
+        roots = [pathlib.Path(r) for r in root]
+    if extra_roots:
+        roots.extend(pathlib.Path(r) for r in extra_roots)
+    if not roots:
+        raise ValueError("At least one run root is required.")
+    return roots
+
+
+def _resolve_reference_ok(
+    plan_tasks: list[str],
+    reference_ok: dict[str, Any] | pathlib.Path | str | None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    if reference_ok is None:
+        if DEFAULT_REFERENCE_OK_JSON.is_file():
+            try:
+                data = json.loads(DEFAULT_REFERENCE_OK_JSON.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return None, None
+            known = set(data.get("xm_reference_ok") or []) | set(data.get("xm_reference_fail") or [])
+            if known and (set(plan_tasks) & known):
+                return data, str(DEFAULT_REFERENCE_OK_JSON)
+        return None, None
+    if isinstance(reference_ok, (pathlib.Path, str)):
+        p = pathlib.Path(reference_ok).expanduser().resolve()
+        return json.loads(p.read_text(encoding="utf-8")), str(p)
+    return dict(reference_ok), str(reference_ok.get("source_report") or "inline")
+
+
+def _stratify_by_ok_set(
+    plan_tasks: list[str],
+    arms_cfg: dict[str, dict[str, Any]],
+    cells: list[dict[str, Any]],
+    ok_tasks: set[str],
+) -> dict[str, Any]:
+    ok_list = [t for t in plan_tasks if t in ok_tasks]
+    fail_list = [t for t in plan_tasks if t not in ok_tasks]
+    out: dict[str, Any] = {}
+    for label, task_subset in (("xm_ref_ok", ok_list), ("xm_ref_fail", fail_list)):
+        tset = set(task_subset)
+        per_arm_s: dict[str, Any] = {}
+        for arm_name, arm_cfg in arms_cfg.items():
+            sub_cells = [c for c in cells if c["arm"] == arm_name and c["task"] in tset and not c.get("infra_void")]
+            n_sc = len(sub_cells)
+            n_p = sum(1 for c in sub_cells if c.get("pass") is True)
+            gated = _is_arm_gated(arm_cfg)
+            fa_c = fb_c = fb_a = tot_a = 0
+            for c in sub_cells:
+                atts = c.get("attempts") or []
+                tot_a += len(atts)
+                fa, fr, _fa_a, fr_a = _cell_fa_fr(c, gated=gated)
+                if fa:
+                    fa_c += 1
+                if fr:
+                    fb_c += 1
+                fb_a += fr_a
+            per_arm_s[arm_name] = {
+                "scored": n_sc,
+                "hidden_pass": n_p,
+                "hidden_success_rate": round(n_p / n_sc, 4) if n_sc else None,
+                "false_accept_cells": fa_c if gated else None,
+                "false_accept_rate": round(fa_c / n_sc, 4) if (gated and n_sc) else None,
+                "false_block_cells": fb_c if gated else None,
+                "false_block_cell_rate": round(fb_c / n_sc, 4) if (gated and n_sc) else None,
+                "false_block_attempts": fb_a if gated else None,
+                "false_block_attempt_rate": round(fb_a / tot_a, 4) if (gated and tot_a) else None,
+            }
+        gt_r = (per_arm_s.get("GT") or {}).get("hidden_success_rate")
+        n3_r = (per_arm_s.get("N3") or {}).get("hidden_success_rate")
+        diff = round(gt_r - n3_r, 6) if (gt_r is not None and n3_r is not None) else None
+        for m in per_arm_s.values():
+            r = m["hidden_success_rate"]
+            if diff is not None and diff > 0.0 and r is not None and n3_r is not None:
+                m["gain_share"] = round((r - n3_r) / diff, 4)
+            else:
+                m["gain_share"] = None
+        out[label] = {
+            "n_tasks": len(task_subset),
+            "tasks": task_subset,
+            "gt_minus_n3": diff,
+            "per_arm": per_arm_s,
+        }
+    return out
+
+
+def analyse(
+    root: pathlib.Path | str | Sequence[pathlib.Path | str],
+    *,
+    extra_roots: Sequence[pathlib.Path | str] | None = None,
+    false_block_rates: dict[str, float] | None = None,
+    reference_ok: dict[str, Any] | pathlib.Path | str | None = None,
+) -> dict[str, Any]:
+    roots = _normalize_roots(root, extra_roots)
+    runs: list[dict[str, Any]] = []
+    merged_arms: dict[str, dict[str, Any]] = {}
+    arm_source_plan: dict[str, str] = {}
+    cells: list[dict[str, Any]] = []
+    roots_meta: list[dict[str, Any]] = []
+
+    base_tasks: list[str] | None = None
+    base_tasks_set: set[str] | None = None
+    base_reps: int | None = None
+
+    for rpath in roots:
+        run, r_cells = _load_cells(rpath)
+        plan = run["plan"]
+        r_tasks = list(plan["tasks"])
+        r_reps = int(plan["reps"])
+        if base_tasks is None:
+            base_tasks = r_tasks
+            base_tasks_set = set(r_tasks)
+            base_reps = r_reps
+        else:
+            if set(r_tasks) != base_tasks_set:
+                diff_only_a = sorted((base_tasks_set or set()) - set(r_tasks))
+                diff_only_b = sorted(set(r_tasks) - (base_tasks_set or set()))
+                raise ValueError(
+                    f"Cannot combine roots with different task sets: {rpath} "
+                    f"(missing={diff_only_a[:5]}, extra={diff_only_b[:5]})"
+                )
+            if r_reps != base_reps:
+                raise ValueError(
+                    f"Cannot combine roots with different reps: expected {base_reps}, got {r_reps} in {rpath}"
+                )
+        for arm_name, arm_cfg in plan["arms"].items():
+            if arm_name in merged_arms:
+                raise ValueError(
+                    f"Duplicate arm {arm_name!r} when combining roots ({arm_source_plan[arm_name]} vs {plan['id']})"
+                )
+            merged_arms[arm_name] = arm_cfg
+            arm_source_plan[arm_name] = str(plan["id"])
+        cells.extend(r_cells)
+        runs.append(run)
+        roots_meta.append({
+            "root": str(rpath),
+            "plan_id": plan["id"],
+            "plan_sha256": run["plan_sha256"],
+            "created": run.get("created"),
+            "arms": list(plan["arms"].keys()),
+        })
+
+    assert base_tasks is not None and base_reps is not None
+    merged_plan = {
+        "id": runs[0]["plan"]["id"] if len(runs) == 1 else " + ".join(r["plan"]["id"] for r in runs),
+        "tasks": base_tasks,
+        "reps": base_reps,
+        "arms": merged_arms,
+    }
+    plan_sha_label = (
+        runs[0]["plan_sha256"]
+        if len(runs) == 1
+        else " + ".join(r["plan_sha256"][:12] for r in runs)
+    )
     by_key = {(c["task"], c["rep"], c["arm"]): c for c in cells}
 
     per_arm: dict[str, Any] = {}
@@ -432,11 +599,12 @@ def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = 
     total_timeouts = 0
     total_attempts = 0
 
-    for arm_name, arm_cfg in plan["arms"].items():
+    for arm_name, arm_cfg in merged_arms.items():
         arm_cells = [c for c in cells if c["arm"] == arm_name]
         m, smp, src = compute_arm_metrics(arm_name, arm_cfg, arm_cells)
+        m["source_plan_id"] = arm_source_plan[arm_name]
         if false_block_rates and arm_name in false_block_rates:
-            m["false_block_rate"] = false_block_rates[arm_name]
+            m["premeasured_false_block_rate"] = false_block_rates[arm_name]
         per_arm[arm_name] = m
         all_samples.extend(smp)
         if all_source is None and src is not None:
@@ -446,16 +614,16 @@ def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = 
 
     # Paired McNemar vs N3 (main) and vs A
     vs_n3: dict[str, Any] = {}
-    if "N3" in plan["arms"]:
-        for arm_name in plan["arms"]:
+    if "N3" in merged_arms:
+        for arm_name in merged_arms:
             if arm_name != "N3":
-                vs_n3[arm_name] = paired_mcnemar(plan, by_key, control="N3", treatment=arm_name)
+                vs_n3[arm_name] = paired_mcnemar(merged_plan, by_key, control="N3", treatment=arm_name)
 
     vs_a: dict[str, Any] = {}
-    if "A" in plan["arms"]:
-        for arm_name in plan["arms"]:
+    if "A" in merged_arms:
+        for arm_name in merged_arms:
             if arm_name != "A":
-                vs_a[arm_name] = paired_mcnemar(plan, by_key, control="A", treatment=arm_name)
+                vs_a[arm_name] = paired_mcnemar(merged_plan, by_key, control="A", treatment=arm_name)
 
     # Gain share = (arm - N3) / (GT - N3)
     gt_rate = (per_arm.get("GT") or {}).get("hidden_success_rate")
@@ -489,14 +657,31 @@ def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = 
                 "gt_false_accept_rate": gt_fa,
                 "false_accept_le_2x_gt": fa_ok,
                 "false_block_rate": m.get("false_block_rate"),
+                "false_block_cell_rate": m.get("false_block_cell_rate"),
+                "false_block_attempt_rate": m.get("false_block_attempt_rate"),
+                "premeasured_false_block_rate": m.get("premeasured_false_block_rate"),
+            }
+
+    # Stratified table by XM exam correctness (reference solution passes fully vs rest)
+    ref_ok_data, ref_ok_src = _resolve_reference_ok(base_tasks, reference_ok)
+    stratified: dict[str, Any] | None = None
+    if ref_ok_data is not None:
+        xm_ok_list = ref_ok_data.get("xm_reference_ok")
+        if xm_ok_list is None:
+            xm_ok_list = ref_ok_data.get("reference_ok")
+        if isinstance(xm_ok_list, list):
+            stratified = {
+                "source": ref_ok_src,
+                **_stratify_by_ok_set(base_tasks, merged_arms, cells, set(xm_ok_list)),
             }
 
     return {
         "schema": "vacant.redo.exam_metrics/1",
-        "plan_id": plan["id"],
-        "plan_sha256": run["plan_sha256"],
-        "n_tasks": len(plan["tasks"]),
-        "reps": int(plan["reps"]),
+        "plan_id": merged_plan["id"],
+        "plan_sha256": plan_sha_label,
+        "roots": roots_meta,
+        "n_tasks": len(base_tasks),
+        "reps": base_reps,
         "gt_rate": gt_rate,
         "n3_rate": n3_rate,
         "gt_minus_n3": gt_minus_n3,
@@ -507,6 +692,7 @@ def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = 
         "qualification": qualification,
         "paired_vs_N3": vs_n3,
         "paired_vs_A": vs_a,
+        "stratified_by_xm_reference_ok": stratified,
         "overall_per_stream_tok_s": _summarize_tok_s(all_samples, all_source),
         "overall_timeouts": {
             "timeouts": total_timeouts,
@@ -517,11 +703,15 @@ def analyse(root: pathlib.Path, *, false_block_rates: dict[str, float] | None = 
 
 
 def render_report(res: dict[str, Any]) -> str:
+    sha_disp = res["plan_sha256"][:16] + "…" if len(res["roots"]) == 1 else res["plan_sha256"]
     lines = [
         f"# {res['plan_id']} — External Exam Pilot Metrics",
-        f"Plan sha256: `{res['plan_sha256'][:16]}…`  Tasks: {res['n_tasks']} × {res['reps']} reps",
+        f"Plan sha256: `{sha_disp}`  Tasks: {res['n_tasks']} × {res['reps']} reps",
         f"GT - N3: `{res['gt_minus_n3']}`  Verdict: **{res['verdict']}**",
     ]
+    if len(res.get("roots") or []) > 1:
+        parts_s = "; ".join(f"{r['plan_id']} ({','.join(r['arms'])})" for r in res["roots"])
+        lines.append(f"Combined roots ({len(res['roots'])}): {parts_s}")
     if not res["discriminable"]:
         lines.append("")
         lines.append("> **題組無法區分**（GT 相對於 N3 沒有正增益，GT − N3 ≤ 0；不做外考合格判定）")
@@ -529,20 +719,24 @@ def render_report(res: dict[str, Any]) -> str:
         "",
         "## Per-Arm Summary",
         "",
-        "| Arm | Source | Hidden Pass | Rate | Gain Share | FA (cell) | FR (cell/att) | Mean Tok | Tok/Pass | Mean Wall | Timeouts | Tok/s (med/agg) | Void |",
+        "| Arm | Source | Hidden Pass | Rate | Gain Share | FA (cell) | FB / FR (cell; att) | Mean Tok | Tok/Pass | Mean Wall | Timeouts | Tok/s (med/agg) | Void |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for arm, m in res["per_arm"].items():
+        src_s = m["acceptance_source"] or "—"
+        if m.get("acceptance_pass_ratio") is not None:
+            src_s = f"{src_s} (≥{m['acceptance_pass_ratio']})"
         fa_s = f"{m['false_accept_rate']} ({m['false_accept_cells']}/{m['scored']})" if m["gated"] else "—"
-        fr_s = (
-            f"{m['false_reject_rate']} ({m['false_reject_cells']}/{m['scored']}; att {m['false_reject_attempts']}/{m['total_attempts']})"
+        fb_s = (
+            f"{m['false_block_cell_rate']} ({m['false_block_cells']}/{m['scored']}; "
+            f"att {m['false_block_attempt_rate']} {m['false_block_attempts']}/{m['total_attempts']})"
             if m["gated"] else "—"
         )
         ts = m["per_stream_tok_s"]
         tps_s = f"{ts['median']}/{ts['aggregate']}" if ts["n_turns"] else "—"
         lines.append(
-            f"| {arm} | {m['acceptance_source'] or '—'} | {m['hidden_pass']}/{m['scored']} | {m['hidden_success_rate']} | "
-            f"{m['gain_share']} | {fa_s} | {fr_s} | {m['mean_tokens_per_cell']} | {m['tokens_per_success']} | "
+            f"| {arm} | {src_s} | {m['hidden_pass']}/{m['scored']} | {m['hidden_success_rate']} | "
+            f"{m['gain_share']} | {fa_s} | {fb_s} | {m['mean_tokens_per_cell']} | {m['tokens_per_success']} | "
             f"{m['mean_wall_s']}s | {m['timeouts']}/{m['total_attempts']} | {tps_s} | {m['infra_void']} |"
         )
 
@@ -551,14 +745,35 @@ def render_report(res: dict[str, Any]) -> str:
             "",
             "## Exam Qualification (frozen prereg: gain_share >= 0.5 AND FA <= 2× GT)",
             "",
-            "| Exam | Qualifies | Gain Share | FA Rate | 2× GT FA | False-Block Rate |",
-            "|---|---|---|---|---|---|",
+            "| Exam | Qualifies | Gain Share | FA Rate | 2× GT FA | False-Block (cell) | False-Block (att) |",
+            "|---|---|---|---|---|---|---|",
         ]
         for arm, q in res["qualification"].items():
             lim = round(2.0 * q["gt_false_accept_rate"], 4) if q["gt_false_accept_rate"] is not None else None
             lines.append(
-                f"| {arm} | {q['qualifies']} | {q['gain_share']} | {q['false_accept_rate']} | {lim} | {q['false_block_rate']} |"
+                f"| {arm} | {q['qualifies']} | {q['gain_share']} | {q['false_accept_rate']} | {lim} | "
+                f"{q['false_block_cell_rate']} | {q['false_block_attempt_rate']} |"
             )
+
+    strat = res.get("stratified_by_xm_reference_ok")
+    if strat:
+        ok_s = strat["xm_ref_ok"]
+        fl_s = strat["xm_ref_fail"]
+        lines += [
+            "",
+            f"## Stratified by XM Exam Correctness (Reference-Pass: {ok_s['n_tasks']} vs {fl_s['n_tasks']} tasks)",
+            "",
+            f"| Arm | All ({res['n_tasks']}t) | XM ref-ok ({ok_s['n_tasks']}t) | XM ref-fail ({fl_s['n_tasks']}t) | FB cell (ok / fail) |",
+            "|---|---|---|---|---|",
+        ]
+        for arm, m in res["per_arm"].items():
+            mo = ok_s["per_arm"][arm]
+            mf = fl_s["per_arm"][arm]
+            all_cell = f"{m['hidden_success_rate']} ({m['hidden_pass']}/{m['scored']})"
+            ok_cell = f"{mo['hidden_success_rate']} ({mo['hidden_pass']}/{mo['scored']})"
+            fl_cell = f"{mf['hidden_success_rate']} ({mf['hidden_pass']}/{mf['scored']})"
+            fb_cell = f"{mo['false_block_cell_rate']} / {mf['false_block_cell_rate']}" if m["gated"] else "—"
+            lines.append(f"| {arm} | {all_cell} | {ok_cell} | {fl_cell} | {fb_cell} |")
 
     for title, comp_map in (("Paired McNemar vs N3 (main)", res["paired_vs_N3"]), ("Paired McNemar vs A", res["paired_vs_A"])):
         if not comp_map:
@@ -588,18 +803,20 @@ def render_report(res: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Analyze external-exam pilot results.")
-    ap.add_argument("root", help="Run root directory containing RUN.json and cells/")
+    ap = argparse.ArgumentParser(description="Analyze external-exam pilot results (single or combined part-1 + part-2 roots).")
+    ap.add_argument("roots", nargs="+", help="One or more run root directories containing RUN.json and cells/")
     ap.add_argument("--json", action="store_true", help="Print JSON instead of markdown.")
     ap.add_argument("--json-out", help="Write full JSON output to this file.")
-    ap.add_argument("--false-block-json", help="Optional JSON mapping exam arm name -> pre-measured false-block rate.")
+    ap.add_argument("--false-block-json", help="Optional JSON mapping exam arm name -> pre-measured reference false-block rate.")
+    ap.add_argument("--reference-ok-json", help="Optional JSON listing XM reference-pass tasks (default: exam37_xm_reference_ok.json if tasks match).")
     a = ap.parse_args(argv)
 
     fb: dict[str, float] | None = None
     if a.false_block_json:
         fb = json.loads(pathlib.Path(a.false_block_json).expanduser().read_text(encoding="utf-8"))
 
-    res = analyse(pathlib.Path(a.root).expanduser().resolve(), false_block_rates=fb)
+    resolved_roots = [pathlib.Path(r).expanduser().resolve() for r in a.roots]
+    res = analyse(resolved_roots, false_block_rates=fb, reference_ok=a.reference_ok_json)
     txt = json.dumps(res, ensure_ascii=False, indent=2)
     if a.json_out:
         pathlib.Path(a.json_out).write_text(txt + "\n", encoding="utf-8")

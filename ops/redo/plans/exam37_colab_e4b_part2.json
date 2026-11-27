@@ -1,0 +1,158 @@
+{
+ "id": "exam37_colab_e4b_part2",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/exam37"
+ ],
+ "arms": {
+  "XMV": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "acceptance_source": "exam:XMV",
+   "hint": "failing_tests_noexpect"
+  },
+  "PB": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "acceptance_source": "exam:PB",
+   "hint": "failing_tests_noexpect"
+  },
+  "XMT": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "acceptance_source": "exam:XMT",
+   "acceptance_pass_ratio": 0.85,
+   "hint": "failing_tests_noexpect"
+  }
+ },
+ "pair": [
+  "XMV",
+  "XMT"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 12,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "main_control": "N3",
+  "baseline_control": "A",
+  "ceiling_arm": "GT",
+  "part1_plan": "ops/redo/plans/exam37_colab_e4b_part1.json",
+  "exam_arms": [
+   "XM",
+   "XMV",
+   "PB",
+   "XMT"
+  ],
+  "reference_ok_json": "ops/redo/analysis/exam37_xm_reference_ok.json",
+  "script": "ops/redo/analysis/exam_metrics.py <part1_root> <part2_root>"
+ },
+ "tasks": [
+  "ex_kindergarten_garden",
+  "ex_ocr_numbers",
+  "ex_circular_buffer",
+  "ex_high_scores",
+  "ex_simple_cipher",
+  "ex_binary",
+  "ex_octal",
+  "ex_yacht",
+  "ex_luhn",
+  "ex_sublist",
+  "ex_say",
+  "ex_dnd_character",
+  "ex_twelve_days",
+  "ex_atbash_cipher",
+  "ex_queen_attack",
+  "ex_prime_factors",
+  "ex_scrabble_score",
+  "ex_series",
+  "ex_word_search",
+  "ex_bank_account",
+  "ex_rational_numbers",
+  "ex_custom_set",
+  "ex_camicia",
+  "ex_binary_search_tree",
+  "ex_meetup",
+  "ex_complex_numbers",
+  "ex_linked_list",
+  "ex_all_your_base",
+  "ex_swift_scheduling",
+  "ex_flower_field",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_change",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_tournament",
+  "ex_pascals_triangle"
+ ],
+ "reps": 2,
+ "prereg": {
+  "frozen": "2026-11-27，在第 2 批執行任何正式模型呼叫之前凍結（不推遠端、尚未發射）；所有臂設定、XMT 門檻（0.85）、題單（37 題，與第 1 批完全相同）與判讀口徑皆不再改。",
+  "two_part": "本計畫為外部考卷先導第 2 批（追加臂：XMV、PB、XMT，共 37 題 × 3 臂 × 2 次重複＝222 格）。第 1 批（ops/redo/plans/exam37_colab_e4b_part1.json）含 A、N3、GT、XM；第 2 批較晚執行，沿用同一台 VM、同一個 vLLM 後端與模型、同一個題庫、同一組 37 題×2 重複與完全相同的預算（單次 600 秒、總預算 1800 秒、最多 3 次嘗試）。合併分析時（ops/redo/analysis/exam_metrics.py <part1_root> <part2_root>），所有考卷臂（XM、XMV、PB、XMT）皆與第 1 批的 N3（主對照）、A（單次基準）與 GT（上限）做配對比較；兩批執行的時間差照實紀錄。",
+  "ex_cancelled": "原規劃之 EX 臂正式取消：凍結考卷中全部 37 題的 EX 考卷皆為空（37/37 none），因為預註冊的確定性抽取器（只認 doctest 與同行呼叫==/=>/->值）在 37 份 Exercism goal.md 中找不到任何符合格式的範例（題目範例多寫在散文、表格或圖示中），且依規則不手寫補題。因此 EX 無資料可跑，不納入第 2 批（不是 EX 無效的證據）。",
+  "frozen_as_is": "XMV 與 PB 皆嚴格（100% 通過才放行）且完全照凍結來源（分支 claude/wonderful-babbage-0l9zcn、commit 72f92b40 之 ops/redo/exams_haiku_20261127/，已匯入 ~/dev/ops/ref/bm_tasks/exam37/<task>/exams/{XM,XMV,PB,XMT}/）原封不動使用，不事後修補。已知退化與缺陷皆照原樣計分並在最終報告逐一列明：(1) XMV 的退化題（皆源自 Haiku 把 SRC 註解寫在 def 上方而非 assert 正上方、遭確定性後處理刪除或結構不合）：ex_luhn 全 13 條斷言被刪空（0 條斷言、13/13 空測試函式必定全過 ⇒ 永遠放行）；ex_say 12/13 斷言被刪、只剩 1 條斷言；ex_series 為模組層級 assert、無 test_* 函式，pytest 收集到 0 個測試（參考解下標記為 collect_error / !，驗收端依 I-4 視為不通過）。(2) PB 在 9 題中共有 40 條斷言未被執行到（unreached），因同一測試函式內前段敘述先拋出例外所致（在考卷品質報告中計為失敗）。",
+  "xmt_threshold": "XMT 使用與 XM 逐位元組相同的考卷（exam:XMT＝exam:XM 的位元組副本），唯一差別是將驗收放行門檻於事前固定為 acceptance_pass_ratio = 0.85（以每個測試函式／方法為 1 個斷言單位，通過數／總數 ≥ 0.85 即放行；load_error／逾時／0 測試仍一律不通過、比例記 0；重試提示維持 failing_tests_noexpect，僅含失敗測試名與輸入、不含預期輸出）。設定 0.85 的事前動機：凍結考卷中約有 12% 的考卷項目對參考解是錯的（vacant-cloud 品質報告：參考解逐測試通過率 XM 87.9% [421/479，約 88%]、XMV 86.3% [339/393，約 86%]、PB 91.8% [597/650，約 92%]；逐斷言通過率含 unreached 計失敗為 XM 88.8% [612/689]、XMV 87.5% [427/488]、PB 89.8% [992/1105]；參考解整份全過的考卷題數為 XM 28/37、XMV 26/37、PB 26/37）。嚴格 100% 放行可能造成約 1/4–3/10 的正確解被考卷誤擋，故測試固定 0.85 容忍門檻能否在不引爆 false-accept 的前提下降低 false-block。",
+  "metrics_and_stratification": "合併報告（ops/redo/analysis/exam_metrics.py <part1_root> <part2_root>）必須同時呈報：(1) 每臂隱藏評分成功率、對第 1 批 N3 與 A 的配對精確雙尾 McNemar、gain share＝(arm−N3)/(GT−N3) 與預註冊合格判定（gain share ≥ 0.5 且 false-accept ≤ 2× GT，若 GT−N3 ≤ 0 則直接判「題組無法區分」）；(2) 每臂實測 false-accept 率（cell 層級與嘗試層級）以及 false-block 率（某次嘗試候選解其實能過隱藏評分卻被該臂閘門退回、迫使重來或耗盡預算的比率，同時報 cell 層級與 attempt 層級）；(3) 依 XM 考卷正確性的分層表（ops/redo/analysis/exam37_xm_reference_ok.json）：將 37 題分為「參考解整份通過 XM 考卷的 28 題」與「其餘 9 題」，分別列出各臂在兩層中的成功率與 false-block 率；(4) XMV 退化題（ex_luhn、ex_say、ex_series）與 PB 40 條 unreached 斷言於報告中明列，不自總分剔除。",
+  "exam_quality_provenance": "本預註冊所引用之考卷品質數字全部直接取自 vacant-cloud 的凍結報告（commit 72f92b40：ops/redo/results/ctl_exams_haiku_20261127/REPORT.md 與 MANIFEST.json），未經本機重算或修訂。報告中「刻意寫錯解」的攔截率——XM 87%（87.3%, 96/110）、PB 85%（84.5%, 93/110）、XMV 73%（72.7%, 80/110）——分母為 110 個入選錯解（其中 107 個由 Haiku 依指定錯誤類型刻意寫出、3 個為 Devin 失敗交付），與真實小模型（E4B）的錯誤分布不同，僅作背景參考、不作為本實驗之推論依據。",
+  "model": "google/gemma-4-E4B-it-qat-w4a16-ct（served_model_name: gemma-4-e4b-it-qat），pi 0.87.1，Colab A100-SXM4-40GB 上以 vLLM 0.30.0 服務（provider colab-vllm-nothink，jobs 12；與第 1 批完全相同）。",
+  "no_tests_in_workspace": "沿用第 1 批：所有臂的工作區皆不放任何測試，測試只由 Host 在工作區副本上執行並永遠不留在 worker 工作區。"
+ }
+}
