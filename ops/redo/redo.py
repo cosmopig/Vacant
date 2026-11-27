@@ -52,6 +52,7 @@ mini_agent 上重現）。**在本來就會自己迴圈的原生 agent（pi 等�
 from __future__ import annotations
 
 import argparse
+import ast
 import fcntl
 import hashlib
 import json
@@ -85,6 +86,8 @@ INFRA_RE_DEFAULT = (r"ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|fetch failed|s
 HINT_CAP = 400                           # 與 v5 的 fresh_hint 同一個上限
 HINT_HEAD = ("An earlier attempt at this task ended with the tests in this directory not passing. "
              "First failing test output from that attempt:\n")
+REVIEW_HINT = "Review your solution and improve it if needed."
+_ACCEPTANCE_SOURCE_RE = re.compile(r"^(?:gate_visible|exam:[A-Za-z0-9_-]+)$")
 # KS-1：提示文字不准有責任／懲罰類措辭。這裡是可執行防呆的最小版（harness 不依賴套件本體）。
 _KS1_BANNED = re.compile(r"你有責任|會被懲罰|負責任|responsib|punish|penal|blame|fault of", re.I)
 
@@ -158,10 +161,19 @@ def load_plan(path: pathlib.Path) -> dict:
     if len(plan["pair"]) != 2 or any(a not in plan["arms"] for a in plan["pair"]):
         raise PlanError("pair 必須是 arms 裡的兩個名字 [對照, 處理]")
     for name, arm in plan["arms"].items():
-        if arm.get("policy") not in ("single", "restart", "controller"):
-            raise PlanError(f"arm {name}: policy 只能是 single／restart／controller")
-        if arm.get("hint", "none") not in ("none", "first_failure", "failing_tests"):
-            raise PlanError(f"arm {name}: hint 只能是 none／first_failure／failing_tests")
+        if arm.get("policy") not in ("single", "restart", "controller", "continue"):
+            raise PlanError(f"arm {name}: policy 只能是 single／restart／controller／continue")
+        if arm.get("hint", "none") not in ("none", "first_failure", "failing_tests", "failing_tests_noexpect", "review"):
+            raise PlanError(
+                f"arm {name}: hint 只能是 none／first_failure／failing_tests／failing_tests_noexpect／review"
+            )
+        if arm.get("deliver") not in (None, "best", "last"):
+            raise PlanError(f"arm {name}: deliver 只能是 best／last")
+        asrc = arm.get("acceptance_source")
+        if asrc is not None and not (isinstance(asrc, str) and _ACCEPTANCE_SOURCE_RE.match(asrc)):
+            raise PlanError(
+                f"arm {name}: acceptance_source 只能是 gate_visible 或 exam:<KIND>：{asrc!r}"
+            )
     if len(set(plan["tasks"])) != len(plan["tasks"]):
         raise PlanError("tasks 有重複")
     acfg = plan.get("acceptance", {})
@@ -408,6 +420,217 @@ sys.stdout.flush()
 print("\n@@REDO_RESULT@@" + json.dumps(out))
 """
 
+_EXTERNAL_AST_HELPER = r"""
+_ASSERT_2ARG = {
+    "assertEqual", "assertNotEqual", "assertIs", "assertIsNot", "assertAlmostEqual",
+    "assertNotAlmostEqual", "assertCountEqual", "assertSetEqual", "assertListEqual",
+    "assertDictEqual", "assertTupleEqual", "assertSequenceEqual", "assertMultiLineEqual",
+    "assertRegex", "assertNotRegex", "assertFactorsEqual", "assertTreeEqual",
+}
+_EXPECTED_VAR_PREFIXES = ("expected", "want", "ans", "answer", "target", "table", "exp_")
+
+def _extract_input_from_func(fn):
+    import ast, inspect, textwrap
+    try:
+        src = textwrap.dedent(inspect.getsource(fn))
+        tree = ast.parse(src)
+    except BaseException:
+        return None
+    fnode = next((n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))), None)
+    if fnode is None:
+        return None
+    skip_vars = set()
+    for n in ast.walk(fnode):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr in _ASSERT_2ARG:
+            if len(n.args) >= 2 and isinstance(n.args[1], ast.Name):
+                skip_vars.add(n.args[1].id)
+            for kw in n.keywords:
+                if kw.arg in ("second", "expected") and isinstance(kw.value, ast.Name):
+                    skip_vars.add(kw.value.id)
+        elif isinstance(n, ast.Assert) and isinstance(n.test, ast.Compare):
+            for c in n.test.comparators:
+                if isinstance(c, ast.Name):
+                    skip_vars.add(c.id)
+    parts = []
+    for stmt in fnode.body:
+        if isinstance(stmt, ast.Assign):
+            targets = [t.id for t in stmt.targets if isinstance(t, ast.Name)]
+            if any(t in skip_vars or t.lower().startswith(_EXPECTED_VAR_PREFIXES) for t in targets):
+                continue
+            parts.append(ast.unparse(stmt))
+        elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+            call = stmt.value
+            if isinstance(call.func, ast.Attribute) and call.func.attr in _ASSERT_2ARG:
+                if call.args:
+                    parts.append(ast.unparse(call.args[0]))
+            elif isinstance(call.func, ast.Attribute) and call.func.attr in (
+                "assertTrue", "assertFalse", "assertIsNone", "assertIsNotNone",
+            ):
+                if call.args:
+                    parts.append(ast.unparse(call.args[0]))
+            elif not (isinstance(call.func, ast.Attribute) and call.func.attr.startswith("assert")):
+                parts.append(ast.unparse(call))
+        elif isinstance(stmt, ast.Assert):
+            if isinstance(stmt.test, ast.Compare):
+                parts.append(ast.unparse(stmt.test.left))
+            else:
+                parts.append(ast.unparse(stmt.test))
+        elif isinstance(stmt, ast.With):
+            for sub in stmt.body:
+                if isinstance(sub, ast.Expr):
+                    parts.append(ast.unparse(sub.value))
+                elif isinstance(sub, ast.Assign):
+                    parts.append(ast.unparse(sub))
+    joined = "; ".join(p.strip() for p in parts if p and p.strip())
+    return joined[:260] if joined else None
+"""
+
+_EXTERNAL_UNITTEST_RUNNER = _EXTERNAL_AST_HELPER + r"""
+import importlib, inspect, json, sys, traceback, unittest
+sys.path.insert(0, ".")
+
+class _NamedFunctionTestCase(unittest.FunctionTestCase):
+    def __init__(self, func, tid):
+        super().__init__(func)
+        self._custom_id = tid
+        self._target_func = func
+    def id(self):
+        return self._custom_id
+    def __str__(self):
+        return self._custom_id
+
+class _TrackResult(unittest.TestResult):
+    def __init__(self):
+        super().__init__()
+        self.test_results = {}
+    def _tid(self, test):
+        return test.id() if hasattr(test, "id") else str(test)
+    def addSuccess(self, test):
+        super().addSuccess(test); self.test_results[self._tid(test)] = True
+    def addFailure(self, test, err):
+        super().addFailure(test, err); self.test_results[self._tid(test)] = False
+    def addError(self, test, err):
+        super().addError(test, err); self.test_results[self._tid(test)] = False
+    def addSkip(self, test, reason):
+        super().addSkip(test, reason); self.test_results[self._tid(test)] = False
+    def addExpectedFailure(self, test, err):
+        super().addExpectedFailure(test, err); self.test_results[self._tid(test)] = True
+    def addUnexpectedSuccess(self, test):
+        super().addUnexpectedSuccess(test); self.test_results[self._tid(test)] = False
+
+def _func_for_test(test):
+    if hasattr(test, "_target_func"):
+        return test._target_func
+    mname = getattr(test, "_testMethodName", None)
+    if mname and hasattr(test, mname):
+        return getattr(test, mname)
+    return None
+
+out = {"run": 0, "failures": 0, "errors": 0, "skipped": 0, "unexpected_successes": 0,
+       "load_error": None, "first_problem": None, "first_input": None, "test_results": {}}
+for mod_name in sys.argv[1:]:
+    try:
+        mod = importlib.import_module(mod_name)
+        suite = unittest.TestLoader().loadTestsFromModule(mod)
+        # Also discover pytest-style top-level def test_*() and non-TestCase class Test* methods.
+        for name, obj in inspect.getmembers(mod):
+            if name.startswith("test_") and inspect.isfunction(obj) and obj.__module__ == mod.__name__:
+                sig = inspect.signature(obj)
+                req = [p for p in sig.parameters.values()
+                       if p.default is inspect.Parameter.empty and p.kind in (
+                           inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)]
+                if not req:
+                    suite.addTest(_NamedFunctionTestCase(obj, f"{mod_name}.{name}"))
+            elif name.startswith("Test") and inspect.isclass(obj) and not issubclass(obj, unittest.TestCase) and obj.__module__ == mod.__name__:
+                for mname, fn in inspect.getmembers(obj, predicate=inspect.isfunction):
+                    if mname.startswith("test_"):
+                        def _make(c=obj, mn=mname):
+                            return lambda: getattr(c(), mn)()
+                        t = _NamedFunctionTestCase(_make(), f"{mod_name}.{name}.{mname}")
+                        t._target_func = fn
+                        suite.addTest(t)
+    except BaseException:
+        out["load_error"] = traceback.format_exc(limit=3)[-800:]
+        break
+    res = _TrackResult()
+    suite.run(res)
+    out["run"] += res.testsRun; out["failures"] += len(res.failures); out["errors"] += len(res.errors)
+    out["skipped"] += len(res.skipped); out["unexpected_successes"] += len(res.unexpectedSuccesses)
+    out["test_results"].update(res.test_results)
+    probs = res.failures + res.errors
+    if probs and out["first_problem"] is None:
+        t_obj, tb_str = probs[0]
+        out["first_problem"] = (str(t_obj) + "\n" + tb_str)[-800:]
+        fn = _func_for_test(t_obj)
+        inp = _extract_input_from_func(fn) if fn is not None else None
+        if inp:
+            out["first_input"] = f"{res._tid(t_obj)}: {inp}"
+sys.stdout.flush()
+print("\n@@REDO_RESULT@@" + json.dumps(out))
+"""
+
+_PYTEST_RUNNER = _EXTERNAL_AST_HELPER + r"""
+import json, sys, pytest
+sys.path.insert(0, ".")
+
+class _Plugin:
+    def __init__(self):
+        self.test_results = {}
+        self.run = 0
+        self.failures = 0
+        self.errors = 0
+        self.skipped = 0
+        self.load_error = None
+        self.first_problem = None
+        self.first_input = None
+        self._items = {}
+    def pytest_collection_modifyitems(self, items):
+        for it in items:
+            self._items[it.nodeid] = it
+    def pytest_collectreport(self, report):
+        if report.failed and self.load_error is None:
+            self.load_error = str(report.longrepr)[-800:]
+    def pytest_runtest_logreport(self, report):
+        nid = report.nodeid
+        if report.when == "call":
+            self.run += 1
+            if report.passed:
+                self.test_results[nid] = True
+            elif report.skipped:
+                self.skipped += 1
+                self.test_results[nid] = False
+            else:
+                self.failures += 1
+                self.test_results[nid] = False
+                self._record_prob(nid, report)
+        elif report.failed:
+            if nid not in self.test_results:
+                self.run += 1
+            self.errors += 1
+            self.test_results[nid] = False
+            self._record_prob(nid, report)
+        elif report.skipped and report.when == "setup":
+            self.run += 1
+            self.skipped += 1
+            self.test_results[nid] = False
+    def _record_prob(self, nid, report):
+        if self.first_problem is None:
+            self.first_problem = (nid + "\n" + str(report.longrepr))[-800:]
+            it = self._items.get(nid)
+            fn = getattr(it, "obj", None) if it is not None else None
+            inp = _extract_input_from_func(fn) if fn is not None else None
+            if inp:
+                self.first_input = f"{nid}: {inp}"
+
+pl = _Plugin()
+pytest.main(["-q", "--tb=short", "--no-header", "-o", "addopts=", *sys.argv[1:]], plugins=[pl])
+out = {"run": pl.run, "failures": pl.failures, "errors": pl.errors, "skipped": pl.skipped,
+       "unexpected_successes": 0, "load_error": pl.load_error, "first_problem": pl.first_problem,
+       "first_input": pl.first_input, "test_results": pl.test_results}
+sys.stdout.flush()
+print("\n@@REDO_RESULT@@" + json.dumps(out))
+"""
+
 
 def _clean_env(home: pathlib.Path) -> dict[str, str]:
     return {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(home), "LANG": "C.UTF-8",
@@ -506,12 +729,128 @@ def _acceptance_command(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict)
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
+def _resolve_acceptance_source_dir(tdir: pathlib.Path, source: str) -> pathlib.Path:
+    if source == "gate_visible":
+        return tdir / "gate_visible"
+    if source.startswith("exam:"):
+        kind = source.split(":", 1)[1]
+        if not kind or "/" in kind or ".." in kind:
+            raise ValueError(f"invalid acceptance_source: {source!r}")
+        return tdir / "exams" / kind
+    raise ValueError(f"unknown acceptance_source: {source!r}")
+
+
+_PYTEST_IMPORT_RE = re.compile(r"^\s*(?:import\s+pytest\b|from\s+pytest\b|@pytest\.)", re.M)
+
+
+def _has_pytest() -> bool:
+    try:
+        import importlib.util
+        return importlib.util.find_spec("pytest") is not None
+    except Exception:
+        return False
+
+
+def _acceptance_external(tdir: pathlib.Path, final_ws: pathlib.Path, cfg: dict, source: str) -> dict:
+    """在工作區副本裡注入外部測試集（gate_visible 或 exams/<KIND>）執行，絕不改動 worker 工作區。"""
+    src_dir = _resolve_acceptance_source_dir(tdir, source)
+    patterns = cfg.get("patterns", ["*_test.py", "test_*.py"])
+    tests = test_files(src_dir, patterns) if src_dir.is_dir() else []
+    base = {"accept": False, "kind": "external_tests", "acceptance_source": source,
+            "tests": tests, "passed": None, "run": None, "tests_tampered": [],
+            "status": None, "first_problem": None, "first_input": None,
+            "test_results": {}, "failing_tests": []}
+    if not src_dir.is_dir() or not tests:
+        return {**base, "status": "no_tests_in_source"}
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="redo-extacc-"))
+    try:
+        work = tmp / "w"
+        shutil.copytree(final_ws, work, symlinks=True, ignore=shutil.ignore_patterns(*SKIP_DIRS))
+        # Copy all files from src_dir into the temporary copy only (never touching final_ws).
+        for root_d, dirs, files in os.walk(src_dir):
+            dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS)
+            for fname in sorted(files):
+                sp = pathlib.Path(root_d) / fname
+                rel = sp.relative_to(src_dir).as_posix()
+                want = sp.read_bytes()
+                dst = work / rel
+                if rel in tests and dst.is_file() and not dst.is_symlink():
+                    if dst.read_bytes() != want:
+                        base["tests_tampered"].append(rel)
+                if dst.is_symlink() or dst.is_file():
+                    dst.unlink()
+                elif dst.is_dir():
+                    shutil.rmtree(dst)
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                dst.write_bytes(want)
+
+        needs_pytest = any(
+            _PYTEST_IMPORT_RE.search((src_dir / rel).read_text(encoding="utf-8", errors="replace"))
+            for rel in tests
+        )
+        timeout_s = float(cfg.get("timeout_s", 120))
+        if needs_pytest and _has_pytest():
+            rc, out = _run_quiet([sys.executable, "-B", "-c", _PYTEST_RUNNER, *tests], work,
+                                 _clean_env(tmp), timeout_s)
+            if "@@REDO_RESULT@@" not in out:
+                return {**base, "status": "timeout" if out == "timeout" else "runner_no_output",
+                        "first_problem": out[-800:]}
+            r = json.loads(out.rsplit("@@REDO_RESULT@@", 1)[1].strip().splitlines()[0])
+            if r["load_error"]:
+                return {**base, "status": "load_error", "first_problem": r["load_error"], "run": int(r["run"])}
+            test_results = {str(k): bool(v) for k, v in (r.get("test_results") or {}).items()}
+            bad = int(r["failures"]) + int(r["errors"]) + int(r["unexpected_successes"])
+            run_n = int(r["run"])
+            skipped = int(r["skipped"])
+            failing_tests = sorted(k for k, ok in test_results.items() if not ok)
+            return {**base, "status": "ok", "run": run_n, "passed": run_n - bad - skipped,
+                    "accept": run_n > 0 and bad == 0 and skipped == 0,
+                    "first_problem": r["first_problem"], "first_input": r.get("first_input"),
+                    "test_results": test_results, "failing_tests": failing_tests}
+
+        by_dir: dict[str, list[str]] = {}
+        for rel in tests:
+            d, _, name = rel.rpartition("/")
+            by_dir.setdefault(d, []).append(name[:-3])
+        agg = {"run": 0, "failures": 0, "errors": 0, "skipped": 0, "unexpected_successes": 0}
+        test_results: dict[str, bool] = {}
+        first = None
+        first_input = None
+        for d, mods in sorted(by_dir.items()):
+            rc, out = _run_quiet([sys.executable, "-B", "-c", _EXTERNAL_UNITTEST_RUNNER, *mods],
+                                 work / d if d else work, _clean_env(tmp), timeout_s)
+            if "@@REDO_RESULT@@" not in out:
+                return {**base, "status": "timeout" if out == "timeout" else "runner_no_output",
+                        "first_problem": out[-800:]}
+            r = json.loads(out.rsplit("@@REDO_RESULT@@", 1)[1].strip().splitlines()[0])
+            if r["load_error"]:
+                return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
+            for k in agg:
+                agg[k] += r[k]
+            for tid, passed_flag in (r.get("test_results") or {}).items():
+                key = f"{d}/{tid}" if d else tid
+                test_results[key] = bool(passed_flag)
+            first = first or r["first_problem"]
+            first_input = first_input or r.get("first_input")
+        bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
+        failing_tests = sorted(k for k, ok in test_results.items() if not ok)
+        return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
+                "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0,
+                "first_problem": first, "first_input": first_input,
+                "test_results": test_results, "failing_tests": failing_tests}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict, *,
+               tdir: pathlib.Path | None = None, source: str | None = None) -> dict:
     """在最後工作區的**副本**裡、把題目原本的測試檔還原之後，跑那些測試。
 
     回傳 `{"accept": bool, "passed": int|None, ...}`。驗收自己壞掉（逾時、沒有輸出、沒有測試檔）
     ＝ `accept=False` 且 `status` 寫明原因——**壞掉的驗收不是通過**（I-4）。
     """
+    if source is not None:
+        return _acceptance_external(tdir if tdir is not None else origin.parent, final_ws, cfg, source)
     kind = cfg.get("kind", "workspace_tests")
     if kind == "command":
         return _acceptance_command(origin, final_ws, cfg)
@@ -708,7 +1047,11 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
                                            "no_model_calls" if usage is not None and usage["calls"] == 0 else "infra_marker")
             write_json(adir / "attempt.json", {**meta, "void": why})
             return {**meta, "void": why}
-        acc = acceptance(origin, ws, plan.get("acceptance", {}))
+        arm_source = arm.get("acceptance_source")
+        if arm_source is not None:
+            acc = acceptance(origin, ws, plan.get("acceptance", {}), tdir=tdir, source=arm_source)
+        else:
+            acc = acceptance(origin, ws, plan.get("acceptance", {}))
         gr = grade(tdir, origin, ws, plan.get("grader", {}), acc)
         _archive(ws, adir / "workspace")
         if snapshot_out is not None:
@@ -717,7 +1060,7 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
             shutil.copytree(ws, snapshot_out, symlinks=True, ignore=shutil.ignore_patterns(*SKIP_DIRS))
             # Restore pristine original test files in the live snapshot so carried-over workspaces stay clean.
             acfg = plan.get("acceptance", {})
-            if acfg.get("kind", "workspace_tests") == "workspace_tests":
+            if arm_source is None and acfg.get("kind", "workspace_tests") == "workspace_tests":
                 for rel in test_files(origin, acfg.get("patterns", ["*_test.py", "test_*.py"])):
                     dst = snapshot_out / rel
                     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -733,6 +1076,138 @@ def make_hint(acc: dict) -> str:
     text = HINT_HEAD + body.decode("utf-8", "ignore")
     if _KS1_BANNED.search(HINT_HEAD):
         raise AssertionError("KS-1：提示模板含責任／懲罰類措辭")
+    return text
+
+
+_ASSERT_2ARG_NAMES = frozenset({
+    "assertEqual", "assertNotEqual", "assertIs", "assertIsNot", "assertAlmostEqual",
+    "assertNotAlmostEqual", "assertCountEqual", "assertSetEqual", "assertListEqual",
+    "assertDictEqual", "assertTupleEqual", "assertSequenceEqual", "assertMultiLineEqual",
+    "assertRegex", "assertNotRegex", "assertFactorsEqual", "assertTreeEqual",
+})
+_EXPECTED_ASSIGN_RE = re.compile(r"^\s*(?:expected|want|ans|answer|target|table|exp_\w*)\s*=", re.I)
+_ASSERT_ERR_LINE_RE = re.compile(r"^AssertionError\b.*$")
+_PYTEST_E_CMP_RE = re.compile(r"^E\s+(?:assert\b|\+\s+where\b|AssertionError\b)")
+
+
+def _strip_assert_line(line: str) -> str:
+    """Strip expected output from a single unittest/pytest assertion line, keeping only the call/input."""
+    s = line.strip()
+    if s.startswith(">"):
+        s = s[1:].strip()
+    if not s:
+        return ""
+    if _EXPECTED_ASSIGN_RE.match(s):
+        return ""
+    try:
+        mod = ast.parse(s)
+    except SyntaxError:
+        mod = None
+    if mod and len(mod.body) == 1:
+        stmt = mod.body[0]
+        if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+            call = stmt.value
+            if isinstance(call.func, ast.Attribute) and call.func.attr in _ASSERT_2ARG_NAMES:
+                if call.args:
+                    return f"input: {ast.unparse(call.args[0])}"
+                return ""
+        elif isinstance(stmt, ast.Assert):
+            if isinstance(stmt.test, ast.Compare):
+                return f"input: {ast.unparse(stmt.test.left)}"
+            return f"input: {ast.unparse(stmt.test)}"
+    # Fallback regex for multi-line / truncated assertion lines.
+    m = re.match(r"^(?:self\.)?(?:assert\w+)\((.+)", s)
+    if m:
+        # Keep only up to the top-level comma separating actual vs expected, if present.
+        inner = m.group(1)
+        depth = 0
+        in_str: str | None = None
+        esc = False
+        for i, ch in enumerate(inner):
+            if esc:
+                esc = False
+                continue
+            if ch == "\\" and in_str:
+                esc = True
+                continue
+            if in_str:
+                if ch == in_str:
+                    in_str = None
+                continue
+            if ch in ("'", '"'):
+                in_str = ch
+            elif ch in "([{":
+                depth += 1
+            elif ch in ")]}":
+                if depth == 0:
+                    return f"input: {inner[:i].strip()}"
+                depth -= 1
+            elif ch == "," and depth == 0:
+                return f"input: {inner[:i].strip()}"
+        return f"input: {inner.rstrip(')').strip()}"
+    if s.startswith("assert "):
+        lhs = re.split(r"\s*(?:==|!=|\bis not\b|\bis\b|\bin\b|\bnot in\b|<=|>=|<|>)\s*", s[7:], maxsplit=1)[0]
+        return f"input: {lhs.strip()}"
+    return s
+
+
+def strip_expected_from_problem(problem: str | None, *, first_input: str | None = None) -> str | None:
+    """Strip expected outputs from a failure message while keeping which test failed and its input."""
+    raw = (problem or "").strip()
+    exc_summary = ""
+    if raw:
+        lines = [ln.rstrip() for ln in raw.splitlines() if ln.strip()]
+        for ln in reversed(lines):
+            st = ln.strip()
+            if _ASSERT_ERR_LINE_RE.match(st) or st.startswith("E   AssertionError"):
+                exc_summary = "AssertionError (expected output omitted)"
+                break
+            tok = st.split(":", 1)[0].removeprefix("E   ").strip()
+            if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+                # Runtime error (e.g. ValueError/TypeError/ZeroDivisionError) — drop any != / is not comparison.
+                if " != " in st or " is not " in st or " == " in st:
+                    exc_summary = f"{tok} (expected output omitted)"
+                else:
+                    exc_summary = st.removeprefix("E   ").strip()
+                break
+    if first_input:
+        inp = first_input.strip()
+        return f"{inp}\n{exc_summary}" if exc_summary else inp
+    if not raw:
+        return None
+    kept: list[str] = []
+    lines = [ln.rstrip() for ln in raw.splitlines() if ln.strip()]
+    for ln in lines:
+        st = ln.strip()
+        if st.startswith("Traceback (most recent call last):") or st.startswith('File "'):
+            continue
+        if _PYTEST_E_CMP_RE.match(st) or _ASSERT_ERR_LINE_RE.match(st):
+            continue
+        if _EXPECTED_ASSIGN_RE.match(st):
+            continue
+        # Skip diff detail lines emitted by unittest/pytest.
+        if st.startswith(("First differing element", "Lists differ:", "Tuples differ:", "Dicts differ:",
+                          "Diff is ", "- ", "+ ", "? ")):
+            continue
+        cleaned = _strip_assert_line(st)
+        if cleaned and cleaned not in kept:
+            kept.append(cleaned)
+    if exc_summary and exc_summary not in kept:
+        kept.append(exc_summary)
+    return "\n".join(kept) if kept else (exc_summary or None)
+
+
+def make_hint_failing_tests_noexpect(acc: dict) -> str:
+    """Shared failing_tests generator stripped of expected outputs (keeps failing test names + input)."""
+    _ctl, _, _ = _import_controller()
+    sanitized = strip_expected_from_problem(acc.get("first_problem"), first_input=acc.get("first_input"))
+    text = _ctl.build_feedback(
+        acc.get("failing_tests") or [],
+        sanitized,
+        status=acc.get("status"),
+    )
+    if _KS1_BANNED.search(text):
+        raise AssertionError("KS-1：提示含責任／懲罰類措辭")
     return text
 
 
@@ -786,7 +1261,9 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
                             "infra_void": None}
     hint: str | None = None
     is_ctl = policy == "controller"
-    ctl_snap_root: pathlib.Path | None = pathlib.Path(tempfile.mkdtemp(prefix="redo-ctlsnap-")) if is_ctl else None
+    is_cont = policy == "continue"
+    needs_snap = is_ctl or is_cont
+    ctl_snap_root: pathlib.Path | None = pathlib.Path(tempfile.mkdtemp(prefix="redo-ctlsnap-")) if needs_snap else None
     ctl_mod = ctl_id = ctl_book = None
     chain_path = cdir / "controller_chain.ndjson"
     if is_ctl:
@@ -811,9 +1288,9 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
             adir = cdir / f"attempt_{k}"
             if adir.exists():
                 shutil.rmtree(adir)
-            snap_out = (ctl_snap_root / f"attempt_{k}") if is_ctl and ctl_snap_root is not None else None
+            snap_out = (ctl_snap_root / f"attempt_{k}") if needs_snap and ctl_snap_root is not None else None
             res = one_attempt(plan, arm, tdir, provider, adir, min(T, remaining), hint, cell_id, k,
-                              start_ws=next_start_ws if is_ctl else None,
+                              start_ws=next_start_ws if needs_snap else None,
                               snapshot_out=snap_out)
             if res["void"]:
                 voids += 1
@@ -888,6 +1365,30 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
                     fb_acc.get("first_problem"),
                     status=fb_acc.get("status"),
                 )
+            elif is_cont:
+                assert snap_out is not None
+                write_json(adir / "attempt.json", res)
+                next_start_ws = snap_out
+                if _policy_stop(arm, res["acc"]):
+                    break
+                hint_mode = arm.get("hint", "review")
+                if hint_mode == "review":
+                    hint = str(arm.get("review_prompt", REVIEW_HINT))
+                    if _KS1_BANNED.search(hint):
+                        raise AssertionError("KS-1：review 提示含責任／懲罰類措辭")
+                elif hint_mode == "none":
+                    hint = None
+                elif hint_mode == "first_failure":
+                    hint = make_hint(res["acc"])
+                elif hint_mode == "failing_tests":
+                    _ctl, _, _ = _import_controller()
+                    hint = _ctl.build_feedback(
+                        res["acc"].get("failing_tests") or [],
+                        res["acc"].get("first_problem"),
+                        status=res["acc"].get("status"),
+                    )
+                elif hint_mode == "failing_tests_noexpect":
+                    hint = make_hint_failing_tests_noexpect(res["acc"])
             else:
                 write_json(adir / "attempt.json", res)
                 # ── 政策：只讀 acc，不讀 grade ──
@@ -903,6 +1404,10 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
                         res["acc"].get("first_problem"),
                         status=res["acc"].get("status"),
                     )
+                elif hint_mode == "failing_tests_noexpect":
+                    hint = make_hint_failing_tests_noexpect(res["acc"])
+                elif hint_mode == "review":
+                    hint = str(arm.get("review_prompt", REVIEW_HINT))
     finally:
         if ctl_snap_root is not None:
             shutil.rmtree(ctl_snap_root, ignore_errors=True)
@@ -910,6 +1415,10 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
     cell["n_attempts"] = len(attempts)
     cell["wall_s"] = round(time.time() - t0, 1)
     cell["agent_wall_s"] = round(spent, 1)
+    arm_source = arm.get("acceptance_source")
+    has_exam_fields = arm_source is not None or any(
+        a.get("acceptance_source") is not None for a in plan["arms"].values()
+    )
     cell["attempts"] = [
         {
             "k": i + 1, "accept": a["acc"]["accept"], "acc_status": a["acc"]["status"],
@@ -917,6 +1426,13 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
             "tests_tampered": a["acc"]["tests_tampered"], "grade_pass": a["grade"]["pass"],
             "grader_kind": a["grade"]["grader_kind"], "wall_s": a["wall_s"], "timed_out": a["timed_out"],
             "rc": a["rc"], "usage": a["usage"], "workspace_changed": a["workspace_changed"],
+            **(
+                {
+                    "acceptance_source": arm_source,
+                    "test_results": dict(a["acc"].get("test_results") or {}),
+                }
+                if has_exam_fields else {}
+            ),
             **(
                 {
                     "action": a["controller"]["action"],
@@ -936,25 +1452,48 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
     if cell["infra_void"] is None and not attempts:
         cell["infra_void"] = "no_attempt"
     if cell["infra_void"] is None:
-        d = _policy_deliver([a["acc"] for a in attempts])
+        deliver_mode = arm.get("deliver", "last" if is_cont else "best")
+        d = _policy_deliver([a["acc"] for a in attempts], deliver=deliver_mode)
         cell["delivered_attempt"] = d + 1
         cell["accepted"] = bool(attempts[d]["acc"]["accept"])
         cell["pass"] = attempts[d]["grade"]["pass"]
         cell["grader_kind"] = attempts[d]["grade"]["grader_kind"]
         if cell["pass"] is None:
             cell["infra_void"] = "grader_failed"
+        elif has_exam_fields:
+            cell["acceptance_source"] = arm_source
+            if arm_source is not None:
+                cell["false_accept"] = bool(cell["accepted"] and cell["pass"] is False)
+                cell["false_reject"] = bool(
+                    any((not a["acc"]["accept"]) and a["grade"]["pass"] is True for a in attempts)
+                )
+                cell["false_accept_attempts"] = sum(
+                    1 for a in attempts if a["acc"]["accept"] and a["grade"]["pass"] is False
+                )
+                cell["false_reject_attempts"] = sum(
+                    1 for a in attempts if (not a["acc"]["accept"]) and a["grade"]["pass"] is True
+                )
+            else:
+                cell["false_accept"] = None
+                cell["false_reject"] = None
+                cell["false_accept_attempts"] = 0
+                cell["false_reject_attempts"] = 0
     cell["ended"] = now()
     write_json(done, cell)
     return cell
 
 
 def _policy_stop(arm: dict, acc: dict) -> bool:
-    """政策唯一的輸入是驗收結果。single 一律停；restart 在驗收通過時停。"""
+    """政策唯一的輸入是驗收結果。single 一律停；continue 不依驗收提前停；restart 在驗收通過時停。"""
+    if arm["policy"] == "continue":
+        return False
     return arm["policy"] == "single" or bool(acc["accept"])
 
 
-def _policy_deliver(accs: list[dict]) -> int:
-    """交哪一次：第一個驗收通過的；都沒過就交原件測試過最多的（同分取最後一次）。只讀驗收結果。"""
+def _policy_deliver(accs: list[dict], *, deliver: str = "best") -> int:
+    """交哪一次：deliver='last' 交最後一次；否則交第一個驗收通過的、都沒過交原件測試過最多的（同分取最後一次）。只讀驗收結果。"""
+    if deliver == "last":
+        return len(accs) - 1
     for i, a in enumerate(accs):
         if a["accept"]:
             return i
@@ -1274,7 +1813,20 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         bank = None
     if bank is not None:
         acfg, gcfg = plan.get("acceptance", {}), plan.get("grader", {})
-        if acfg.get("kind") == "command":
+        arm_sources = sorted({a["acceptance_source"] for a in plan["arms"].values() if a.get("acceptance_source")})
+        if arm_sources:
+            pats = acfg.get("patterns", ["*_test.py", "test_*.py"])
+            for src in arm_sources:
+                no_src = [
+                    t for t in plan["tasks"]
+                    if not (
+                        _resolve_acceptance_source_dir(bank / t, src).is_dir()
+                        and test_files(_resolve_acceptance_source_dir(bank / t, src), pats)
+                    )
+                ]
+                say(not no_src,
+                    f"每一題都有外部驗收源 {src}" if not no_src else f"{len(no_src)} 題缺外部驗收源 {src}：{no_src[:5]}")
+        elif acfg.get("kind") == "command":
             cmd0 = acfg["cmd"][0]
             cexe = shutil.which(cmd0)
             say(cexe is not None, f"驗收指令 {cmd0} → {cexe}")
@@ -1298,10 +1850,19 @@ def cmd_preflight(a: argparse.Namespace) -> int:
             say(not no_scorer, "每一題都有 scorer.py＋hidden/" if not no_scorer else f"{len(no_scorer)} 題缺 scorer.py 或 hidden/：{no_scorer[:5]}")
         # 起點必須是紅的：原封不動的工作區不可以通過驗收（否則「通過」沒有資訊）
         t0 = plan["tasks"][0]
-        acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg)
-        neg_ok = (not acc0["accept"] and acc0["status"] == "ok") if acfg.get("kind") == "command" else (not acc0["accept"])
-        say(neg_ok, f"負控制：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
-            if neg_ok else f"負控制失敗：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
+        if arm_sources:
+            for src in arm_sources:
+                acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg, tdir=bank / t0, source=src)
+                neg_ok = (not acc0["accept"]) and acc0["status"] not in (
+                    "no_tests_in_source", "no_tests_in_origin", "runner_no_output", "timeout"
+                )
+                say(neg_ok, f"負控制（{src}）：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
+                    if neg_ok else f"負控制失敗（{src}）：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
+        else:
+            acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg)
+            neg_ok = (not acc0["accept"] and acc0["status"] == "ok") if acfg.get("kind") == "command" else (not acc0["accept"])
+            say(neg_ok, f"負控制：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
+                if neg_ok else f"負控制失敗：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
     agent = plan["agent"]
     exe = shutil.which(agent["argv"][0])
     say(exe is not None, f"agent 指令 {agent['argv'][0]} → {exe}")
