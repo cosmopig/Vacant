@@ -365,6 +365,68 @@ def usage_from_log(log_path: pathlib.Path) -> dict | None:
             "final_error": final_error}
 
 
+def usage_from_claude_log(log_path: pathlib.Path) -> dict | None:
+    """Claude Code `--output-format stream-json --verbose` 的事件流（DECISION 修正 4，worker 改 Haiku）。
+
+    `calls`＝不同 message.id 的 assistant 回應（不含 `<synthetic>`，那是 CLI 自己合成的錯誤訊息）；
+    token／費用優先取最後的 `result` 事件（`modelUsage` 逐模型加總，含快取讀寫）；沒有 result（被逾時殺掉）時用
+    assistant 訊息自己的 usage 加總、`cost_usd`＝None（不編數字）。`input`＝送進模型的全部 token
+    （未快取＋快取建立＋快取讀取），分項另列。`result.is_error` 算一次 error，原文放 `final_error`
+    （判斷基礎設施失敗用）。讀不出任何 JSON 事件＝None。
+    """
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    saw = False
+    per_msg: dict[str, dict] = {}
+    result: dict | None = None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            o = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(o, dict) or "type" not in o:
+            continue
+        saw = True
+        if o["type"] == "assistant" and isinstance(o.get("message"), dict):
+            m = o["message"]
+            if m.get("model") == "<synthetic>" or not m.get("id"):
+                continue
+            per_msg[m["id"]] = m.get("usage") or {}
+        elif o["type"] == "result":
+            result = o
+    if not saw:
+        return None
+    out: dict = {"calls": len(per_msg), "errors": 0, "final_error": None, "cost_usd": None, "num_turns": None,
+                 "input": None, "output": None, "cache_read": None, "cache_create": None, "uncached_input": None,
+                 "terminal_reason": None}
+    mu = (result or {}).get("modelUsage") if isinstance((result or {}).get("modelUsage"), dict) else None
+    if mu:
+        def tot(key: str) -> int:
+            return sum(int(v.get(key) or 0) for v in mu.values() if isinstance(v, dict))
+        unc, cc, cr, outp = tot("inputTokens"), tot("cacheCreationInputTokens"), tot("cacheReadInputTokens"), tot("outputTokens")
+        out["cost_usd"] = round(sum(float(v.get("costUSD") or 0) for v in mu.values() if isinstance(v, dict)), 6)
+    else:
+        unc = sum(int(u.get("input_tokens") or 0) for u in per_msg.values())
+        cc = sum(int(u.get("cache_creation_input_tokens") or 0) for u in per_msg.values())
+        cr = sum(int(u.get("cache_read_input_tokens") or 0) for u in per_msg.values())
+        outp = sum(int(u.get("output_tokens") or 0) for u in per_msg.values())
+        if result and result.get("total_cost_usd") is not None:
+            out["cost_usd"] = round(float(result["total_cost_usd"]), 6)
+    out.update(uncached_input=unc, cache_create=cc, cache_read=cr, output=outp or None, input=(unc + cc + cr) or None)
+    if result:
+        out["num_turns"] = result.get("num_turns")
+        out["terminal_reason"] = result.get("terminal_reason")
+        if result.get("is_error"):
+            out["errors"] = 1
+            out["final_error"] = (f"{result.get('terminal_reason')}: " + str(result.get("result") or ""))[:300]
+    return out
+
+
 # ── 驗收（政策唯一讀得到的訊號）與評分（政策讀不到）─────────────────────────
 
 _UNITTEST_RUNNER = r"""
@@ -687,7 +749,9 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
         r = run_agent(argv, env, ws, timeout_s, adir / "agent.log", drop)
         final_snap = snapshot(ws)
         changed = final_snap != origin_snap
-        usage = usage_from_log(adir / "agent.log") if agent.get("usage", "pi_json") == "pi_json" else None
+        _uk = agent.get("usage", "pi_json")
+        usage = (usage_from_log(adir / "agent.log") if _uk == "pi_json" else
+                 usage_from_claude_log(adir / "agent.log") if _uk == "claude_stream_json" else None)
         try:
             tail = (adir / "agent.log").read_bytes()[-20000:].decode("utf-8", "replace")
         except OSError:

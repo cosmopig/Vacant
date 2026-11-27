@@ -1,0 +1,117 @@
+{
+ "id": "ctlcal_haiku37_A",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/opt/ctlwork/bm_tasks/ctl37",
+ "bank_candidates": [
+  "/opt/ctlwork/bm_tasks/ctl37"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  }
+ },
+ "pair": [
+  "A",
+  "A"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-claude-agent",
+   "{logs}",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "REDO_WS_ROOT": "/var/ctlws"
+  },
+  "usage": "claude_stream_json",
+  "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable"
+ },
+ "providers": [
+  {
+   "name": "claude_haiku",
+   "provider": "anthropic",
+   "model": "haiku",
+   "jobs": 8
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_kindergarten_garden",
+  "ex_ocr_numbers",
+  "ex_circular_buffer",
+  "ex_high_scores",
+  "ex_simple_cipher",
+  "ex_binary",
+  "ex_octal",
+  "ex_yacht",
+  "ex_luhn",
+  "ex_sublist",
+  "ex_say",
+  "ex_dnd_character",
+  "ex_twelve_days",
+  "ex_atbash_cipher",
+  "ex_queen_attack",
+  "ex_prime_factors",
+  "ex_scrabble_score",
+  "ex_series",
+  "ex_binary_search_tree",
+  "ex_pascals_triangle",
+  "ex_tournament",
+  "ex_change",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_largest_series_product",
+  "ex_minesweeper",
+  "ex_bank_account",
+  "ex_flower_field",
+  "ex_swift_scheduling",
+  "ex_all_your_base",
+  "ex_linked_list",
+  "ex_word_search",
+  "ex_camicia",
+  "ex_custom_set",
+  "ex_complex_numbers",
+  "ex_rational_numbers",
+  "ex_meetup"
+ ],
+ "reps": 1,
+ "prereg": {
+  "purpose": "校準（不進正式分析）：Haiku 單次 A 臂，37 題候選，hidden 半數獨立評分（修正 4）。",
+  "worker": "Claude Haiku（claude -p --model haiku，Claude Code headless），DECISION 修正 4；沙箱 ops/redo/claude_sandbox_agent.py",
+  "exploratory_only": "不作任何效果宣稱；不依結果調整控制器門檻。",
+  "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。"
+ }
+}
