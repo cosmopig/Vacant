@@ -61,3 +61,20 @@
 - **沙箱**：agent 透過 `ops/redo/bwrap_agent.sh` 關進 bwrap，只掛自己的工作區、logs、agent 設定（唯讀的 pi、node、系統目錄）；題庫目錄（含 hidden/）與 ~/dev 不可見。負控制已手動驗過：看不到 ~/dev 與題庫，網路可以連 LM Studio。
 - **吞吐量**（1004，qwen3.5-9b，131072）：單串流 107 tok/s；總 tok/s 在 2／4／6／8 串流時是 191／282／355／408。1004 因為 gemma 共用顯示記憶體，正式批次用 jobs 4；1003 會載 9B 262144／parallel 8（量過再定 jobs）。量表在 `~/dev/ops/ctl/tps_1004_q9.jsonl`。
 - **4 案例小測試的題**：原本草稿裡的 ex_series 是校準候選，換掉。依「不在 18 題候選裡、≥8 個測試、difficulty 由高到低、測試數由多到少」的規則，改成 ex_matrix、ex_point_mutations、ex_acronym、ex_bob。舊的題庫目錄改名為 ctl_smoke4_VOID_had_series 保留。
+
+## 機器設定紀錄（11-27 01:55Z）
+- 擁有者原話（經 vacant-hope）：「實驗室助理可以關掉，現在整台機器都你的，你不要初始化機器就好」。
+- 01:53Z **停掉本機的 systemd user 服務 `vacant-gemmawatch`**（實驗室助理用來把 gemma 載回 1004 的看門程式）。
+  - 只有 `stop`，沒有 `disable`：開機設定不動，重開機後它會自己回來。
+  - 1004 的 gemma-4-12b-it-qat 已卸載，模型檔沒刪。
+- **恢復方式**：`systemctl --user start vacant-gemmawatch`。11/29 之後 rfh4 續跑時，兩台都要把 gemma-4-12b-it-qat 照計畫設定（262144／4）載回去；實驗室助理的服務要不要恢復，到時由 vacant-hope 問擁有者。
+- **1004 的 9B 吞吐量**（gemma 卸掉後）：
+
+  | 設定 | 單串流 | 8 串流總計 | 12 串流總計 | VRAM |
+  |---|---|---|---|---|
+  | ctx 262144／parallel 8 | 108 | 408 | — | 15.2 GB |
+  | ctx 393216／parallel 12 | 109 | 412 | **455**（每串流 38） | 19.7 GB |
+
+  - 依「開到總吞吐量還在上升的最大值」，**1004 用 393216／parallel 12、jobs 12**。agent 設定的 contextWindow＝32768（＝393216／12）。
+  - 量表：`~/dev/ops/ctl/tps_1004_q9*.jsonl`。
+- 校準因此重開：之前 jobs 4 那一次（跑了約 3 分鐘）的 root 改名作廢保留 `ctlcal_q9_1004_VOID_jobs4_restart_max`。更早兩次因為包裝程式路徑錯而作廢的 root 也都保留。

@@ -47,7 +47,7 @@
    "name": "lms1004q9",
    "provider": "lms1004q9",
    "model": "qwen/qwen3.5-9b",
-   "jobs": 4
+   "jobs": 12
   }
  ],
  "acceptance": {
