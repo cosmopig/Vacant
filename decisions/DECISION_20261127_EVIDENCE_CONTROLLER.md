@@ -128,3 +128,31 @@
   - 沙箱：Devin 的 Bash 走其內建 `--sandbox`（bwrap＋seccomp，研究預覽）；檔案工具的邊界以負控制實測為準，實際強制範圍寫在 `ops/redo/results/ctl_devin_20261127/`。
   - 遠端模型別名之後可能指向別的版本；Devin 的模型可能見過 Exercism 公開參考解（無法排除）。
 - **限制**：校準只做一次（A 單次、37 題）；這是校準，不是效果量測；選題依 A 結果會有回歸均值。
+
+### 修正 5 實測補記（2026-11-27，Devin 校準之後；四臂批次未啟動）
+- 沙箱：mount namespace（bwrap，整個 CLI）＋ deny 規則＋ Devin `--sandbox`；負控制 `ops/redo/results/ctl_devin_20261127/negctl_4.json` 42/42（強制邊界與缺陷見同目錄 `NEGCTL.md`；
+  只靠規則時 exec 內 python 讀得到兄弟工作區，已用 mount namespace 修掉）。
+- 並行：jobs＝8（12 起帳號層級限流，`THROUGHPUT.md`）。
+- 校準（`swe-2-flash-medium`、A 單次、37 題、獨立評分）：**hidden 全過 34/37＝91.9%**（比例平均 0.990），可見驗收 37/37，infra_void 0、逾時 0。
+  ≥70% ⇒ 依任務規定**不再試更弱設定、停下回報**。未過：ex_dnd_character 9/10、ex_pascals_triangle 4/5、ex_yacht 14/15。
+  修正 3 選題規則在這個結果下只湊得出 7 題（<12 的下限）⇒ 先回報、不啟動批次。落在 25–70% 帶內的 (模型, 題池)：本池沒有。
+
+## 修正 6（2026-11-27，接手的執行者；在任何新的 Devin 資料之前）：Devin flash 在 ctl37 為 91.9%（帶外）⇒ 校準到 cc40 與 cchard
+- **觸發**：修正 5 的校準，`swe-2-flash-medium` 在 ctl37 的 A 臂 hidden 34/37＝91.9%，在 25–70% 之外。協調者指示：把同一個 worker 校準到另一條線建的兩個較難題池
+  （`decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HARDPOOL.md`：`cc40`＝Codeforces 1200–3500、Python 參考解；`cchard`＝Codeforces ≥2400、C++ oracle，worker 可交 `solution.py` 或 `solution.cpp`）。
+  兩個題庫在 `/opt/ctlwork/bm_tasks/{cc40,cchard}`；本檔不改它們。校準＝A 臂每題 1 次，預算形狀同 `ctlcal_haiku37_A`／HARDPOOL 的校準計畫（單次 600、A 臂 1800、驗收 120 秒、`grader.suite_timeout_s` 400／`timeout_s` 600）。
+- **固定規則（在任何新資料之前）**：
+  1. **正式 hidden 分數＝批次結束後對每個交付工作區的「序列」（一次一個）重新評分**（容器共用、計時有雜訊）；報告有多少格與批次內分數不同。
+  2. **選擇**：{flash×cc40、flash×cchard} 中取 A 率（hidden 全過比例）在 25–70% 之內、且最接近 45% 的那一對；再用**未改**的修正 3 規則挑 16 題
+     （先取沒過但 hidden 比例 ≥30%；再交替補沒過 <30% 與通過〔通過上限 4〕；同類按題名字典序；少於 12 題⇒報告、不跑）。
+     兩者都不在帶內：若**兩者都低於 25%**，對 `swe-2-medium` 只在 cc40 校準一次、套同一規則；否則（有一個以上高於 70%、或其他組合）報告並停止。
+  3. **正式批次（若有配對合格）**：臂 A／R／B／C 逐字照 `ops/redo/plans/ctl16_pi_qwen9b.json`（A 單次 1800 秒；R／B／C 最多 3 次×600 秒、總預算 1800 秒），
+     每題每臂 3 重複＝16×4×3＝192 格；分析逐字照 HARDPOOL 附錄 2（五個凍結指標、配對 C−B／C−R／R,B,C−A、不一致對數與精確符號檢定、規則觸發表、序列重評分數為正式）。
+     校準的 A 臂不併入。**因為題目是依 A 臂校準結果挑的，正式批次的 A 率會往中間回歸（迴歸均值），A 臂與其他臂的絕對水準不能直接和校準比。**
+  4. 限流：jobs 8，出現限流就降；限流的嘗試＝infra 失敗⇒重試 ×4（退避依錯誤訊息的「resets in N seconds」），否則 infra_void。
+     Devin 的匯出在回合結束後才寫；**逾時被殺的嘗試，用量記為「缺」不是 0**。
+  5. 批次若跑：先看前約 16 格有無 infra 問題才放行其餘；用 harness 的續跑；每約 30 分鐘推緊湊的部分結果；驗證每一條 C 臂決策鏈並回報數量。
+     **硬停**：預估完成時間超過 2026-11-28 12:00Z ⇒ 所有臂一律把重複數從 3 降成 2（記錄），不丟臂也不丟題。
+- **cchard 的沙箱**：worker 要在 Devin 的 exec 沙箱裡用 g++。先做正控制（編譯＋執行），並重跑負控制，都在校準之前。
+- **和先前不可比（照實寫）**：與修正 5 同（Devin 的框架／工具、成本單位、遠端服務）；另外 cc40／cchard 的題面、語言（Python 或 C++）、case 級測資與逐案時限（L＝2×time_limit+2）和 Exercism 不同；
+  Devin 模型可能見過 Codeforces 題與題解（無法排除）。共用容器上別的批次（Haiku）同時在跑，牆鐘有雜訊（所以序列重評分）。

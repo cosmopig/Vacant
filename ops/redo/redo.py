@@ -374,7 +374,7 @@ def usage_from_devin_log(log_path: pathlib.Path) -> dict | None:
     `agent.model_name`／`version`。**沒有費用欄位**（免費模型）⇒ `cost_usd` 固定 None，不編數字。
     `calls`＝帶 metrics 的 agent 步驟數；`input`＝prompt_tokens 加總（cached 是其中的子集，實測三步加總＝總和）；
     `cache_read`＝cached_tokens；`uncached_input`＝input−cache_read；`num_turns`＝total_steps。
-    匯出沒有「這一回合以錯誤結束」的欄位 ⇒ `final_error` 恆 None；被逾時殺掉時匯出可能不存在 ⇒ 回 None
+    匯出沒有「這一回合以錯誤結束」的欄位 ⇒ `final_error` 取 agent.log 裡的 `Error: Agent error: …` 行（有就記一次 error，限流等會被 infra_re 當成 infra 失敗）；被逾時殺掉時匯出可能不存在 ⇒ 回 None
     （redo 把「工作區沒動＋usage None」當成需看 log 尾端的 infra 判斷，見 one_attempt）。
     另附 `first_ts`／`last_ts`（匯出裡步驟時間戳，ISO 字串）供牆鐘對照。
     """
@@ -396,9 +396,19 @@ def usage_from_devin_log(log_path: pathlib.Path) -> dict | None:
         outp = int(fm.get("total_completion_tokens") or outp)
         cr = int(fm.get("total_cached_tokens") or cr)
     ts = [x.get("timestamp") for x in steps if x.get("timestamp")]
-    return {"calls": len(ag), "errors": 0, "final_error": None, "cost_usd": None,
+    if fm is None:      # 回合沒正常結束（逾時被殺／錯誤）：匯出可能不完整 ⇒ 用量記「缺」，不是 0、也不是部分加總
+        inp = outp = cr = 0
+        ag = []
+    # 這一跑以錯誤結束時，CLI 把 "Error: Agent error: ..." 印在 agent.log（匯出裡沒有這個欄位）
+    ferr = None
+    try:
+        m = re.search(r"^Error: Agent error: (.{0,300})", log_path.read_text(encoding="utf-8", errors="replace"), re.M)
+        ferr = m.group(1) if m else None
+    except OSError:
+        pass
+    return {"calls": len(ag) if fm else None, "errors": 1 if ferr else 0, "final_error": ferr, "cost_usd": None,
             "num_turns": (fm or {}).get("total_steps"), "input": inp or None, "output": outp or None,
-            "cache_read": cr, "cache_create": None, "uncached_input": inp - cr if inp else None,
+            "cache_read": cr if fm else None, "cache_create": None, "usage_missing": fm is None, "uncached_input": inp - cr if inp else None,
             "terminal_reason": None, "first_ts": ts[0] if ts else None, "last_ts": ts[-1] if ts else None}
 
 
