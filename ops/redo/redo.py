@@ -181,6 +181,12 @@ def load_plan(path: pathlib.Path) -> dict:
                 raise PlanError(
                     f"arm {name}: acceptance_pass_ratio 必須是 (0, 1] 內的浮點數：{apr!r}"
                 )
+        psuf = arm.get("prompt_suffix")
+        if psuf is not None:
+            if not isinstance(psuf, str):
+                raise PlanError(f"arm {name}: prompt_suffix 必須是字串：{psuf!r}")
+            if _KS1_BANNED.search(psuf):
+                raise PlanError(f"arm {name}: prompt_suffix 含 KS-1 禁用詞（責任／懲罰類措辭）")
     if len(set(plan["tasks"])) != len(plan["tasks"]):
         raise PlanError("tasks 有重複")
     acfg = plan.get("acceptance", {})
@@ -245,6 +251,17 @@ def arm_order(plan: dict, task: str, rep: int) -> list[str]:
 def task_prompt(tdir: pathlib.Path) -> str:
     f = tdir / "instruction.txt"
     return f.read_text(encoding="utf-8").strip() if f.is_file() else DEFAULT_PROMPT
+
+
+def compose_prompt(base: str, *, prompt_suffix: str | None = None, hint: str | None = None) -> str:
+    """組合題目提示、可選每臂 prompt_suffix（以空行接在題目提示後）與可選 hint。
+    prompt_suffix 缺省或空字串時，輸出與舊行為逐位元組相同。"""
+    prompt = base
+    if prompt_suffix:
+        prompt = prompt + "\n\n" + prompt_suffix
+    if hint:
+        prompt = prompt + "\n\n---\n" + hint
+    return prompt
 
 
 def test_files(origin: pathlib.Path, patterns: list[str]) -> list[str]:
@@ -1036,9 +1053,8 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
     try:
         shutil.copytree(src_ws, ws, symlinks=True)
         origin_snap = snapshot(ws)
-        prompt = task_prompt(tdir)
-        if hint:
-            prompt = prompt + "\n\n---\n" + hint
+        prompt_suffix = arm.get("prompt_suffix")
+        prompt = compose_prompt(task_prompt(tdir), prompt_suffix=prompt_suffix, hint=hint)
         env = dict(os.environ)
         for k in list(env):
             if k.startswith("VACANT_PI_") or k in ("VACANT_DO_RUN",):   # e016 attempt-1 的 env 洩漏
@@ -1870,6 +1886,10 @@ def cmd_preflight(a: argparse.Namespace) -> int:
     if bank is not None:
         acfg, gcfg = plan.get("acceptance", {}), plan.get("grader", {})
         arm_sources = sorted({a["acceptance_source"] for a in plan["arms"].values() if a.get("acceptance_source")})
+        all_single_external_grader = (
+            all(a.get("policy") == "single" for a in plan["arms"].values())
+            and not gcfg.get("visible_equals_grader")
+        )
         if arm_sources:
             pats = acfg.get("patterns", ["*_test.py", "test_*.py"])
             for src in arm_sources:
@@ -1895,8 +1915,11 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         else:
             no_tests = [t for t in plan["tasks"]
                         if not test_files(bank / t / "workspace", acfg.get("patterns", ["*_test.py", "test_*.py"]))]
-            say(not no_tests,
-                "每一題的工作區都有測試檔（驗收訊號的來源）" if not no_tests else f"{len(no_tests)} 題的工作區沒有測試檔：{no_tests[:5]}")
+            if no_tests and all_single_external_grader:
+                say(True, f"{len(no_tests)} 題的工作區沒有測試檔（全部為 single 臂且採獨立 scorer.py＋hidden/，不依賴工作區驗收）")
+            else:
+                say(not no_tests,
+                    "每一題的工作區都有測試檔（驗收訊號的來源）" if not no_tests else f"{len(no_tests)} 題的工作區沒有測試檔：{no_tests[:5]}")
         no_scorer = [t for t in plan["tasks"] if not ((bank / t / "scorer.py").is_file() and (bank / t / "hidden").is_dir())]
         if no_scorer and gcfg.get("visible_equals_grader"):
             say(len(no_scorer) == len(plan["tasks"]),
