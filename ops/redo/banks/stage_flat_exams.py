@@ -8,7 +8,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("src"); ap.add_argument("dst"); 
 a = ap.parse_args(); src, dst = pathlib.Path(a.src), pathlib.Path(a.dst)
 if dst.exists(): sys.exit(f"refuse: {dst} exists")
 kinds = [k for k in a.kinds.split(",") if k]; missing = []
-for t in sorted(p for p in src.iterdir() if p.is_dir()):
+for t in sorted(p for p in src.iterdir() if p.is_dir() and p.name.startswith("ex_")):
     for k in kinds:
         f = t / MAP[k]
         if not f.is_file(): missing.append(f"{t.name}/{MAP[k]}"); continue

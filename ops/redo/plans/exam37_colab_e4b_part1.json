@@ -1,0 +1,168 @@
+{
+ "id": "exam37_colab_e4b_part1",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/exam37"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "N3": {
+   "policy": "continue",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "review",
+   "deliver": "last"
+  },
+  "GT": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "acceptance_source": "gate_visible",
+   "hint": "failing_tests_noexpect"
+  },
+  "XM": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "acceptance_source": "exam:XM",
+   "hint": "failing_tests_noexpect"
+  }
+ },
+ "pair": [
+  "N3",
+  "GT"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 12,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "main_control": "N3",
+  "baseline_control": "A",
+  "ceiling_arm": "GT",
+  "exam_arms": [
+   "XM",
+   "XMV",
+   "PB",
+   "EX"
+  ],
+  "script": "ops/redo/analysis/exam_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_kindergarten_garden",
+  "ex_ocr_numbers",
+  "ex_circular_buffer",
+  "ex_high_scores",
+  "ex_simple_cipher",
+  "ex_binary",
+  "ex_octal",
+  "ex_yacht",
+  "ex_luhn",
+  "ex_sublist",
+  "ex_say",
+  "ex_dnd_character",
+  "ex_twelve_days",
+  "ex_atbash_cipher",
+  "ex_queen_attack",
+  "ex_prime_factors",
+  "ex_scrabble_score",
+  "ex_series",
+  "ex_word_search",
+  "ex_bank_account",
+  "ex_rational_numbers",
+  "ex_custom_set",
+  "ex_camicia",
+  "ex_binary_search_tree",
+  "ex_meetup",
+  "ex_complex_numbers",
+  "ex_linked_list",
+  "ex_all_your_base",
+  "ex_swift_scheduling",
+  "ex_flower_field",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_change",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_tournament",
+  "ex_pascals_triangle"
+ ],
+ "reps": 2,
+ "prereg": {
+  "frozen": "2026-11-27，在執行任何正式模型呼叫之前凍結（不推遠端、尚未發射）；所有臂設定、題單（37 題＝ctl_cal18＋ctl_hard19）與判讀門檻皆不再改。",
+  "question": "在工作區沒有現成測試（no existing tests）的情境下，使用相同的 harness 與預算上限，外部產生的驗收考題（XM／XMV／PB／EX）相較於無檢核三輪續做（N3）與原生單次（A），能否取得接近真驗收上限（GT）的隱藏評分增益，且不引入過高的誤放行（false-accept）？",
+  "bank": "~/dev/ops/ref/bm_tasks/exam37（由 ops/redo/banks/build_exam37.py 從 ctl_cal18 與 ctl_hard19 合併建立；每題 workspace/ 刪除所有測試檔與 contract.md 的測試提示；gate_visible/ 放驗收半；hidden/＋scorer.py 為獨立評分半；exams/{XM,XMV,PB,EX}/ 由 ops/redo/banks/import_exams.py 從凍結考題目錄匯入）。",
+  "arms": "A＝單次 1800 秒；N3＝同一工作區連跑 3 次（每次 600 秒、總預算 1800 秒），第 2–3 次只給固定提示「Review your solution and improve it if needed.」無任何檢核資訊，交付最後一次；GT／XM／XMV／PB／EX＝restart 政策（每次從乾淨工作區重來，最多 3 次，每次 600 秒，總預算 1800 秒），各依自己的 acceptance_source（gate_visible 或 exam:{XM,XMV,PB,EX}）在工作區副本上驗收（測試檔永不留在 worker 工作區），提示為 failing_tests_noexpect（僅含失敗測試名與輸入，不含預期輸出）。37 題 × 7 臂 × 2 次重複＝518 格。",
+  "model": "google/gemma-4-E4B-it-qat-w4a16-ct（served_model_name: gemma-4-e4b-it-qat），pi 0.87.1，Colab A100-SXM4-40GB 上以 vLLM 0.30.0 服務（provider colab-vllm-nothink，jobs 12；沿用 ops/redo/plans/ctl12_colab_e4b.json 之 provider 與 agent 設定）。",
+  "readout": "main comparison vs N3; an exam qualifies for local confirmation iff gain share >=0.5 AND false-accept <= 2x GT's; if GT shows no gain over N3 => 題組無法區分; also report each exam's false-block rate (fraction of assertions the reference solution fails), measured beforehand",
+  "readout_zh": "主比較對 N3（並附對 A 之配對 McNemar）；定義 gain share＝(arm−N3)/(GT−N3)。若 GT 相對於 N3 無正增益（GT−N3 ≤ 0）⇒ 判定「題組無法區分」。任一外部考題臂（XM／XMV／PB／EX）取得本機確認資格的充要條件為：gain share ≥ 0.5 且 false-accept 率 ≤ 2× GT 的 false-accept 率。另須事先在參考解答上量測並報告各考題的 false-block 率（參考解答未能通過的斷言比例）。",
+  "metrics": "每臂獨立隱藏評分成功率；配對精確 McNemar（對 N3 為主、對 A 為輔）；gain share；每臂 cell 層級與嘗試層級的 false-accept／false-reject 率（每次嘗試皆於事後由 host 在 hidden 半評分）；每臂 token 與牆鐘；從 agent log 計算 per-stream tok/s 與逾時次數；另附事前量測之各考題 false-block 率。分析程式：ops/redo/analysis/exam_metrics.py。",
+  "infra_void": "沿用 redo.py：工作區沒動＋0 次成功模型回應或連線類錯誤＝基礎設施失敗，不算嘗試、最多重試 4 次，仍失敗該格 infra_void 不進分母、逐一列出；配對比較時任一臂 void 的那一對不計。",
+  "known_limits": [
+   "Colab E4B 先導批次，僅篩選具資格進入本機確認的外部考題臂，不直接與本機批次合併。",
+   "37 題 × 2 次重複＝74 對；若 GT−N3 ≤ 0 則依預註冊直接報「題組無法區分」。",
+   "hard 19 題先前被 gemma-12b 評測過、37 題先前被 Colab E4B 校準（僅 A 臂、有工作區測試）跑過；本批為無工作區測試情境，校準資料不併入分析。",
+   "等預算是牆鐘上限（1800 秒），token 與 per-stream tok/s 照實紀錄。"
+  ],
+  "two_part": "臂分兩批執行（vacant-hope 11-27）：第 1 批＝A、N3、GT、XM（本計畫）；第 2 批＝追加臂 XMV、PB、EX，考卷到齊後在同一台 VM、同樣設定（同題、同後端、同模型、同預算）接著跑，計畫另檔 exam37_colab_e4b_part2。判讀時每個考卷臂都對同一份 N3 與 GT（本批）比。追加臂較晚跑，時間差照實寫。",
+  "exams": "XM＝vacant-cloud 用 Haiku 只看需求寫的考卷（分支 claude/wonderful-babbage-0l9zcn 的 ops/redo/exams_haiku_20261127/，commit fa04d0a99），37 份全部照 MANIFEST 驗過 sha256。XM 的誤擋率（參考解過不了的斷言比例）MANIFEST 裡還沒有，先跑、之後補進報告。",
+  "no_tests_in_workspace": "所有臂的工作區都不放任何測試（A、N3、GT 也一樣），對應『沒有現成測試』的情境；GT 只由 Host 拿可見那一半驗收、當上限。這和 ctl12 不同（ctl12 的工作區有可見那一半），所以本批的 A／GT 數字不和 ctl12 直接比。"
+ }
+}
