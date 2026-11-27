@@ -94,3 +94,13 @@
 2026-11-27T15:31:52Z  cc_1553I/r2/R 第 3 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
 2026-11-27T15:32:00Z  cc_1552G/r2/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
 2026-11-27T15:34:32Z  cc_1599A/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T15:41:22Z  cc_1603E/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T15:42:05Z  cc_1601F/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T15:42:23Z  cc_1553I/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T15:45:36Z  cc_1599D/r2/A                                pass=False accepted=True attempts=1 wall=1772.2s
+2026-11-27T15:48:46Z  cc_1608F/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T15:57:39Z  cc_1599A/r2/A                                pass=True accepted=True attempts=1 wall=1383.8s
+2026-11-27T15:59:37Z  cc_1553I/r2/B                                pass=True accepted=True attempts=2 wall=1029.3s
+2026-11-27T16:01:29Z  cc_1552I/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T16:02:34Z  cc_1552G/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T16:06:23Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=1453.5s
