@@ -1,0 +1,124 @@
+{
+ "created": "2026-11-27T02:39:27Z",
+ "git_head": "71f349841582091913b5fc3887738b3ec5dfdc3d",
+ "plan": {
+  "acceptance": {
+   "kind": "workspace_tests",
+   "patterns": [
+    "*_test.py",
+    "test_*.py"
+   ],
+   "timeout_s": 120
+  },
+  "agent": {
+   "argv": [
+    "redo-claude-agent",
+    "{logs}",
+    "{model}",
+    "{prompt}"
+   ],
+   "env": {
+    "REDO_WS_ROOT": "/var/ctlws"
+   },
+   "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable",
+   "usage": "claude_stream_json"
+  },
+  "analysis": {
+   "alpha": 0.05,
+   "comparisons": [
+    {
+     "control": "B",
+     "name": "C_vs_B",
+     "treatment": "C"
+    },
+    {
+     "control": "R",
+     "name": "C_vs_R",
+     "treatment": "C"
+    }
+   ],
+   "script": "ops/redo/analysis/ctl_metrics.py <root>",
+   "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "arms": {
+   "A": {
+    "attempt_timeout_s": 1800,
+    "policy": "single"
+   }
+  },
+  "attempt_timeout_s": 600,
+  "bank": "/opt/ctlwork/bm_tasks/ctl37",
+  "bank_candidates": [
+   "/opt/ctlwork/bm_tasks/ctl37"
+  ],
+  "grader": {
+   "suite_timeout_s": 60,
+   "timeout_s": 240,
+   "visible_equals_grader": false
+  },
+  "id": "ctlcal_haiku37_A",
+  "pair": [
+   "A",
+   "A"
+  ],
+  "prereg": {
+   "exploratory_only": "不作任何效果宣稱；不依結果調整控制器門檻。",
+   "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。",
+   "purpose": "校準（不進正式分析）：Haiku 單次 A 臂，37 題候選，hidden 半數獨立評分（修正 4）。",
+   "worker": "Claude Haiku（claude -p --model haiku，Claude Code headless），DECISION 修正 4；沙箱 ops/redo/claude_sandbox_agent.py"
+  },
+  "providers": [
+   {
+    "jobs": 32,
+    "model": "haiku",
+    "name": "claude_haiku",
+    "provider": "anthropic"
+   }
+  ],
+  "reps": 1,
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261127,
+  "tasks": [
+   "ex_kindergarten_garden",
+   "ex_ocr_numbers",
+   "ex_circular_buffer",
+   "ex_high_scores",
+   "ex_simple_cipher",
+   "ex_binary",
+   "ex_octal",
+   "ex_yacht",
+   "ex_luhn",
+   "ex_sublist",
+   "ex_say",
+   "ex_dnd_character",
+   "ex_twelve_days",
+   "ex_atbash_cipher",
+   "ex_queen_attack",
+   "ex_prime_factors",
+   "ex_scrabble_score",
+   "ex_series",
+   "ex_binary_search_tree",
+   "ex_pascals_triangle",
+   "ex_tournament",
+   "ex_change",
+   "ex_killer_sudoku_helper",
+   "ex_palindrome_products",
+   "ex_largest_series_product",
+   "ex_minesweeper",
+   "ex_bank_account",
+   "ex_flower_field",
+   "ex_swift_scheduling",
+   "ex_all_your_base",
+   "ex_linked_list",
+   "ex_word_search",
+   "ex_camicia",
+   "ex_custom_set",
+   "ex_complex_numbers",
+   "ex_rational_numbers",
+   "ex_meetup"
+  ]
+ },
+ "plan_id": "ctlcal_haiku37_A",
+ "plan_path": "/home/user/Vacant/ops/redo/plans/ctlcal_haiku37_A.json",
+ "plan_sha256": "6cf38a080dfef03a210a28f23d92f3086def1dd6f49a4a04dd948421a6db5b2b"
+}
