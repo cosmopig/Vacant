@@ -1,0 +1,109 @@
+{
+  "schema": "vacant.d2.expT.plan/1",
+  "id": "expT_colab_e4b",
+  "seed": 20261192,
+  "arms": ["A", "G", "T", "T0"],
+  "reps": 2,
+  "max_rounds": 2,
+  "agent_timeout_s": 600,
+  "budget_s": 1800,
+  "no_tool_mention": true,
+  "private_live": "/srv/d2/private_live",
+  "egress": {
+    "mode": "per-worker proxy, OS-assigned port"
+  },
+  "server": {
+    "port": 18262
+  },
+  "agent": {
+    "argv": [
+      "pi",
+      "-p",
+      "--mode",
+      "json",
+      "--session-dir",
+      "{logs}/sessions",
+      "--provider",
+      "{provider}",
+      "--model",
+      "{model}",
+      "{prompt}"
+    ],
+    "env": {
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "config_dir": {
+      "env": "PI_CODING_AGENT_DIR",
+      "from": "~/.pi/agent",
+      "copy": [
+        "models.json",
+        "extensions"
+      ]
+    },
+    "log_drop_re": "\"type\":\"message_update\"",
+    "usage": "pi_json"
+  },
+  "providers": [
+    {
+      "name": "colab",
+      "provider": "colab-vllm-nothink",
+      "model": "gemma-4-e4b-it-qat",
+      "jobs": 12,
+      "health_url": "http://127.0.0.1:8000/v1/models",
+      "health_contains": "gemma-4-e4b-it-qat",
+      "sets": [
+        "sc-s01", "sc-s02", "sc-s03", "sc-s04", "sc-s05",
+        "sc-s06", "sc-s07", "sc-s08", "sc-s09", "sc-s10",
+        "sc-s11", "sc-s12", "sc-s13", "sc-s14", "sc-s15",
+        "sc-s16", "sc-s17",
+        "fb-s01", "fb-s02", "fb-s03", "fb-s04", "fb-s05",
+        "fb-s06", "fb-s07", "fb-s08", "fb-s09", "fb-s10",
+        "fb-s11", "fb-s12", "fb-s13", "fb-s14", "fb-s15",
+        "fb-s16", "fb-s17", "fb-s18", "fb-s19", "fb-s20"
+      ]
+    }
+  ],
+  "vacant_python": "/opt/redo/d2v52_venv/bin/python",
+  "agentcfg": {
+    "dir": "~/.pi/agent",
+    "copy": ["models.json", "extensions"],
+    "install_json": "/srv/d2/vacant_state/adapters/install.json"
+  },
+  "vllm_config": "ops/redo/colab/vllm_gemma4_e4b.json",
+  "materials": [
+    {
+      "prefix": "sc",
+      "dir": "${D2_PRIVATE}/realrev2_sc",
+      "manifest_sha256": "09b9c5937fadad33e213898b5fc999f5949fdfae8af0908f4fccae0a75e2b58f",
+      "sets": [
+        "s01", "s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09",
+        "s10", "s11", "s12", "s13", "s14", "s15", "s16", "s17"
+      ]
+    },
+    {
+      "prefix": "fb",
+      "dir": "${D2_PRIVATE}/realrev2_football",
+      "manifest_sha256": "68b9744f1cea8297f5aab8556415e809fb0e2d094df8ecf5bfa745688bacca11",
+      "sets": [
+        "s01", "s02", "s03", "s04", "s05", "s06", "s07", "s08", "s09", "s10",
+        "s11", "s12", "s13", "s14", "s15", "s16", "s17", "s18", "s19", "s20"
+      ]
+    }
+  ],
+  "colab_requirements": {
+    "repo_archive": "Current ops/redo/colab/launch_batch.sh archives only `ops/redo vacant_network`; running Experiment T on Colab requires also including `ops/d2` in the uploaded repo tarball.",
+    "materials_upload": "Upload tarballs of `${D2_PRIVATE}/realrev2_sc` and `${D2_PRIVATE}/realrev2_football` to e.g. `/srv/d2/materials/{realrev2_sc,realrev2_football}` and export `D2_PRIVATE=/srv/d2/materials` before invoking `run_expT.py`.",
+    "vacant_wheel_and_observe_hook": "Install the pinned vacant_network wheel (v5.2, sha256 fccf569c...) into `/opt/redo/d2v52_venv` on the VM and run `PI_CODING_AGENT_DIR=~/.pi/agent VACANT_HOME=/srv/d2/vacant_state /opt/redo/d2v52_venv/bin/vacant install --agents pi --mode observe` ON THE VM (do not copy local vacant.ts, which embeds the workstation venv path).",
+    "source_server_and_egress": "`source_server.py` (127.0.0.1:18262) and per-worker `vacant trace egress` (127.0.0.1:0 -> upstream 127.0.0.1:18262) bind loopback only and need no root or bwrap. Each (set, rep) uses a unique hostname `<set>-r<rep>.d2-sources.example` and isolated live dir so `jobs=12` workers never collide on routes.json or access.jsonl.",
+    "proxy_bypass_for_vllm": "vLLM listens on `http://127.0.0.1:8000/v1`. `run_expT.py` always puts `localhost,127.0.0.1` in `no_proxy`/`NO_PROXY` so pi model requests hit vLLM directly while `*.d2-sources.example` requests traverse `http_proxy -> vacant trace egress -> source_server.py`.",
+    "invocation": "Invoke `python3 /srv/redo/repo/ops/d2/run_expT.py run --plan /srv/redo/repo/ops/d2/plans/expT_colab_e4b.json --root /srv/d2/run --allow-uncommitted-plan` after `vm_setup.sh --config ops/redo/colab/vllm_gemma4_e4b.json` (git archive omits `.git/`). No bwrap on Colab VM."
+  },
+  "purpose": "Experiment T (send unsupported claims back for revision, cycle 0 only) second model on Colab vLLM Gemma-4 E4B (37 real Wikipedia revision sets, 4 arms A/G/T/T0 x 2 reps = 296 arm-cells; judged separately from local 9B, never merged).",
+  "prereg": {
+    "registered": "2026-11-27, frozen before any Experiment T model calls.",
+    "second_model_note": "second model, Colab vLLM backend, judged separately from the local 9B batch, never merged.",
+    "model": "google/gemma-4-E4B-it-qat-w4a16-ct (served_model_name: gemma-4-e4b-it-qat), pi 0.87.1, Colab A100-SXM4-40GB with vLLM 0.30.0 (VLLM_USE_FLASHINFER_SAMPLER=0, --tool-call-parser gemma4 --reasoning-parser gemma4, tool_chat_template_gemma4.jinja, --enable-prefix-caching --enable-prompt-tokens-details --async-scheduling, --limit-mm-per-prompt '{\"image\": 0, \"audio\": 0, \"video\": 0}', max_model_len 131072, max_tokens 16384, max_num_seqs 16, provider colab-vllm-nothink, jobs 12). No bwrap on Colab VM.",
+    "analysis": "python3 ops/d2/expT_metrics.py <root>",
+    "frozen_readout": "primary T vs G; T counts as useful iff T's correct-line proportion exceeds G's by ≥10 percentage points with paired CI lower bound >0 and harm not more than G's; T≈G with both > A ⇒ 'more rounds help, records don't'; neither > A ⇒ no effect; known blind spot: wrong_read recall ~11–29%; these 37 sets were used in experiment 1 and v5.2 was tuned on football data ⇒ exploratory"
+  }
+}
