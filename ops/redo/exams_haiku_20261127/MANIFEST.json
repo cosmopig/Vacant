@@ -1,0 +1,1139 @@
+{
+ "schema": "haiku_exams/1",
+ "dir": "ops/redo/exams_haiku_20261127",
+ "decision": "decisions/DECISION_20261127_HAIKU_EXAMS.md",
+ "writer_cli": "claude -p --model haiku --output-format json --tools '' (default sampling; the CLI has no temperature setting)",
+ "bank": "/opt/ctlwork/bm_tasks/ctl37",
+ "prompt_templates_sha256": {
+  "pb_prompt.txt": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+  "wrong_kinds.json": "8a96134b9948f570bc86dabf9e9e63a4221ad5070564d5acab97e20a66669f46",
+  "wrong_prompt.txt": "541cbfbff83c4d76d035fcf1c5819a9fe0692783950655b75695a79b76f5fee4",
+  "xm_prompt.txt": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+  "xmv_prompt.txt": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7"
+ },
+ "tools_sha256": {
+  "build_manifest.py": "24216b09a03980628ace34521d99fd8384a3eb9ce4d9c9d9fd2f61b333ca2713",
+  "gen_exams.py": "d911a24ee9e2de15a3624eb5fe99e4cb1f597b3e22c16a0fa15199389ee9cda9",
+  "haiku_call.py": "026f283c671bd43d47b747623f1115a0a6b797db5dc2624aad412a69fc81c384",
+  "make_prompts.py": "799f21dbe89fa3c6080510c78d2da9c4a82d367c0a01345c484a1dddc8dcb69b",
+  "runner.py": "5357af913a7889b62f17b06bbeebc20b6f71cf5938f99826316a790ce849394c",
+  "xmv_post.py": "31ed7f20f2ece94f61f2d7c62e6aa484f14cf8a7ab86c4889a1d0e0011421696"
+ },
+ "models_seen": [
+  "claude-haiku-5-5"
+ ],
+ "tasks": {
+  "ex_kindergarten_garden": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_kindergarten_garden/workspace/goal.md",
+     "sha256": "46fbdc135f1602f8b39763eb929dcddf0bf4557e9ab1aaf60a99b7348ea8ce0c"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/kindergarten-garden/kindergarten_garden.py (exercism/python 479f11b4)",
+     "sha256": "c30b096dda3805e1587f5e9dd158688e918190b2cbf278f5cba8e1e91d96b979"
+    }
+   ],
+   "module": "kindergarten_garden",
+   "exams": {
+    "xm": {
+     "file": "ex_kindergarten_garden/xm_test.py",
+     "sha256": "60d14798e46d9f682fa15eb0958a80191448b6f577cd629645be1ef9829998e9",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "a41a8dc9c1cfc608b49bc82b4120f99c6ee691fddd9678f97018ff86958e31df",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:04:53+0000",
+     "elapsed_s": 21.3,
+     "cost_usd": 0.00286723,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_ocr_numbers": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_ocr_numbers/workspace/goal.md",
+     "sha256": "00fbcc9d18a9dc732a841702cc8568e5b095a240aeafc48798238704f7315c63"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/ocr-numbers/ocr_numbers.py (exercism/python 479f11b4)",
+     "sha256": "94887109787e503ad474c25abe1f819cde6cf93728502d6b922baeb7ea9a8474"
+    }
+   ],
+   "module": "ocr_numbers",
+   "exams": {
+    "xm": {
+     "file": "ex_ocr_numbers/xm_test.py",
+     "sha256": "33269ec09a6e2db452d6cb839e40021f01fe57e7310c12df4435335ac2c8deac",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "3e559329337202a28f6ac3a652303e4492d52e3948e9a9794671e256b5988cf0",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:17+0000",
+     "elapsed_s": 44.6,
+     "cost_usd": 0.005497429999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_circular_buffer": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_circular_buffer/workspace/goal.md",
+     "sha256": "e186844756b61744745b8cc37cbca3cb8d0291690e2ccda9db617916de49c778"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/circular-buffer/circular_buffer.py (exercism/python 479f11b4)",
+     "sha256": "0ef8d60d8836c30c0c9e5c26f301d5e991263fe05affed3bc10151b881d79d1d"
+    }
+   ],
+   "module": "circular_buffer",
+   "exams": {
+    "xm": {
+     "file": "ex_circular_buffer/xm_test.py",
+     "sha256": "edbdcc91fc17a000b8e5178a3a5aa423c16d4e85c4971286b854fe0f52cc9010",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "e31b724ad324527b528adea422ef943654b55874a3a7963a84de964689d33756",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:04:50+0000",
+     "elapsed_s": 17.52,
+     "cost_usd": 0.0022608299999999997,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_high_scores": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_high_scores/workspace/goal.md",
+     "sha256": "b45ffe34e5b6cfa997df56046ea8d4d730f4cd4388cfb35e332243d5379f98e1"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/high-scores/high_scores.py (exercism/python 479f11b4)",
+     "sha256": "557d5397ac44666225e0064a8eec4509b397429370a8c0552af59861c6069dd8"
+    }
+   ],
+   "module": "high_scores",
+   "exams": {
+    "xm": {
+     "file": "ex_high_scores/xm_test.py",
+     "sha256": "fe14137943555cb34f1dbd81703a218966740e31359df0177fa0430b02e60efb",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "8a602e589a0f04215bbe7cf018b76977bb317ab3f9129067759ac5ed9adbbecb",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:02+0000",
+     "elapsed_s": 12.05,
+     "cost_usd": 0.00145043,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_simple_cipher": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_simple_cipher/workspace/goal.md",
+     "sha256": "7591022534f51b8abac5854c96889ff75dd043d7aebffb035377890c54c0eb45"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/simple-cipher/simple_cipher.py (exercism/python 479f11b4)",
+     "sha256": "cc5591357cd83c9b76bbe03139ff0cc3cd2e63ec6f0a0f076037d094b163840e"
+    }
+   ],
+   "module": "simple_cipher",
+   "exams": {
+    "xm": {
+     "file": "ex_simple_cipher/xm_test.py",
+     "sha256": "2cc9e0d91ab6be41fde461078346e3ef5569e38898df032b0c2674d36e341c18",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "924a2215b8211a64e90b28c8b917ef2952f700030ecb7bc1c3436047a1088239",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:05+0000",
+     "elapsed_s": 12.13,
+     "cost_usd": 0.00179273,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_binary": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_binary/workspace/goal.md",
+     "sha256": "75fb554f4f912a3807efb650194beeebd1d336d2a7666fa446c8f76dc0a7cae9"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/binary/binary.py (exercism/python 479f11b4)",
+     "sha256": "8751880275c38bd7a33abd8c04e4a6daf94af080db853b7b834a22195a72f4ec"
+    }
+   ],
+   "module": "binary",
+   "exams": {
+    "xm": {
+     "file": "ex_binary/xm_test.py",
+     "sha256": "cda12ef1e74c0d162604592739d57b5eb400a7a86ef313facb4f16ebe7bcd3ee",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "e720e5ee632261abac1da5c6e418b4f5450f5e1261a3da335594f3335ba12ae1",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:09+0000",
+     "elapsed_s": 7.67,
+     "cost_usd": 0.0011310299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_octal": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_octal/workspace/goal.md",
+     "sha256": "8a445b79778ababa35f1046b23fa7d6355fd12b07bacd9c3bbc2552c05eee4c2"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/octal/octal.py (exercism/python 479f11b4)",
+     "sha256": "5a483de21f610534e5df1d5c08ba2495cedddaebe728823cca408b7c35f4d626"
+    }
+   ],
+   "module": "octal",
+   "exams": {
+    "xm": {
+     "file": "ex_octal/xm_test.py",
+     "sha256": "d030623b148027f397a8af05cfaa08852fc32a4ae3d8f399bb3a9221d36c43b7",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "7d6bec4c8bcecc1eadf6633146597ace583a0c498fe4b5980d9c50d2f486ec0e",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:12+0000",
+     "elapsed_s": 6.69,
+     "cost_usd": 0.0009215299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_yacht": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_yacht/workspace/goal.md",
+     "sha256": "d70d3ee85423118f3ebb1287c501890ec4735a77c8082eab415788142b2bc3b6"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/yacht/yacht.py (exercism/python 479f11b4)",
+     "sha256": "4c7a13a431e387f6742dd6b9ec58a1701dbfb2bb5d84da92e2cf4cd6217815a6"
+    }
+   ],
+   "module": "yacht",
+   "exams": {
+    "xm": {
+     "file": "ex_yacht/xm_test.py",
+     "sha256": "9c0b0f705b9f004fc5e4d236591634fcdc88dd44f3a7d4b0b9d565c16a16f466",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "a50667bd664594e532a90746104b5d31eff28891096f9b6fc91e41b69ad21ab5",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:19+0000",
+     "elapsed_s": 10.02,
+     "cost_usd": 0.0016113299999999998,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_luhn": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_luhn/workspace/goal.md",
+     "sha256": "bf03a99ff7849b897f3214d7e3bc11c38af7049a61f17a8647b0eb7f127bf240"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/luhn/luhn.py (exercism/python 479f11b4)",
+     "sha256": "b6e0478001be928db7981864f123019011b818072dfb630ea42d6349fbb46f2b"
+    }
+   ],
+   "module": "luhn",
+   "exams": {
+    "xm": {
+     "file": "ex_luhn/xm_test.py",
+     "sha256": "d841f57e981e25257c3f878bd5fbe33097d28725dce05deca5acdd5b745306bc",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "c01cad02b459035a14a848513f5387e37de61682c8ad9cc6ef29c16aed8d3479",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:04:28+0000",
+     "elapsed_s": 16.06,
+     "cost_usd": 0.00202083,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_sublist": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_sublist/workspace/goal.md",
+     "sha256": "e2e0e3d2a34e366ec4e242a7c80fe93eb992f2233702655ffb45512c7e6a9dfd"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/sublist/sublist.py (exercism/python 479f11b4)",
+     "sha256": "05198e74feefce72160c48cb771c99870cb092436d6a5b40c2edd8d5a6df5fb7"
+    }
+   ],
+   "module": "sublist",
+   "exams": {
+    "xm": {
+     "file": "ex_sublist/xm_test.py",
+     "sha256": "fd2715f4e2e461679edd3305d57650fdab717dec3b066e5f6e9e9cf44d021591",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "3cc3be04577eb254041b54a65526104e5da8a941fefe57cd81995234da6cf5d4",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:23+0000",
+     "elapsed_s": 11.18,
+     "cost_usd": 0.00168513,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_say": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_say/workspace/goal.md",
+     "sha256": "2caaee64b3108600188f20e9517c44469917d5fd903324df3732ca54f920fb4d"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/say/say.py (exercism/python 479f11b4)",
+     "sha256": "fc830aaf33f2823731d13fa0f4adce9ab00a71a8906954d0b3c7c31063827f93"
+    }
+   ],
+   "module": "say",
+   "exams": {
+    "xm": {
+     "file": "ex_say/xm_test.py",
+     "sha256": "0c323a48efe3782550e2a62d91b7a15844ddad4af933fda34b358c5e109d618e",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "770e950bcd744198b1624d538fae8e99c93dffc47743312a1cc17599f2ddb604",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:25+0000",
+     "elapsed_s": 7.95,
+     "cost_usd": 0.0011189300000000002,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_dnd_character": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_dnd_character/workspace/goal.md",
+     "sha256": "289bfe2a6471256fd95171707a3a432b7af35ee1b63c01dfa2cf1a613f3118b4"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/dnd-character/dnd_character.py (exercism/python 479f11b4)",
+     "sha256": "34ba86cdf1972ec6dcfd8ae1c8b1978e6187c8fad35a40ee446bd35b332c3d27"
+    }
+   ],
+   "module": "dnd_character",
+   "exams": {
+    "xm": {
+     "file": "ex_dnd_character/xm_test.py",
+     "sha256": "0fc254c8d7d201cf3778eed1d12da809b0ff92451543bf6eb8f973e8e21f226e",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "8a04d9d492a425d2fd33ab2f62f0d7c922e7867255afec4edd641c452c0e8e70",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:29+0000",
+     "elapsed_s": 9.67,
+     "cost_usd": 0.00135013,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_twelve_days": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_twelve_days/workspace/goal.md",
+     "sha256": "e3d8208f03acd2464265d34ecc82e1ad5968202878706ad6afd4ceae79951372"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/twelve-days/twelve_days.py (exercism/python 479f11b4)",
+     "sha256": "d7c1f854251ec4677ff36fdabbc87ef0ebcff8e8559fdee91b52fdeb8c3dc6b5"
+    }
+   ],
+   "module": "twelve_days",
+   "exams": {
+    "xm": {
+     "file": "ex_twelve_days/xm_test.py",
+     "sha256": "9a42f83afe5695c93cb4c0111b79b557304f22d041cbe83172043924d2510ae3",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "c81d0567f2a8edf39c81b12386fade412f9c9a56e9e39adeabeda17f697fec74",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:41+0000",
+     "elapsed_s": 17.25,
+     "cost_usd": 0.0027479300000000004,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_atbash_cipher": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_atbash_cipher/workspace/goal.md",
+     "sha256": "bed40ef5a37640234fe3a4a1005c02054b31c2946ce242261d9e0b6c68d6ba39"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/atbash-cipher/atbash_cipher.py (exercism/python 479f11b4)",
+     "sha256": "cd6bf62d65b8186ca3f49f1a3fe5e42cc8f0b8500be9cb1c78cfd64da6cf74e6"
+    }
+   ],
+   "module": "atbash_cipher",
+   "exams": {
+    "xm": {
+     "file": "ex_atbash_cipher/xm_test.py",
+     "sha256": "eba715fd87ef47337ec11e857417f670e4a288b757a241f6b1495346d2726414",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "0fb3c27a8f3527a6d5bebe4978ad440b9e1d4ce5cb3bb2cb4b2ddde741e2faf2",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:37+0000",
+     "elapsed_s": 12.81,
+     "cost_usd": 0.0015999299999999998,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_queen_attack": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_queen_attack/workspace/goal.md",
+     "sha256": "3432b569a3acf9969f48c2ff1bbade9e081b0d9573e23e6d590acd5c960a8fce"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/queen-attack/queen_attack.py (exercism/python 479f11b4)",
+     "sha256": "30f1cc22818cd4572a611d11ed95f6b1baff9c9e0d340b80f54f572fc0d05567"
+    }
+   ],
+   "module": "queen_attack",
+   "exams": {
+    "xm": {
+     "file": "ex_queen_attack/xm_test.py",
+     "sha256": "c44ec3149b1f3bead2ca0bbc71c7f4a8d62ea4a4557b81f085cc61f6d2a49bd4",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "b07e6a242c280c55138615ff86cd4446a4828640c18c6f17f09b8e5ae20c9214",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:39+0000",
+     "elapsed_s": 10.17,
+     "cost_usd": 0.0014748299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_prime_factors": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_prime_factors/workspace/goal.md",
+     "sha256": "c48426c31cc9af4e079c094d3196ce26c0eb4dbd9a802825fd43833b4e550f07"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/prime-factors/prime_factors.py (exercism/python 479f11b4)",
+     "sha256": "365b3b7db803b0f332e766a715a0df5497207cd03546e8edc4c51d67b18950e1"
+    }
+   ],
+   "module": "prime_factors",
+   "exams": {
+    "xm": {
+     "file": "ex_prime_factors/xm_test.py",
+     "sha256": "b4d52225e23a8f38fcceafde4ca0380f65c83a36241e66edb8fa3268bcd88300",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "faf30c3abcb8b2a12a7f529535532cba8ef6fe6a3de38a7eaa456dc947ad7568",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:43+0000",
+     "elapsed_s": 5.23,
+     "cost_usd": 0.0006704300000000001,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_scrabble_score": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_scrabble_score/workspace/goal.md",
+     "sha256": "307baa031c69df457280029cccc4653d7adc007dcef402b4ea2c0e7ee2e9f7c7"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/scrabble-score/scrabble_score.py (exercism/python 479f11b4)",
+     "sha256": "f9c953efbc6734754c10fa32aaa308cdc06004ae1b7fdb552fdb4ab6b346986b"
+    }
+   ],
+   "module": "scrabble_score",
+   "exams": {
+    "xm": {
+     "file": "ex_scrabble_score/xm_test.py",
+     "sha256": "faceb0d62e123c8d544062832f89777254fdd177a7203a5047cd3937d64dad8c",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "7df3938706b89ed165105350953f4f370f9e993267deaced4fbd033d4d4ad287",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:48+0000",
+     "elapsed_s": 8.4,
+     "cost_usd": 0.00104753,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_series": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_series/workspace/goal.md",
+     "sha256": "594bdccdfbbb7afd405260855faeb44f8711b5a47dacd4ebcc16db13af3c6fe3"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/series/series.py (exercism/python 479f11b4)",
+     "sha256": "0c611cc43e85af9efa7279d9e9e252602c79566bcbcff72da5b3de57f2ba3cd0"
+    }
+   ],
+   "module": "series",
+   "exams": {
+    "xm": {
+     "file": "ex_series/xm_test.py",
+     "sha256": "8da53873d47f813ebadaa697dc4c7ce08ff2366ac8432268df48671f1a509725",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "4eee6b212e08e02ff152095e62f0bc331ba28e2433f54ba6c141026a64b3ee0c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:47+0000",
+     "elapsed_s": 6.01,
+     "cost_usd": 0.00086043,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_binary_search_tree": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_binary_search_tree/workspace/goal.md",
+     "sha256": "f96d9e51481a318ceaa267fc1f0da31f2dda888266b8549ecb5fbe104d1becd7"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/binary-search-tree/binary_search_tree.py (exercism/python 479f11b4)",
+     "sha256": "4a45b68ab03ccd8cdfcd34fd8bf68c17dd7ecc8ae579f63a1ffd18e8ddbacfbf"
+    }
+   ],
+   "module": "binary_search_tree",
+   "exams": {
+    "xm": {
+     "file": "ex_binary_search_tree/xm_test.py",
+     "sha256": "f592b17f6c0b7d1c8b66b44ccf3c6ce70d57464a102f90a1012be4261df58767",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "875e4a4ac3bdec62c4d13493f9b0268a66602720ef44e9ff2452c17b6cee581a",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:58+0000",
+     "elapsed_s": 14.86,
+     "cost_usd": 0.00224973,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_pascals_triangle": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_pascals_triangle/workspace/goal.md",
+     "sha256": "f728312d1e4ff7adfebd5aaf4e671605fa0765543d49e423e924c0a46484e131"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/pascals-triangle/pascals_triangle.py (exercism/python 479f11b4)",
+     "sha256": "3f80293c07c7707277942304e2559f00fd57ada7f37cd1264189337af6ae0c65"
+    }
+   ],
+   "module": "pascals_triangle",
+   "exams": {
+    "xm": {
+     "file": "ex_pascals_triangle/xm_test.py",
+     "sha256": "b8833bdf9c388b0af4924d900778cb5926ef45b5276663f6f02d3afdccb5e7bb",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "8ed23423dcde07e1b99ad443280f1dc9117b5ee21edfbc241607ffb09e6c2023",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:05:54+0000",
+     "elapsed_s": 7.36,
+     "cost_usd": 0.0011199299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_tournament": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_tournament/workspace/goal.md",
+     "sha256": "a545d4c4160a1d9310ad162434a716f20db989b3a995bb818fec8038c1362b6e"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/tournament/tournament.py (exercism/python 479f11b4)",
+     "sha256": "4f231ed8cddf8f63d8b5f59777e3bdf162e97acc9f87803ed736e6b75afdb130"
+    }
+   ],
+   "module": "tournament",
+   "exams": {
+    "xm": {
+     "file": "ex_tournament/xm_test.py",
+     "sha256": "ba04e4ae76529988e9b69acbbe3101e095277b545bab933304824447fa0a1625",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "60b8a8ad863574c2bbd606e095d141e2343d1d1692c519cfae8bd31eb4ee34ff",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:20+0000",
+     "elapsed_s": 32.71,
+     "cost_usd": 0.004170330000000001,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_change": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_change/workspace/goal.md",
+     "sha256": "01f77605c3b2b77247bfef470f658d49b666dd0f65dc631d22c0a172e5f77f3f"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/change/change.py (exercism/python 479f11b4)",
+     "sha256": "b13661aadb4f36de1b8fce36472661490db5855d1bf4a5774b31d4229a8480ab"
+    }
+   ],
+   "module": "change",
+   "exams": {
+    "xm": {
+     "file": "ex_change/xm_test.py",
+     "sha256": "0bf026670be31e17ecce0405b087c730bb84d2e91cd81297005c909ade1a5855",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "c52b30b08eb3758c6de3d0b27e8165c936381e3bd00d11d08d4fe15833990b7c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:04+0000",
+     "elapsed_s": 9.77,
+     "cost_usd": 0.0012867299999999998,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_killer_sudoku_helper": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_killer_sudoku_helper/workspace/goal.md",
+     "sha256": "629626bf0f7c64d4f2486120d2631855f5d3d7b6e09c577293b24811f66c8139"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/killer-sudoku-helper/killer_sudoku_helper.py (exercism/python 479f11b4)",
+     "sha256": "4ca2384941dde6517c4549a0a2aa087a973b1e742f847bd231e96d9b1da95cb0"
+    }
+   ],
+   "module": "killer_sudoku_helper",
+   "exams": {
+    "xm": {
+     "file": "ex_killer_sudoku_helper/xm_test.py",
+     "sha256": "96777514305e70de0a5d8a2b087b4a74c1fff48630d6ec188df526f02a2baa40",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "32b5d49464f171c9e2f7665207ff228cfb9b1d87b23fb6c06071c8270e240411",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:08+0000",
+     "elapsed_s": 10.86,
+     "cost_usd": 0.0016589299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_palindrome_products": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_palindrome_products/workspace/goal.md",
+     "sha256": "ea83ca27e70b6e63efa1cdaab2d1f8166a8d2f21b020ad44473a373339407caf"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/palindrome-products/palindrome_products.py (exercism/python 479f11b4)",
+     "sha256": "2c5c9671348bd9f5e253f33bc4306e0f62851016a0d5bac839553e65a1952057"
+    }
+   ],
+   "module": "palindrome_products",
+   "exams": {
+    "xm": {
+     "file": "ex_palindrome_products/xm_test.py",
+     "sha256": "8ae16181702e675bd131dff3f99fcd6a685c074acdf01d04389d4e5277e93445",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "b63c926a7346f0a0815206a4ccf4ab1b4ae98269a87001742957582350cfd68c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:31+0000",
+     "elapsed_s": 27.25,
+     "cost_usd": 0.0035182300000000002,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_largest_series_product": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_largest_series_product/workspace/goal.md",
+     "sha256": "6075e3317b1d1d67a5903caf20c144fd9568f11b15aa193b987fa46101245339"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/largest-series-product/largest_series_product.py (exercism/python 479f11b4)",
+     "sha256": "7adb51ea48fb676a351409815f9b5cfce831fcf3d8de693cfadbaa7c004c6638"
+    }
+   ],
+   "module": "largest_series_product",
+   "exams": {
+    "xm": {
+     "file": "ex_largest_series_product/xm_test.py",
+     "sha256": "d47426cbb0cd7438bca9c5d158d4c941625230a9aab850cec504e141a8949174",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "40860eb88cdb2d8454294b167960508d9d15bb24629b29ed01ee0b97fe2400e5",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:17+0000",
+     "elapsed_s": 8.83,
+     "cost_usd": 0.00121743,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_minesweeper": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_minesweeper/workspace/goal.md",
+     "sha256": "e746d52c641f31f952d83cd62c48a4f8b5dca89ee9b6902ccca640b1e7ad2cca"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/minesweeper/minesweeper.py (exercism/python 479f11b4)",
+     "sha256": "82805e268e4ace4e59986832c7ae6c2d8f79bfdc832453cef168c77d2f0151fe"
+    }
+   ],
+   "module": "minesweeper",
+   "exams": {
+    "xm": {
+     "file": "ex_minesweeper/xm_test.py",
+     "sha256": "fe9e8881bcef72b562c43cdaa8cdf830956df00b3a6cd95cef12a626dd8a6183",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "380b7796712cb5d427cc5effc724caa1f31d61d169503af9569517161063a2fe",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:29+0000",
+     "elapsed_s": 12.03,
+     "cost_usd": 0.00157093,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_bank_account": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_bank_account/workspace/goal.md",
+     "sha256": "5b055928d112d39c8952cd20cbcb9e83abcc6ddf6bc9ab3007ac5a7b25268aa9"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/bank-account/bank_account.py (exercism/python 479f11b4)",
+     "sha256": "ed205e497b0fd700bababdba5d0b2522e67f03d7c166e3ae1d1d9da4dd76d60e"
+    }
+   ],
+   "module": "bank_account",
+   "exams": {
+    "xm": {
+     "file": "ex_bank_account/xm_test.py",
+     "sha256": "a21a40d9b576578f50cf7e380e7c126ec10c4a8f4312f416c81a8efab11ca777",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "06fc956b3c8e6d43fc3573038812f111cb37f815fcc38f1b33e238ecc894844b",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:33+0000",
+     "elapsed_s": 12.97,
+     "cost_usd": 0.00197983,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_flower_field": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_flower_field/workspace/goal.md",
+     "sha256": "2336f3047a1d80d20f39786f4e0742287b068a38ba8e5657df1f266642c14266"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/flower-field/flower_field.py (exercism/python 479f11b4)",
+     "sha256": "56eaf4d1ae8edc8b76926241fa60c875c0db58593d448384db3ad5b67637e60f"
+    }
+   ],
+   "module": "flower_field",
+   "exams": {
+    "xm": {
+     "file": "ex_flower_field/xm_test.py",
+     "sha256": "e872904b4d055d14a46b9627990d1d3ebf859aa59ab23eaf8029f02adf098850",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "c662b9a774975ba524810199b658bfb3a7d8ef6855ec68e975bfa2a481ad9a06",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:43+0000",
+     "elapsed_s": 14.21,
+     "cost_usd": 0.0018947299999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_swift_scheduling": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_swift_scheduling/workspace/goal.md",
+     "sha256": "abebc7a7558ec73216b6f646b33ec3d66eb9785a9cc8603adf6f455001eebd21"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/swift-scheduling/swift_scheduling.py (exercism/python 479f11b4)",
+     "sha256": "8d654d7072d6cad7166b3df4e2930b90acb73f623a3d2a90072aba61bf9d0634"
+    }
+   ],
+   "module": "swift_scheduling",
+   "exams": {
+    "xm": {
+     "file": "ex_swift_scheduling/xm_test.py",
+     "sha256": "32b2d378fbff753bb9df0d38fa1657ae88a3f80784e2553aa075531ba9bb720e",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "01bb651bdb252f15abead57f5e0805374a6640558fafc501c74b59ea90d6722c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:48+0000",
+     "elapsed_s": 16.81,
+     "cost_usd": 0.00242733,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_all_your_base": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_all_your_base/workspace/goal.md",
+     "sha256": "bedd0b2f848093a4f81349fb6c546b3a11d2632b220404dbb7c3eb02a48c18b2"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/all-your-base/all_your_base.py (exercism/python 479f11b4)",
+     "sha256": "2e56b09b73834a546742ccc53b71d507fcef76dc9d2a7dd4e5809ccf0e4b1bfc"
+    }
+   ],
+   "module": "all_your_base",
+   "exams": {
+    "xm": {
+     "file": "ex_all_your_base/xm_test.py",
+     "sha256": "c8aef4afac449308ed4af00c79d58dac1409c129ffd5b69526bef6cd1070bda0",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "f8c8c5d5735074381f734953797e21ec4483ac61f7d5f4bc9fba376841bc4406",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:45+0000",
+     "elapsed_s": 12.17,
+     "cost_usd": 0.00169043,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_linked_list": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_linked_list/workspace/goal.md",
+     "sha256": "b546b5ecbfac371d980227a3516ffb0b990005af7b76ffdc8da5231da42efca0"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/linked-list/linked_list.py (exercism/python 479f11b4)",
+     "sha256": "781a9f82bed643856bd2e6309f570187dd443a3a1e238459e1d4ba5d30561e47"
+    }
+   ],
+   "module": "linked_list",
+   "exams": {
+    "xm": {
+     "file": "ex_linked_list/xm_test.py",
+     "sha256": "d3777b8fc86472c258d324d3c5f04bb225d957f80a47a735abbd2bb7a15fa334",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "97d7e631bf7ca2086e4c0e96c34b3cef6d794d6e3f477100ab47fa21fd565d5d",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:06:56+0000",
+     "elapsed_s": 12.85,
+     "cost_usd": 0.00199073,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_word_search": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_word_search/workspace/goal.md",
+     "sha256": "ec749d7e2303930a7c00de1885b426947ce2ef1289c5e753646a749cf2f4a26b"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/word-search/word_search.py (exercism/python 479f11b4)",
+     "sha256": "2c57e6458344b273ffc7e9e4d07726cc1c09c3ab215dab92a60f40b4b8947a7b"
+    }
+   ],
+   "module": "word_search",
+   "exams": {
+    "xm": {
+     "file": "ex_word_search/xm_test.py",
+     "sha256": "22ac007e9cd53b2c1bfbf468cf414beca114a2f250e1b1dc46a2f61f46763d01",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "b86aec3f6ad04391cf1ba6ae99b39d8b3045ff1e043fbe538f534d95fbed2c9f",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:07:40+0000",
+     "elapsed_s": 54.87,
+     "cost_usd": 0.006732729999999999,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_camicia": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_camicia/workspace/goal.md",
+     "sha256": "0b1cb227f27866030b68af44d9a31f09b8203a0158f37f3519f495eefe35882b"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/camicia/camicia.py (exercism/python 479f11b4)",
+     "sha256": "7c4efaf5bc5ca3364e054d5ae384c6dc0ead442af2d7a527fa575737510ec62e"
+    }
+   ],
+   "module": "camicia",
+   "exams": {
+    "xm": {
+     "file": "ex_camicia/xm_test.py",
+     "sha256": "b53958faffaed71b4e749f3cd117b3dd83aff3eed84b46e6039605f31c115bef",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "c4cb518a79a5b87e0826e3c6ae4ea7fb8f786c06f5a175ee6d9e2923542ffab8",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:07:41+0000",
+     "elapsed_s": 53.07,
+     "cost_usd": 0.00663843,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_custom_set": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_custom_set/workspace/goal.md",
+     "sha256": "2c1f80439e843b6264113d687aa0bc9a2d8314759e987cd163474a50c237f81d"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/custom-set/custom_set.py (exercism/python 479f11b4)",
+     "sha256": "6567d4284a47524eb7d4115bdad623198a3e937f27641122f6588451630be758"
+    }
+   ],
+   "module": "custom_set",
+   "exams": {
+    "xm": {
+     "file": "ex_custom_set/xm_test.py",
+     "sha256": "a65d50cc0b0464f99dd31845c74f54cfd2f94a65fc7579618f31761a5e00b126",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "481a83d05a04203ba5d31e3e501c46b473610963d438879f882d33defb4222f3",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:07:15+0000",
+     "elapsed_s": 19.01,
+     "cost_usd": 0.0026943300000000004,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_complex_numbers": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_complex_numbers/workspace/goal.md",
+     "sha256": "0519e65e1f46cb7ad969ff7a9ce5cc7485e5098b75bc444a04c1b2fbb0bba3d7"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/complex-numbers/complex_numbers.py (exercism/python 479f11b4)",
+     "sha256": "dfe924fe11fa4b184923c1f7c1aa684ca7dcd7515311fa828cb03170df358b46"
+    }
+   ],
+   "module": "complex_numbers",
+   "exams": {
+    "xm": {
+     "file": "ex_complex_numbers/xm_test.py",
+     "sha256": "6cec5e7a0664a7835d4a6561a31a62db220fdee36855cd03a675b27fdacaa1a7",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "cf2b6ecfd745b659f69b05ec074873be453d19edce14c329960e82171d128651",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:07:38+0000",
+     "elapsed_s": 22.69,
+     "cost_usd": 0.00318153,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_rational_numbers": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_rational_numbers/workspace/goal.md",
+     "sha256": "982aefbb4814ff536d58bd076f3ee21ead2bb0c893d8cb776b8818eaabbc980d"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/rational-numbers/rational_numbers.py (exercism/python 479f11b4)",
+     "sha256": "14c2915aa9db971f9aa3ae38a78c3f0e77ea7c47f9c031af6976aefea3af9a78"
+    }
+   ],
+   "module": "rational_numbers",
+   "exams": {
+    "xm": {
+     "file": "ex_rational_numbers/xm_test.py",
+     "sha256": "f4f647148a98537a67e1a20b0553160f7d5c669bbe10d89b47d6579f151bf77d",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "cb4b9add07a7c4e66693c80168ae2e5f7ee6297ba56f5ca8c5eddeeddba781c8",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:07:49+0000",
+     "elapsed_s": 10.78,
+     "cost_usd": 0.00173573,
+     "attempts": 1
+    }
+   }
+  },
+  "ex_meetup": {
+   "writer_inputs": [
+    {
+     "role": "requirements",
+     "bank_path": "ex_meetup/workspace/goal.md",
+     "sha256": "98f94bd24da4749ffe1eb815bbb794d4b24fe7df99e485160eee61393eabb478"
+    },
+    {
+     "role": "stub",
+     "repo_path": "exercises/practice/meetup/meetup.py (exercism/python 479f11b4)",
+     "sha256": "ee60a79b400d68bc0643f4ca9aec0a7ad7ed751847d78641d1dacf4b96901edf"
+    }
+   ],
+   "module": "meetup",
+   "exams": {
+    "xm": {
+     "file": "ex_meetup/xm_test.py",
+     "sha256": "bd60f20aeebfdc043aa3ffae8faf30a69d70cf626372c7c9d8f99d3adac76a98",
+     "status": "ok",
+     "prompt_template": "prompts/xm_prompt.txt",
+     "prompt_template_sha256": "7aead4bf804d726d509977013e720a50c444e36537ce2dea763d2e99ef4d7633",
+     "prompt_sha256": "9459928a5de8e1f34aea1c57ff2b12e7f7300d33afd418c1d90d3445060a0e58",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:08:01+0000",
+     "elapsed_s": 20.39,
+     "cost_usd": 0.0029236300000000004,
+     "attempts": 1
+    }
+   }
+  }
+ },
+ "exam_cost_usd_total": 0.08279,
+ "all_haiku_calls_cost_usd_total_incl_failures": 0.08279
+}

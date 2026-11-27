@@ -1,0 +1,6 @@
+{
+ "1": "a boundary or off-by-one error, or wrong handling of an empty or minimal input",
+ "2": "misreading one of the rules stated in the requirements text, so that one stated rule is applied differently from what the text says",
+ "3": "a wrong order, format, or type of the returned output (while the values are otherwise right)",
+ "4": "mishandling of a rarely considered case such as repeated input, state kept between calls, an error that should be raised, or a special-value case"
+}
