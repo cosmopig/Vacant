@@ -12,11 +12,19 @@ Covers:
      - unknown session in `colab sessions` => ALERT written, NO auto-stop.
      - registered live session matching assignments => NO alert.
      - excess assignments (e.g. another machine's VM) => ALERT written, NO auto-stop.
-  5. Queue mode: GPU preference order A100->G4->L4, too-many-assignments graceful fallback on 2nd VM,
+  5. Queue mode: GPU preference order, too-many-assignments graceful fallback on 2nd VM,
      periodic partial fetch (`fetch_batch.sh --force --no-stop`), BATCH_DONE fetch + `--reuse-session`
      for next batch without releasing VM, release + verify usage 0 when queue empty.
   6. Concurrent 2nd VM rental when account allows 2 assignments.
   7. Spend cap (180 CU) and balance floor (20 CU) breaches => partial fetch, stop, ALERT, exit 10.
+  8. Owner-safe stop/exec guards:
+     (i) unregistered session exists (pre-existing or concurrently appearing) & launch fails => never stopped + ALERT with listing line;
+     (ii) our own named session created & launch fails alongside unregistered session => only ours is stopped;
+     (iii) our name not listed (even if assignments rise) => no stop call at all.
+  9. Error classification (`too_many_assignments`, `no_quota`, `service_unavailable`, `no_capacity_timeout`, `unknown`),
+     full raw stdout+stderr saved to `<batch out dir>/launch_attempt_<n>.log`, and per-attempt `colab new` timeout (flag + env).
+ 10. Default GPU order T4 -> L4 -> G4 -> A100 (H100 excluded), queue override, and parallel launch of first two pending batches across 2 VMs.
+ 11. Kernel keepalive (c415e1275) touches kernel while session is listed verbatim, and skips `colab exec` (never triggering CLI fallback) when session disappears.
 """
 from __future__ import annotations
 
@@ -48,6 +56,7 @@ import pathlib
 import shutil
 import sys
 import tarfile
+import time
 
 STATE_PATH = pathlib.Path(os.environ["FAKE_COLAB_STATE"])
 LOG_PATH = pathlib.Path(os.environ["FAKE_COLAB_LOG"])
@@ -58,7 +67,7 @@ def load_state():
 
 
 def save_state(st):
-    tmp = STATE_PATH.with_suffix(".tmp")
+    tmp = STATE_PATH.with_name(STATE_PATH.name + f".tmp.{os.getpid()}")
     tmp.write_text(json.dumps(st, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, STATE_PATH)
 
@@ -141,6 +150,32 @@ def main():
                 j += 2
             else:
                 j += 1
+        # Optional scheduled scripted behaviors for testing error classes, hangs, and concurrent unknown sessions.
+        sched = st.get("new_actions") or []
+        if sched:
+            act = sched.pop(0)
+            if act.get("spawn_other_session"):
+                oth = act["spawn_other_session"]
+                st["sessions"][oth["name"]] = {
+                    "endpoint": oth["endpoint"],
+                    "gpu": oth.get("gpu", "A100"),
+                    "polls": 0,
+                    "remote_root": "/srv/redo/run",
+                    "tar_path": "/content/redo_results.tar.gz",
+                    "done": False,
+                }
+            if act.get("bump_extra_assignments"):
+                st["extra_assignments"] = int(st.get("extra_assignments", 0)) + int(act["bump_extra_assignments"])
+            save_state(st)
+            if act.get("hang_s"):
+                time.sleep(float(act["hang_s"]))
+                sys.exit(1)
+            if act.get("rc", 0) != 0:
+                if act.get("stdout"):
+                    print(act["stdout"])
+                if act.get("stderr"):
+                    print(act["stderr"], file=sys.stderr)
+                sys.exit(int(act["rc"]))
         if gpu in set(st.get("reject_gpus") or []):
             print(f"Error: GPU {gpu} currently unavailable", file=sys.stderr)
             sys.exit(1)
@@ -299,6 +334,34 @@ def main():
 
         sys.exit(1)
 
+    if cmd == "exec":
+        sess = ""
+        j = 0
+        while j < len(rest):
+            if rest[j] == "-s":
+                sess = rest[j + 1]
+                j += 2
+            else:
+                j += 1
+        _ = sys.stdin.read()
+        if sess in st["sessions"]:
+            if st.get("drop_session_after_exec"):
+                cnt = int(st.get("exec_calls_seen", 0)) + 1
+                st["exec_calls_seen"] = cnt
+                if cnt >= int(st["drop_session_after_exec"]):
+                    st["sessions"].pop(sess, None)
+                save_state(st)
+            print("keepalive")
+            sys.exit(0)
+        if len(st["sessions"]) == 1:
+            only_name = next(iter(st["sessions"]))
+            st.setdefault("dangerous_fallbacks", []).append({"cmd": "exec", "requested": sess, "hit": only_name})
+            save_state(st)
+            print(f"[colab] Using unique session {only_name}", file=sys.stderr)
+            sys.exit(0)
+        print(f"Error: session {sess} not found", file=sys.stderr)
+        sys.exit(1)
+
     if cmd == "stop":
         sess = ""
         j = 0
@@ -308,10 +371,22 @@ def main():
                 j += 2
             else:
                 j += 1
-        st["sessions"].pop(sess, None)
-        save_state(st)
-        print(f"Stopped session {sess}")
-        sys.exit(0)
+        if sess in st["sessions"]:
+            st["sessions"].pop(sess, None)
+            save_state(st)
+            print(f"Stopped session {sess}")
+            sys.exit(0)
+        # Simulate real colab CLI's dangerous fallback to "Using unique session" when target is not found!
+        if len(st["sessions"]) == 1:
+            only_name = next(iter(st["sessions"]))
+            st["sessions"].pop(only_name, None)
+            st.setdefault("dangerous_fallbacks", []).append({"cmd": "stop", "requested": sess, "hit": only_name})
+            save_state(st)
+            print(f"[colab] Using unique session {only_name}", file=sys.stderr)
+            print(f"Stopped session {only_name}")
+            sys.exit(0)
+        print(f"Error: session {sess} not found", file=sys.stderr)
+        sys.exit(1)
 
     print(f"Unknown fake colab subcommand: {cmd}", file=sys.stderr)
     sys.exit(2)
@@ -778,6 +853,379 @@ def main() -> int:
             and any(c and c[0] == "stop" for c in calls7b)
             and json.loads(state7b_p.read_text())["sessions"] == {},
             "balance floor 20 CU breach triggers partial fetch, stop, ALERT, and exit 10",
+        )
+
+        # 8. Owner-safe failure & stop/exec guards (Requirement 1).
+        print("8) Owner-safe guards: never stop unregistered/other sessions; no stop when our name not listed")
+        # 8(i): An unregistered session exists (pre-existing + concurrently appearing), our launch fails
+        #       => neither unregistered session is stopped, NO colab stop call, ALERT with listing line written.
+        d8i = tmp_root / "case8i"
+        d8i.mkdir()
+        env8i, state8i_p, log8i_p = make_fake_env(d8i, {
+            "balance": 200.0,
+            "sessions": {
+                "owner-probe-vm": {"endpoint": "gpu-a100-owner-01", "gpu": "A100"},
+            },
+            "max_assignments": 1,
+            "new_actions": [
+                {
+                    "rc": 1,
+                    "stderr": "Error: TooManyAssignments: account already at limit",
+                    "spawn_other_session": {"name": "owner-concurrent-probe", "endpoint": "gpu-t4-owner-02", "gpu": "T4"},
+                },
+            ],
+        })
+        q8i = d8i / "queue.json"
+        q8i.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c8i_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4"], "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        alerts8i = d8i / "colab_alerts.log"
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q8i),
+            "--registry", str(d8i / "reg.jsonl"), "--alerts-log", str(alerts8i),
+            "--log", str(d8i / "run.log"), "--out-root", str(d8i / "out"),
+            "--deadline", str(int(__import__("time").time()) + 2),
+            "--rent-interval", "9999", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "1", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env8i)
+        calls8i = read_calls(log8i_p)
+        st8i = json.loads(state8i_p.read_text(encoding="utf-8"))
+        alerts8i_txt = alerts8i.read_text(encoding="utf-8") if alerts8i.is_file() else ""
+        chk(
+            r.returncode == 11
+            and not any(c and c[0] == "stop" for c in calls8i)
+            and "owner-probe-vm" in st8i["sessions"]
+            and "owner-concurrent-probe" in st8i["sessions"]
+            and not st8i.get("dangerous_fallbacks")
+            and "ALERT" in alerts8i_txt
+            and "[owner-probe-vm] gpu-a100-owner-01 | Hardware: A100" in alerts8i_txt
+            and "[owner-concurrent-probe] gpu-t4-owner-02 | Hardware: T4" in alerts8i_txt,
+            "8(i) unregistered pre-existing & concurrent sessions never stopped on launch failure; ALERT includes listing lines",
+        )
+
+        # 8(ii): Our own named session was created and launch failed while an unregistered owner session exists
+        #        => ONLY our own named session is stopped; owner's session untouched + ALERT written.
+        d8ii = tmp_root / "case8ii"
+        d8ii.mkdir()
+        env8ii, state8ii_p, log8ii_p = make_fake_env(d8ii, {
+            "balance": 200.0,
+            "sessions": {
+                "owner-probe-keep": {"endpoint": "gpu-l4-owner-99", "gpu": "L4"},
+            },
+            "max_assignments": 2,
+            "fail_upload_remaining": 1,  # Our 1st attempt creates our named session, then fails upload.
+            "polls_until_done": 1,
+        })
+        q8ii = d8ii / "queue.json"
+        q8ii.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c8ii_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4", "L4"], "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        reg8ii = d8ii / "reg.jsonl"
+        alerts8ii = d8ii / "colab_alerts.log"
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q8ii),
+            "--registry", str(reg8ii), "--alerts-log", str(alerts8ii),
+            "--log", str(d8ii / "run.log"), "--out-root", str(d8ii / "out"),
+            "--rent-interval", "0", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "0", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env8ii)
+        calls8ii = read_calls(log8ii_p)
+        st8ii = json.loads(state8ii_p.read_text(encoding="utf-8"))
+        regs8ii = read_jsonl(reg8ii)
+        alerts8ii_txt = alerts8ii.read_text(encoding="utf-8") if alerts8ii.is_file() else ""
+        stop_targets8ii = [c[c.index("-s") + 1] for c in calls8ii if c and c[0] == "stop" and "-s" in c]
+        failed_ours = [x["session"] for x in regs8ii if x.get("event") == "launch_failed_assignment"]
+        chk(
+            r.returncode == 0
+            and len(failed_ours) == 1
+            and failed_ours[0] in stop_targets8ii
+            and "owner-probe-keep" not in stop_targets8ii
+            and "owner-probe-keep" in st8ii["sessions"]
+            and not st8ii.get("dangerous_fallbacks")
+            and "[owner-probe-keep] gpu-l4-owner-99 | Hardware: L4" in alerts8ii_txt,
+            "8(ii) when our session created & launch failed alongside owner session, ONLY ours is stopped & owner untouched",
+        )
+
+        # 8(iii): Our name is NOT listed after failure (even if account active_assignments increased)
+        #         with a unique owner session on the account => NO `colab stop` call at all.
+        d8iii = tmp_root / "case8iii"
+        d8iii.mkdir()
+        env8iii, state8iii_p, log8iii_p = make_fake_env(d8iii, {
+            "balance": 200.0,
+            "sessions": {
+                "owner-unique-vm": {"endpoint": "gpu-a100-unique-1", "gpu": "A100"},
+            },
+            "max_assignments": 3,
+            "new_actions": [
+                {
+                    "rc": 1,
+                    "stderr": "Error: Service Unavailable",
+                    "bump_extra_assignments": 1,  # active_assignments increases even though our name is NOT listed!
+                },
+            ],
+        })
+        q8iii = d8iii / "queue.json"
+        q8iii.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c8iii_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4"], "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        alerts8iii = d8iii / "colab_alerts.log"
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q8iii),
+            "--registry", str(d8iii / "reg.jsonl"), "--alerts-log", str(alerts8iii),
+            "--log", str(d8iii / "run.log"), "--out-root", str(d8iii / "out"),
+            "--deadline", str(int(__import__("time").time()) + 2),
+            "--rent-interval", "9999", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "1", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env8iii)
+        calls8iii = read_calls(log8iii_p)
+        st8iii = json.loads(state8iii_p.read_text(encoding="utf-8"))
+        alerts8iii_txt = alerts8iii.read_text(encoding="utf-8") if alerts8iii.is_file() else ""
+        chk(
+            r.returncode == 11
+            and not any(c and c[0] == "stop" for c in calls8iii)
+            and "owner-unique-vm" in st8iii["sessions"]
+            and not st8iii.get("dangerous_fallbacks")
+            and "assignment_increased_without_named_session" in alerts8iii_txt,
+            "8(iii) our name not listed (even when active_assignments rose) => zero colab stop calls & unique owner VM safe",
+        )
+
+        # 9. Error classification, full raw launch_attempt_<n>.log, and per-attempt `colab new` timeout (Requirement 2).
+        print("9) Error classification, launch_attempt_<n>.log persistence, and colab new timeout")
+        d9 = tmp_root / "case9"
+        d9.mkdir()
+        env9, _, _ = make_fake_env(d9, {
+            "balance": 200.0,
+            "sessions": {},
+            "max_assignments": 1,
+            "polls_until_done": 1,
+            "new_actions": [
+                {"rc": 1, "stderr": "Error: TooManyAssignments: limit hit"},
+                {"rc": 1, "stderr": "Error: you have too many assignments right now"},
+                {"rc": 1, "stderr": "Error: Account does not have quota for H100"},
+                {"rc": 1, "stderr": "Error: GPU quota exhausted"},
+                {"rc": 1, "stderr": "Error: HTTP 503 backend overloaded"},
+                {"rc": 1, "stderr": "Error: Service Unavailable please retry"},
+                {"hang_s": 30},  # Hang with no output -> killed by --new-timeout 1 -> no_capacity_timeout
+                {"rc": 1, "stderr": "Error: assignment limit or opaque failure"},  # Not an explicit match -> unknown
+            ],
+        })
+        q9 = d9 / "queue.json"
+        q9.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c9_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4", "L4", "G4", "A100", "T4", "L4", "G4", "A100", "T4"],
+                 "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        runlog9 = d9 / "run.log"
+        out9 = d9 / "out"
+        t0 = __import__("time").monotonic()
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q9),
+            "--registry", str(d9 / "reg.jsonl"), "--alerts-log", str(d9 / "alerts.log"),
+            "--log", str(runlog9), "--out-root", str(out9),
+            "--new-timeout", "1",
+            "--rent-interval", "0", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "0", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env9)
+        elapsed9 = __import__("time").monotonic() - t0
+        log9_txt = runlog9.read_text(encoding="utf-8")
+        err_classes_seen = re.findall(r"launch FAILED \([^)]*error_class=([a-z_]+)", log9_txt)
+        expected_classes = [
+            "too_many_assignments",
+            "too_many_assignments",
+            "no_quota",
+            "no_quota",
+            "service_unavailable",
+            "service_unavailable",
+            "no_capacity_timeout",
+            "unknown",
+        ]
+        attempt_logs9 = sorted(out9.glob("*/launch_attempt_*.log"))
+        chk(
+            r.returncode == 0 and elapsed9 < 25.0,
+            f"case9 completed after 8 classified failures + 1 success with 1s new-timeout (rc={r.returncode}, elapsed={elapsed9:.1f}s)",
+        )
+        chk(
+            err_classes_seen == expected_classes,
+            f"exact error classification sequence matched (got {err_classes_seen})",
+        )
+        chk(
+            len(attempt_logs9) == 9
+            and any("TooManyAssignments: limit hit" in p.read_text(encoding="utf-8") for p in attempt_logs9)
+            and any("does not have quota" in p.read_text(encoding="utf-8") for p in attempt_logs9)
+            and any("HTTP 503 backend overloaded" in p.read_text(encoding="utf-8") for p in attempt_logs9),
+            f"all 9 raw launch_attempt_<n>.log files saved under batch out dirs with raw stdout+stderr (found {len(attempt_logs9)})",
+        )
+
+        # Also verify COLAB_NEW_TIMEOUT env var override works without CLI flag.
+        d9e = tmp_root / "case9_env"
+        d9e.mkdir()
+        env9e, _, _ = make_fake_env(d9e, {
+            "balance": 200.0,
+            "sessions": {},
+            "max_assignments": 1,
+            "polls_until_done": 1,
+            "new_actions": [{"hang_s": 30}],
+        })
+        env9e["COLAB_NEW_TIMEOUT"] = "1"
+        q9e = d9e / "queue.json"
+        q9e.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c9e_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4", "L4"], "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        runlog9e = d9e / "run.log"
+        t0 = __import__("time").monotonic()
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q9e),
+            "--registry", str(d9e / "reg.jsonl"), "--alerts-log", str(d9e / "alerts.log"),
+            "--log", str(runlog9e), "--out-root", str(d9e / "out"),
+            "--rent-interval", "0", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "0", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env9e)
+        elapsed9e = __import__("time").monotonic() - t0
+        chk(
+            r.returncode == 0
+            and elapsed9e < 15.0
+            and "error_class=no_capacity_timeout" in runlog9e.read_text(encoding="utf-8"),
+            f"COLAB_NEW_TIMEOUT=1 env override aborts hanging `colab new` as no_capacity_timeout (elapsed={elapsed9e:.1f}s)",
+        )
+
+        # 10. Default GPU order T4 -> L4 -> G4 -> A100 (H100 excluded), queue override, and 2 parallel VMs (Requirement 3).
+        print("10) Default GPU order (T4->L4->G4->A100, no H100), queue override, and 2 concurrent VMs")
+        d10a = tmp_root / "case10a"
+        d10a.mkdir()
+        env10a, _, log10a_p = make_fake_env(d10a, {
+            "balance": 200.0,
+            "sessions": {},
+            "reject_gpus": ["T4", "L4", "G4"],  # Forces default fallback order T4 -> L4 -> G4 -> A100
+            "max_assignments": 1,
+            "polls_until_done": 1,
+        })
+        q10a = d10a / "queue.json"
+        # No defaults.preferred_gpus and no batch.preferred_gpus => exercises script default!
+        q10a.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c10a_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q10a),
+            "--registry", str(d10a / "reg.jsonl"), "--alerts-log", str(d10a / "alerts.log"),
+            "--log", str(d10a / "run.log"), "--out-root", str(d10a / "out"),
+            "--rent-interval", "0", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "0", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env10a)
+        calls10a = read_calls(log10a_p)
+        gpus10a = [c[c.index("--gpu") + 1] for c in calls10a if c and c[0] == "new" and "--gpu" in c]
+        chk(
+            r.returncode == 0 and gpus10a == ["T4", "L4", "G4", "A100"] and "H100" not in gpus10a,
+            f"default GPU order is T4->L4->G4->A100 with H100 excluded (saw {gpus10a})",
+        )
+
+        # 10b: 3 pending batches, max_assignments=2, default GPUs + queue override on batch 2
+        #      => first 2 pending batches launch in parallel on 2 distinct VMs, 3rd reuses one of them.
+        d10b = tmp_root / "case10b"
+        d10b.mkdir()
+        env10b, state10b_p, log10b_p = make_fake_env(d10b, {
+            "balance": 240.0,
+            "sessions": {},
+            "max_assignments": 2,
+            "polls_until_done": 1,
+        })
+        q10b = d10b / "queue.json"
+        q10b.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c10b_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "allow_uncommitted_plan": True},
+                {"id": "c10b_b2", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["L4", "T4"], "allow_uncommitted_plan": True},
+                {"id": "c10b_b3", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q10b),
+            "--registry", str(d10b / "reg.jsonl"), "--alerts-log", str(d10b / "alerts.log"),
+            "--log", str(d10b / "run.log"), "--out-root", str(d10b / "out"),
+            "--rent-interval", "0", "--poll-interval", "0", "--partial-fetch-interval", "9999",
+            "--tick-interval", "0", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env10b)
+        calls10b = read_calls(log10b_p)
+        q10b_after = json.loads(q10b.read_text(encoding="utf-8"))
+        new_gpus10b = [c[c.index("--gpu") + 1] for c in calls10b if c and c[0] == "new" and "--gpu" in c]
+        chk(
+            r.returncode == 0
+            and new_gpus10b == ["T4", "L4"]
+            and all(b["status"] == "done" for b in q10b_after["batches"])
+            and q10b_after["batches"][0]["session"] != q10b_after["batches"][1]["session"]
+            and q10b_after["batches"][2]["session"] in (q10b_after["batches"][0]["session"], q10b_after["batches"][1]["session"])
+            and json.loads(state10b_p.read_text(encoding="utf-8"))["sessions"] == {},
+            f"first 2 pending batches ran in parallel (b1=T4 default, b2=L4 override), b3 reused a VM, all released (new_gpus={new_gpus10b})",
+        )
+
+        # 11. Kernel keepalive (c415e1275) works when session listed verbatim & skips `colab exec` when session gone.
+        print("11) Kernel keepalive (c415e1275) + guarded `colab exec -s <name>`")
+        d11 = tmp_root / "case11"
+        d11.mkdir()
+        env11, state11_p, log11_p = make_fake_env(d11, {
+            "balance": 200.0,
+            "sessions": {
+                "owner-keepalive-bystander": {"endpoint": "gpu-a100-owner-ka", "gpu": "A100"},
+            },
+            "max_assignments": 2,
+            "polls_until_done": 3,
+            "drop_session_after_exec": 1,  # After 1st keepalive exec succeeds, simulate our VM vanishing!
+        })
+        q11 = d11 / "queue.json"
+        q11.write_text(json.dumps({
+            "schema": "vacant.redo.colab.queue/1",
+            "batches": [
+                {"id": "c11_b1", "plan": str(plan), "bank": str(bank), "vllm_config": str(vcfg),
+                 "preferred_gpus": ["T4"], "allow_uncommitted_plan": True},
+            ],
+        }) + "\n", encoding="utf-8")
+        runlog11 = d11 / "run.log"
+        r = run_cmd([
+            "bash", str(ORCH), "--queue", str(q11),
+            "--registry", str(d11 / "reg.jsonl"), "--alerts-log", str(d11 / "alerts.log"),
+            "--log", str(runlog11), "--out-root", str(d11 / "out"),
+            "--keepalive-interval", "1",
+            "--rent-interval", "0", "--poll-interval", "3", "--partial-fetch-interval", "9999",
+            "--tick-interval", "1", "--stop-retry-delay", "0", "--no-watchdog",
+        ], env=env11)
+        calls11 = read_calls(log11_p)
+        st11 = json.loads(state11_p.read_text(encoding="utf-8"))
+        log11_txt = runlog11.read_text(encoding="utf-8")
+        exec_calls11 = [c for c in calls11 if c and c[0] == "exec"]
+        chk(
+            r.returncode == 0
+            and "kernel keepalive started for" in log11_txt
+            and "skipping colab exec" in log11_txt
+            and len(exec_calls11) == 1
+            and all("owner-keepalive-bystander" not in c for c in exec_calls11)
+            and not st11.get("dangerous_fallbacks")
+            and "owner-keepalive-bystander" in st11["sessions"],
+            f"keepalive touched our kernel while listed verbatim, skipped exec once gone (zero fallback onto owner VM); exec_calls={len(exec_calls11)}",
         )
     finally:
         shutil.rmtree(tmp_root, ignore_errors=True)

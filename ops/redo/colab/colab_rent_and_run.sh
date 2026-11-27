@@ -4,8 +4,10 @@
 # Replaces ad-hoc colab_retry_*.sh + colab_monitor_only.sh scripts with:
 #   1. Post-launch session registry ($HOME/dev/ops/ctl/colab_registry.jsonl):
 #      queries `colab sessions` after EVERY `colab new` attempt (success or failure),
-#      records session + endpoint + gpu + batch + state, and ALWAYS stops & verifies
-#      assignment drop if launch failed after an assignment was created.
+#      records session + endpoint + gpu + batch + state, and on launch failure ONLY stops
+#      the exact session name THIS attempt passed to `colab new -s <name>` if and only if
+#      it is listed verbatim in fresh `colab sessions` AND recorded in our registry for this
+#      attempt (never stops other/unknown sessions — writes ALERT instead).
 #   2. Account-level usage watchdog (separate background loop, default every 5 min):
 #      parses `colab usage` and `colab sessions`; writes ALERT to
 #      $HOME/dev/ops/ctl/colab_alerts.log if usage rate > 0 or active assignments > 0
@@ -16,8 +18,9 @@
 #   4. Spend cap (default 180 CU from start balance) + balance floor (default 20 CU),
 #      checked before every launch and every poll; on breach: partial fetch, stop, alert.
 #   5. Periodic partial fetch every 30 min (`fetch_batch.sh --force --no-stop`).
-#   6. Rent retries in GPU order A100 -> G4 -> L4 every 20 min up to --deadline,
-#      supporting up to 2 concurrent VMs (gracefully falling back to queue reuse on
+#   6. Rent retries in GPU order T4 -> L4 -> G4 -> A100 (H100 excluded — no quota) every 20 min
+#      up to --deadline, supporting up to 2 concurrent VMs and launching the first two pending
+#      batches in parallel when two VMs are obtained (gracefully falling back to queue reuse on
 #      too-many-assignments errors).
 #   7. Dry-run mode (`--dry-run`) that never invokes `colab` and mutates no state.
 #
@@ -43,13 +46,15 @@ Budget & Concurrency:
   --max-spend <CU>                Max total spend from start balance across queue (default: 180)
   --balance-floor <CU>            Minimum balance floor in CU (default: 20)
   --max-concurrent-vms <N>        Maximum concurrent Colab VMs (default: 2)
-  --gpus <CSV>                    Fallback GPU preference order (default: A100,G4,L4)
+  --gpus <CSV>                    Fallback GPU preference order (default: T4,L4,G4,A100)
 
 Intervals (seconds):
   --rent-interval <sec>           Seconds between rent attempts (default: 1200 = 20 min)
   --poll-interval <sec>           Seconds between batch polls (default: 600 = 10 min)
   --partial-fetch-interval <sec>  Seconds between partial fetches (default: 1800 = 30 min)
   --watchdog-interval <sec>       Seconds between account usage watchdog checks (default: 300 = 5 min)
+  --keepalive-interval <sec>      Seconds between kernel keepalive touches (default: 240 = 4 min; env KEEPALIVE_INTERVAL)
+  --new-timeout <sec>             Per-attempt timeout for `colab new` step (default: 60; env COLAB_NEW_TIMEOUT)
   --tick-interval <sec>           Main loop sleep cap in seconds (default: 30)
   --stop-retry-delay <sec>        Seconds before retrying stop verification (default: 3)
 
@@ -92,6 +97,8 @@ RENT_INTERVAL=1200
 POLL_INTERVAL=600
 PARTIAL_FETCH_INTERVAL=1800
 WATCHDOG_INTERVAL=300
+KEEPALIVE_INTERVAL="${KEEPALIVE_INTERVAL:-240}"
+COLAB_NEW_TIMEOUT="${COLAB_NEW_TIMEOUT:-60}"
 TICK_INTERVAL=30
 STOP_RETRY_DELAY=3
 
@@ -121,6 +128,8 @@ while [ $# -gt 0 ]; do
     --poll-interval) POLL_INTERVAL="$2"; shift 2 ;;
     --partial-fetch-interval) PARTIAL_FETCH_INTERVAL="$2"; shift 2 ;;
     --watchdog-interval) WATCHDOG_INTERVAL="$2"; shift 2 ;;
+    --keepalive-interval) KEEPALIVE_INTERVAL="$2"; shift 2 ;;
+    --new-timeout|--colab-new-timeout) COLAB_NEW_TIMEOUT="$2"; shift 2 ;;
     --tick-interval) TICK_INTERVAL="$2"; shift 2 ;;
     --stop-retry-delay) STOP_RETRY_DELAY="$2"; shift 2 ;;
     --registry) REGISTRY_FILE="$2"; shift 2 ;;
@@ -147,6 +156,19 @@ if [ -n "$COLAB_CONFIG" ]; then
   COLAB_CMD+=(--config "$COLAB_CONFIG")
 fi
 
+if ! python3 - "$COLAB_NEW_TIMEOUT" <<'PY'
+import sys
+try:
+    v = float(sys.argv[1])
+except ValueError:
+    sys.exit(1)
+sys.exit(0 if v > 0 else 1)
+PY
+then
+  echo "error: --new-timeout / COLAB_NEW_TIMEOUT must be a positive number (got: ${COLAB_NEW_TIMEOUT})" >&2
+  exit 2
+fi
+
 utc_now() {
   date -u +%Y-%m-%dT%H:%M:%SZ
 }
@@ -168,22 +190,69 @@ log_msg() {
 
 # Colab reclaims a VM after ~25–30 min of Jupyter-kernel inactivity even while background processes run
 # (COLAB_NOTES §2.7; 11-27: four VMs vanished 20–36 min after launch without this). Touch the kernel every 4 min
-# for as long as the session is listed; exits on its own when the session is gone. Never stops or creates sessions.
+# for as long as the session is listed verbatim in `colab sessions`; exits on its own when the session is gone.
+# Guarded: NEVER calls `colab exec -s <name>` unless <name> is listed verbatim in fresh `colab sessions`
+# (the CLI falls back to "Using unique session" otherwise, which would hit someone else's VM).
+# Never stops or creates sessions.
 start_kernel_keepalive() {
   local s="$1"
+  local safe_s pid_file existing_pid
   [ "${DRY_RUN:-0}" = "1" ] && { log_msg "[dry-run] would start kernel keepalive for ${s}"; return 0; }
+  safe_s="$(printf '%s' "$s" | tr -c 'A-Za-z0-9_.-' '_')"
+  pid_file="${RUN_TMPDIR}/keepalive_${safe_s}.pid"
+  if [ -f "$pid_file" ]; then
+    existing_pid="$(cat "$pid_file" 2>/dev/null || true)"
+    if [ -n "$existing_pid" ] && kill -0 "$existing_pid" 2>/dev/null; then
+      log_msg "kernel keepalive already running for ${s} (pid ${existing_pid})"
+      return 0
+    fi
+  fi
   (
+    spid=""
+    trap 'kill "${spid:-}" 2>/dev/null || true; exit 0' TERM INT
     miss=0
     while true; do
-      out=$(timeout 60 "$COLAB_BIN" sessions 2>/dev/null); rc=$?
-      if [ $rc -eq 0 ] && ! echo "$out" | grep -q "\[${s}\]"; then miss=$((miss+1)); else miss=0; fi
-      [ $miss -ge 3 ] && { log_msg "keepalive: session ${s} gone (3 misses); keepalive exits"; exit 0; }
-      echo 'print("keepalive")' | timeout 120 "$COLAB_BIN" exec -s "$s" >/dev/null 2>&1 || log_msg "keepalive: exec failed for ${s}"
-      sleep 240
+      sess_json="$(query_sessions_json)"
+      listed="$(session_listed_verbatim "$s" "$sess_json")"
+      case "$listed" in
+        LISTED)
+          miss=0
+          printf 'print("keepalive")\n' | timeout 120 "${COLAB_CMD[@]}" exec -s "$s" >/dev/null 2>&1 || log_msg "keepalive: exec failed for ${s}"
+          ;;
+        NOT_LISTED)
+          miss=$((miss + 1))
+          log_msg "keepalive: session ${s} not listed verbatim (miss=${miss}/3); skipping colab exec"
+          [ "$miss" -ge 3 ] && { log_msg "keepalive: session ${s} gone (3 misses); keepalive exits"; exit 0; }
+          ;;
+        *)
+          log_msg "keepalive: colab sessions query failed (${listed}) for ${s}; skipping colab exec"
+          ;;
+      esac
+      sleep "$KEEPALIVE_INTERVAL" &
+      spid=$!
+      wait "$spid" 2>/dev/null || true
+      spid=""
     done
-  ) >/dev/null 2>&1 &
-  KEEPALIVE_PIDS="${KEEPALIVE_PIDS:-} $!"
-  log_msg "kernel keepalive started for ${s} (pid $!)"
+  ) </dev/null >/dev/null 2>&1 &
+  local kpid=$!
+  printf '%s\n' "$kpid" > "$pid_file"
+  KEEPALIVE_PIDS="${KEEPALIVE_PIDS:-} ${kpid}"
+  log_msg "kernel keepalive started for ${s} (pid ${kpid})"
+}
+
+stop_kernel_keepalive() {
+  local s="$1"
+  local safe_s pid_file kpid
+  safe_s="$(printf '%s' "$s" | tr -c 'A-Za-z0-9_.-' '_')"
+  pid_file="${RUN_TMPDIR}/keepalive_${safe_s}.pid"
+  if [ -f "$pid_file" ]; then
+    kpid="$(cat "$pid_file" 2>/dev/null || true)"
+    if [ -n "$kpid" ] && kill -0 "$kpid" 2>/dev/null; then
+      kill "$kpid" 2>/dev/null || true
+      wait "$kpid" 2>/dev/null || true
+    fi
+    rm -f "$pid_file"
+  fi
 }
 
 write_alert() {
@@ -263,16 +332,18 @@ out = sys.argv[2]
 sessions = []
 for raw_line in out.splitlines():
     line = raw_line.strip()
-    m = re.match(r"^\[([^\]]+)\]\s+(\S+)(.*)$", line)
+    # Real `colab sessions` line: `[<name>] <endpoint> | Hardware: <gpu> ...`
+    # `[colab] Error: No active sessions…` / `[colab] Using unique session…` are CLI messages, not sessions.
+    m = re.match(r"^\[([^\]]+)\]\s+(\S+)\s*\|\s*(.*)$", line)
     if not m:
         continue
-    name, endpoint, rest = m.group(1).strip(), m.group(2).strip(), m.group(3)
-    # `[colab] Error: No active sessions…` / `[colab] Using unique session…` are CLI messages, not sessions:
-    # a real session line carries a `Hardware:` field.
+    name, endpoint, rest = m.group(1), m.group(2).strip(), m.group(3)
     if name == "colab" or "Hardware:" not in rest:
         continue
     hw_m = re.search(r"Hardware:\s*([^|\s]+)", rest)
-    gpu = hw_m.group(1).strip() if hw_m else ""
+    if not hw_m:
+        continue
+    gpu = hw_m.group(1).strip()
     sessions.append({
         "session": name,
         "endpoint": endpoint,
@@ -286,6 +357,60 @@ doc = {
     "raw": " ".join(out.split())[:400],
 }
 print(json.dumps(doc))
+PY
+}
+
+# Check whether an exact session name appears verbatim in a `query_sessions_json` payload.
+# Prints: LISTED | NOT_LISTED | QUERY_ERR
+session_listed_verbatim() {
+  local target="$1"
+  local sess_json="$2"
+  python3 - "$target" "$sess_json" <<'PY'
+import json, sys
+target = sys.argv[1]
+doc = json.loads(sys.argv[2])
+if not doc.get("ok"):
+    print("QUERY_ERR")
+    sys.exit(0)
+if any(x.get("session") == target for x in doc.get("sessions", [])):
+    print("LISTED")
+else:
+    print("NOT_LISTED")
+PY
+}
+
+# Return 0 iff `session` is currently active in $REGISTRY_FILE (and if `batch_name` is non-empty,
+# recorded for that exact batch attempt).
+registry_has_active_session() {
+  local session="$1"
+  local batch_name="${2:-}"
+  python3 - "$REGISTRY_FILE" "$session" "$batch_name" <<'PY'
+import json, os, sys
+reg_path, target, want_batch = sys.argv[1:]
+if not target or not os.path.isfile(reg_path):
+    sys.exit(1)
+latest_status = None
+batch_match_active = False
+with open(reg_path, encoding="utf-8", errors="replace") as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except ValueError:
+            continue
+        if rec.get("session") != target:
+            continue
+        st = rec.get("status", "active")
+        latest_status = st
+        if want_batch and rec.get("batch") == want_batch:
+            batch_match_active = (st == "active")
+if latest_status != "active":
+    sys.exit(1)
+if want_batch and not batch_match_active:
+    sys.exit(1)
+sys.exit(0)
 PY
 }
 
@@ -441,7 +566,7 @@ if [ ! -f "$QUEUE_FILE" ]; then
 fi
 
 # Validate queue file & load defaults (without mutating queue file).
-QUEUE_DEFAULTS="$(python3 - "$QUEUE_FILE" "$REPO_ROOT" "${DEFAULT_GPUS:-A100,G4,L4}" <<'PY'
+QUEUE_DEFAULTS="$(python3 - "$QUEUE_FILE" "$REPO_ROOT" "${DEFAULT_GPUS:-T4,L4,G4,A100}" <<'PY'
 import json, os, pathlib, shlex, sys
 
 qpath, repo_root, cli_gpus = sys.argv[1:]
@@ -483,7 +608,7 @@ PY
 Q_DEF_MAX_SPEND=180
 Q_DEF_FLOOR=20
 Q_DEF_MAX_VMS=2
-Q_DEF_GPUS="A100,G4,L4"
+Q_DEF_GPUS="T4,L4,G4,A100"
 eval "$QUEUE_DEFAULTS"
 
 MAX_SPEND="${MAX_SPEND:-$Q_DEF_MAX_SPEND}"
@@ -509,7 +634,7 @@ if [ "$DRY_RUN" = "1" ]; then
   echo "[dry-run] queue=${QUEUE_FILE} repo_root=${REPO_ROOT}"
   echo "[dry-run] registry=${REGISTRY_FILE} alerts_log=${ALERTS_LOG} out_root=${OUT_ROOT}"
   echo "[dry-run] max_spend=${MAX_SPEND} balance_floor=${BALANCE_FLOOR} max_concurrent_vms=${MAX_CONCURRENT_VMS}"
-  echo "[dry-run] intervals: rent=${RENT_INTERVAL}s poll=${POLL_INTERVAL}s partial_fetch=${PARTIAL_FETCH_INTERVAL}s watchdog=${WATCHDOG_INTERVAL}s"
+  echo "[dry-run] intervals: rent=${RENT_INTERVAL}s poll=${POLL_INTERVAL}s partial_fetch=${PARTIAL_FETCH_INTERVAL}s watchdog=${WATCHDOG_INTERVAL}s keepalive=${KEEPALIVE_INTERVAL}s new_timeout=${COLAB_NEW_TIMEOUT}s"
   echo "[dry-run] deadline_epoch=${DEADLINE_EPOCH} hard_deadline_epoch=${HARD_DEADLINE_EPOCH}"
   echo "[dry-run] watchdog: every ${WATCHDOG_INTERVAL}s run \`${COLAB_CMD[*]} usage\` + \`${COLAB_CMD[*]} sessions\` -> alert to ${ALERTS_LOG} if usage>0 or assignments>0 with no live registered session (no auto-stop)"
 
@@ -620,6 +745,11 @@ trap cleanup EXIT
 
 # Helper: stop a session and verify via `colab sessions` + `colab usage` that it is gone
 # and that assignment count dropped (to <= expected_max_assignments if >= 0).
+# Owner-safe guards:
+#   1. Refuses to stop any session not recorded as active in $REGISTRY_FILE.
+#   2. Before EVERY `colab stop -s <session>` invocation, verifies <session> is listed verbatim
+#      in a fresh `colab sessions` listing (the CLI otherwise falls back to "Using unique session"
+#      and would stop someone else's VM).
 stop_and_verify_session() {
   local session="$1"
   local expected_max_asgn="${2:--1}"
@@ -628,9 +758,35 @@ stop_and_verify_session() {
   local state_path="$5"
   local gpu="$6"
   local endpoint="$7"
-  local attempt stop_rc=0 stop_out="" sess_json usage_json check_res
+  local attempt stop_rc=0 stop_out="" pre_sess_json listed_res sess_json usage_json check_res=""
+
+  if ! registry_has_active_session "$session"; then
+    write_alert "refusing_stop_unregistered_session session=${session} reason=${event_name} batch=${batch_name} (owner_safe:no_auto_stop)"
+    return 1
+  fi
 
   for attempt in 1 2; do
+    pre_sess_json="$(query_sessions_json)"
+    listed_res="$(session_listed_verbatim "$session" "$pre_sess_json")"
+    case "$listed_res" in
+      LISTED)
+        ;;
+      NOT_LISTED)
+        log_msg "skipping colab stop -s ${session} (attempt=${attempt}, reason=${event_name}): session not listed verbatim in colab sessions"
+        stop_kernel_keepalive "$session"
+        registry_append "$event_name" "stopped" "$session" "$endpoint" "$gpu" "$batch_name" "$state_path" ""
+        return 0
+        ;;
+      *)
+        log_msg "skipping colab stop -s ${session} (attempt=${attempt}, reason=${event_name}): unable to verify listing (${listed_res})"
+        check_res="PRE_CHECK_${listed_res}"
+        if [ "$attempt" -eq 1 ] && [ "$STOP_RETRY_DELAY" -gt 0 ]; then
+          sleep "$STOP_RETRY_DELAY"
+        fi
+        continue
+        ;;
+    esac
+
     log_msg "stopping session=${session} (attempt=${attempt}, reason=${event_name})"
     if stop_out="$(timeout 120 "${COLAB_CMD[@]}" stop -s "$session" </dev/null 2>&1)"; then
       stop_rc=0
@@ -652,20 +808,27 @@ still_listed = any(x["session"] == target for x in sess.get("sessions", [])) if 
 asgn = usage.get("active_assignments") if usage.get("ok") else None
 rate = usage.get("usage_rate") if usage.get("ok") else None
 
-dropped_ok = True
-if still_listed is True:
-    dropped_ok = False
-if max_asgn >= 0 and asgn is not None and asgn > max_asgn:
-    dropped_ok = False
-
-status = "OK" if dropped_ok else "STILL_ACTIVE"
+if still_listed is False:
+    if max_asgn >= 0 and asgn is not None and asgn > max_asgn:
+        status = "GONE_EXCESS_ASGN"
+    else:
+        status = "OK"
+else:
+    status = "STILL_ACTIVE"
 print(f"{status} still_listed={still_listed} active_assignments={asgn} usage_rate={rate} expected_max={max_asgn}")
 PY
 )"
     log_msg "stop verification (${session}): ${check_res}"
     case "$check_res" in
       OK\ *)
+        stop_kernel_keepalive "$session"
         registry_append "$event_name" "stopped" "$session" "$endpoint" "$gpu" "$batch_name" "$state_path" ""
+        return 0
+        ;;
+      GONE_EXCESS_ASGN\ *)
+        stop_kernel_keepalive "$session"
+        registry_append "$event_name" "stopped" "$session" "$endpoint" "$gpu" "$batch_name" "$state_path" ""
+        write_alert "stop_verified_session_gone_but_excess_assignments session=${session} reason=${event_name} details=[${check_res}] (owner_safe:no_auto_stop)"
         return 0
         ;;
     esac
@@ -914,11 +1077,15 @@ PY
 }
 
 # Build launch_batch.sh argument array for a batch JSON + mode (new vs reuse).
-# Invokes launch_batch.sh, queries `colab sessions` immediately afterward, updates registry,
-# and on failure stops + verifies any leaked assignment.
+# Invokes launch_batch.sh under a supervisor that enforces $COLAB_NEW_TIMEOUT on the `colab new` step,
+# saves FULL raw stdout+stderr to <batch out dir>/launch_attempt_<n>.log, classifies explicit errors,
+# queries `colab sessions` immediately afterward, updates registry, and on failure ONLY stops the exact
+# session name THIS attempt passed to `colab new -s <name>` if listed verbatim AND recorded in our registry.
 # Sets LAST_LAUNCH_STATUS to: OK | FAILED | TOO_MANY_ASSIGNMENTS
+# Sets LAST_LAUNCH_ERROR_CLASS to: "" | too_many_assignments | no_quota | service_unavailable | no_capacity_timeout | unknown
 # Sets LAST_LAUNCH_SESSION, LAST_LAUNCH_ENDPOINT, LAST_LAUNCH_GPU, LAST_LAUNCH_BATCH_NAME, LAST_LAUNCH_STATE_FILE
 LAST_LAUNCH_STATUS=""
+LAST_LAUNCH_ERROR_CLASS=""
 LAST_LAUNCH_SESSION=""
 LAST_LAUNCH_ENDPOINT=""
 LAST_LAUNCH_GPU=""
@@ -933,8 +1100,10 @@ run_launch_attempt() {
   local bid="" safe_bid="" plan="" bank="" vcfg="" high_mem="0" commit="HEAD" transport="ssh" allow_unc="0" extra_wheel=""
   local ts batch_name session_name out_dir state_file
   local before_usage before_sess before_asgn
-  local launch_log launch_rc=0
+  local launch_log launch_rc=0 is_reuse_flag="0" sup_out="" TIMED_OUT_NEW=0
   local after_sess after_usage
+
+  LAST_LAUNCH_ERROR_CLASS=""
 
   eval "$(python3 - "$batch_json" <<'PY'
 import json, re, shlex, sys
@@ -959,11 +1128,15 @@ PY
   batch_name="${safe_bid}_${ts}_n${LAUNCH_SEQ}"
   if [ -n "$reuse_session" ]; then
     session_name="$reuse_session"
+    is_reuse_flag="1"
   else
     session_name="redo-${safe_bid:0:15}-${ts:9:6}-${LAUNCH_SEQ}"
+    is_reuse_flag="0"
   fi
   out_dir="${OUT_ROOT}/${batch_name}"
   state_file="${out_dir}/state.json"
+  mkdir -p "$out_dir"
+  launch_log="${out_dir}/launch_attempt_${LAUNCH_SEQ}.log"
 
   local cmd=(
     bash "$LAUNCH_SCRIPT" "$plan" "$bank"
@@ -1005,18 +1178,171 @@ for et in json.loads(sys.argv[1]).get("extra_tars") or []:
 PY
 )
 
-  # Snapshot pre-launch usage & sessions so we can detect any newly created assignment.
+  # Snapshot pre-launch usage & sessions so we can detect any newly created assignment or unknown session.
   before_usage="$(query_usage_json)"
   before_sess="$(query_sessions_json)"
   before_asgn="$(python3 -c 'import json,sys; u=json.loads(sys.argv[1]); print(u["active_assignments"] if u.get("ok") and u.get("active_assignments") is not None else -1)' "$before_usage")"
 
-  launch_log="${RUN_TMPDIR}/launch_${batch_name}.log"
-  log_msg "launching batch_id=${bid} batch_name=${batch_name} session=${session_name} gpu=${gpu} reuse=${reuse_session:-no}"
-  if timeout 600 "${cmd[@]}" </dev/null > "$launch_log" 2>&1; then
-    launch_rc=0
-  else
-    launch_rc=$?
-  fi
+  log_msg "launching batch_id=${bid} batch_name=${batch_name} session=${session_name} gpu=${gpu} reuse=${reuse_session:-no} new_timeout=${COLAB_NEW_TIMEOUT}s log=${launch_log}"
+  sup_out="$(python3 - "$launch_log" "$COLAB_NEW_TIMEOUT" "600" "$is_reuse_flag" "${cmd[@]}" <<'PY'
+import os, re, select, shlex, signal, subprocess, sys, time
+
+log_path = sys.argv[1]
+new_timeout = float(sys.argv[2])
+total_timeout = float(sys.argv[3])
+is_reuse = sys.argv[4] == "1"
+cmd = sys.argv[5:]
+
+os.makedirs(os.path.dirname(log_path) or ".", exist_ok=True)
+
+proc = subprocess.Popen(
+    cmd,
+    stdin=subprocess.DEVNULL,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    start_new_session=True,
+)
+assert proc.stdout is not None
+fd = proc.stdout.fileno()
+os.set_blocking(fd, False)
+
+start_ts = time.monotonic()
+phase = "reuse" if is_reuse else "pre_new"
+new_start_ts = None
+timed_out_new = False
+timed_out_total = False
+
+buf_line = b""
+pre_new_chunks = []
+new_step_chunks = []
+post_new_chunks = []
+
+def kill_group():
+    try:
+        os.killpg(proc.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        if proc.poll() is not None:
+            return
+        time.sleep(0.05)
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+def process_line(raw_line: bytes):
+    global phase, new_start_ts
+    text = raw_line.decode("utf-8", errors="replace")
+    if not is_reuse and phase == "pre_new" and text.startswith("3/6 Provisioning Colab VM:"):
+        pre_new_chunks.append(text)
+        phase = "colab_new"
+        new_start_ts = time.monotonic()
+        return
+    if phase == "colab_new" and text.startswith("4/6 Uploading "):
+        phase = "post_new"
+        post_new_chunks.append(text)
+        return
+    if phase == "pre_new":
+        pre_new_chunks.append(text)
+    elif phase == "colab_new":
+        new_step_chunks.append(text)
+    else:
+        post_new_chunks.append(text)
+
+with open(log_path, "wb") as lf:
+    eof = False
+    while True:
+        now = time.monotonic()
+        if phase == "colab_new" and new_start_ts is not None and (now - new_start_ts) >= new_timeout:
+            timed_out_new = True
+            kill_group()
+            break
+        if (now - start_ts) >= total_timeout:
+            timed_out_total = True
+            kill_group()
+            break
+
+        wait_s = 0.2
+        if phase == "colab_new" and new_start_ts is not None:
+            wait_s = min(wait_s, max(0.01, new_timeout - (now - new_start_ts)))
+        wait_s = min(wait_s, max(0.01, total_timeout - (now - start_ts)))
+
+        if not eof:
+            rlist, _, _ = select.select([fd], [], [], wait_s)
+            if rlist:
+                try:
+                    chunk = os.read(fd, 8192)
+                except BlockingIOError:
+                    chunk = b""
+                if not chunk:
+                    eof = True
+                else:
+                    lf.write(chunk)
+                    lf.flush()
+                    buf_line += chunk
+                    while b"\n" in buf_line:
+                        line, buf_line = buf_line.split(b"\n", 1)
+                        process_line(line + b"\n")
+        if eof:
+            if proc.poll() is not None:
+                break
+            time.sleep(0.05)
+
+    if buf_line:
+        process_line(buf_line)
+        buf_line = b""
+    if timed_out_new or timed_out_total:
+        try:
+            while True:
+                rlist, _, _ = select.select([fd], [], [], 0.05)
+                if not rlist:
+                    break
+                chunk = os.read(fd, 8192)
+                if not chunk:
+                    break
+                lf.write(chunk)
+                lf.flush()
+                process_line(chunk)
+        except OSError:
+            pass
+
+rc = proc.wait()
+if timed_out_new or timed_out_total:
+    rc = 124
+
+new_step_text = "".join(new_step_chunks)
+post_new_text = "".join(post_new_chunks)
+pre_new_text = "".join(pre_new_chunks)
+
+if rc == 0:
+    err_class = ""
+else:
+    if not is_reuse and phase == "colab_new":
+        inspect_text = new_step_text
+    elif phase == "post_new" or is_reuse:
+        inspect_text = post_new_text
+    else:
+        inspect_text = pre_new_text
+
+    if re.search(r"TooManyAssignments|too many assignments", inspect_text, re.IGNORECASE):
+        err_class = "too_many_assignments"
+    elif re.search(r"does not have quota|quota", inspect_text, re.IGNORECASE):
+        err_class = "no_quota"
+    elif re.search(r"Service Unavailable|\b503\b", inspect_text, re.IGNORECASE):
+        err_class = "service_unavailable"
+    elif timed_out_new and not new_step_text.strip():
+        err_class = "no_capacity_timeout"
+    else:
+        err_class = "unknown"
+
+print(f"launch_rc={rc}")
+print(f"LAST_LAUNCH_ERROR_CLASS={shlex.quote(err_class)}")
+print(f"TIMED_OUT_NEW={1 if timed_out_new else 0}")
+PY
+)"
+  eval "$sup_out"
   mkdir -p "$(dirname "$LOG_FILE")"
   cat "$launch_log" >> "$LOG_FILE"
 
@@ -1025,40 +1351,61 @@ PY
   after_usage="$(query_usage_json)"
 
   local inspect_out
-  inspect_out="$(python3 - "$session_name" "$gpu" "$before_sess" "$after_sess" "$before_asgn" "$after_usage" <<'PY'
-import json, shlex, sys
-target, req_gpu, bs_raw, as_raw, before_asgn_s, au_raw = sys.argv[1:]
+  inspect_out="$(python3 - "$session_name" "$gpu" "$before_sess" "$after_sess" "$before_asgn" "$after_usage" "$REGISTRY_FILE" <<'PY'
+import json, os, shlex, sys
+target, req_gpu, bs_raw, as_raw, before_asgn_s, au_raw, reg_path = sys.argv[1:]
 bs = json.loads(bs_raw)
 as_ = json.loads(as_raw)
 au = json.loads(au_raw)
 before_asgn = int(before_asgn_s)
 after_asgn = au["active_assignments"] if au.get("ok") and au.get("active_assignments") is not None else -1
 
+reg_status = {}
+if os.path.isfile(reg_path):
+    with open(reg_path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            s = rec.get("session")
+            if s:
+                reg_status[s] = rec.get("status", "active")
+reg_active = {s for s, st in reg_status.items() if st == "active"}
+
 before_names = {x["session"] for x in bs.get("sessions", [])} if bs.get("ok") else set()
 after_map = {x["session"]: x for x in as_.get("sessions", [])} if as_.get("ok") else {}
 
 target_info = after_map.get(target)
-new_sessions = [x for name, x in after_map.items() if name not in before_names]
+# Other sessions that are either newly appeared (not in before_names) or unregistered (not active in registry).
+alert_other_sessions = [
+    x for name, x in after_map.items()
+    if name != target and (name not in reg_active or name not in before_names)
+]
 asgn_increased = (before_asgn >= 0 and after_asgn > before_asgn)
 
 print(f"FOUND_TARGET={1 if target_info else 0}")
 print(f"TARGET_ENDPOINT={shlex.quote(target_info['endpoint'] if target_info else '')}")
 print(f"TARGET_GPU={shlex.quote((target_info['gpu'] or req_gpu) if target_info else req_gpu)}")
 print(f"TARGET_RAW={shlex.quote(target_info['raw_line'] if target_info else '')}")
-print(f"NEW_SESSIONS_JSON={shlex.quote(json.dumps(new_sessions))}")
+print(f"ALERT_OTHER_JSON={shlex.quote(json.dumps(alert_other_sessions))}")
 print(f"ASGN_INCREASED={1 if asgn_increased else 0}")
 PY
 )"
-  local FOUND_TARGET=0 TARGET_ENDPOINT="" TARGET_GPU="$gpu" TARGET_RAW="" NEW_SESSIONS_JSON="[]" ASGN_INCREASED=0
+  local FOUND_TARGET=0 TARGET_ENDPOINT="" TARGET_GPU="$gpu" TARGET_RAW="" ALERT_OTHER_JSON="[]" ASGN_INCREASED=0
   eval "$inspect_out"
 
   if [ "$launch_rc" -eq 0 ]; then
     local ev="launched"
     [ -n "$reuse_session" ] && ev="reused"
     registry_append "$ev" "active" "$session_name" "$TARGET_ENDPOINT" "$TARGET_GPU" "$batch_name" "$state_file" "$TARGET_RAW"
-    log_msg "launch succeeded: session=${session_name} endpoint=${TARGET_ENDPOINT:-unknown} gpu=${TARGET_GPU} state=${state_file}"
+    log_msg "launch succeeded: session=${session_name} endpoint=${TARGET_ENDPOINT:-unknown} gpu=${TARGET_GPU} state=${state_file} log=${launch_log}"
     start_kernel_keepalive "${session_name}"
     LAST_LAUNCH_STATUS="OK"
+    LAST_LAUNCH_ERROR_CLASS=""
     LAST_LAUNCH_SESSION="$session_name"
     LAST_LAUNCH_ENDPOINT="$TARGET_ENDPOINT"
     LAST_LAUNCH_GPU="$TARGET_GPU"
@@ -1067,47 +1414,43 @@ PY
     return 0
   fi
 
-  log_msg "launch FAILED (rc=${launch_rc}) for batch_id=${bid} session=${session_name} gpu=${gpu} reuse=${reuse_session:-no}"
+  log_msg "launch FAILED (rc=${launch_rc}, error_class=${LAST_LAUNCH_ERROR_CLASS}, timed_out_new=${TIMED_OUT_NEW}, log=${launch_log}) for batch_id=${bid} session=${session_name} gpu=${gpu} reuse=${reuse_session:-no}"
 
-  # If this was a fresh `colab new` attempt and ANY assignment exists/appeared,
-  # record it in registry, ALWAYS stop it, and verify assignment count dropped.
-  if [ -z "$reuse_session" ]; then
-    local stopped_any=0
-    if [ "$FOUND_TARGET" = "1" ]; then
-      registry_append "launch_failed_assignment" "active" "$session_name" "$TARGET_ENDPOINT" "$TARGET_GPU" "$batch_name" "$state_file" "$TARGET_RAW"
-      stop_and_verify_session "$session_name" "$before_asgn" "stopped_after_launch_failure" "$batch_name" "$state_file" "$TARGET_GPU" "$TARGET_ENDPOINT" || true
-      stopped_any=1
-    fi
-
-    # Also stop any other newly created session that wasn't present before this attempt.
-    local extra_lines es eep egpu eraw
-    extra_lines="$(python3 - "$NEW_SESSIONS_JSON" "$session_name" <<'PY'
+  # Alert on ANY other new or unknown session — NEVER stop a session we did not create.
+  local other_lines osess oraw
+  other_lines="$(python3 - "$ALERT_OTHER_JSON" <<'PY'
 import json, sys
-target = sys.argv[2]
 for x in json.loads(sys.argv[1]):
-    if x["session"] == target:
-        continue
-    print("\t".join([x["session"], x.get("endpoint", ""), x.get("gpu", ""), x.get("raw_line", "")]))
+    print("\t".join([x.get("session", ""), x.get("raw_line", "")]))
 PY
 )"
-    if [ -n "$extra_lines" ]; then
-      while IFS=$'\t' read -r es eep egpu eraw; do
-        [ -n "$es" ] || continue
-        registry_append "launch_failed_assignment" "active" "$es" "$eep" "${egpu:-$gpu}" "$batch_name" "$state_file" "$eraw"
-        stop_and_verify_session "$es" "$before_asgn" "stopped_after_launch_failure" "$batch_name" "$state_file" "${egpu:-$gpu}" "$eep" || true
-        stopped_any=1
-      done <<< "$extra_lines"
-    fi
+  if [ -n "$other_lines" ]; then
+    while IFS=$'\t' read -r osess oraw; do
+      [ -n "$osess" ] || continue
+      write_alert "unknown_or_new_session_after_launch_failure session=${osess} batch=${batch_name} line=[${oraw}] (owner_safe:no_auto_stop)"
+    done <<< "$other_lines"
+  fi
 
-    if [ "$stopped_any" = "0" ] && [ "$ASGN_INCREASED" = "1" ]; then
-      # Assignment count rose even though `colab sessions` didn't list the name; attempt stop anyway + alert if unresolved.
-      registry_append "launch_failed_assignment" "active" "$session_name" "" "$gpu" "$batch_name" "$state_file" ""
-      stop_and_verify_session "$session_name" "$before_asgn" "stopped_after_launch_failure" "$batch_name" "$state_file" "$gpu" "" || true
+  # If this was a fresh `colab new` attempt: the ONLY session that may be stopped is the exact
+  # name THIS attempt passed to `colab new -s <name>`, and ONLY if:
+  #   (a) that exact name appears verbatim in fresh `colab sessions` (`FOUND_TARGET == 1`), AND
+  #   (b) it is recorded in our registry for this attempt.
+  # If our name is NOT listed verbatim -> NO `colab stop` call at all.
+  if [ -z "$reuse_session" ]; then
+    if [ "$FOUND_TARGET" = "1" ]; then
+      registry_append "launch_failed_assignment" "active" "$session_name" "$TARGET_ENDPOINT" "$TARGET_GPU" "$batch_name" "$state_file" "$TARGET_RAW"
+      if registry_has_active_session "$session_name" "$batch_name"; then
+        stop_and_verify_session "$session_name" "$before_asgn" "stopped_after_launch_failure" "$batch_name" "$state_file" "$TARGET_GPU" "$TARGET_ENDPOINT" || true
+      else
+        write_alert "refusing_stop_registry_mismatch session=${session_name} batch=${batch_name} (owner_safe:no_auto_stop)"
+      fi
+    elif [ "$ASGN_INCREASED" = "1" ]; then
+      write_alert "assignment_increased_without_named_session expected_session=${session_name} batch=${batch_name} before_asgn=${before_asgn} (owner_safe:no_auto_stop)"
     fi
   fi
 
-  if grep -iEq 'too many assignments|toomanyassignments|assignment limit|maximum.*assignments|exceeded.*assignments|max.*concurrent.*assignments' "$launch_log"; then
-    log_msg "detected too-many-assignments error from colab CLI during launch of ${bid} (gpu=${gpu})"
+  if [ "$LAST_LAUNCH_ERROR_CLASS" = "too_many_assignments" ]; then
+    log_msg "detected too-many-assignments error (error_class=too_many_assignments) from colab CLI during launch of ${bid} (gpu=${gpu})"
     LAST_LAUNCH_STATUS="TOO_MANY_ASSIGNMENTS"
   else
     LAST_LAUNCH_STATUS="FAILED"
@@ -1284,8 +1627,8 @@ PY
     exit 11
   fi
 
-  # 6) Rent attempts (Requirement 6): A100 -> G4 -> L4 every RENT_INTERVAL (20 min) up to DEADLINE,
-  # supporting up to MAX_CONCURRENT_VMS (2).
+  # 6) Rent attempts (Requirement 6): T4 -> L4 -> G4 -> A100 (H100 excluded — no quota) every RENT_INTERVAL (20 min)
+  # up to DEADLINE, supporting up to MAX_CONCURRENT_VMS (2) and launching the first two pending batches in parallel.
   if [ "$NOW" -lt "$DEADLINE_EPOCH" ] && [ "$PENDING_N" -gt 0 ] && [ "$ACTIVE_N" -lt "$MAX_CONCURRENT_VMS" ] \
      && { [ "$LAST_RENT_ATTEMPT_TS" -eq 0 ] || [ $((NOW - LAST_RENT_ATTEMPT_TS)) -ge "$RENT_INTERVAL" ]; }; then
     rent_cycle_blocked=0
