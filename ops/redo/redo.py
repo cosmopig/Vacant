@@ -396,6 +396,9 @@ def usage_from_devin_log(log_path: pathlib.Path) -> dict | None:
         outp = int(fm.get("total_completion_tokens") or outp)
         cr = int(fm.get("total_cached_tokens") or cr)
     ts = [x.get("timestamp") for x in steps if x.get("timestamp")]
+    if fm is None:      # 回合沒正常結束（逾時被殺／錯誤）：匯出可能不完整 ⇒ 用量記「缺」，不是 0、也不是部分加總
+        inp = outp = cr = 0
+        ag = []
     # 這一跑以錯誤結束時，CLI 把 "Error: Agent error: ..." 印在 agent.log（匯出裡沒有這個欄位）
     ferr = None
     try:
@@ -403,9 +406,9 @@ def usage_from_devin_log(log_path: pathlib.Path) -> dict | None:
         ferr = m.group(1) if m else None
     except OSError:
         pass
-    return {"calls": len(ag), "errors": 1 if ferr else 0, "final_error": ferr, "cost_usd": None,
+    return {"calls": len(ag) if fm else None, "errors": 1 if ferr else 0, "final_error": ferr, "cost_usd": None,
             "num_turns": (fm or {}).get("total_steps"), "input": inp or None, "output": outp or None,
-            "cache_read": cr, "cache_create": None, "uncached_input": inp - cr if inp else None,
+            "cache_read": cr if fm else None, "cache_create": None, "usage_missing": fm is None, "uncached_input": inp - cr if inp else None,
             "terminal_reason": None, "first_ts": ts[0] if ts else None, "last_ts": ts[-1] if ts else None}
 
 
