@@ -1,4 +1,4 @@
-# Devin worker 隔離：負控制／正控制（修正 5，2026-11-27）
+# Devin worker 隔離：負控制／正控制（雲端修正 C5，2026-11-27）
 
 腳本：`ops/redo/devin_negctl.py`（真 Devin、`swe-2-flash-medium`、費用 0）；機制：`ops/redo/devin_sandbox_agent.py`。
 最終結果 **`negctl_4.json`：42/42 通過**（36 個禁止探針、6 個正控制），在任何真實嘗試之前。
