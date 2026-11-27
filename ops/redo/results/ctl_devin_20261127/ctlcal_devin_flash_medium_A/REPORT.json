@@ -1,0 +1,254 @@
+{
+ "control": "A",
+ "generated": "2026-11-27T04:34:45Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "71a281b3ece96738308df2b623f34910a2a7fbce2382fbe6ac025685dd3a6e51"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 34,
+  "control_only_b": 0,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 0,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 3,
+  "treatment_only_c": 0
+ },
+ "pairs_complete": 37,
+ "pairs_infra_void": [],
+ "pairs_planned": 37,
+ "pairs_scored": 37,
+ "per_arm": {
+  "A": {
+   "accepted": 37,
+   "accepted_but_wrong": 3,
+   "cells": 37,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 91.4,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 6.0,
+   "model_calls_known_cells": 37,
+   "pass": 34,
+   "rate": 0.9189,
+   "scored": 37,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 0,
+   "ctrl_pass": 34,
+   "p": 1.0,
+   "pairs": 37,
+   "treat_pass": 34
+  }
+ },
+ "per_task": {
+  "ex_all_your_base": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_atbash_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_bank_account": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_binary": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_binary_search_tree": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_camicia": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_change": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_circular_buffer": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_complex_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_custom_set": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_dnd_character": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_flower_field": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_high_scores": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_killer_sudoku_helper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_kindergarten_garden": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_largest_series_product": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_linked_list": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_luhn": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_meetup": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_minesweeper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_ocr_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_octal": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_palindrome_products": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_pascals_triangle": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_prime_factors": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_queen_attack": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rational_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_say": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_scrabble_score": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_series": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_simple_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_sublist": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_swift_scheduling": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_tournament": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_twelve_days": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_word_search": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_yacht": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  }
+ },
+ "plan_id": "ctlcal_devin_flash_medium_A",
+ "plan_sha256": "88f9fcaa7d117e183907ebaca2265ea079108767b1cfa68373e27d403ef1eb75",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 3,
+  "accept_pass": 34,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 0,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "A"
+}

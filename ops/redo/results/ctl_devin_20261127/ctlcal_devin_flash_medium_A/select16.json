@@ -1,0 +1,61 @@
+{
+ "n": 7,
+ "tasks": [
+  "ex_dnd_character",
+  "ex_pascals_triangle",
+  "ex_yacht",
+  "ex_all_your_base",
+  "ex_atbash_cipher",
+  "ex_bank_account",
+  "ex_binary"
+ ],
+ "class1_fail_ge30": [
+  "ex_dnd_character",
+  "ex_pascals_triangle",
+  "ex_yacht"
+ ],
+ "class2_fail_lt30": [],
+ "class3_pass_available": [
+  "ex_all_your_base",
+  "ex_atbash_cipher",
+  "ex_bank_account",
+  "ex_binary",
+  "ex_binary_search_tree",
+  "ex_camicia",
+  "ex_change",
+  "ex_circular_buffer",
+  "ex_complex_numbers",
+  "ex_custom_set",
+  "ex_flower_field",
+  "ex_high_scores",
+  "ex_killer_sudoku_helper",
+  "ex_kindergarten_garden",
+  "ex_largest_series_product",
+  "ex_linked_list",
+  "ex_luhn",
+  "ex_meetup",
+  "ex_minesweeper",
+  "ex_ocr_numbers",
+  "ex_octal",
+  "ex_palindrome_products",
+  "ex_prime_factors",
+  "ex_queen_attack",
+  "ex_rational_numbers",
+  "ex_say",
+  "ex_scrabble_score",
+  "ex_series",
+  "ex_simple_cipher",
+  "ex_sublist",
+  "ex_swift_scheduling",
+  "ex_tournament",
+  "ex_twelve_days",
+  "ex_word_search"
+ ],
+ "pass_picked": [
+  "ex_all_your_base",
+  "ex_atbash_cipher",
+  "ex_bank_account",
+  "ex_binary"
+ ],
+ "below_floor_12": true
+}

@@ -128,3 +128,11 @@
   - 沙箱：Devin 的 Bash 走其內建 `--sandbox`（bwrap＋seccomp，研究預覽）；檔案工具的邊界以負控制實測為準，實際強制範圍寫在 `ops/redo/results/ctl_devin_20261127/`。
   - 遠端模型別名之後可能指向別的版本；Devin 的模型可能見過 Exercism 公開參考解（無法排除）。
 - **限制**：校準只做一次（A 單次、37 題）；這是校準，不是效果量測；選題依 A 結果會有回歸均值。
+
+### 修正 5 實測補記（2026-11-27，Devin 校準之後；四臂批次未啟動）
+- 沙箱：mount namespace（bwrap，整個 CLI）＋ deny 規則＋ Devin `--sandbox`；負控制 `ops/redo/results/ctl_devin_20261127/negctl_4.json` 42/42（強制邊界與缺陷見同目錄 `NEGCTL.md`；
+  只靠規則時 exec 內 python 讀得到兄弟工作區，已用 mount namespace 修掉）。
+- 並行：jobs＝8（12 起帳號層級限流，`THROUGHPUT.md`）。
+- 校準（`swe-2-flash-medium`、A 單次、37 題、獨立評分）：**hidden 全過 34/37＝91.9%**（比例平均 0.990），可見驗收 37/37，infra_void 0、逾時 0。
+  ≥70% ⇒ 依任務規定**不再試更弱設定、停下回報**。未過：ex_dnd_character 9/10、ex_pascals_triangle 4/5、ex_yacht 14/15。
+  修正 3 選題規則在這個結果下只湊得出 7 題（<12 的下限）⇒ 先回報、不啟動批次。落在 25–70% 帶內的 (模型, 題池)：本池沒有。
