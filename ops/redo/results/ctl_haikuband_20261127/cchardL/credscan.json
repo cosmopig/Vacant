@@ -1,0 +1,211 @@
+{
+ "files_scanned": 721,
+ "hits": 41,
+ "detail": [
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1575C/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1586G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1566G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1572D/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1599I/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1558E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1603D/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1580F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1620G/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "taaa"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1620G/r1/A/attempt_1/workspace/goal.md",
+   "rule": "b64",
+   "head": "aaaa"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1620G/r1/A/attempt_1/workspace/cases.json",
+   "rule": "b64",
+   "head": "naaa"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1620G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1555F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1552G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1548C/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1580D/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1580B/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1558D/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1574F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1575F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1580E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1553I/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1613F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1572F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1608E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1599A/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "RLLR"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1599A/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1575E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1572C/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1608G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1553H/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1608F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1599E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1601E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1603E/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1552I/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1569F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1599F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1603F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1601F/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_cchardL_A/cells/cc_1582G/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  }
+ ]
+}

@@ -1,3 +1,2 @@
-Fri Nov 27 06:36:58 UTC 2026
-cells 322 /468 pass 313 void 0 attempts 334 cost 7.607
-note: launcher hit its 2h background limit at 06:12Z and was resumed (resume skips completed cells)
+Fri Nov 27 04:50:30 UTC 2026
+cells 103 /468 pass 102 void 0 attempts 105 cost 2.161

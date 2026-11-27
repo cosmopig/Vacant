@@ -1,0 +1,41 @@
+{
+ "sandbox": {
+  "enabled": true,
+  "failIfUnavailable": true,
+  "allowUnsandboxedCommands": false,
+  "filesystem": {
+   "denyRead": [
+    "/home",
+    "/root",
+    "/opt/ctlwork",
+    "/mnt",
+    "/srv",
+    "/tmp",
+    "/var/tmp",
+    "/var/ctlws"
+   ],
+   "allowRead": [
+    "/var/ctlws/redo-negctl-self/w"
+   ],
+   "allowWrite": [
+    "/var/ctlws/redo-negctl-self/w"
+   ]
+  }
+ },
+ "permissions": {
+  "deny": [
+   "Read(//home/**)",
+   "Edit(//home/**)",
+   "Read(//root/**)",
+   "Edit(//root/**)",
+   "Read(//opt/ctlwork/**)",
+   "Edit(//opt/ctlwork/**)",
+   "Read(//mnt/**)",
+   "Edit(//mnt/**)",
+   "Read(//srv/**)",
+   "Edit(//srv/**)",
+   "WebFetch",
+   "WebSearch"
+  ]
+ }
+}
