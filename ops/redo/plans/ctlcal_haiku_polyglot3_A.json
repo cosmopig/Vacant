@@ -1,0 +1,109 @@
+{
+ "id": "ctlcal_haiku_polyglot3_A",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/opt/ctlwork/bm_tasks/polyglot3",
+ "bank_candidates": [
+  "/opt/ctlwork/bm_tasks/polyglot3"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  }
+ },
+ "pair": [
+  "A",
+  "A"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-claude-agent-poly",
+   "{logs}",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "REDO_WS_ROOT": "/var/ctlws"
+  },
+  "usage": "claude_stream_json",
+  "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable"
+ },
+ "providers": [
+  {
+   "name": "claude_haiku",
+   "provider": "anthropic",
+   "model": "haiku",
+   "jobs": 4
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "solution_test.py"
+  ],
+  "timeout_s": 400
+ },
+ "grader": {
+  "timeout_s": 900,
+  "suite_timeout_s": 600,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "pg3_cpp_all_your_base",
+  "pg3_cpp_allergies",
+  "pg3_cpp_bank_account",
+  "pg3_cpp_binary_search_tree",
+  "pg3_cpp_circular_buffer",
+  "pg3_cpp_complex_numbers",
+  "pg3_cpp_dnd_character",
+  "pg3_cpp_kindergarten_garden",
+  "pg3_cpp_linked_list",
+  "pg3_cpp_parallel_letter_frequency",
+  "pg3_cpp_perfect_numbers",
+  "pg3_cpp_phone_number",
+  "pg3_cpp_queen_attack",
+  "pg3_cpp_sublist",
+  "pg3_cpp_yacht",
+  "pg3_go_react",
+  "pg3_go_simple_linked_list",
+  "pg3_rust_accumulate",
+  "pg3_rust_acronym",
+  "pg3_rust_book_store",
+  "pg3_rust_bowling",
+  "pg3_rust_grade_school",
+  "pg3_rust_luhn_from",
+  "pg3_rust_nucleotide_codons",
+  "pg3_rust_ocr_numbers",
+  "pg3_rust_parallel_letter_frequency",
+  "pg3_rust_react",
+  "pg3_rust_say",
+  "pg3_rust_variable_length_quantity",
+  "pg3_rust_word_count"
+ ],
+ "reps": 1,
+ "prereg": {
+  "purpose": "校準（不進正式分析）：Haiku 單次 A 臂，Aider polyglot（C++／Go／Rust，每測試函式切可見／hidden），hidden 半獨立評分；預註冊 decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HAIKUBAND.md 候選 2。jobs=4。",
+  "worker": "Claude Haiku（claude -p --model haiku），沙箱 ops/redo/claude_sandbox_agent_poly.py（只加 PATH／快取目錄環境變數）",
+  "exploratory_only": "不作任何效果宣稱；不依結果調整控制器門檻。",
+  "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。"
+ }
+}

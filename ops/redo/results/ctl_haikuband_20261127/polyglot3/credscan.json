@@ -1,0 +1,191 @@
+{
+ "files_scanned": 650,
+ "hits": 37,
+ "detail": [
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_luhn_from/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "na64"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_luhn_from/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_bank_account/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_perfect_numbers/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_yacht/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_variable_length_quantity/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_sublist/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_kindergarten_garden/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_word_count/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_binary_search_tree/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_all_your_base/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_go_react/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "nd6a"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_go_react/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_dnd_character/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_go_simple_linked_list/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "nb2c"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_go_simple_linked_list/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_acronym/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_accumulate/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "n0e9"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_accumulate/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_book_store/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_grade_school/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_parallel_letter_frequency/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_complex_numbers/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_nucleotide_codons/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "n32f"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_nucleotide_codons/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_circular_buffer/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_queen_attack/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_react/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_linked_list/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "n681"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_linked_list/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_allergies/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_bowling/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_ocr_numbers/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_say/r1/A/attempt_1/agent.log",
+   "rule": "b64",
+   "head": "n8e6"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_say/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_cpp_phone_number/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_haiku_polyglot3_A/cells/pg3_rust_parallel_letter_frequency/r1/A/attempt_1/logs/home/.claude/policy-limits.json.signature.json",
+   "rule": "b64",
+   "head": "eyJh"
+  }
+ ]
+}
