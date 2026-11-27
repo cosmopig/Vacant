@@ -285,6 +285,12 @@ if [ "$SKIP_INSTALL" = "0" ]; then
     uv pip install -q -p "${VLLM_VENV}/bin/python" "vllm==${VLLM_VERSION}" >> "$SETUP_LOG" 2>&1
   fi
   log "vLLM ready: $("${VLLM_VENV}/bin/python" -c 'import vllm, torch; print(f"vllm={vllm.__version__} torch={torch.__version__} cuda={torch.version.cuda}")')"
+
+  # 1e) Ensure cryptography is available to system python3 (required by redo.py controller arms)
+  if ! python3 -c 'import cryptography' >/dev/null 2>&1; then
+    log "Installing cryptography>=42 for system python3 (required by controller arms)"
+    python3 -m pip install -q 'cryptography>=42' >> "$SETUP_LOG" 2>&1
+  fi
 fi
 
 # 2) Render pi models.json before starting/checking server.

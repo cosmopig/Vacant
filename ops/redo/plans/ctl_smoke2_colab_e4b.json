@@ -1,0 +1,94 @@
+{
+ "id": "ctl_smoke2_colab_e4b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl_smoke4"
+ ],
+ "arms": {
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 2,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_matrix",
+  "ex_point_mutations"
+ ],
+ "reps": 1,
+ "prereg": {
+  "purpose": "Colab 平行線冒煙與機制驗證（不進正式 16 題批次）：用 ctl_smoke4 的 2 題（ex_matrix、ex_point_mutations），在 Colab GPU VM 上以 vLLM 0.30.0 服務 google/gemma-4-E4B-it-qat-w4a16-ct（--tool-call-parser gemma4 --reasoning-parser gemma4、tool_chat_template_gemma4.jinja、max_model_len 131072、colab-vllm-nothink），驗證證據控制器（C）與失敗回饋重開（B）兩臂的模型呼叫、工具呼叫執行、簽章鏈與隱藏半評分皆端到端跑通。Colab VM 上不套 bwrap（容器內無 bwrap／非特權 user namespace，且一次性 Colab VM 上沒有任何本機宿主檔案可外洩）。",
+  "bank_split": "由 ops/redo/banks/build_ctl16.py --smoke4 以固定種子 20261127 切半（驗收半在 workspace/、隱藏評分半在 hidden/ + scorer.py），並打包上傳至 Colab VM 的 /srv/redo/bank。",
+  "infra_void": "基礎設施失敗（agent 起不來、工作區未動且 0 次成功模型呼叫或連線錯誤、跑到一半模型連線錯誤）記 void 不算嘗試（最多重試 4 次）；仍失敗該格標 infra_void、不進分母並逐一列出。",
+  "exploratory_only": "本冒煙只驗基礎設施與工具呼叫是否端到端跑通，不作任何效果宣稱，亦不依冒煙結果調整正式批次或控制器門檻。"
+ }
+}

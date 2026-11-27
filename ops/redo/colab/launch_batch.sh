@@ -242,7 +242,7 @@ if [ "$DRY_RUN" = "1" ]; then
   echo "[dry-run] bank=${BANK_ABS}"
   echo "[dry-run] vllm_config=${VLLM_CFG_ABS}"
   echo "[dry-run] local_out_dir=${OUT_DIR} state_file=${STATE_FILE}"
-  echo "[dry-run] git -C $(printf '%q' "$REPO_ROOT") archive --format=tar.gz --prefix=repo/ -o $(printf '%q' "$REPO_TAR_LOCAL") $(printf '%q' "$COMMIT_SHA") -- ops/redo"
+  echo "[dry-run] git -C $(printf '%q' "$REPO_ROOT") archive --format=tar.gz --prefix=repo/ -o $(printf '%q' "$REPO_TAR_LOCAL") $(printf '%q' "$COMMIT_SHA") -- ops/redo vacant_network"
   echo "[dry-run] tar -czf $(printf '%q' "$BANK_TAR_LOCAL") -C $(printf '%q' "$BANK_ABS") ."
   echo "[dry-run] $(fmt_cmd "${NEW_CMD[@]}")"
   echo "[dry-run] $(fmt_cmd "${COLAB_CMD[@]}" upload -s "$SESSION" "$REPO_TAR_LOCAL" "$REMOTE_REPO_TAR")"
@@ -263,7 +263,7 @@ fi
 mkdir -p "$STAGING_DIR"
 
 echo "1/6 Archiving frozen commit ${COMMIT_SHA} -> ${REPO_TAR_LOCAL}"
-git -C "$REPO_ROOT" archive --format=tar.gz --prefix=repo/ -o "$REPO_TAR_LOCAL" "$COMMIT_SHA" -- ops/redo
+git -C "$REPO_ROOT" archive --format=tar.gz --prefix=repo/ -o "$REPO_TAR_LOCAL" "$COMMIT_SHA" -- ops/redo vacant_network
 REPO_TAR_SHA=$(sha256sum "$REPO_TAR_LOCAL" | cut -d' ' -f1)
 
 echo "2/6 Archiving task bank ${BANK_ABS} -> ${BANK_TAR_LOCAL}"
