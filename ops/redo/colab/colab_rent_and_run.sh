@@ -25,7 +25,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || cd "${SCRIPT_DIR}/../../.." && pwd)"
+REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))"
 LAUNCH_SCRIPT="${SCRIPT_DIR}/launch_batch.sh"
 POLL_SCRIPT="${SCRIPT_DIR}/poll_batch.sh"
 FETCH_SCRIPT="${SCRIPT_DIR}/fetch_batch.sh"
@@ -247,6 +247,10 @@ for raw_line in out.splitlines():
     if not m:
         continue
     name, endpoint, rest = m.group(1).strip(), m.group(2).strip(), m.group(3)
+    # `[colab] Error: No active sessions…` / `[colab] Using unique session…` are CLI messages, not sessions:
+    # a real session line carries a `Hardware:` field.
+    if name == "colab" or "Hardware:" not in rest:
+        continue
     hw_m = re.search(r"Hardware:\s*([^|\s]+)", rest)
     gpu = hw_m.group(1).strip() if hw_m else ""
     sessions.append({
