@@ -1,0 +1,177 @@
+{
+  "bank_id": "ctl_smoke4",
+  "created": "2026-11-27T02:21:35Z",
+  "files_sha256": {
+    "ex_acronym/hidden/acronym_test.py": "beb7db44073cde1370ce7f055830910d73a94d3b393a51e4f01391d68a7c1c65",
+    "ex_acronym/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_acronym/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_acronym/workspace/acronym_test.py": "4a5c98a8c7a4a32766441406733cb49235f673b16c6e2f70760378a6efad350f",
+    "ex_acronym/workspace/contract.md": "cb2f0331aad8a57dd4afee16f9b8e54328c87ece54ef3b3cede40f9477c0f5ad",
+    "ex_acronym/workspace/goal.md": "772c1af1c2bd3064fc6efd98cc0bf63ecb3ddfaf7532c3c2b5c75a862b464b24",
+    "ex_bob/hidden/bob_test.py": "9a1576bbb354722d4e03762304d4e80aa1e115133423fa71eda44e75e4a0fa2a",
+    "ex_bob/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_bob/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_bob/workspace/bob_test.py": "26a2a8d1ead43889e56b28a0ae5ebe5b72ff9074625d315d86a4c2ea8b24aedd",
+    "ex_bob/workspace/contract.md": "ec4d68616709b7e113cda06875910cf2c02cfe1d408919fe2cdaa0323de21038",
+    "ex_bob/workspace/goal.md": "810f3d27ac3122cd83de440217a7dbb5f93bf490879b8888f450614cdaebdca5",
+    "ex_matrix/hidden/matrix_test.py": "1c148e6b7c5033a3407d003cb5dc76f8344af6b03869e7c26391e0f1bdc5de3d",
+    "ex_matrix/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_matrix/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_matrix/workspace/contract.md": "873d96820f5b1578eabc6364d61e8567f6cdd9f08da7381932ba594e73c9750c",
+    "ex_matrix/workspace/goal.md": "b9705a0850861af5699b3cf3ae54aee6869aaf08c0a4491e235890256ed6b970",
+    "ex_matrix/workspace/matrix_test.py": "9508d8a86a0059095b9b3216508756cce53d8537d00cd32a7f0489a961164998",
+    "ex_point_mutations/hidden/point_mutations_test.py": "3c31a076140fb68cb9e15ac4f7832f5a3b7452b9abeb5a446e20a7401625a17a",
+    "ex_point_mutations/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_point_mutations/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_point_mutations/workspace/contract.md": "e86c039887f56dc2bf6c0242078fcbbd9f94455c00751dfa89325a8c87812d4d",
+    "ex_point_mutations/workspace/goal.md": "24ea074b4386583d9e03bf31a6fde6d32759cf2089d0bf01c70356b52e1cd37b",
+    "ex_point_mutations/workspace/point_mutations_test.py": "d7009c158ffbaff53d5e266d6ea7eeb8fe0c1c34a7058c06d679cf2c546a8818"
+  },
+  "n_tasks": 4,
+  "schema": "vacant.redo.ctl_bank/1",
+  "seed": 20261127,
+  "source_pool": "/opt/ctlwork/bm_tasks/all_py",
+  "task_order": [
+    "ex_matrix",
+    "ex_point_mutations",
+    "ex_acronym",
+    "ex_bob"
+  ],
+  "tasks": {
+    "ex_acronym": {
+      "acceptance_tests": [
+        "AcronymTest.test_basic",
+        "AcronymTest.test_all_caps_word",
+        "AcronymTest.test_punctuation_without_whitespace",
+        "AcronymTest.test_underscore_emphasis"
+      ],
+      "hidden_tests": [
+        "AcronymTest.test_lowercase_words",
+        "AcronymTest.test_punctuation",
+        "AcronymTest.test_very_long_abbreviation",
+        "AcronymTest.test_consecutive_delimiters",
+        "AcronymTest.test_apostrophes"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "acronym.py",
+      "test_file": "acronym_test.py",
+      "total_tests": 9,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 4,
+          "acceptance_total": 4,
+          "example_sha256": "71992b8294815270e503c81ed38a850145203225d0af005e3d4fd744a3dac91f",
+          "hidden_passed": 5,
+          "hidden_total": 5,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_bob": {
+      "acceptance_tests": [
+        "BobTest.test_shouting",
+        "BobTest.test_forceful_question",
+        "BobTest.test_stating_something",
+        "BobTest.test_asking_a_numeric_question",
+        "BobTest.test_asking_gibberish",
+        "BobTest.test_question_with_no_letters",
+        "BobTest.test_prattling_on",
+        "BobTest.test_ending_with_whitespace",
+        "BobTest.test_shouting_gibberish",
+        "BobTest.test_prolonged_silence",
+        "BobTest.test_other_whitespace",
+        "BobTest.test_using_acronyms_in_regular_speech",
+        "BobTest.test_starting_with_whitespace"
+      ],
+      "hidden_tests": [
+        "BobTest.test_asking_a_question",
+        "BobTest.test_silence",
+        "BobTest.test_non_letters_with_question",
+        "BobTest.test_multiple_line_question",
+        "BobTest.test_shouting_a_statement_containing_a_question_mark",
+        "BobTest.test_shouting_numbers",
+        "BobTest.test_shouting_with_special_characters",
+        "BobTest.test_shouting_with_no_exclamation_mark",
+        "BobTest.test_alternate_silence",
+        "BobTest.test_talking_forcefully",
+        "BobTest.test_no_letters",
+        "BobTest.test_statement_containing_question_mark",
+        "BobTest.test_non_question_ending_with_whitespace"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "bob.py",
+      "test_file": "bob_test.py",
+      "total_tests": 26,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 13,
+          "acceptance_total": 13,
+          "example_sha256": "f9162a6932c526d8ce23a710ddd488fb3c8e02115ba3bd9702a8da316b19242b",
+          "hidden_passed": 13,
+          "hidden_total": 13,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_matrix": {
+      "acceptance_tests": [
+        "MatrixTest.test_extract_row_from_one_number_matrix",
+        "MatrixTest.test_extract_row_where_numbers_have_different_widths",
+        "MatrixTest.test_extract_column_from_one_number_matrix",
+        "MatrixTest.test_can_extract_column"
+      ],
+      "hidden_tests": [
+        "MatrixTest.test_can_extract_row",
+        "MatrixTest.test_can_extract_row_from_non_square_matrix_with_no_corresponding_column",
+        "MatrixTest.test_can_extract_column_from_non_square_matrix_with_no_corresponding_row",
+        "MatrixTest.test_extract_column_where_numbers_have_different_widths"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "matrix.py",
+      "test_file": "matrix_test.py",
+      "total_tests": 8,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 4,
+          "acceptance_total": 4,
+          "example_sha256": "ef0e9fb9763f955fdd663c7f736cb6dccd91575884609ae1729210f7d1264adb",
+          "hidden_passed": 4,
+          "hidden_total": 4,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_point_mutations": {
+      "acceptance_tests": [
+        "PointMutationsTest.test_no_difference_between_empty_strands",
+        "PointMutationsTest.test_complete_hamming_distance_in_small_strand",
+        "PointMutationsTest.test_hamming_distance_in_off_by_one_strand",
+        "PointMutationsTest.test_small_hamming_distance_in_middle_somewhere"
+      ],
+      "hidden_tests": [
+        "PointMutationsTest.test_no_difference_between_identical_strands",
+        "PointMutationsTest.test_larger_distance",
+        "PointMutationsTest.test_ignores_extra_length_on_other_strand_when_longer",
+        "PointMutationsTest.test_ignores_extra_length_on_original_strand_when_longer"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "point_mutations.py",
+      "test_file": "point_mutations_test.py",
+      "total_tests": 8,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 4,
+          "acceptance_total": 4,
+          "example_sha256": "8ea998222378f1a62944fe721a1ff8ab82fd84c2ce0455b6e62f989e167d57ef",
+          "hidden_passed": 4,
+          "hidden_total": 4,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    }
+  }
+}

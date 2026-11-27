@@ -1,0 +1,1811 @@
+{
+  "bank_id": "ctl37",
+  "created": "2026-11-27T02:21:28Z",
+  "files_sha256": {
+    "ex_all_your_base/hidden/all_your_base_test.py": "bc4bb164c3f081ffbb82830a546baf21514eb43293fe5ff487d9355545279f2e",
+    "ex_all_your_base/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_all_your_base/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_all_your_base/workspace/all_your_base_test.py": "033538c95baf5a9bf7955a560318f60734257d042b66de914e92aabdb01628ad",
+    "ex_all_your_base/workspace/contract.md": "13439910f7bff8578b5e346d47ab26087e7c2dcc4b7625587ca0747930c1a3c7",
+    "ex_all_your_base/workspace/goal.md": "bedd0b2f848093a4f81349fb6c546b3a11d2632b220404dbb7c3eb02a48c18b2",
+    "ex_atbash_cipher/hidden/atbash_cipher_test.py": "cc0e4f24d2eb71e91bb3263608a56bd94461846a48518c338cee78541f12e460",
+    "ex_atbash_cipher/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_atbash_cipher/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_atbash_cipher/workspace/atbash_cipher_test.py": "1489cbb8dc98ba92438a4accdc6dfe44f01809044fa1bbb2f6ed98c816df9382",
+    "ex_atbash_cipher/workspace/contract.md": "147858fcfeded292119841c8e37b82140c90084fd11e50367b3867f1acf3aa3d",
+    "ex_atbash_cipher/workspace/goal.md": "bed40ef5a37640234fe3a4a1005c02054b31c2946ce242261d9e0b6c68d6ba39",
+    "ex_bank_account/hidden/bank_account_test.py": "34002ebc6ee4084df3de35a974d6700d6218c484c99ef8449d6bce4c1c9c4572",
+    "ex_bank_account/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_bank_account/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_bank_account/workspace/bank_account_test.py": "cb2da65454fd0aefb6351e271b601486934f6b8c24302597db7216668d255042",
+    "ex_bank_account/workspace/contract.md": "8903c616e388fcc97bb72a17c440b9e07aede662f404f8cfe90de6f63e568bd0",
+    "ex_bank_account/workspace/goal.md": "5b055928d112d39c8952cd20cbcb9e83abcc6ddf6bc9ab3007ac5a7b25268aa9",
+    "ex_binary/hidden/binary_test.py": "12b23e27b08336828a8b52a70044356767e35ee64b6d4d0de391e5b8e68512ee",
+    "ex_binary/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_binary/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_binary/workspace/binary_test.py": "405704ee6cac5f0e8ed8e765194e103c9aca7fd7b50e80e3f50c972d9e1e0d06",
+    "ex_binary/workspace/contract.md": "117c5c9452c1605b7041a35086b653d1d9776c310a51b8dc357406debbb224c1",
+    "ex_binary/workspace/goal.md": "75fb554f4f912a3807efb650194beeebd1d336d2a7666fa446c8f76dc0a7cae9",
+    "ex_binary_search_tree/hidden/binary_search_tree_test.py": "a4420254da2cc1ad507781192c3117ffe72145481dde083c1fa8c0c1c807e7ab",
+    "ex_binary_search_tree/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_binary_search_tree/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_binary_search_tree/workspace/binary_search_tree_test.py": "75f042957b66f2ce780b406b957c1596639fd6249a539d8f17558d392f6d61f0",
+    "ex_binary_search_tree/workspace/contract.md": "a2733df7e8f162902d20c81e2bca67d67387c3129571821dc83c39aa3741fb22",
+    "ex_binary_search_tree/workspace/goal.md": "f96d9e51481a318ceaa267fc1f0da31f2dda888266b8549ecb5fbe104d1becd7",
+    "ex_camicia/hidden/camicia_test.py": "372615206c5f5bdc305b65825b464184b17ee7d9e4b6df41410b3544ea3c975a",
+    "ex_camicia/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_camicia/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_camicia/workspace/camicia_test.py": "108ff962b876924fd9b67fbe45932c85aa104e04604fab429f16fe58f1f8b6f3",
+    "ex_camicia/workspace/contract.md": "718622542302c7e2b6468655c4352fb9d760d8bd69fa1f36564eea61b57d3b01",
+    "ex_camicia/workspace/goal.md": "0b1cb227f27866030b68af44d9a31f09b8203a0158f37f3519f495eefe35882b",
+    "ex_change/hidden/change_test.py": "ff34937d62722f6dcc602e395e12d9a2a3309e040aa4fd74c132abaa18a8fd4d",
+    "ex_change/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_change/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_change/workspace/change_test.py": "94d63649dd2a20423898eb4102024d18366fe2f140caef68587bdcd6368e7045",
+    "ex_change/workspace/contract.md": "947179bedb1c3c19989df7e843c5d703f15d2a45b13a293ee43b155df4a5e250",
+    "ex_change/workspace/goal.md": "01f77605c3b2b77247bfef470f658d49b666dd0f65dc631d22c0a172e5f77f3f",
+    "ex_circular_buffer/hidden/circular_buffer_test.py": "c0586084a40eabb4f8bae02188987dfbb31cd7ea9f03b3d6a0564ba85c9304f3",
+    "ex_circular_buffer/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_circular_buffer/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_circular_buffer/workspace/circular_buffer_test.py": "783f2b239ff8bd71c8539b3e4f7071330dd27229f75f9a1d45cb74786eb77b13",
+    "ex_circular_buffer/workspace/contract.md": "bb8170b43b8002b5b9c8846cc75b27b79c6fcbf5eab7c9d968c8556c46e11e59",
+    "ex_circular_buffer/workspace/goal.md": "e186844756b61744745b8cc37cbca3cb8d0291690e2ccda9db617916de49c778",
+    "ex_complex_numbers/hidden/complex_numbers_test.py": "78204d030be2ec5aa2123460e157103152cdf3999082726273ceb557714fbee7",
+    "ex_complex_numbers/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_complex_numbers/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_complex_numbers/workspace/complex_numbers_test.py": "d745b1952b407bb10a96ad90dc73a1fa40cbae69d85c396bd3ab31742045c30e",
+    "ex_complex_numbers/workspace/contract.md": "1778c43c7831c522dbcc005d65aa694ad2f06b645a3f47ad26376c0f5f899809",
+    "ex_complex_numbers/workspace/goal.md": "0519e65e1f46cb7ad969ff7a9ce5cc7485e5098b75bc444a04c1b2fbb0bba3d7",
+    "ex_custom_set/hidden/custom_set_test.py": "d9889d45319bd52b7a5101d66a4ea59b4024cfb178f6ecfda851ece0a988e6d9",
+    "ex_custom_set/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_custom_set/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_custom_set/workspace/contract.md": "644e4d7f42c6bb3b36350ce6c043b9075fe1b883e4a3a23cad7e8a0063349dca",
+    "ex_custom_set/workspace/custom_set_test.py": "87b0e9fcea7c9af6e12f27bb8762a84eee895fb23a041837d8f7703bf2e45fac",
+    "ex_custom_set/workspace/goal.md": "2c1f80439e843b6264113d687aa0bc9a2d8314759e987cd163474a50c237f81d",
+    "ex_dnd_character/hidden/dnd_character_test.py": "1d347994a32d4fc25e37fb6c3ae098c2eb82e4326036ccfffc08a699b7af4e15",
+    "ex_dnd_character/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_dnd_character/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_dnd_character/workspace/contract.md": "e440108d02a4e6482fe53ad6875534bc72cca4a7d8caa81bbf1e44def0f93ce2",
+    "ex_dnd_character/workspace/dnd_character_test.py": "93a34ea5c0a6a19f8ccf4d38925ec95069f981fab43fa357a813d8afa7fb3b61",
+    "ex_dnd_character/workspace/goal.md": "289bfe2a6471256fd95171707a3a432b7af35ee1b63c01dfa2cf1a613f3118b4",
+    "ex_flower_field/hidden/flower_field_test.py": "26e8e8fc9e54077d66b433c7f10e8774a070c20ed6b21605879d7c7856838f00",
+    "ex_flower_field/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_flower_field/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_flower_field/workspace/contract.md": "41fa919fc6719ce6f7256077343ae6f9deea00dece2e2a7a0d4f424ac0971b2b",
+    "ex_flower_field/workspace/flower_field_test.py": "a4a8266a762c8baefe3cc753428efe80ad5bc42c7f3433115364c8805c3ced38",
+    "ex_flower_field/workspace/goal.md": "2336f3047a1d80d20f39786f4e0742287b068a38ba8e5657df1f266642c14266",
+    "ex_high_scores/hidden/high_scores_test.py": "881392a9d2e738b784d98a9775e1c691eda9748debebdc831a20555fb0853c5e",
+    "ex_high_scores/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_high_scores/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_high_scores/workspace/contract.md": "12d4765d03c25941ca96031e710b455ebd7b35a6cc92fceab59495870d4f9ce0",
+    "ex_high_scores/workspace/goal.md": "b45ffe34e5b6cfa997df56046ea8d4d730f4cd4388cfb35e332243d5379f98e1",
+    "ex_high_scores/workspace/high_scores_test.py": "5e33853edfb7ad8877a3ed2b0a509dee113e562415cd49133158a12a61d2e50e",
+    "ex_killer_sudoku_helper/hidden/killer_sudoku_helper_test.py": "2d58e13685782b0f1513f32d2b94bba4f43a33301a27f31e746cca1010b476b5",
+    "ex_killer_sudoku_helper/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_killer_sudoku_helper/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_killer_sudoku_helper/workspace/contract.md": "e56140426a2071cdbe2d5fef18d9d448e76979c38704c1e81dbef79af5e72ca4",
+    "ex_killer_sudoku_helper/workspace/goal.md": "629626bf0f7c64d4f2486120d2631855f5d3d7b6e09c577293b24811f66c8139",
+    "ex_killer_sudoku_helper/workspace/killer_sudoku_helper_test.py": "ca34d79b567f170e5c4ff85d9f6cf297f5cd42951946d2ec81491facd5a72dcf",
+    "ex_kindergarten_garden/hidden/kindergarten_garden_test.py": "87932d0f1e26c0d3fca12b3be4ec4e8fd04f36044c5063cc879a2117a4ed002f",
+    "ex_kindergarten_garden/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_kindergarten_garden/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_kindergarten_garden/workspace/contract.md": "bb2c0e2f36527bd345f0dddc8284803f94991063f0975f225c3522da6843abbc",
+    "ex_kindergarten_garden/workspace/goal.md": "46fbdc135f1602f8b39763eb929dcddf0bf4557e9ab1aaf60a99b7348ea8ce0c",
+    "ex_kindergarten_garden/workspace/kindergarten_garden_test.py": "e2b137b65d2726c2d891785f1a33050435628dc797c44d73983ca3dfd9e5c3ae",
+    "ex_largest_series_product/hidden/largest_series_product_test.py": "ef97c28035b6ae0a6aa38e9c16d65f3cc02d7ba5750b32b1fe423e41dd681faf",
+    "ex_largest_series_product/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_largest_series_product/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_largest_series_product/workspace/contract.md": "86fd3d42e5ec0577310bb477f414e1066d8f5d4854a69d2c50e70a1ff2e915c6",
+    "ex_largest_series_product/workspace/goal.md": "6075e3317b1d1d67a5903caf20c144fd9568f11b15aa193b987fa46101245339",
+    "ex_largest_series_product/workspace/largest_series_product_test.py": "f81415e5fb0f1c4b869689102a43575e10a360d4b76df4e1b9208fb57aee1a14",
+    "ex_linked_list/hidden/linked_list_test.py": "e46daa3c52625a77f45337d52933e1dec9493282a9927e5ff1ddf169751c9877",
+    "ex_linked_list/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_linked_list/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_linked_list/workspace/contract.md": "47363a19b9b7924475a71530eab1c455a90b380b473796c093238bec9e2d8202",
+    "ex_linked_list/workspace/goal.md": "b546b5ecbfac371d980227a3516ffb0b990005af7b76ffdc8da5231da42efca0",
+    "ex_linked_list/workspace/linked_list_test.py": "a34bc62861da25c095d102230777d617641e88f6de48f68a7a702e9dddb90399",
+    "ex_luhn/hidden/luhn_test.py": "97c7746b45195e7c8daef30d15bc2e7165d7c08c387cafe321bde8d0b0f3b797",
+    "ex_luhn/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_luhn/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_luhn/workspace/contract.md": "6837bbebb1242fe12ed55d6682e77589bea5edaf17f3bed2c4e608f1d8992d19",
+    "ex_luhn/workspace/goal.md": "bf03a99ff7849b897f3214d7e3bc11c38af7049a61f17a8647b0eb7f127bf240",
+    "ex_luhn/workspace/luhn_test.py": "7ef863e352499f7247e733036b58c6edae1c2eb4e7c89bfd903a266559f96ff5",
+    "ex_meetup/hidden/meetup_test.py": "f273467d1594c17641538c00bf4fd7b242024292c7826fe7e0598b9c98b40024",
+    "ex_meetup/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_meetup/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_meetup/workspace/contract.md": "2cbfe89bc038b4ef081215e76b6eeb8fcbf4a3d134e927d720fd0b013497d605",
+    "ex_meetup/workspace/goal.md": "98f94bd24da4749ffe1eb815bbb794d4b24fe7df99e485160eee61393eabb478",
+    "ex_meetup/workspace/meetup_test.py": "38621544dc45d17332049b970b86045c721009c1b64cecfa3498dff03cecae18",
+    "ex_minesweeper/hidden/minesweeper_test.py": "59a314058b3169ea04e3670d1237c43f383e2d01bb18463d27ef3499b6ca49cc",
+    "ex_minesweeper/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_minesweeper/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_minesweeper/workspace/contract.md": "0fda3f08c0c6d96fcc68308bd6db066a26675e13eb0f41f355ac62a88c4895c5",
+    "ex_minesweeper/workspace/goal.md": "e746d52c641f31f952d83cd62c48a4f8b5dca89ee9b6902ccca640b1e7ad2cca",
+    "ex_minesweeper/workspace/minesweeper_test.py": "7c74cdfdde6fc4615a581e865bc7eb84e593c2f58878c45700ae1e2dc7eb49bf",
+    "ex_ocr_numbers/hidden/ocr_numbers_test.py": "1ceebce32c4b5c52fa568c9a4906ca5a9e8dbbeda2f1d656db32b9f823b3449f",
+    "ex_ocr_numbers/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_ocr_numbers/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_ocr_numbers/workspace/contract.md": "c5f2d8b5d6cfe6d7f21081542206fd37cc3e1c05711cd48ca4ea965580f798dc",
+    "ex_ocr_numbers/workspace/goal.md": "00fbcc9d18a9dc732a841702cc8568e5b095a240aeafc48798238704f7315c63",
+    "ex_ocr_numbers/workspace/ocr_numbers_test.py": "eae05108c79685c86431a87231f7e076665af17ae663569c4d2ef65043653816",
+    "ex_octal/hidden/octal_test.py": "224373f3c878cc950ae217dacd417f3d09b8fb7528a7e951a6777d0ed3a66238",
+    "ex_octal/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_octal/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_octal/workspace/contract.md": "59d3f8dddd05d3fb92be8d648d51c0bcf40c8aa66006aa872e6aa06fd7195088",
+    "ex_octal/workspace/goal.md": "8a445b79778ababa35f1046b23fa7d6355fd12b07bacd9c3bbc2552c05eee4c2",
+    "ex_octal/workspace/octal_test.py": "ce9f058aaf75bed0ead6b4af8fea0c19b3717196a926ba79a123ac87440bbc67",
+    "ex_palindrome_products/hidden/palindrome_products_test.py": "66646257a98d57efc7a58dbb718d5f691c02a5c11f2a201cc7290ce5a970cab5",
+    "ex_palindrome_products/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_palindrome_products/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_palindrome_products/workspace/contract.md": "4fbc91e9ea9775819d188cdfbfe2d033f5ada36c1df067993f6b6bf3186e588a",
+    "ex_palindrome_products/workspace/goal.md": "ea83ca27e70b6e63efa1cdaab2d1f8166a8d2f21b020ad44473a373339407caf",
+    "ex_palindrome_products/workspace/palindrome_products_test.py": "974bdbbd13d893d0e138da299048f21690a74d0b19a4c868f86f11c0eec0abd9",
+    "ex_pascals_triangle/hidden/pascals_triangle_test.py": "b860862889d42f7a12d754987d564d4fd24ec9ffd51b56dba2808d01d18a776c",
+    "ex_pascals_triangle/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_pascals_triangle/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_pascals_triangle/workspace/contract.md": "c2c41291b67e173c980601f833fcb742d3fa456a5b069a98e5917f0b99ade02e",
+    "ex_pascals_triangle/workspace/goal.md": "f728312d1e4ff7adfebd5aaf4e671605fa0765543d49e423e924c0a46484e131",
+    "ex_pascals_triangle/workspace/pascals_triangle_test.py": "68428ec263b0f7b4a2a1243426c07f84509f75d31ebf556b75d411857ba88f40",
+    "ex_prime_factors/hidden/prime_factors_test.py": "7316ce2a85155aedeb6340fced6682fabdfc7fdcd58a900666d5bb944c143c63",
+    "ex_prime_factors/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_prime_factors/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_prime_factors/workspace/contract.md": "10f22efd51760aeed373bbcaf74b03b51d0ac8447e1200b1dada9a9e33a3bcf2",
+    "ex_prime_factors/workspace/goal.md": "c48426c31cc9af4e079c094d3196ce26c0eb4dbd9a802825fd43833b4e550f07",
+    "ex_prime_factors/workspace/prime_factors_test.py": "a5efd0a39bc3d7c4660712873ea25d40fa04030905df9413ec343ba1ec562b81",
+    "ex_queen_attack/hidden/queen_attack_test.py": "f596721793b2adabe35e1d5b5a86f7212a5a074368f83d7b98165a07ec909f52",
+    "ex_queen_attack/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_queen_attack/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_queen_attack/workspace/contract.md": "33fe61e125f2f1b2936f7cae846443b3117eb018830d83e38183a747d6604935",
+    "ex_queen_attack/workspace/goal.md": "3432b569a3acf9969f48c2ff1bbade9e081b0d9573e23e6d590acd5c960a8fce",
+    "ex_queen_attack/workspace/queen_attack_test.py": "6c3346218e164b718d0064175c24229cdd1631079d80823da3be3315df1210d2",
+    "ex_rational_numbers/hidden/rational_numbers_test.py": "2dcaef660723afbec6ba170fc90e6806d5be720a2023b40d6e0b10420bff9e97",
+    "ex_rational_numbers/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_rational_numbers/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_rational_numbers/workspace/contract.md": "e44be20686cf1eb0a079981070ea7d2fea25dd58c54b5430a0b8cdb2d682d53b",
+    "ex_rational_numbers/workspace/goal.md": "982aefbb4814ff536d58bd076f3ee21ead2bb0c893d8cb776b8818eaabbc980d",
+    "ex_rational_numbers/workspace/rational_numbers_test.py": "79435fd77ff4f8fed2507d7836c5774726f5c73fc3bb60fddc185570242d8f8d",
+    "ex_say/hidden/say_test.py": "78a912c9635cdd6cc9e86e25829583b1e8c60b4976bf4d4e8cf882dac904ae8e",
+    "ex_say/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_say/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_say/workspace/contract.md": "0d1d69129cc354ed5ce0c8c69adb24cfbeb3d953790adc902289d5c82ab23272",
+    "ex_say/workspace/goal.md": "2caaee64b3108600188f20e9517c44469917d5fd903324df3732ca54f920fb4d",
+    "ex_say/workspace/say_test.py": "228df883473d8ecd7a782c72e63507ec2bb290d1ad7806b9d44893e79c3e4e86",
+    "ex_scrabble_score/hidden/scrabble_score_test.py": "11e7b93558c75e8b7d5af9a91e69f215123300d3ca489c412a8fa91fcd587f60",
+    "ex_scrabble_score/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_scrabble_score/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_scrabble_score/workspace/contract.md": "6c2006cec3645264d1984a0ac922065eea8568f6dc693426da3f6c253f3efd5b",
+    "ex_scrabble_score/workspace/goal.md": "307baa031c69df457280029cccc4653d7adc007dcef402b4ea2c0e7ee2e9f7c7",
+    "ex_scrabble_score/workspace/scrabble_score_test.py": "65fb86ed3ed8b7f9b4f55185d3a252493239ff431d6dc30ffc6792ce36704c70",
+    "ex_series/hidden/series_test.py": "dfaa5a11b3e6e4863dcdc23c0ba226f74f69264bd30b5d74338a661341090b53",
+    "ex_series/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_series/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_series/workspace/contract.md": "e1f695e534255b4950371b11e8675e3440a593cebb215932f1af7831744b0e6e",
+    "ex_series/workspace/goal.md": "594bdccdfbbb7afd405260855faeb44f8711b5a47dacd4ebcc16db13af3c6fe3",
+    "ex_series/workspace/series_test.py": "2c0cd8ea0ae958f637639a9537d97460bc8b696480667967db156cbc305bdfad",
+    "ex_simple_cipher/hidden/simple_cipher_test.py": "c31ca597f53b6d7dd9739ebb3378449d7218e330709f692255ccab360417b424",
+    "ex_simple_cipher/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_simple_cipher/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_simple_cipher/workspace/contract.md": "0d313d9cf144149bf2917ee2089dd72175db9e8c52dfebc3efe861096774219b",
+    "ex_simple_cipher/workspace/goal.md": "7591022534f51b8abac5854c96889ff75dd043d7aebffb035377890c54c0eb45",
+    "ex_simple_cipher/workspace/simple_cipher_test.py": "c155e39cd1b87ad30c42a0fd51010eb1272ab272f4c6625e8666c26a1f64f095",
+    "ex_sublist/hidden/sublist_test.py": "2d95d0c2a3321ca96b11f1f51a4014d748e3eafee8674da888a897a465ca5732",
+    "ex_sublist/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_sublist/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_sublist/workspace/contract.md": "50d7b6a1a23647e1663fa9be5801fab64720f8ca8e98e09c5e15f05d493afd44",
+    "ex_sublist/workspace/goal.md": "e2e0e3d2a34e366ec4e242a7c80fe93eb992f2233702655ffb45512c7e6a9dfd",
+    "ex_sublist/workspace/sublist_test.py": "c0276cda9e6addf41c14a956b32cdae58ec3b33e7a4a4a38427b2d5efaaf753b",
+    "ex_swift_scheduling/hidden/swift_scheduling_test.py": "2508a119f88c8e8e0442f5cff1abeabb770f6c39b451d8ca2adddad79eeca291",
+    "ex_swift_scheduling/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_swift_scheduling/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_swift_scheduling/workspace/contract.md": "a5d7ec1da3a8956340f43e9541f254233c0bbe63372003b9af22e8870a3aab94",
+    "ex_swift_scheduling/workspace/goal.md": "abebc7a7558ec73216b6f646b33ec3d66eb9785a9cc8603adf6f455001eebd21",
+    "ex_swift_scheduling/workspace/swift_scheduling_test.py": "c919919b3c7b5bc6099a31c5467a6dbe1aa22a87ae3ef5ca49099687c62939d0",
+    "ex_tournament/hidden/tournament_test.py": "498df679613c03e7909d86a6e4397547a00d5af54a476d50c75a56b3e52cc507",
+    "ex_tournament/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_tournament/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_tournament/workspace/contract.md": "62d38686883da879edcefa1d7a2edfe065b7ba396594f62d6971a645df2cb1dc",
+    "ex_tournament/workspace/goal.md": "a545d4c4160a1d9310ad162434a716f20db989b3a995bb818fec8038c1362b6e",
+    "ex_tournament/workspace/tournament_test.py": "45b02fcd8cef1d695fad459725fdf32e2cbafd3fb78c97ecc5751063f613a57e",
+    "ex_twelve_days/hidden/twelve_days_test.py": "ff1ec2302c5e1f857983df6b245235c1543d6799fdcc192ec0b06a9b6ea667a2",
+    "ex_twelve_days/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_twelve_days/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_twelve_days/workspace/contract.md": "89f712acf8b8f544cd408f31de1a95e9b44eded55a5a71947e115f734b6d7f2c",
+    "ex_twelve_days/workspace/goal.md": "e3d8208f03acd2464265d34ecc82e1ad5968202878706ad6afd4ceae79951372",
+    "ex_twelve_days/workspace/twelve_days_test.py": "7630d17a076962a1db1c487cfe9fee552cc17c4c3d3ddd5ca7e5627f230a221e",
+    "ex_word_search/hidden/word_search_test.py": "b6c308b46a4fc909922486c564438f5d955f302a169b9ac912ec6d67c6c5905f",
+    "ex_word_search/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_word_search/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_word_search/workspace/contract.md": "bae7e4c2ae6bcbcc6f81883da496001731e3f1cb4865e10e5f2ee1c34a996e31",
+    "ex_word_search/workspace/goal.md": "ec749d7e2303930a7c00de1885b426947ce2ef1289c5e753646a749cf2f4a26b",
+    "ex_word_search/workspace/word_search_test.py": "75337a30baf68be24b27f98da1a5d2e3061e5349c7babd3fa631177b1264bf2a",
+    "ex_yacht/hidden/yacht_test.py": "6a2f2491a432e305ae73e779d0537aa4f86d1165ef8e118359883c834930eb5c",
+    "ex_yacht/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_yacht/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+    "ex_yacht/workspace/contract.md": "ebbc8e825dca649301ab24da08c602b5a433b31444d78b283cd7ef2c39cff4ba",
+    "ex_yacht/workspace/goal.md": "d70d3ee85423118f3ebb1287c501890ec4735a77c8082eab415788142b2bc3b6",
+    "ex_yacht/workspace/yacht_test.py": "6bea7ef07c5ac92883809973803af8321d32cf5695953ecd51b38fd84074a55b"
+  },
+  "n_tasks": 37,
+  "schema": "vacant.redo.ctl_bank/1",
+  "seed": 20261127,
+  "source_pool": "/opt/ctlwork/bm_tasks/all_py",
+  "task_order": [
+    "ex_kindergarten_garden",
+    "ex_ocr_numbers",
+    "ex_circular_buffer",
+    "ex_high_scores",
+    "ex_simple_cipher",
+    "ex_binary",
+    "ex_octal",
+    "ex_yacht",
+    "ex_luhn",
+    "ex_sublist",
+    "ex_say",
+    "ex_dnd_character",
+    "ex_twelve_days",
+    "ex_atbash_cipher",
+    "ex_queen_attack",
+    "ex_prime_factors",
+    "ex_scrabble_score",
+    "ex_series",
+    "ex_binary_search_tree",
+    "ex_pascals_triangle",
+    "ex_tournament",
+    "ex_change",
+    "ex_killer_sudoku_helper",
+    "ex_palindrome_products",
+    "ex_largest_series_product",
+    "ex_minesweeper",
+    "ex_bank_account",
+    "ex_flower_field",
+    "ex_swift_scheduling",
+    "ex_all_your_base",
+    "ex_linked_list",
+    "ex_word_search",
+    "ex_camicia",
+    "ex_custom_set",
+    "ex_complex_numbers",
+    "ex_rational_numbers",
+    "ex_meetup"
+  ],
+  "tasks": {
+    "ex_all_your_base": {
+      "acceptance_tests": [
+        "AllYourBaseTest.test_single_decimal_to_binary",
+        "AllYourBaseTest.test_binary_to_multiple_decimal",
+        "AllYourBaseTest.test_decimal_to_binary",
+        "AllYourBaseTest.test_hexadecimal_to_trinary",
+        "AllYourBaseTest.test_15_bit_integer",
+        "AllYourBaseTest.test_single_zero",
+        "AllYourBaseTest.test_input_base_is_zero",
+        "AllYourBaseTest.test_negative_digit",
+        "AllYourBaseTest.test_output_base_is_one",
+        "AllYourBaseTest.test_both_bases_are_negative"
+      ],
+      "hidden_tests": [
+        "AllYourBaseTest.test_single_bit_one_to_decimal",
+        "AllYourBaseTest.test_binary_to_single_decimal",
+        "AllYourBaseTest.test_trinary_to_hexadecimal",
+        "AllYourBaseTest.test_empty_list",
+        "AllYourBaseTest.test_multiple_zeros",
+        "AllYourBaseTest.test_leading_zeros",
+        "AllYourBaseTest.test_input_base_is_one",
+        "AllYourBaseTest.test_input_base_is_negative",
+        "AllYourBaseTest.test_invalid_positive_digit",
+        "AllYourBaseTest.test_output_base_is_zero",
+        "AllYourBaseTest.test_output_base_is_negative"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "all_your_base.py",
+      "test_file": "all_your_base_test.py",
+      "total_tests": 21,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 10,
+          "acceptance_total": 10,
+          "example_sha256": "73d36e4fad7424d9725eb32b73a628c1927b8b6c8c48c3e472ae36acd55332e1",
+          "hidden_passed": 11,
+          "hidden_total": 11,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_atbash_cipher": {
+      "acceptance_tests": [
+        "AtbashCipherTest.test_encode_no",
+        "AtbashCipherTest.test_encode_omg",
+        "AtbashCipherTest.test_decode_exercism",
+        "AtbashCipherTest.test_decode_a_sentence",
+        "AtbashCipherTest.test_decode_all_the_letters",
+        "AtbashCipherTest.test_decode_with_too_many_spaces",
+        "AtbashCipherTest.test_decode_with_no_spaces"
+      ],
+      "hidden_tests": [
+        "AtbashCipherTest.test_encode_yes",
+        "AtbashCipherTest.test_encode_spaces",
+        "AtbashCipherTest.test_encode_mindblowingly",
+        "AtbashCipherTest.test_encode_numbers",
+        "AtbashCipherTest.test_encode_deep_thought",
+        "AtbashCipherTest.test_encode_all_the_letters",
+        "AtbashCipherTest.test_decode_numbers"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "atbash_cipher.py",
+      "test_file": "atbash_cipher_test.py",
+      "total_tests": 14,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "037b2e1eea480351d933b88c67758c58850448c86d6975d9adab1d9db493cfaa",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_bank_account": {
+      "acceptance_tests": [
+        "BankAccountTest.test_newly_opened_account_has_zero_balance",
+        "BankAccountTest.test_single_deposit",
+        "BankAccountTest.test_withdraw_once",
+        "BankAccountTest.test_withdraw_twice",
+        "BankAccountTest.test_cannot_deposit_into_unopened_account",
+        "BankAccountTest.test_reopened_account_does_not_retain_balance",
+        "BankAccountTest.test_cannot_withdraw_negative",
+        "BankAccountTest.test_cannot_deposit_negative"
+      ],
+      "hidden_tests": [
+        "BankAccountTest.test_multiple_deposits",
+        "BankAccountTest.test_can_do_multiple_operations_sequentially",
+        "BankAccountTest.test_cannot_check_balance_of_closed_account",
+        "BankAccountTest.test_cannot_deposit_into_closed_account",
+        "BankAccountTest.test_cannot_withdraw_from_closed_account",
+        "BankAccountTest.test_cannot_close_an_account_that_was_not_opened",
+        "BankAccountTest.test_cannot_open_an_already_opened_account",
+        "BankAccountTest.test_cannot_withdraw_more_than_deposited"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "bank_account.py",
+      "test_file": "bank_account_test.py",
+      "total_tests": 16,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 8,
+          "acceptance_total": 8,
+          "example_sha256": "e75d1fb46070b291a9404f36be076944e5c8e2f20582cf3dd6e9195bde1be7e4",
+          "hidden_passed": 8,
+          "hidden_total": 8,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_binary": {
+      "acceptance_tests": [
+        "BinaryTest.test_binary_10_is_decimal_2",
+        "BinaryTest.test_binary_11_is_decimal_3",
+        "BinaryTest.test_binary_10001101000_is_decimal_1128",
+        "BinaryTest.test_invalid_binary_number_not_base2",
+        "BinaryTest.test_invalid_binary_text_with_numbers"
+      ],
+      "hidden_tests": [
+        "BinaryTest.test_binary_1_is_decimal_1",
+        "BinaryTest.test_binary_100_is_decimal_4",
+        "BinaryTest.test_binary_1001_is_decimal_9",
+        "BinaryTest.test_binary_11010_is_decimal_26",
+        "BinaryTest.test_invalid_binary_text_only",
+        "BinaryTest.test_invalid_binary_numbers_with_text"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "binary.py",
+      "test_file": "binary_test.py",
+      "total_tests": 11,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "20d0abfbb3f89771369426a9a42df1a234462e073c9e2f446a7afcaae258ca2f",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_binary_search_tree": {
+      "acceptance_tests": [
+        "BinarySearchTreeTest.test_data_is_retained",
+        "BinarySearchTreeTest.test_smaller_number_at_left_node",
+        "BinarySearchTreeTest.test_same_number_at_left_node",
+        "BinarySearchTreeTest.test_can_sort_single_number",
+        "BinarySearchTreeTest.test_can_sort_if_second_number_is_same_as_first"
+      ],
+      "hidden_tests": [
+        "BinarySearchTreeTest.test_greater_number_at_right_node",
+        "BinarySearchTreeTest.test_can_create_complex_tree",
+        "BinarySearchTreeTest.test_can_sort_if_second_number_is_smaller_than_first",
+        "BinarySearchTreeTest.test_can_sort_if_second_number_is_greater_than_first",
+        "BinarySearchTreeTest.test_can_sort_complex_tree"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "binary_search_tree.py",
+      "test_file": "binary_search_tree_test.py",
+      "total_tests": 10,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "a7cc3f6e9f3df46d18272459324cf9e9595ecdc953e3499e855c0a2f2182155f",
+          "hidden_passed": 5,
+          "hidden_total": 5,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_camicia": {
+      "acceptance_tests": [
+        "CamiciaTest.test_three_cards_one_trick",
+        "CamiciaTest.test_the_king_beats_ace",
+        "CamiciaTest.test_the_queen_seduces_the_king",
+        "CamiciaTest.test_two_tricks",
+        "CamiciaTest.test_simple_loop_with_decks_of_4_cards",
+        "CamiciaTest.test_easy_card_combination",
+        "CamiciaTest.test_easy_card_combination_inverted_decks",
+        "CamiciaTest.test_mirrored_decks",
+        "CamiciaTest.test_random_decks_1",
+        "CamiciaTest.test_random_decks_2",
+        "CamiciaTest.test_kleber_1999",
+        "CamiciaTest.test_nessler_2012",
+        "CamiciaTest.test_anderson_2013",
+        "CamiciaTest.test_casella_2024_first_infinite_game_found"
+      ],
+      "hidden_tests": [
+        "CamiciaTest.test_two_cards_one_trick",
+        "CamiciaTest.test_four_cards_one_trick",
+        "CamiciaTest.test_the_ace_reigns_supreme",
+        "CamiciaTest.test_the_jack_betrays_the_queen",
+        "CamiciaTest.test_the_10_just_wants_to_put_on_a_show",
+        "CamiciaTest.test_simple_loop_with_decks_of_3_cards",
+        "CamiciaTest.test_the_story_is_starting_to_get_a_bit_complicated",
+        "CamiciaTest.test_more_tricks",
+        "CamiciaTest.test_opposite_decks",
+        "CamiciaTest.test_collins_2006",
+        "CamiciaTest.test_mann_and_wu_2007",
+        "CamiciaTest.test_rucklidge_2014",
+        "CamiciaTest.test_nessler_2021",
+        "CamiciaTest.test_nessler_2022"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "camicia.py",
+      "test_file": "camicia_test.py",
+      "total_tests": 28,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 14,
+          "acceptance_total": 14,
+          "example_sha256": "a388195ad3f0b23f095af6db5d8727998549e5612803bf3d58e8ac48800aa0f2",
+          "hidden_passed": 14,
+          "hidden_total": 14,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_change": {
+      "acceptance_tests": [
+        "ChangeTest.test_single_coin_change",
+        "ChangeTest.test_change_with_lower_elbonia_coins",
+        "ChangeTest.test_another_possible_change_without_unit_coins_available",
+        "ChangeTest.test_no_coins_make_0_change",
+        "ChangeTest.test_error_if_no_combination_can_add_up_to_target",
+        "ChangeTest.test_cannot_find_negative_change_values"
+      ],
+      "hidden_tests": [
+        "ChangeTest.test_change_for_1_cent",
+        "ChangeTest.test_multiple_coin_change",
+        "ChangeTest.test_change_with_lilliputian_coins",
+        "ChangeTest.test_large_target_values",
+        "ChangeTest.test_possible_change_without_unit_coins_available",
+        "ChangeTest.test_a_greedy_approach_is_not_optimal",
+        "ChangeTest.test_error_testing_for_change_smaller_than_the_smallest_of_coins"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "change.py",
+      "test_file": "change_test.py",
+      "total_tests": 13,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "f9c3ccf99862f3ffe76c2b3282d0b6a69c4366afbfc0b9a56350e200467e1f4e",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_circular_buffer": {
+      "acceptance_tests": [
+        "CircularBufferTest.test_reading_empty_buffer_should_fail",
+        "CircularBufferTest.test_each_item_may_only_be_read_once",
+        "CircularBufferTest.test_full_buffer_can_t_be_written_to",
+        "CircularBufferTest.test_clear_does_nothing_on_empty_buffer",
+        "CircularBufferTest.test_overwrite_acts_like_write_on_non_full_buffer",
+        "CircularBufferTest.test_overwrite_replaces_the_oldest_item_remaining_in_buffer_following_a_read",
+        "CircularBufferTest.test_initial_clear_does_not_affect_wrapping_around"
+      ],
+      "hidden_tests": [
+        "CircularBufferTest.test_can_read_an_item_just_written",
+        "CircularBufferTest.test_items_are_read_in_the_order_they_are_written",
+        "CircularBufferTest.test_a_read_frees_up_capacity_for_another_write",
+        "CircularBufferTest.test_read_position_is_maintained_even_across_multiple_writes",
+        "CircularBufferTest.test_items_cleared_out_of_buffer_can_t_be_read",
+        "CircularBufferTest.test_clear_frees_up_capacity_for_another_write",
+        "CircularBufferTest.test_overwrite_replaces_the_oldest_item_on_full_buffer"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "circular_buffer.py",
+      "test_file": "circular_buffer_test.py",
+      "total_tests": 14,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "8a6057be363e6deb96df46b856863491d70d3ca8785fe0b36ddde0a55f108d65",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_complex_numbers": {
+      "acceptance_tests": [
+        "ComplexNumbersTest.test_imaginary_part_of_a_purely_real_number",
+        "ComplexNumbersTest.test_imaginary_part_of_a_purely_imaginary_number",
+        "ComplexNumbersTest.test_add_purely_real_numbers",
+        "ComplexNumbersTest.test_add_purely_imaginary_numbers",
+        "ComplexNumbersTest.test_add_numbers_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_subtract_purely_real_numbers",
+        "ComplexNumbersTest.test_subtract_purely_imaginary_numbers",
+        "ComplexNumbersTest.test_subtract_numbers_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_multiply_purely_real_numbers",
+        "ComplexNumbersTest.test_multiply_purely_imaginary_numbers",
+        "ComplexNumbersTest.test_multiply_numbers_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_absolute_value_of_a_negative_purely_real_number",
+        "ComplexNumbersTest.test_absolute_value_of_a_purely_imaginary_number_with_negative_imaginary_part",
+        "ComplexNumbersTest.test_absolute_value_of_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_conjugate_a_purely_real_number",
+        "ComplexNumbersTest.test_euler_s_identity_formula",
+        "ComplexNumbersTest.test_exponential_of_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_subtract_complex_number_from_real_number",
+        "ComplexNumbersTest.test_multiply_real_number_by_complex_number",
+        "ComplexNumbersTest.test_divide_real_number_by_complex_number",
+        "ComplexNumbersTest.test_inequality_of_imaginary_part"
+      ],
+      "hidden_tests": [
+        "ComplexNumbersTest.test_real_part_of_a_purely_real_number",
+        "ComplexNumbersTest.test_real_part_of_a_purely_imaginary_number",
+        "ComplexNumbersTest.test_real_part_of_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_imaginary_part_of_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_imaginary_unit",
+        "ComplexNumbersTest.test_divide_purely_real_numbers",
+        "ComplexNumbersTest.test_divide_purely_imaginary_numbers",
+        "ComplexNumbersTest.test_divide_numbers_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_absolute_value_of_a_positive_purely_real_number",
+        "ComplexNumbersTest.test_absolute_value_of_a_purely_imaginary_number_with_positive_imaginary_part",
+        "ComplexNumbersTest.test_conjugate_a_purely_imaginary_number",
+        "ComplexNumbersTest.test_conjugate_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_exponential_of_0",
+        "ComplexNumbersTest.test_exponential_of_a_purely_real_number",
+        "ComplexNumbersTest.test_exponential_resulting_in_a_number_with_real_and_imaginary_part",
+        "ComplexNumbersTest.test_add_real_number_to_complex_number",
+        "ComplexNumbersTest.test_add_complex_number_to_real_number",
+        "ComplexNumbersTest.test_subtract_real_number_from_complex_number",
+        "ComplexNumbersTest.test_multiply_complex_number_by_real_number",
+        "ComplexNumbersTest.test_divide_complex_number_by_real_number",
+        "ComplexNumbersTest.test_equality_of_complex_numbers",
+        "ComplexNumbersTest.test_inequality_of_real_part"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "complex_numbers.py",
+      "test_file": "complex_numbers_test.py",
+      "total_tests": 43,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 21,
+          "acceptance_total": 21,
+          "example_sha256": "30806b1f99b2fda21645647c2a24abd3d3d600090c3f3b5597ee4508a31b3fd0",
+          "hidden_passed": 22,
+          "hidden_total": 22,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_custom_set": {
+      "acceptance_tests": [
+        "CustomSetTest.test_sets_with_elements_are_not_empty",
+        "CustomSetTest.test_nothing_is_contained_in_an_empty_set",
+        "CustomSetTest.test_when_the_element_is_not_in_the_set",
+        "CustomSetTest.test_empty_set_is_a_subset_of_another_empty_set",
+        "CustomSetTest.test_non_empty_set_is_not_a_subset_of_empty_set",
+        "CustomSetTest.test_set_is_a_subset_of_set_with_exact_same_elements",
+        "CustomSetTest.test_set_is_a_subset_of_larger_set_with_same_elements",
+        "CustomSetTest.test_set_is_not_a_subset_of_set_that_does_not_contain_its_elements",
+        "CustomSetTest.test_non_empty_set_is_disjoint_with_empty_set",
+        "CustomSetTest.test_sets_are_disjoint_if_they_share_no_elements",
+        "CustomSetTest.test_empty_sets_are_equal",
+        "CustomSetTest.test_non_empty_set_is_not_equal_to_empty_set",
+        "CustomSetTest.test_set_is_equal_to_a_set_constructed_from_an_array_with_duplicates",
+        "CustomSetTest.test_add_to_empty_set",
+        "CustomSetTest.test_adding_an_existing_element_does_not_change_the_set",
+        "CustomSetTest.test_intersection_of_an_empty_set_and_non_empty_set_is_an_empty_set",
+        "CustomSetTest.test_intersection_of_two_sets_with_no_shared_elements_is_an_empty_set",
+        "CustomSetTest.test_difference_of_two_empty_sets_is_an_empty_set",
+        "CustomSetTest.test_difference_of_two_non_empty_sets_is_a_set_of_elements_that_are_only_in_the_first_set",
+        "CustomSetTest.test_union_of_an_empty_set_and_non_empty_set_is_the_non_empty_set"
+      ],
+      "hidden_tests": [
+        "CustomSetTest.test_sets_with_no_elements_are_empty",
+        "CustomSetTest.test_when_the_element_is_in_the_set",
+        "CustomSetTest.test_empty_set_is_a_subset_of_non_empty_set",
+        "CustomSetTest.test_the_empty_set_is_disjoint_with_itself",
+        "CustomSetTest.test_empty_set_is_disjoint_with_non_empty_set",
+        "CustomSetTest.test_sets_are_not_disjoint_if_they_share_an_element",
+        "CustomSetTest.test_empty_set_is_not_equal_to_non_empty_set",
+        "CustomSetTest.test_sets_with_the_same_elements_are_equal",
+        "CustomSetTest.test_sets_with_different_elements_are_not_equal",
+        "CustomSetTest.test_set_is_not_equal_to_larger_set_with_same_elements",
+        "CustomSetTest.test_add_to_non_empty_set",
+        "CustomSetTest.test_intersection_of_two_empty_sets_is_an_empty_set",
+        "CustomSetTest.test_intersection_of_a_non_empty_set_and_an_empty_set_is_an_empty_set",
+        "CustomSetTest.test_intersection_of_two_sets_with_shared_elements_is_a_set_of_the_shared_elements",
+        "CustomSetTest.test_difference_of_empty_set_and_non_empty_set_is_an_empty_set",
+        "CustomSetTest.test_difference_of_a_non_empty_set_and_an_empty_set_is_the_non_empty_set",
+        "CustomSetTest.test_difference_removes_all_duplicates_in_the_first_set",
+        "CustomSetTest.test_union_of_empty_sets_is_an_empty_set",
+        "CustomSetTest.test_union_of_a_non_empty_set_and_empty_set_is_the_non_empty_set",
+        "CustomSetTest.test_union_of_non_empty_sets_contains_all_unique_elements"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "custom_set.py",
+      "test_file": "custom_set_test.py",
+      "total_tests": 40,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 20,
+          "acceptance_total": 20,
+          "example_sha256": "1cad5ce97926dec38c63eaa7368c52c182f45acde2eeb22b0d5cc522c3aa577b",
+          "hidden_passed": 20,
+          "hidden_total": 20,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_dnd_character": {
+      "acceptance_tests": [
+        "DndCharacterTest.test_ability_modifier_for_score_5_is_n3",
+        "DndCharacterTest.test_ability_modifier_for_score_7_is_n2",
+        "DndCharacterTest.test_ability_modifier_for_score_12_is_1",
+        "DndCharacterTest.test_ability_modifier_for_score_13_is_1",
+        "DndCharacterTest.test_ability_modifier_for_score_14_is_2",
+        "DndCharacterTest.test_ability_modifier_for_score_16_is_3",
+        "DndCharacterTest.test_ability_modifier_for_score_17_is_3",
+        "DndCharacterTest.test_ability_modifier_for_score_18_is_4",
+        "DndCharacterTest.test_random_ability_is_within_range"
+      ],
+      "hidden_tests": [
+        "DndCharacterTest.test_ability_modifier_for_score_3_is_n4",
+        "DndCharacterTest.test_ability_modifier_for_score_4_is_n3",
+        "DndCharacterTest.test_ability_modifier_for_score_6_is_n2",
+        "DndCharacterTest.test_ability_modifier_for_score_8_is_n1",
+        "DndCharacterTest.test_ability_modifier_for_score_9_is_n1",
+        "DndCharacterTest.test_ability_modifier_for_score_10_is_0",
+        "DndCharacterTest.test_ability_modifier_for_score_11_is_0",
+        "DndCharacterTest.test_ability_modifier_for_score_15_is_2",
+        "DndCharacterTest.test_random_character_is_valid",
+        "DndCharacterTest.test_each_ability_is_only_calculated_once"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "dnd_character.py",
+      "test_file": "dnd_character_test.py",
+      "total_tests": 19,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 9,
+          "acceptance_total": 9,
+          "example_sha256": "566be121fbb20aa0e6e8c2d1cc7f6337d267bd4cc149dd00541c075b38fc47cc",
+          "hidden_passed": 10,
+          "hidden_total": 10,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_flower_field": {
+      "acceptance_tests": [
+        "FlowerFieldTest.test_no_rows",
+        "FlowerFieldTest.test_no_columns",
+        "FlowerFieldTest.test_garden_full_of_flowers",
+        "FlowerFieldTest.test_flower_surrounded_by_spaces",
+        "FlowerFieldTest.test_space_surrounded_by_flowers",
+        "FlowerFieldTest.test_horizontal_line_flowers_at_edges",
+        "FlowerFieldTest.test_vertical_line",
+        "FlowerFieldTest.test_different_len"
+      ],
+      "hidden_tests": [
+        "FlowerFieldTest.test_no_flowers",
+        "FlowerFieldTest.test_horizontal_line",
+        "FlowerFieldTest.test_vertical_line_flowers_at_edges",
+        "FlowerFieldTest.test_cross",
+        "FlowerFieldTest.test_large_garden",
+        "FlowerFieldTest.test_multiple_adjacent_flowers",
+        "FlowerFieldTest.test_annotate_9",
+        "FlowerFieldTest.test_invalid_char"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "flower_field.py",
+      "test_file": "flower_field_test.py",
+      "total_tests": 16,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 8,
+          "acceptance_total": 8,
+          "example_sha256": "15233d86593b994bb863d775ce4a8986f4b1c0cc671982df8c98a1e8f723210d",
+          "hidden_passed": 8,
+          "hidden_total": 8,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_high_scores": {
+      "acceptance_tests": [
+        "HighScoresTest.test_list_of_scores",
+        "HighScoresTest.test_latest_score",
+        "HighScoresTest.test_personal_top_when_there_is_a_tie",
+        "HighScoresTest.test_personal_top_when_there_are_less_than_3",
+        "HighScoresTest.test_latest_score_after_personal_top_scores",
+        "HighScoresTest.test_latest_score_after_personal_best"
+      ],
+      "hidden_tests": [
+        "HighScoresTest.test_personal_best",
+        "HighScoresTest.test_personal_top_three_from_a_list_of_scores",
+        "HighScoresTest.test_personal_top_highest_to_lowest",
+        "HighScoresTest.test_personal_top_when_there_is_only_one",
+        "HighScoresTest.test_scores_after_personal_top_scores",
+        "HighScoresTest.test_scores_after_personal_best"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "high_scores.py",
+      "test_file": "high_scores_test.py",
+      "total_tests": 12,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "53e85f81a9ef081a5205bb7a75547331b8afad9afcc2108060937e4b1d02aae4",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_killer_sudoku_helper": {
+      "acceptance_tests": [
+        "KillerSudokuHelperTest.test_1",
+        "KillerSudokuHelperTest.test_3",
+        "KillerSudokuHelperTest.test_6",
+        "KillerSudokuHelperTest.test_7",
+        "KillerSudokuHelperTest.test_cage_with_several_combinations",
+        "KillerSudokuHelperTest.test_cage_with_several_combinations_that_is_restricted"
+      ],
+      "hidden_tests": [
+        "KillerSudokuHelperTest.test_2",
+        "KillerSudokuHelperTest.test_4",
+        "KillerSudokuHelperTest.test_5",
+        "KillerSudokuHelperTest.test_8",
+        "KillerSudokuHelperTest.test_9",
+        "KillerSudokuHelperTest.test_cage_with_sum_45_contains_all_digits_1_9",
+        "KillerSudokuHelperTest.test_cage_with_only_1_possible_combination"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "killer_sudoku_helper.py",
+      "test_file": "killer_sudoku_helper_test.py",
+      "total_tests": 13,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "483bf810fa536aec04a80e4f072d4ec346dff6f109551b1aad70911004314153",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_kindergarten_garden": {
+      "acceptance_tests": [
+        "KindergartenGardenTest.test_partial_garden_second_student_s_garden",
+        "KindergartenGardenTest.test_partial_garden_third_student_s_garden",
+        "KindergartenGardenTest.test_full_garden_for_bob_second_student_s_garden",
+        "KindergartenGardenTest.test_full_garden_for_charlie",
+        "KindergartenGardenTest.test_full_garden_for_david",
+        "KindergartenGardenTest.test_full_garden_for_ginny",
+        "KindergartenGardenTest.test_full_garden_for_harriet",
+        "KindergartenGardenTest.test_full_garden_for_joseph",
+        "KindergartenGardenTest.test_students_are_unordered_last_student"
+      ],
+      "hidden_tests": [
+        "KindergartenGardenTest.test_partial_garden_garden_with_single_student",
+        "KindergartenGardenTest.test_partial_garden_different_garden_with_single_student",
+        "KindergartenGardenTest.test_partial_garden_garden_with_two_students",
+        "KindergartenGardenTest.test_full_garden_for_alice_first_student_s_garden",
+        "KindergartenGardenTest.test_full_garden_for_eve",
+        "KindergartenGardenTest.test_full_garden_for_fred",
+        "KindergartenGardenTest.test_full_garden_for_ileana",
+        "KindergartenGardenTest.test_full_garden_for_kincaid_second_to_last_student_s_garden",
+        "KindergartenGardenTest.test_full_garden_for_larry_last_student_s_garden",
+        "KindergartenGardenTest.test_students_are_unordered_first_student"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "kindergarten_garden.py",
+      "test_file": "kindergarten_garden_test.py",
+      "total_tests": 19,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 9,
+          "acceptance_total": 9,
+          "example_sha256": "7f3e07aa5a5e0032676c2d4a35586895504b5ee8510e8a3e28b96f9884478f72",
+          "hidden_passed": 10,
+          "hidden_total": 10,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_largest_series_product": {
+      "acceptance_tests": [
+        "LargestSeriesProductTest.test_can_find_the_largest_product_of_3_with_numbers_in_order",
+        "LargestSeriesProductTest.test_can_find_the_largest_product_of_3",
+        "LargestSeriesProductTest.test_can_get_the_largest_product_of_a_big_number",
+        "LargestSeriesProductTest.test_reports_zero_if_all_spans_include_zero",
+        "LargestSeriesProductTest.test_rejects_span_longer_than_string_length",
+        "LargestSeriesProductTest.test_rejects_invalid_character_in_digits",
+        "LargestSeriesProductTest.test_rejects_negative_span"
+      ],
+      "hidden_tests": [
+        "LargestSeriesProductTest.test_finds_the_largest_product_if_span_equals_length",
+        "LargestSeriesProductTest.test_can_find_the_largest_product_of_2_with_numbers_in_order",
+        "LargestSeriesProductTest.test_can_find_the_largest_product_of_2",
+        "LargestSeriesProductTest.test_can_find_the_largest_product_of_5_with_numbers_in_order",
+        "LargestSeriesProductTest.test_reports_zero_if_the_only_digits_are_zero",
+        "LargestSeriesProductTest.test_rejects_empty_string_and_nonzero_span",
+        "LargestSeriesProductTest.test_euler_big_number"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "largest_series_product.py",
+      "test_file": "largest_series_product_test.py",
+      "total_tests": 14,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "ec6ff4355e673bbdc0c748bd05ca5d8ef4ace26bf584479ffb6d4244908889e7",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_linked_list": {
+      "acceptance_tests": [
+        "LinkedListTest.test_pop_gets_element_from_the_list",
+        "LinkedListTest.test_push_pop_respectively_add_remove_at_the_end_of_the_list",
+        "LinkedListTest.test_count_a_list_with_items",
+        "LinkedListTest.test_deletes_the_only_element",
+        "LinkedListTest.test_deletes_the_element_with_the_specified_value_from_the_list",
+        "LinkedListTest.test_deletes_the_element_with_the_specified_value_from_the_list_re_assigns_head",
+        "LinkedListTest.test_deletes_only_the_first_occurrence",
+        "LinkedListTest.test_using_pop_raises_an_error_if_the_list_is_empty",
+        "LinkedListTest.test_using_shift_raises_an_error_if_the_list_is_empty",
+        "LinkedListTest.test_can_return_with_shift_and_then_raise_an_error_if_empty",
+        "LinkedListTest.test_using_delete_raises_an_error_if_the_list_is_empty",
+        "LinkedListTest.test_using_delete_raises_an_error_if_the_value_is_not_found"
+      ],
+      "hidden_tests": [
+        "LinkedListTest.test_shift_gets_an_element_from_the_list",
+        "LinkedListTest.test_shift_gets_first_element_from_the_list",
+        "LinkedListTest.test_unshift_adds_element_at_start_of_the_list",
+        "LinkedListTest.test_pop_push_shift_and_unshift_can_be_used_in_any_order",
+        "LinkedListTest.test_count_an_empty_list",
+        "LinkedListTest.test_count_is_correct_after_mutation",
+        "LinkedListTest.test_popping_to_empty_doesn_t_break_the_list",
+        "LinkedListTest.test_shifting_to_empty_doesn_t_break_the_list",
+        "LinkedListTest.test_deletes_the_element_with_the_specified_value_from_the_list_re_assigns_tail",
+        "LinkedListTest.test_deletes_the_first_of_two_elements",
+        "LinkedListTest.test_deletes_the_second_of_two_elements",
+        "LinkedListTest.test_can_return_with_pop_and_then_raise_an_error_if_empty"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "linked_list.py",
+      "test_file": "linked_list_test.py",
+      "total_tests": 24,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 12,
+          "acceptance_total": 12,
+          "example_sha256": "1b935d64b49c20e9102f79f5f5df45cbe74472e62acb78bb12b7794c0385f018",
+          "hidden_passed": 12,
+          "hidden_total": 12,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_luhn": {
+      "acceptance_tests": [
+        "LuhnTest.test_single_digit_strings_can_not_be_valid",
+        "LuhnTest.test_a_valid_canadian_sin",
+        "LuhnTest.test_invalid_canadian_sin",
+        "LuhnTest.test_invalid_credit_card",
+        "LuhnTest.test_invalid_long_number_with_an_even_remainder",
+        "LuhnTest.test_valid_strings_with_a_non_digit_added_at_the_end_become_invalid",
+        "LuhnTest.test_valid_strings_with_punctuation_included_become_invalid",
+        "LuhnTest.test_valid_strings_with_symbols_included_become_invalid",
+        "LuhnTest.test_more_than_a_single_zero_is_valid",
+        "LuhnTest.test_using_ascii_value_for_non_doubled_non_digit_isn_t_allowed",
+        "LuhnTest.test_is_valid_can_be_called_repeatedly"
+      ],
+      "hidden_tests": [
+        "LuhnTest.test_a_single_zero_is_invalid",
+        "LuhnTest.test_a_simple_valid_sin_that_remains_valid_if_reversed",
+        "LuhnTest.test_a_simple_valid_sin_that_becomes_invalid_if_reversed",
+        "LuhnTest.test_invalid_long_number_with_a_remainder_divisible_by_5",
+        "LuhnTest.test_valid_number_with_an_even_number_of_digits",
+        "LuhnTest.test_valid_number_with_an_odd_number_of_spaces",
+        "LuhnTest.test_single_zero_with_space_is_invalid",
+        "LuhnTest.test_input_digit_9_is_correctly_converted_to_output_digit_9",
+        "LuhnTest.test_very_long_input_is_valid",
+        "LuhnTest.test_valid_luhn_with_an_odd_number_of_digits_and_non_zero_first_digit",
+        "LuhnTest.test_using_ascii_value_for_doubled_non_digit_isn_t_allowed",
+        "LuhnTest.test_non_numeric_non_space_char_in_the_middle_with_a_sum_that_s_divisible_by_10_isn_t_allowed"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "luhn.py",
+      "test_file": "luhn_test.py",
+      "total_tests": 23,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 11,
+          "acceptance_total": 11,
+          "example_sha256": "8c9b705167891902cc94605dd71668082cc7b8cd2b67cc1054e40755d38b5d23",
+          "hidden_passed": 12,
+          "hidden_total": 12,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_meetup": {
+      "acceptance_tests": [
+        "MeetupTest.test_when_teenth_monday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_tuesday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_tuesday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_wednesday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_wednesday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_thursday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_thursday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_friday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_friday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_saturday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_saturday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_sunday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_sunday_is_the_13th_the_first_day_of_the_teenth_week",
+        "MeetupTest.test_when_first_monday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_thursday_is_another_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_friday_is_the_1st_the_first_day_of_the_first_week",
+        "MeetupTest.test_when_first_friday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_saturday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_saturday_is_another_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_sunday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_second_monday_is_the_8th_the_first_day_of_the_second_week",
+        "MeetupTest.test_when_second_tuesday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_wednesday_is_the_14th_the_last_day_of_the_second_week",
+        "MeetupTest.test_when_second_saturday_is_another_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_sunday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_third_wednesday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_wednesday_is_the_21st_the_last_day_of_the_third_week",
+        "MeetupTest.test_when_third_thursday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_friday_is_the_15th_the_first_day_of_the_third_week",
+        "MeetupTest.test_when_third_sunday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_sunday_is_the_21st_the_last_day_of_the_third_week",
+        "MeetupTest.test_when_fourth_monday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_wednesday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_thursday_is_another_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_friday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_saturday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_sunday_is_the_28th_the_last_day_of_the_fourth_week",
+        "MeetupTest.test_last_monday_in_a_month_with_five_mondays",
+        "MeetupTest.test_last_wednesday_in_a_month_with_four_wednesdays",
+        "MeetupTest.test_last_thursday_in_a_month_with_four_thursdays",
+        "MeetupTest.test_last_saturday_in_a_month_with_four_saturdays",
+        "MeetupTest.test_last_sunday_in_a_month_with_four_sundays",
+        "MeetupTest.test_when_last_wednesday_in_february_in_a_leap_year_is_the_29th",
+        "MeetupTest.test_last_wednesday_in_december_that_is_also_the_last_day_of_the_year",
+        "MeetupTest.test_when_last_sunday_in_february_in_a_non_leap_year_is_not_the_29th",
+        "MeetupTest.test_fifth_saturday_of_february_2020",
+        "MeetupTest.test_last_sunday_of_june_2024",
+        "MeetupTest.test_teenth_friday_of_may_2022",
+        "MeetupTest.test_nonexistent_fifth_monday_of_february_2022",
+        "MeetupTest.test_nonexistent_fifth_friday_of_august_2022",
+        "MeetupTest.test_nonexistent_fifth_thursday_of_may_2023"
+      ],
+      "hidden_tests": [
+        "MeetupTest.test_when_teenth_monday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_monday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_tuesday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_wednesday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_thursday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_friday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_saturday_is_the_19th_the_last_day_of_the_teenth_week",
+        "MeetupTest.test_when_teenth_sunday_is_some_day_in_the_middle_of_the_teenth_week",
+        "MeetupTest.test_when_first_monday_is_the_1st_the_first_day_of_the_first_week",
+        "MeetupTest.test_when_first_tuesday_is_the_7th_the_last_day_of_the_first_week",
+        "MeetupTest.test_when_first_tuesday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_wednesday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_wednesday_is_the_7th_the_last_day_of_the_first_week",
+        "MeetupTest.test_when_first_thursday_is_some_day_in_the_middle_of_the_first_week",
+        "MeetupTest.test_when_first_sunday_is_the_7th_the_last_day_of_the_first_week",
+        "MeetupTest.test_when_second_monday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_tuesday_is_the_14th_the_last_day_of_the_second_week",
+        "MeetupTest.test_when_second_wednesday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_thursday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_thursday_is_another_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_friday_is_the_8th_the_first_day_of_the_second_week",
+        "MeetupTest.test_when_second_friday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_saturday_is_some_day_in_the_middle_of_the_second_week",
+        "MeetupTest.test_when_second_sunday_is_the_14th_the_last_day_of_the_second_week",
+        "MeetupTest.test_when_third_monday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_monday_is_the_15th_the_first_day_of_the_third_week",
+        "MeetupTest.test_when_third_tuesday_is_the_21st_the_last_day_of_the_third_week",
+        "MeetupTest.test_when_third_tuesday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_thursday_is_another_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_friday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_saturday_is_some_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_third_saturday_is_another_day_in_the_middle_of_the_third_week",
+        "MeetupTest.test_when_fourth_monday_is_the_22nd_the_first_day_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_tuesday_is_the_28th_the_last_day_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_tuesday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_wednesday_is_the_28th_the_last_day_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_thursday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_friday_is_the_22nd_the_first_day_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_saturday_is_another_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_when_fourth_sunday_is_some_day_in_the_middle_of_the_fourth_week",
+        "MeetupTest.test_last_monday_in_a_month_with_four_mondays",
+        "MeetupTest.test_last_tuesday_in_a_month_with_four_tuesdays",
+        "MeetupTest.test_last_tuesday_in_another_month_with_four_tuesdays",
+        "MeetupTest.test_last_wednesday_in_a_month_with_five_wednesdays",
+        "MeetupTest.test_last_thursday_in_a_month_with_five_thursdays",
+        "MeetupTest.test_last_friday_in_a_month_with_five_fridays",
+        "MeetupTest.test_last_friday_in_a_month_with_four_fridays",
+        "MeetupTest.test_last_saturday_in_another_month_with_four_saturdays",
+        "MeetupTest.test_last_sunday_in_a_month_with_five_sundays",
+        "MeetupTest.test_when_first_friday_is_the_7th_the_last_day_of_the_first_week",
+        "MeetupTest.test_fifth_monday_of_march_2015",
+        "MeetupTest.test_fifth_thursday_of_february_2024"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "meetup.py",
+      "test_file": "meetup_test.py",
+      "total_tests": 103,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 51,
+          "acceptance_total": 51,
+          "example_sha256": "8f1994b2c508769fbad4abc3cc475de3b227e837486a25d1b23e280cc9f8bf4d",
+          "hidden_passed": 52,
+          "hidden_total": 52,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_minesweeper": {
+      "acceptance_tests": [
+        "MinesweeperTest.test_no_rows",
+        "MinesweeperTest.test_no_columns",
+        "MinesweeperTest.test_no_mines",
+        "MinesweeperTest.test_mine_surrounded_by_spaces",
+        "MinesweeperTest.test_horizontal_line",
+        "MinesweeperTest.test_annotate_9",
+        "MinesweeperTest.test_different_len"
+      ],
+      "hidden_tests": [
+        "MinesweeperTest.test_minefield_with_only_mines",
+        "MinesweeperTest.test_space_surrounded_by_mines",
+        "MinesweeperTest.test_horizontal_line_mines_at_edges",
+        "MinesweeperTest.test_vertical_line",
+        "MinesweeperTest.test_vertical_line_mines_at_edges",
+        "MinesweeperTest.test_cross",
+        "MinesweeperTest.test_large_minefield",
+        "MinesweeperTest.test_invalid_char"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "minesweeper.py",
+      "test_file": "minesweeper_test.py",
+      "total_tests": 15,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "ce990e898785e3173048d9605d4137adf392bfd4b002b75ed05ba76cd5b5ab73",
+          "hidden_passed": 8,
+          "hidden_total": 8,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_ocr_numbers": {
+      "acceptance_tests": [
+        "OcrNumbersTest.test_input_with_a_number_of_columns_that_is_not_a_multiple_of_three_raises_an_error",
+        "OcrNumbersTest.test_garbled_numbers_in_a_string_are_replaced_with",
+        "OcrNumbersTest.test_recognizes_3",
+        "OcrNumbersTest.test_recognizes_4",
+        "OcrNumbersTest.test_recognizes_7",
+        "OcrNumbersTest.test_recognizes_9",
+        "OcrNumbersTest.test_recognizes_string_of_decimal_numbers",
+        "OcrNumbersTest.test_numbers_separated_by_empty_lines_are_recognized_lines_are_joined_by_commas"
+      ],
+      "hidden_tests": [
+        "OcrNumbersTest.test_recognizes_0",
+        "OcrNumbersTest.test_recognizes_1",
+        "OcrNumbersTest.test_unreadable_but_correctly_sized_inputs_return",
+        "OcrNumbersTest.test_input_with_a_number_of_lines_that_is_not_a_multiple_of_four_raises_an_error",
+        "OcrNumbersTest.test_recognizes_110101100",
+        "OcrNumbersTest.test_recognizes_2",
+        "OcrNumbersTest.test_recognizes_5",
+        "OcrNumbersTest.test_recognizes_6",
+        "OcrNumbersTest.test_recognizes_8"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "ocr_numbers.py",
+      "test_file": "ocr_numbers_test.py",
+      "total_tests": 17,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 8,
+          "acceptance_total": 8,
+          "example_sha256": "1f05dfe4975c1c7bc74941fdfaeda21dd16c1b9469bb628a573e429f5e71830c",
+          "hidden_passed": 9,
+          "hidden_total": 9,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_octal": {
+      "acceptance_tests": [
+        "OctalTest.test_octal_130_is_decimal_88",
+        "OctalTest.test_octal_2047_is_decimal_1063",
+        "OctalTest.test_invalid_octal_is_recognized",
+        "OctalTest.test_6789_is_seen_as_invalid",
+        "OctalTest.test_valid_octal_formatted_string_011_is_decimal_9"
+      ],
+      "hidden_tests": [
+        "OctalTest.test_octal_1_is_decimal_1",
+        "OctalTest.test_octal_10_is_decimal_8",
+        "OctalTest.test_octal_17_is_decimal_15",
+        "OctalTest.test_octal_1234567_is_decimal_342391",
+        "OctalTest.test_8_is_seen_as_invalid"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "octal.py",
+      "test_file": "octal_test.py",
+      "total_tests": 10,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "da9cde8bb5a4463da49b1f92bd2750e624584a23d3ae7ceed44e8d2185e06ad6",
+          "hidden_passed": 5,
+          "hidden_total": 5,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_palindrome_products": {
+      "acceptance_tests": [
+        "PalindromeProductsTest.test_find_the_largest_palindrome_from_single_digit_factors",
+        "PalindromeProductsTest.test_find_the_largest_palindrome_from_double_digit_factors",
+        "PalindromeProductsTest.test_find_the_largest_palindrome_from_triple_digit_factors",
+        "PalindromeProductsTest.test_empty_result_for_smallest_if_no_palindrome_in_the_range",
+        "PalindromeProductsTest.test_empty_result_for_largest_if_no_palindrome_in_the_range",
+        "PalindromeProductsTest.test_error_result_for_largest_if_min_is_more_than_max"
+      ],
+      "hidden_tests": [
+        "PalindromeProductsTest.test_find_the_smallest_palindrome_from_single_digit_factors",
+        "PalindromeProductsTest.test_find_the_smallest_palindrome_from_double_digit_factors",
+        "PalindromeProductsTest.test_find_the_smallest_palindrome_from_triple_digit_factors",
+        "PalindromeProductsTest.test_find_the_smallest_palindrome_from_four_digit_factors",
+        "PalindromeProductsTest.test_find_the_largest_palindrome_from_four_digit_factors",
+        "PalindromeProductsTest.test_error_result_for_smallest_if_min_is_more_than_max",
+        "PalindromeProductsTest.test_smallest_product_does_not_use_the_smallest_factor"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "palindrome_products.py",
+      "test_file": "palindrome_products_test.py",
+      "total_tests": 13,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "1422028a0d52c617c45f4cd650172e2e06d76f23cdaab9338b87f2cb951b395b",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_pascals_triangle": {
+      "acceptance_tests": [
+        "PascalsTriangleTest.test_zero_rows",
+        "PascalsTriangleTest.test_single_row",
+        "PascalsTriangleTest.test_four_rows",
+        "PascalsTriangleTest.test_five_rows",
+        "PascalsTriangleTest.test_six_rows"
+      ],
+      "hidden_tests": [
+        "PascalsTriangleTest.test_two_rows",
+        "PascalsTriangleTest.test_three_rows",
+        "PascalsTriangleTest.test_ten_rows",
+        "PascalsTriangleTest.test_negative_rows_are_invalid",
+        "PascalsTriangleTest.test_solution_is_recursive"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "pascals_triangle.py",
+      "test_file": "pascals_triangle_test.py",
+      "total_tests": 10,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "850842af1213ca9af963680f4e67c62f6f1ed77c7336178298d1157c0c317681",
+          "hidden_passed": 5,
+          "hidden_total": 5,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_prime_factors": {
+      "acceptance_tests": [
+        "PrimeFactorsTest.test_prime_number",
+        "PrimeFactorsTest.test_product_of_second_prime",
+        "PrimeFactorsTest.test_product_of_third_prime",
+        "PrimeFactorsTest.test_product_of_primes_and_non_primes",
+        "PrimeFactorsTest.test_product_of_primes",
+        "PrimeFactorsTest.test_factors_include_a_large_prime"
+      ],
+      "hidden_tests": [
+        "PrimeFactorsTest.test_no_factors",
+        "PrimeFactorsTest.test_another_prime_number",
+        "PrimeFactorsTest.test_square_of_a_prime",
+        "PrimeFactorsTest.test_product_of_first_prime",
+        "PrimeFactorsTest.test_cube_of_a_prime",
+        "PrimeFactorsTest.test_product_of_first_and_second_prime"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "prime_factors.py",
+      "test_file": "prime_factors_test.py",
+      "total_tests": 12,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "290d95221fff8ca04fbe3587d1c201d9f8e5e6ab8fcb2ac3df7bc7ecd11036fc",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_queen_attack": {
+      "acceptance_tests": [
+        "QueenAttackTest.test_queen_with_a_valid_position",
+        "QueenAttackTest.test_queen_must_have_positive_column",
+        "QueenAttackTest.test_cannot_attack",
+        "QueenAttackTest.test_can_attack_on_same_row",
+        "QueenAttackTest.test_can_attack_on_fourth_diagonal",
+        "QueenAttackTest.test_cannot_attack_if_falling_diagonals_are_only_the_same_when_reflected_across_the_longest_falling_diagonal",
+        "QueenAttackTest.test_queens_same_position_can_attack"
+      ],
+      "hidden_tests": [
+        "QueenAttackTest.test_queen_must_have_positive_row",
+        "QueenAttackTest.test_queen_must_have_row_on_board",
+        "QueenAttackTest.test_queen_must_have_column_on_board",
+        "QueenAttackTest.test_can_attack_on_same_column",
+        "QueenAttackTest.test_can_attack_on_first_diagonal",
+        "QueenAttackTest.test_can_attack_on_second_diagonal",
+        "QueenAttackTest.test_can_attack_on_third_diagonal"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "queen_attack.py",
+      "test_file": "queen_attack_test.py",
+      "total_tests": 14,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "3983ec4a2a490be8228911c4a118a0fa7c4afe1cd6f33e0f956a78dd251736d8",
+          "hidden_passed": 7,
+          "hidden_total": 7,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_rational_numbers": {
+      "acceptance_tests": [
+        "RationalNumbersTest.test_add_a_positive_rational_number_and_a_negative_rational_number",
+        "RationalNumbersTest.test_add_two_negative_rational_numbers",
+        "RationalNumbersTest.test_add_a_rational_number_to_its_additive_inverse",
+        "RationalNumbersTest.test_subtract_two_positive_rational_numbers",
+        "RationalNumbersTest.test_subtract_two_negative_rational_numbers",
+        "RationalNumbersTest.test_multiply_two_positive_rational_numbers",
+        "RationalNumbersTest.test_multiply_a_rational_number_by_1",
+        "RationalNumbersTest.test_divide_a_rational_number_by_1",
+        "RationalNumbersTest.test_absolute_value_of_a_negative_rational_number",
+        "RationalNumbersTest.test_raise_a_positive_rational_number_to_a_positive_integer_power",
+        "RationalNumbersTest.test_raise_a_negative_rational_number_to_a_positive_integer_power",
+        "RationalNumbersTest.test_raise_a_positive_rational_number_to_a_negative_integer_power",
+        "RationalNumbersTest.test_raise_a_negative_rational_number_to_an_odd_negative_integer_power",
+        "RationalNumbersTest.test_raise_zero_to_an_integer_power",
+        "RationalNumbersTest.test_raise_a_negative_rational_number_to_the_power_of_zero",
+        "RationalNumbersTest.test_raise_a_real_number_to_a_zero_rational_number",
+        "RationalNumbersTest.test_reduce_a_positive_rational_number_to_lowest_terms",
+        "RationalNumbersTest.test_reduce_places_the_minus_sign_on_the_numerator",
+        "RationalNumbersTest.test_reduce_a_rational_number_with_a_negative_denominator_to_lowest_terms",
+        "RationalNumbersTest.test_reduce_zero_to_lowest_terms",
+        "RationalNumbersTest.test_reduce_one_to_lowest_terms"
+      ],
+      "hidden_tests": [
+        "RationalNumbersTest.test_add_two_positive_rational_numbers",
+        "RationalNumbersTest.test_subtract_a_positive_rational_number_and_a_negative_rational_number",
+        "RationalNumbersTest.test_subtract_a_rational_number_from_itself",
+        "RationalNumbersTest.test_multiply_a_negative_rational_number_by_a_positive_rational_number",
+        "RationalNumbersTest.test_multiply_two_negative_rational_numbers",
+        "RationalNumbersTest.test_multiply_a_rational_number_by_its_reciprocal",
+        "RationalNumbersTest.test_multiply_a_rational_number_by_0",
+        "RationalNumbersTest.test_divide_two_positive_rational_numbers",
+        "RationalNumbersTest.test_divide_a_positive_rational_number_by_a_negative_rational_number",
+        "RationalNumbersTest.test_divide_two_negative_rational_numbers",
+        "RationalNumbersTest.test_absolute_value_of_a_positive_rational_number",
+        "RationalNumbersTest.test_absolute_value_of_a_positive_rational_number_with_negative_numerator_and_denominator",
+        "RationalNumbersTest.test_absolute_value_of_a_negative_rational_number_with_negative_denominator",
+        "RationalNumbersTest.test_absolute_value_of_zero",
+        "RationalNumbersTest.test_absolute_value_of_a_rational_number_is_reduced_to_lowest_terms",
+        "RationalNumbersTest.test_raise_a_negative_rational_number_to_an_even_negative_integer_power",
+        "RationalNumbersTest.test_raise_one_to_an_integer_power",
+        "RationalNumbersTest.test_raise_a_positive_rational_number_to_the_power_of_zero",
+        "RationalNumbersTest.test_raise_a_real_number_to_a_positive_rational_number",
+        "RationalNumbersTest.test_raise_a_real_number_to_a_negative_rational_number",
+        "RationalNumbersTest.test_reduce_a_negative_rational_number_to_lowest_terms",
+        "RationalNumbersTest.test_reduce_an_integer_to_lowest_terms"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "rational_numbers.py",
+      "test_file": "rational_numbers_test.py",
+      "total_tests": 43,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 21,
+          "acceptance_total": 21,
+          "example_sha256": "7f08dc26c13717ff924166a915ff62aaf71f9675d530f92fb7f8ccfc508bb51c",
+          "hidden_passed": 22,
+          "hidden_total": 22,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_say": {
+      "acceptance_tests": [
+        "SayTest.test_fourteen",
+        "SayTest.test_twenty",
+        "SayTest.test_twenty_two",
+        "SayTest.test_one_hundred_twenty_three",
+        "SayTest.test_two_hundred",
+        "SayTest.test_one_thousand",
+        "SayTest.test_one_million",
+        "SayTest.test_one_billion",
+        "SayTest.test_a_big_number",
+        "SayTest.test_one_hundred_seventy"
+      ],
+      "hidden_tests": [
+        "SayTest.test_zero",
+        "SayTest.test_one",
+        "SayTest.test_thirty",
+        "SayTest.test_ninety_nine",
+        "SayTest.test_one_hundred",
+        "SayTest.test_nine_hundred_ninety_nine",
+        "SayTest.test_one_thousand_two_hundred_thirty_four",
+        "SayTest.test_one_million_two_thousand_three_hundred_forty_five",
+        "SayTest.test_numbers_below_zero_are_out_of_range",
+        "SayTest.test_numbers_above_999_999_999_999_are_out_of_range"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "say.py",
+      "test_file": "say_test.py",
+      "total_tests": 20,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 10,
+          "acceptance_total": 10,
+          "example_sha256": "dc9e3848096e317b051041d0ad1f75a404bb479c82242c47971595ca2814c127",
+          "hidden_passed": 10,
+          "hidden_total": 10,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_scrabble_score": {
+      "acceptance_tests": [
+        "ScrabbleScoreTest.test_lowercase_letter",
+        "ScrabbleScoreTest.test_uppercase_letter",
+        "ScrabbleScoreTest.test_short_word",
+        "ScrabbleScoreTest.test_english_like_word",
+        "ScrabbleScoreTest.test_empty_input"
+      ],
+      "hidden_tests": [
+        "ScrabbleScoreTest.test_valuable_letter",
+        "ScrabbleScoreTest.test_short_valuable_word",
+        "ScrabbleScoreTest.test_medium_word",
+        "ScrabbleScoreTest.test_medium_valuable_word",
+        "ScrabbleScoreTest.test_long_mixed_case_word",
+        "ScrabbleScoreTest.test_entire_alphabet_available"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "scrabble_score.py",
+      "test_file": "scrabble_score_test.py",
+      "total_tests": 11,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "ae878a71bdf11acb3f8669ee0799bbb8748ece21c542783d483b68692c721e30",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_series": {
+      "acceptance_tests": [
+        "SeriesTest.test_slices_of_one_from_one",
+        "SeriesTest.test_slices_of_one_from_two",
+        "SeriesTest.test_slice_length_is_too_large",
+        "SeriesTest.test_slice_length_is_way_too_large",
+        "SeriesTest.test_slice_length_cannot_be_negative"
+      ],
+      "hidden_tests": [
+        "SeriesTest.test_slices_of_two",
+        "SeriesTest.test_slices_of_two_overlap",
+        "SeriesTest.test_slices_can_include_duplicates",
+        "SeriesTest.test_slices_of_a_long_series",
+        "SeriesTest.test_slice_length_cannot_be_zero",
+        "SeriesTest.test_empty_series_is_invalid"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "series.py",
+      "test_file": "series_test.py",
+      "total_tests": 11,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 5,
+          "acceptance_total": 5,
+          "example_sha256": "3bea1c53c306291b441c5e9b04faa1a02ca4435ce0c12a5ff65360c167974c74",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_simple_cipher": {
+      "acceptance_tests": [
+        "RandomKeyCipherTest.test_can_decode",
+        "RandomKeyCipherTest.test_is_reversible",
+        "SubstitutionCipherTest.test_can_encode",
+        "SubstitutionCipherTest.test_is_reversible",
+        "SubstitutionCipherTest.test_can_double_shift_encode",
+        "SubstitutionCipherTest.test_can_wrap_on_decode"
+      ],
+      "hidden_tests": [
+        "RandomKeyCipherTest.test_can_encode",
+        "RandomKeyCipherTest.test_key_is_made_only_of_lowercase_letters",
+        "SubstitutionCipherTest.test_can_decode",
+        "SubstitutionCipherTest.test_can_wrap_on_encode",
+        "SubstitutionCipherTest.test_can_encode_messages_longer_than_the_key",
+        "SubstitutionCipherTest.test_can_decode_messages_longer_than_the_key"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "simple_cipher.py",
+      "test_file": "simple_cipher_test.py",
+      "total_tests": 12,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "defdd4742cfc6832c46f70319f439f788d306070272349f878d96c5974c2a0ad",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_sublist": {
+      "acceptance_tests": [
+        "SublistTest.test_empty_list_within_non_empty_list",
+        "SublistTest.test_list_equals_itself",
+        "SublistTest.test_different_lists",
+        "SublistTest.test_consecutive",
+        "SublistTest.test_sublist_in_middle",
+        "SublistTest.test_at_start_of_superlist",
+        "SublistTest.test_at_end_of_superlist",
+        "SublistTest.test_order_matters_to_a_list",
+        "SublistTest.test_same_digits_but_different_numbers",
+        "SublistTest.test_large_lists"
+      ],
+      "hidden_tests": [
+        "SublistTest.test_empty_lists",
+        "SublistTest.test_non_empty_list_contains_empty_list",
+        "SublistTest.test_false_start",
+        "SublistTest.test_sublist_at_start",
+        "SublistTest.test_sublist_at_end",
+        "SublistTest.test_in_middle_of_superlist",
+        "SublistTest.test_first_list_missing_element_from_second_list",
+        "SublistTest.test_second_list_missing_element_from_first_list",
+        "SublistTest.test_first_list_missing_additional_digits_from_second_list",
+        "SublistTest.test_inner_spaces",
+        "SublistTest.test_spread_sublist"
+      ],
+      "shared_invariant_tests": [
+        "SublistTest.test_unique_return_values"
+      ],
+      "solution_file": "sublist.py",
+      "test_file": "sublist_test.py",
+      "total_tests": 22,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 11,
+          "acceptance_total": 11,
+          "example_sha256": "b0c3bdbf6c73ddf82d7843e1bd0bdaa042ec67d880bced2b553aac82ad2f98e6",
+          "hidden_passed": 12,
+          "hidden_total": 12,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_swift_scheduling": {
+      "acceptance_tests": [
+        "SwiftSchedulingTest.test_now_translates_to_two_hours_later",
+        "SwiftSchedulingTest.test_asap_before_one_in_the_afternoon_translates_to_today_at_five_in_the_afternoon",
+        "SwiftSchedulingTest.test_asap_after_one_in_the_afternoon_translates_to_tomorrow_at_one_in_the_afternoon",
+        "SwiftSchedulingTest.test_eow_on_wednesday_translates_to_friday_at_five_in_the_afternoon",
+        "SwiftSchedulingTest.test_eow_translates_to_leap_day",
+        "SwiftSchedulingTest.test_11_m_in_the_eleventh_month_translates_to_the_first_workday_of_the_eleventh_month_of_next_year",
+        "SwiftSchedulingTest.test_q1_in_the_first_quarter_translates_to_the_last_workday_of_the_first_quarter_of_this_year",
+        "SwiftSchedulingTest.test_q2_starting_in_the_last_month_of_the_second_quarter_translates_to_the_last_workday_of_the_second_quarter_of_this_year"
+      ],
+      "hidden_tests": [
+        "SwiftSchedulingTest.test_asap_at_one_in_the_afternoon_translates_to_tomorrow_at_one_in_the_afternoon",
+        "SwiftSchedulingTest.test_eow_on_monday_translates_to_friday_at_five_in_the_afternoon",
+        "SwiftSchedulingTest.test_eow_on_tuesday_translates_to_friday_at_five_in_the_afternoon",
+        "SwiftSchedulingTest.test_eow_on_thursday_translates_to_sunday_at_eight_in_the_evening",
+        "SwiftSchedulingTest.test_eow_on_friday_translates_to_sunday_at_eight_in_the_evening",
+        "SwiftSchedulingTest.test_2_m_before_the_second_month_of_this_year_translates_to_the_first_workday_of_the_second_month_of_this_year",
+        "SwiftSchedulingTest.test_4_m_in_the_ninth_month_translates_to_the_first_workday_of_the_fourth_month_of_next_year",
+        "SwiftSchedulingTest.test_q4_in_the_second_quarter_translates_to_the_last_workday_of_the_fourth_quarter_of_this_year",
+        "SwiftSchedulingTest.test_q3_in_the_fourth_quarter_translates_to_the_last_workday_of_the_third_quarter_of_next_year"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "swift_scheduling.py",
+      "test_file": "swift_scheduling_test.py",
+      "total_tests": 17,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 8,
+          "acceptance_total": 8,
+          "example_sha256": "bd5db1fa9cd2dc7b4ff979b354d617ac2830b53eb7646cba8428f2b38374692a",
+          "hidden_passed": 9,
+          "hidden_total": 9,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_tournament": {
+      "acceptance_tests": [
+        "TournamentTest.test_a_different_team_can_win",
+        "TournamentTest.test_a_draw_is_one_point_each",
+        "TournamentTest.test_there_can_be_more_than_one_match",
+        "TournamentTest.test_there_can_be_more_than_one_winner",
+        "TournamentTest.test_typical_input",
+        "TournamentTest.test_ties_broken_alphabetically"
+      ],
+      "hidden_tests": [
+        "TournamentTest.test_just_the_header_if_no_input",
+        "TournamentTest.test_a_win_is_three_points_a_loss_is_zero_points",
+        "TournamentTest.test_a_win_can_also_be_expressed_as_a_loss",
+        "TournamentTest.test_there_can_be_more_than_two_teams",
+        "TournamentTest.test_incomplete_competition_not_all_pairs_have_played",
+        "TournamentTest.test_ensure_points_sorted_numerically"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "tournament.py",
+      "test_file": "tournament_test.py",
+      "total_tests": 12,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 6,
+          "acceptance_total": 6,
+          "example_sha256": "da9c6c3b385d6539b73e2c39664ff1ae7664e93fdb708411773d441cd32cc72e",
+          "hidden_passed": 6,
+          "hidden_total": 6,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_twelve_days": {
+      "acceptance_tests": [
+        "TwelveDaysTest.test_third_day_three_french_hens",
+        "TwelveDaysTest.test_fourth_day_four_calling_birds",
+        "TwelveDaysTest.test_seventh_day_seven_swans_a_swimming",
+        "TwelveDaysTest.test_ninth_day_nine_ladies_dancing",
+        "TwelveDaysTest.test_eleventh_day_eleven_pipers_piping",
+        "TwelveDaysTest.test_recites_three_verses_from_the_middle_of_the_song",
+        "TwelveDaysTest.test_recites_the_whole_song"
+      ],
+      "hidden_tests": [
+        "TwelveDaysTest.test_first_day_a_partridge_in_a_pear_tree",
+        "TwelveDaysTest.test_second_day_two_turtle_doves",
+        "TwelveDaysTest.test_fifth_day_five_gold_rings",
+        "TwelveDaysTest.test_sixth_day_six_geese_a_laying",
+        "TwelveDaysTest.test_eighth_day_eight_maids_a_milking",
+        "TwelveDaysTest.test_tenth_day_ten_lords_a_leaping",
+        "TwelveDaysTest.test_twelfth_day_twelve_drummers_drumming",
+        "TwelveDaysTest.test_recites_first_three_verses_of_the_song"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "twelve_days.py",
+      "test_file": "twelve_days_test.py",
+      "total_tests": 15,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 7,
+          "acceptance_total": 7,
+          "example_sha256": "3c2057d809820f3ccc6ae0dbb8db8be0e91bf9cca54e96e044be193275d85cd2",
+          "hidden_passed": 8,
+          "hidden_total": 8,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_word_search": {
+      "acceptance_tests": [
+        "WordSearchTest.test_should_locate_one_word_written_left_to_right",
+        "WordSearchTest.test_should_locate_a_different_left_to_right_word",
+        "WordSearchTest.test_should_locate_that_different_left_to_right_word_in_a_different_position",
+        "WordSearchTest.test_should_locate_a_left_to_right_word_in_two_line_grid",
+        "WordSearchTest.test_should_locate_a_left_to_right_word_in_three_line_grid",
+        "WordSearchTest.test_should_locate_a_different_left_to_right_word_in_a_ten_line_grid",
+        "WordSearchTest.test_should_locate_a_single_word_written_right_to_left",
+        "WordSearchTest.test_should_locate_words_written_top_left_to_bottom_right",
+        "WordSearchTest.test_should_locate_words_written_bottom_left_to_top_right",
+        "WordSearchTest.test_should_fail_to_locate_words_that_are_not_on_horizontal_vertical_or_diagonal_lines",
+        "WordSearchTest.test_should_not_wrap_around_horizontally_to_find_a_word",
+        "WordSearchTest.test_should_not_wrap_around_vertically_to_find_a_word"
+      ],
+      "hidden_tests": [
+        "WordSearchTest.test_should_accept_an_initial_game_grid_and_a_target_search_word",
+        "WordSearchTest.test_should_locate_the_same_word_written_left_to_right_in_a_different_position",
+        "WordSearchTest.test_should_locate_a_left_to_right_word_in_ten_line_grid",
+        "WordSearchTest.test_should_locate_that_left_to_right_word_in_a_different_position_in_a_ten_line_grid",
+        "WordSearchTest.test_should_locate_multiple_words",
+        "WordSearchTest.test_should_locate_multiple_words_written_in_different_horizontal_directions",
+        "WordSearchTest.test_should_locate_words_written_top_to_bottom",
+        "WordSearchTest.test_should_locate_words_written_bottom_to_top",
+        "WordSearchTest.test_should_locate_words_written_bottom_right_to_top_left",
+        "WordSearchTest.test_should_locate_words_written_top_right_to_bottom_left",
+        "WordSearchTest.test_should_fail_to_locate_a_word_that_is_not_in_the_puzzle",
+        "WordSearchTest.test_should_not_concatenate_different_lines_to_find_a_horizontal_word"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "word_search.py",
+      "test_file": "word_search_test.py",
+      "total_tests": 24,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 12,
+          "acceptance_total": 12,
+          "example_sha256": "ddef232826786a83e26b1fb1a46e530a533f24946e02ec629caf4ddb003bc71d",
+          "hidden_passed": 12,
+          "hidden_total": 12,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    },
+    "ex_yacht": {
+      "acceptance_tests": [
+        "YachtTest.test_not_yacht",
+        "YachtTest.test_ones",
+        "YachtTest.test_fives",
+        "YachtTest.test_sixes",
+        "YachtTest.test_full_house_two_small_three_big",
+        "YachtTest.test_yacht_is_not_a_full_house",
+        "YachtTest.test_yacht_can_be_scored_as_four_of_a_kind",
+        "YachtTest.test_little_straight_as_big_straight",
+        "YachtTest.test_four_in_order_but_not_a_little_straight",
+        "YachtTest.test_minimum_is_1_maximum_is_5_but_not_a_little_straight",
+        "YachtTest.test_big_straight_as_little_straight",
+        "YachtTest.test_no_pairs_but_not_a_big_straight",
+        "YachtTest.test_choice",
+        "YachtTest.test_yacht_as_choice"
+      ],
+      "hidden_tests": [
+        "YachtTest.test_yacht",
+        "YachtTest.test_ones_out_of_order",
+        "YachtTest.test_no_ones",
+        "YachtTest.test_twos",
+        "YachtTest.test_fours",
+        "YachtTest.test_yacht_counted_as_threes",
+        "YachtTest.test_yacht_of_3s_counted_as_fives",
+        "YachtTest.test_full_house_three_small_two_big",
+        "YachtTest.test_two_pair_is_not_a_full_house",
+        "YachtTest.test_four_of_a_kind_is_not_a_full_house",
+        "YachtTest.test_four_of_a_kind",
+        "YachtTest.test_full_house_is_not_four_of_a_kind",
+        "YachtTest.test_little_straight",
+        "YachtTest.test_no_pairs_but_not_a_little_straight",
+        "YachtTest.test_big_straight"
+      ],
+      "shared_invariant_tests": [],
+      "solution_file": "yacht.py",
+      "test_file": "yacht_test.py",
+      "total_tests": 29,
+      "verification": {
+        "reference": {
+          "acceptance_passed": 14,
+          "acceptance_total": 14,
+          "example_sha256": "db12b6f5fc775f64ac4d365c7944db91c10fb762d4860cfbc31af4395566b04b",
+          "hidden_passed": 15,
+          "hidden_total": 15,
+          "status": "passed"
+        },
+        "stub_fails_both": true
+      }
+    }
+  }
+}
