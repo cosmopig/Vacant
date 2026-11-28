@@ -334,7 +334,7 @@ def by_set_diff_fprec(cells, pairs, t, c):
 
 
 # ---------------------------------------------------------------- selector (B8)
-def selector(draft_roots, runs_by_root, nonblank_only: bool):
+def selector(draft_roots, runs_by_root, nonblank_only: bool, flags_name: str = "flags_v2.json"):
     plan, sha = None, None
     for r in draft_roots:
         run = json.loads((r / "RUN.json").read_text())
@@ -345,7 +345,7 @@ def selector(draft_roots, runs_by_root, nonblank_only: bool):
     valid: dict = collections.defaultdict(list)
     for root in draft_roots:
         runs = runs_by_root[root]
-        for sid, ds in M.collect_offline_drafts(root, truth, list(truth), K).items():
+        for sid, ds in M.collect_offline_drafts(root, truth, list(truth), K, flags_name=flags_name).items():
             for d in ds:
                 rr = runs.get((sid, d["rep"], "c0", "c0"), {})
                 if rr.get("infra") or rr.get("escape"):
@@ -434,8 +434,10 @@ def main() -> None:
     out["drafts_runs"] = {"total": len(dr), "infra": sum(x["infra"] for x in dr), "escape": sum(x["escape"] for x in dr),
                           "context_exhausted": sum(x["context_exhausted"] for x in dr), "timeout": sum(x["timeout"] for x in dr),
                           "bad": [x for x in dr if x["infra"] or x["escape"]]}
+    # 紀錄分數用修正後的標記（flags_v2.json，`expT_reflag.py --write`）；舊標記版本只描述
     sel_all = selector(droots, runs_d, False); sel_nb = selector(droots, runs_d, True)
-    out["selector"] = {"all": sel_all, "nonblank_drafts": sel_nb}
+    sel_v1 = selector(droots, runs_d, False, flags_name="flags.json")
+    out["selector"] = {"all": sel_all, "nonblank_drafts": sel_nb, "old_flags_descriptive": sel_v1}
     ps = {"record_vs_random": sel_all["record_vs_random"]["perm_p"], "record_vs_nonblank": sel_all["record_vs_nonblank"]["perm_p"]}
     if froots:
         runs_f = {r: scan_runs(r, d2) for r in froots}

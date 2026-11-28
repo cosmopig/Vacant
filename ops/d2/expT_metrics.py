@@ -987,6 +987,7 @@ def collect_offline_drafts(
     sets_truth: dict[str, dict[str, Any]],
     sets_order: list[str],
     reps: int,
+    flags_name: str = "flags.json",
 ) -> dict[str, list[dict[str, Any]]]:
     """Collect all non-void shared c0 drafts per set for secondary offline draft-selection analysis."""
     drafts_by_set: dict[str, list[dict[str, Any]]] = {}
@@ -1004,7 +1005,7 @@ def collect_offline_drafts(
             c0_dir = cells_dir / sid / f"r{rep}" / "c0"
             done_p = c0_dir / "done.json"
             rep_p = c0_dir / "report.md"
-            fl_p = c0_dir / "flags.json"
+            fl_p = c0_dir / flags_name
             if not (done_p.is_file() and rep_p.is_file() and fl_p.is_file()):
                 continue
             done_doc = json.loads(done_p.read_text(encoding="utf-8"))

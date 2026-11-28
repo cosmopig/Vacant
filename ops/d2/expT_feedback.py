@@ -386,10 +386,71 @@ def fetch_universe(rec: Recorder) -> list[dict[str, Any]]:
                 out.append({"seq": int(st.seq), "url": u, "text": t, "source": "step_url"})
     for e in rec.events():
         if e.get("type") == "source_fetch" and e.get("url") and not e.get("tls"):
-            t = S._blob_text(rec, e.get("sha256"))
+            t = _blob(rec, e.get("sha256"))
             if t is not None:
                 out.append({"seq": int(e["seq"]), "url": e["url"], "text": t, "source": "egress"})
     return out
+
+
+# ---------------------------------------------------------------------------------------------
+# 2026-11-28 量具修正（附錄 B 補充；診斷 ~/dev/ops/diag_c0_flags_20261128/DIAG.md）。預設 "literal"＝舊行為（探索批次可重現）。
+# "n2db"：(a) 出口紀錄的頁面內容被自動 gc 刪掉時，按 sha256 從這一格 revision 0 的凍結頁補回（sha256 必須相同）；
+#         (b) 值與頁面純文字兩邊都去掉空白、`*`、反引號、`_` 後做子字串比對（長度 ≥2），且命中處前後不能緊接數字（數字邊界）。
+# 規則在跑回歸之前凍結；不參考答案鍵或任何臂的結果。
+FLAG_MATCHING = "literal"
+FROZEN_FALLBACK: dict[str, str] = {}
+_N2 = re.compile(r"[\s*`_]+")
+
+
+def set_flag_matching(mode: str) -> None:
+    global FLAG_MATCHING
+    if mode not in ("literal", "n2db"):
+        raise ValueError(f"unknown flag_matching {mode!r}")
+    FLAG_MATCHING = mode
+
+
+def add_frozen_fallback(site_frozen_dir: pathlib.Path, sha_json: pathlib.Path) -> dict[str, int]:
+    """把一格 revision 0 凍結頁（sha256 與 site_snapshot_sha256.json 相同者）加進補回表；回傳 {pages, mismatched}。"""
+    import hashlib as _h
+    pinned = json.loads(pathlib.Path(sha_json).read_text(encoding="utf-8"))
+    ok = bad = 0
+    for name, sha in pinned.items():
+        f = pathlib.Path(site_frozen_dir) / name
+        try:
+            b = f.read_bytes()
+        except OSError:
+            bad += 1; continue
+        if _h.sha256(b).hexdigest() != sha:
+            bad += 1; continue
+        FROZEN_FALLBACK[sha] = b.decode("utf-8", "replace"); ok += 1
+    return {"pages": ok, "mismatched": bad}
+
+
+def _blob(rec: Recorder, sha: str | None) -> str | None:
+    t = S._blob_text(rec, sha)
+    if t is None and FLAG_MATCHING == "n2db" and sha:
+        return FROZEN_FALLBACK.get(sha)
+    return t
+
+
+def _n2(s: str) -> str:
+    return _N2.sub("", s or "")
+
+
+def n2db_contains(plain_n2: str, value: str) -> bool:
+    k = _n2(value)
+    if len(k) < 2:
+        return False
+    start = 0
+    while True:
+        i = plain_n2.find(k, start)
+        if i < 0:
+            return False
+        before = plain_n2[i - 1] if i > 0 else ""
+        after = plain_n2[i + len(k)] if i + len(k) < len(plain_n2) else ""
+        if not ((k[0].isdigit() and before.isdigit()) or (k[-1].isdigit() and after.isdigit())):
+            return True
+        start = i + 1
 
 
 def egress_fetched_urls(rec: Recorder, *, bound_seq: int | None = None) -> list[str]:
@@ -401,7 +462,7 @@ def egress_fetched_urls(rec: Recorder, *, bound_seq: int | None = None) -> list[
         if bound_seq is not None and int(e.get("seq") or 0) > bound_seq:
             continue
         url = e.get("url")
-        if url and not e.get("tls") and S._blob_text(rec, e.get("sha256")) is not None:
+        if url and not e.get("tls") and _blob(rec, e.get("sha256")) is not None:
             urls.add(str(url))
     return sorted(urls)
 
@@ -459,6 +520,12 @@ def compute_line_flags(
             reasons.append(PROBLEM_MISSING)
         else:
             carriers = [u for u in uk if S.plain_contains(str(u.get("text") or ""), v)]
+            if not carriers and FLAG_MATCHING == "n2db":
+                for u in uk:
+                    if "_n2plain" not in u:
+                        u["_n2plain"] = _n2(S._plain(str(u.get("text") or "")))
+                    if n2db_contains(u["_n2plain"], v):
+                        carriers.append(u)
             if not carriers:
                 f1 = True
                 reasons.append(PROBLEM_NOT_IN_FETCHED)

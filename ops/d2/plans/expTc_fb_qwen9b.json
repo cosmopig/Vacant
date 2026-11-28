@@ -168,5 +168,7 @@
    2
   ]
  },
- "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently."
+ "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently.",
+ "flag_matching": "n2db",
+ "hook_no_gc": true
 }

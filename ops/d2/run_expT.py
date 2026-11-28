@@ -273,6 +273,8 @@ class ExpTRun:
             if a not in FB.EXPT_ARMS:
                 raise SystemExit(f"unsupported Experiment T arm: {a!r} (valid: {FB.EXPT_ARMS})")
 
+        # 2026-11-28 量具修正（附錄 B 補充）：flag_matching＝"n2db" 時用修正後的比對與凍結頁補回；預設 literal＝舊行為
+        FB.set_flag_matching(str(self.plan.get("flag_matching") or "literal"))
         need_oracle = "TO" in self.arms
         self.sets_meta, self.manifest_shas, self._oracle_truth = load_materials_specs(
             self.plan, include_oracle_truth=need_oracle,
@@ -406,6 +408,9 @@ class ExpTRun:
                 "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
             })
             return env
+        if self.plan.get("hook_no_gc"):
+            # 2026-11-28：實驗用 wheel 的自動 gc 不認得 egress.jsonl，會在進鏈前刪掉出口代理存的頁面內容（附錄 B 補充）
+            env["VACANT_HOOK_NO_GC"] = "1"
         env.update({
             "PI_CODING_AGENT_DIR": str(live / "cfg"),
             "VACANT_HOME": str(live / "vh"),
@@ -737,6 +742,8 @@ class ExpTRun:
 
         # 0) Pin revision-0 frozen page snapshot once for all arms & rounds
         frozen_site, site_shas = self._prepare_frozen_site(c0_dir, set_id)
+        if FB.FLAG_MATCHING == "n2db":
+            FB.add_frozen_fallback(c0_dir / "site_frozen", c0_dir / "site_snapshot_sha256.json")
 
         # 1) Shared cycle-0 draft (all arms branch from this identical draft)
         if not (c0_dir / "done.json").exists():
