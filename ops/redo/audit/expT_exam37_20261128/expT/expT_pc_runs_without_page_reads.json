@@ -1,0 +1,526 @@
+[
+ {
+  "set": "fb-s01",
+  "rep": 1,
+  "arm": "TB",
+  "round": "round_1",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 429,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "fb-s04",
+  "rep": 1,
+  "arm": "TB",
+  "round": "round_1",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1373,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "fb-s06",
+  "rep": 1,
+  "arm": "G",
+  "round": "round_2",
+  "calls_to_other_live": 12,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 153,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 822,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 603,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 494,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 429,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 11,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 11,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 211,
+    "is_listing": true,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "fb-s20",
+  "rep": 2,
+  "arm": "c0",
+  "round": "c0",
+  "calls_to_other_live": 4,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1427,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1302,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1387,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1427,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s01",
+  "rep": 1,
+  "arm": "TO",
+  "round": "round_1",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1440,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s01",
+  "rep": 2,
+  "arm": "G",
+  "round": "round_1",
+  "calls_to_other_live": 2,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1309,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1176,
+    "is_listing": true,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s02",
+  "rep": 2,
+  "arm": "TO",
+  "round": "round_2",
+  "calls_to_other_live": 6,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 412,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 153,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1264,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1162,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1440,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1309,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s03",
+  "rep": 2,
+  "arm": "TO",
+  "round": "round_2",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 653,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s05",
+  "rep": 1,
+  "arm": "G",
+  "round": "round_2",
+  "calls_to_other_live": 3,
+  "listing_only": true,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 11,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 412,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 323,
+    "is_listing": true,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s06",
+  "rep": 1,
+  "arm": "TO",
+  "round": "round_2",
+  "calls_to_other_live": 2,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "read",
+    "has_page_in_args": false,
+    "result_len": 1457,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 359,
+    "is_listing": true,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s12",
+  "rep": 2,
+  "arm": "TO",
+  "round": "round_2",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1387,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s13",
+  "rep": 2,
+  "arm": "TO",
+  "round": "round_2",
+  "calls_to_other_live": 2,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1504,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1625,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s15",
+  "rep": 2,
+  "arm": "TB",
+  "round": "round_2",
+  "calls_to_other_live": 1,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "read",
+    "has_page_in_args": false,
+    "result_len": 1193,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s16",
+  "rep": 2,
+  "arm": "G",
+  "round": "round_1",
+  "calls_to_other_live": 12,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1427,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1387,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1387,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1193,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1193,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1096,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1502,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1534,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s16",
+  "rep": 2,
+  "arm": "G",
+  "round": "round_2",
+  "calls_to_other_live": 13,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 1096,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 468,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 468,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 12463,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 50797,
+    "is_listing": false,
+    "truncated": true
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 9654,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 51043,
+    "is_listing": false,
+    "truncated": true
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 44955,
+    "is_listing": false,
+    "truncated": false
+   }
+  ]
+ },
+ {
+  "set": "sc-s17",
+  "rep": 2,
+  "arm": "G",
+  "round": "round_1",
+  "calls_to_other_live": 3,
+  "listing_only": false,
+  "calls": [
+   {
+    "tool": "read",
+    "has_page_in_args": false,
+    "result_len": 1387,
+    "is_listing": false,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 366,
+    "is_listing": true,
+    "truncated": false
+   },
+   {
+    "tool": "bash",
+    "has_page_in_args": false,
+    "result_len": 366,
+    "is_listing": true,
+    "truncated": false
+   }
+  ]
+ }
+]

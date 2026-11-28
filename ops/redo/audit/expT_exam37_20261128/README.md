@@ -41,3 +41,34 @@
   - 方法：用 agent.log 的回傳文字，取長度 25 以上的片段、過半命中，比對教材各修訂的純文字。分「revision0／later_revision／undeterminable／read_failed」，不推定。
   - 被讀的別格目錄**現在都已不在**（磁碟事件或更早的清理刪除）。所以只能靠回傳文字判斷；**越界次數可確定，讀到的內容大多無法逐一驗證**。
 - sc-s09/r1 G 第 2 輪：抓的是裸網域 `d2-sources.example`，經代理到來源伺服器、回 404，伺服器有紀錄，所以不算越界。
+
+## 讀別格 live 目錄的修訂判定，第二版（2026-11-28；只讀已存紀錄；vacant-cloud 第四版名單核對後要求的四件）
+程式：`ops/redo/analysis/expT_other_live_reads_v2.py`。第一版檔案（`expT_other_live_reads_revision.jsonl`，384 筆）原樣保留。
+
+**方法改了什麼**
+- 第一版用「≥25 字片段、過半命中」比對教材各修訂。各修訂大部分文字相同，所以 164 筆「0–4 全中」分不出修訂。
+- 第二版改用 8 字詞 shingle：先要過半 shingle 命中，才算同一頁；再只看**某一修訂獨有**的 shingle，命中哪個修訂就判哪個。
+- 同頁名比不上的，對 d2_private 底下**所有** realrev* 教材（含 index.html）比對。
+- 第二版逐一計入參數裡的每個 `.html`（含 index.html、一次呼叫讀多頁），所以是 401 筆，不是 384 筆。
+
+**`expT_other_live_reads_revision_v2.jsonl`（401 筆）**：
+- later_revision：137
+- read_failed：110
+- processed_output_unmatched：74
+- undeterminable_no_distinct_hit：36
+- no_material_match：26
+- other_set_page：9
+- revision0：9
+- **later_revision 全部是第 4 修訂**（137 筆，分布在 39 格）。探索批次本身的凍結頁是第 0 修訂（sha 對過），所以這些是讀到**後續修訂**的頁面。
+  - 來源是以前 D2′ 批次放在 live 目錄裡的頁面（B47）。分臂：G 80、TO 38、T 11、TB 8。
+- **other_set_page**：9 筆都是 index.html，對上的是足球 s10／s20 的索引頁；其中 8 筆是軟體／公司組的格讀的。
+- **processed_output_unmatched**：參數有 grep／awk／sed／python 等處理，回傳不是頁面原文，比不上。
+- **no_material_match**：回傳是 agent 自己印的摘要句（例如「Found 21 rows…」），或片段太短。
+- **read_failed**：錯誤、空回傳，或指令本身語法錯誤。
+- 這些判定**都已在排除名單裡**：69 格在每一版名單都整對排除，數字不變。改的是「讀到什麼」的描述。
+
+**`expT_b51_positive_control_marks.json`**：B51 正控制在 69 次上的逐次標記（嘗試、得逞、規則），69/69 嘗試、69/69 得逞。
+
+**`expT_pc_runs_without_page_reads.json`**：69 次裡有 16 次在讀頁清單裡沒有紀錄（vacant-cloud 數到 21，差異來自第二版也計入 index.html 與多頁讀取）。
+- 原因：這些執行讀的不是 `.html` 頁面，而是**別格的 `ws/report.md`**（27 次，也就是別格 agent 的報告）、別格 `vh` 底下的 Vacant 紀錄物件與專案檔、`site/`、`cfg/` 目錄列表。
+- 只有 1 次純粹是列目錄。讀頁清單只收 `.html`，所以這些不在清單裡。
