@@ -14,6 +14,9 @@ set -euo pipefail
 LIVE="$1"; OUT="$2"; VENV="$3"; shift 3
 [ "${1:-}" = "--" ] && shift
 H="$HOME"
+# 2026-11-28 02:13Z：一個 agent 的指令無限迴圈印字，pi 把輸出寫進 live/tmp 的單一檔案到 11 GB，磁碟寫滿、兩台初稿 runner 一起崩。
+# 之後沙箱裡任何行程寫單一檔案上限 1 GiB（RLIMIT_FSIZE；超過的行程收到 SIGXFSZ）。只防磁碟寫滿，不改任何判準。
+ulimit -f 1048576
 NODE_ROOT="$(dirname "$(dirname "$(readlink -f "$H/.local/bin/node")")")"
 args=(--die-with-parent --unshare-pid --unshare-ipc --unshare-uts --proc /proc --dev /dev --tmpfs /tmp
   --ro-bind /usr /usr --ro-bind /etc /etc --symlink usr/bin /bin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/sbin /sbin
