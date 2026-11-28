@@ -1,0 +1,567 @@
+{
+  "schema": "vacant.trust_delivery_lift.tasks/1",
+  "split": {
+    "pilot_ids": [
+      "org_01", "org_02", "org_03", "org_04", "org_05", "org_06",
+      "org_07", "org_08", "org_09", "org_10", "org_11", "org_12"
+    ],
+    "confirm_ids": [
+      "org_13", "org_14", "org_15", "org_16", "org_17", "org_18",
+      "org_19", "org_20", "org_21", "org_22", "org_23", "org_24"
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "org_01",
+      "title": "Northline Biotech profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Northline Biotech was founded in 1998 in Boston, Massachusetts."},
+        {"id": "p2", "text": "In fiscal 2024 the company reported revenue of USD 240 million and net income of USD 18 million."},
+        {"id": "p3", "text": "As of March 2025 it employed 1,250 people worldwide."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2024", "type": "money", "required": true},
+        {"id": "net_income_fy2024", "type": "money", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1998",
+        "hq_city": "Boston",
+        "revenue_fy2024": "USD 240 million",
+        "net_income_fy2024": "USD 18 million",
+        "employees": "1250"
+      }
+    },
+    {
+      "task_id": "org_02",
+      "title": "HelioGrid Energy profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "HelioGrid Energy Ltd. started operations in 2005 with headquarters in Oslo, Norway."},
+        {"id": "p2", "text": "2023 annual revenue was EUR 3.2 billion; operating margin was 12.5%."},
+        {"id": "p3", "text": "The firm had 8,400 employees at year-end 2023."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2023", "type": "money", "required": true},
+        {"id": "operating_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2005",
+        "hq_city": "Oslo",
+        "revenue_fy2023": "EUR 3.2 billion",
+        "operating_margin": "12.5%",
+        "employees": "8400"
+      }
+    },
+    {
+      "task_id": "org_03",
+      "title": "Maple Cantech profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Maple Cantech Inc. was established in 2012 in Toronto, Canada."},
+        {"id": "p2", "text": "FY2022 revenue totaled CAD 95 million with a net loss of CAD 4 million."},
+        {"id": "p3", "text": "Headcount reached 620 employees in 2022."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2022", "type": "money", "required": true},
+        {"id": "net_result_fy2022", "type": "money", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2012",
+        "hq_city": "Toronto",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "CAD -4 million",
+        "employees": "620"
+      }
+    },
+    {
+      "task_id": "org_04",
+      "title": "Sahara Logistics profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Sahara Logistics SA was created in 1988; corporate offices are in Casablanca, Morocco."},
+        {"id": "p2", "text": "Revenue for 2021 was USD 1.1 billion and EBITDA margin was 9.0%."},
+        {"id": "p3", "text": "The company reported 22,000 employees globally in 2021."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2021", "type": "money", "required": true},
+        {"id": "ebitda_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      }
+    },
+    {
+      "task_id": "org_05",
+      "title": "Kita Semiconductor profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Kita Semiconductor K.K. began in 1976 in Tokyo, Japan."},
+        {"id": "p2", "text": "Net sales in FY2019 were JPY 580 billion; net income was JPY 42 billion."},
+        {"id": "p3", "text": "Employee count was 31,500 at fiscal year-end 2019."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2019", "type": "money", "required": true},
+        {"id": "net_income_fy2019", "type": "money", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      }
+    },
+    {
+      "task_id": "org_06",
+      "title": "Blue Harbor Retail profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Blue Harbor Retail was founded in 2001 and is based in Seattle, Washington."},
+        {"id": "p2", "text": "2020 revenue was USD 6.8 billion; same-store sales growth was 3.2%."},
+        {"id": "p3", "text": "The retailer employed 98,000 workers in 2020."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2020", "type": "money", "required": true},
+        {"id": "ssg_fy2020", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2001",
+        "hq_city": "Seattle",
+        "revenue_fy2020": "USD 6.8 billion",
+        "ssg_fy2020": "3.2%",
+        "employees": "98000"
+      }
+    },
+    {
+      "task_id": "org_07",
+      "title": "Orion Cyber profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Orion Cyber GmbH launched in 2015 with HQ in Berlin, Germany."},
+        {"id": "p2", "text": "Annual recurring revenue hit EUR 120 million in 2024 with gross margin 72%."},
+        {"id": "p3", "text": "Staff totaled 890 people in 2024."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "arr_fy2024", "type": "money", "required": true},
+        {"id": "gross_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2015",
+        "hq_city": "Berlin",
+        "arr_fy2024": "EUR 120 million",
+        "gross_margin": "72%",
+        "employees": "890"
+      }
+    },
+    {
+      "task_id": "org_08",
+      "title": "Pacific Alloy profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Pacific Alloy Pte Ltd was registered in 1993 in Singapore."},
+        {"id": "p2", "text": "FY2018 revenue was USD 450 million; return on equity was 14.1%."},
+        {"id": "p3", "text": "The manufacturer had 2,100 employees in 2018."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2018", "type": "money", "required": true},
+        {"id": "roe_fy2018", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2100"
+      }
+    },
+    {
+      "task_id": "org_09",
+      "title": "Riverstone Media profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Riverstone Media began in 2008 in Austin, Texas."},
+        {"id": "p2", "text": "2023 revenue reached USD 88 million and operating profit margin was 6.5%."},
+        {"id": "p3", "text": "The company had 410 employees as of December 2023."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2023", "type": "money", "required": true},
+        {"id": "op_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2008",
+        "hq_city": "Austin",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      }
+    },
+    {
+      "task_id": "org_10",
+      "title": "Aurora Foods profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Aurora Foods Co. dates to 1965 with main offices in Chicago, Illinois."},
+        {"id": "p2", "text": "Net sales for 2017 were USD 2.4 billion; dividend yield was 2.8%."},
+        {"id": "p3", "text": "Workforce size was 17,600 in 2017."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2017", "type": "money", "required": true},
+        {"id": "dividend_yield", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1965",
+        "hq_city": "Chicago",
+        "revenue_fy2017": "USD 2.4 billion",
+        "dividend_yield": "2.8%",
+        "employees": "17600"
+      }
+    },
+    {
+      "task_id": "org_11",
+      "title": "Zenith Robotics profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Zenith Robotics was started in 2010 in Shenzhen, China."},
+        {"id": "p2", "text": "2022 revenue was USD 1.6 billion; R&D intensity was 11.0% of revenue."},
+        {"id": "p3", "text": "The firm employed 12,300 people in 2022."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2022", "type": "money", "required": true},
+        {"id": "rnd_intensity", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "USD 1.6 billion",
+        "rnd_intensity": "11.0%",
+        "employees": "12300"
+      }
+    },
+    {
+      "task_id": "org_12",
+      "title": "Cedar Insurance profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Cedar Insurance Group was formed in 1990 in Zurich, Switzerland."},
+        {"id": "p2", "text": "Gross written premiums in 2021 totaled CHF 5.5 billion; combined ratio was 96.2%."},
+        {"id": "p3", "text": "Employees numbered 9,800 worldwide in 2021."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "premiums_fy2021", "type": "money", "required": true},
+        {"id": "combined_ratio", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "CHF 5.5 billion",
+        "combined_ratio": "96.2%",
+        "employees": "9800"
+      }
+    },
+    {
+      "task_id": "org_13",
+      "title": "Nimbus Airlines profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Nimbus Airlines PLC was incorporated in 1982; main hub offices are in London, United Kingdom."},
+        {"id": "p2", "text": "FY2016 revenue was GBP 12.3 billion with operating margin 8.4%."},
+        {"id": "p3", "text": "The airline group had 65,000 employees in 2016."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2016", "type": "money", "required": true},
+        {"id": "op_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1982",
+        "hq_city": "London",
+        "revenue_fy2016": "GBP 12.3 billion",
+        "op_margin": "8.4%",
+        "employees": "65000"
+      }
+    },
+    {
+      "task_id": "org_14",
+      "title": "Lumen Diagnostics profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Lumen Diagnostics was founded in 2003 in San Diego, California."},
+        {"id": "p2", "text": "2024 revenue was USD 310 million; net margin was 4.5%."},
+        {"id": "p3", "text": "It employed 1,080 staff at year-end 2024."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2024", "type": "money", "required": true},
+        {"id": "net_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2003",
+        "hq_city": "San Diego",
+        "revenue_fy2024": "USD 310 million",
+        "net_margin": "4.5%",
+        "employees": "1080"
+      }
+    },
+    {
+      "task_id": "org_15",
+      "title": "Falcon Mining profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Falcon Mining Ltd began operations in 1971 with headquarters in Perth, Australia."},
+        {"id": "p2", "text": "Revenue in 2015 reached AUD 2.1 billion; EBITDA margin was 31.0%."},
+        {"id": "p3", "text": "Employee headcount was 7,200 in 2015."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2015", "type": "money", "required": true},
+        {"id": "ebitda_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1971",
+        "hq_city": "Perth",
+        "revenue_fy2015": "AUD 2.1 billion",
+        "ebitda_margin": "31.0%",
+        "employees": "7200"
+      }
+    },
+    {
+      "task_id": "org_16",
+      "title": "Prairie AgTech profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Prairie AgTech Inc. launched in 2014 in Des Moines, Iowa."},
+        {"id": "p2", "text": "FY2021 sales were USD 72 million with gross margin 58%."},
+        {"id": "p3", "text": "The company had 260 employees in 2021."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2021", "type": "money", "required": true},
+        {"id": "gross_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2014",
+        "hq_city": "Des Moines",
+        "revenue_fy2021": "USD 72 million",
+        "gross_margin": "58%",
+        "employees": "260"
+      }
+    },
+    {
+      "task_id": "org_17",
+      "title": "Vertex Payments profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Vertex Payments was established in 2007 in Dublin, Ireland."},
+        {"id": "p2", "text": "Processed volume fee revenue in 2023 was EUR 890 million; take rate was 1.9%."},
+        {"id": "p3", "text": "Vertex employed 3,400 people globally in 2023."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2023", "type": "money", "required": true},
+        {"id": "take_rate", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2007",
+        "hq_city": "Dublin",
+        "revenue_fy2023": "EUR 890 million",
+        "take_rate": "1.9%",
+        "employees": "3400"
+      }
+    },
+    {
+      "task_id": "org_18",
+      "title": "Silverline Pharma profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Silverline Pharma AG was founded in 1995 in Basel, Switzerland."},
+        {"id": "p2", "text": "2020 product revenue was CHF 7.8 billion; R&D spend ratio was 19.5%."},
+        {"id": "p3", "text": "The group had 28,900 employees in 2020."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2020", "type": "money", "required": true},
+        {"id": "rnd_ratio", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1995",
+        "hq_city": "Basel",
+        "revenue_fy2020": "CHF 7.8 billion",
+        "rnd_ratio": "19.5%",
+        "employees": "28900"
+      }
+    },
+    {
+      "task_id": "org_19",
+      "title": "Harbor Steel profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Harbor Steel Co. started in 1968 in Pittsburgh, Pennsylvania."},
+        {"id": "p2", "text": "Net sales for 2014 were USD 3.3 billion; operating margin 7.1%."},
+        {"id": "p3", "text": "Employees totaled 14,800 in 2014."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2014", "type": "money", "required": true},
+        {"id": "op_margin", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1968",
+        "hq_city": "Pittsburgh",
+        "revenue_fy2014": "USD 3.3 billion",
+        "op_margin": "7.1%",
+        "employees": "14800"
+      }
+    },
+    {
+      "task_id": "org_20",
+      "title": "Echo Learning profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Echo Learning Ltd was founded in 2016 in Manchester, United Kingdom."},
+        {"id": "p2", "text": "Subscription revenue in 2022 was GBP 140 million; churn was 5.6%."},
+        {"id": "p3", "text": "Headcount was 920 in 2022."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2022", "type": "money", "required": true},
+        {"id": "churn_rate", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2016",
+        "hq_city": "Manchester",
+        "revenue_fy2022": "GBP 140 million",
+        "churn_rate": "5.6%",
+        "employees": "920"
+      }
+    },
+    {
+      "task_id": "org_21",
+      "title": "Tidal Shipping profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Tidal Shipping AS began in 1985 in Bergen, Norway."},
+        {"id": "p2", "text": "2021 freight revenue was NOK 18.6 billion; fleet utilization was 91%."},
+        {"id": "p3", "text": "The operator had 4,600 mariners and staff in 2021."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2021", "type": "money", "required": true},
+        {"id": "utilization", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1985",
+        "hq_city": "Bergen",
+        "revenue_fy2021": "NOK 18.6 billion",
+        "utilization": "91%",
+        "employees": "4600"
+      }
+    },
+    {
+      "task_id": "org_22",
+      "title": "Copper Lane Telecom profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Copper Lane Telecom was created in 2000 in Madrid, Spain."},
+        {"id": "p2", "text": "Service revenue in 2018 reached EUR 4.7 billion; capex intensity 15.2%."},
+        {"id": "p3", "text": "The company employed 24,500 people in 2018."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2018", "type": "money", "required": true},
+        {"id": "capex_intensity", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2000",
+        "hq_city": "Madrid",
+        "revenue_fy2018": "EUR 4.7 billion",
+        "capex_intensity": "15.2%",
+        "employees": "24500"
+      }
+    },
+    {
+      "task_id": "org_23",
+      "title": "Brightfield Solar profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Brightfield Solar LLC formed in 2009 in Phoenix, Arizona."},
+        {"id": "p2", "text": "Energy sales revenue in 2023 was USD 520 million; capacity factor 24.8%."},
+        {"id": "p3", "text": "Brightfield had 740 employees in 2023."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "revenue_fy2023", "type": "money", "required": true},
+        {"id": "capacity_factor", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "2009",
+        "hq_city": "Phoenix",
+        "revenue_fy2023": "USD 520 million",
+        "capacity_factor": "24.8%",
+        "employees": "740"
+      }
+    },
+    {
+      "task_id": "org_24",
+      "title": "Granite Mutual profile",
+      "source_paragraphs": [
+        {"id": "p1", "text": "Granite Mutual was founded in 1934 in Hartford, Connecticut."},
+        {"id": "p2", "text": "Net premiums written in 2019 were USD 8.9 billion; loss ratio 62.3%."},
+        {"id": "p3", "text": "The insurer employed 19,200 people in 2019."}
+      ],
+      "fields": [
+        {"id": "founded_year", "type": "year", "required": true},
+        {"id": "hq_city", "type": "text", "required": true},
+        {"id": "premiums_fy2019", "type": "money", "required": true},
+        {"id": "loss_ratio", "type": "percent", "required": true},
+        {"id": "employees", "type": "int", "required": true}
+      ],
+      "gold": {
+        "founded_year": "1934",
+        "hq_city": "Hartford",
+        "premiums_fy2019": "USD 8.9 billion",
+        "loss_ratio": "62.3%",
+        "employees": "19200"
+      }
+    }
+  ]
+}
