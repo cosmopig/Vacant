@@ -66,7 +66,12 @@ def main():
     M.strict_status = lenient_status
     sys.argv = [target] + args
     try:
-        runpy.run_path(target, run_name="__main__")
+        if pathlib.Path(target).name == "expT_metrics.py":   # 目標就是被換掉的模組本身：呼叫已換過的模組的 main，不另起命名空間
+            rc = M.main()
+            if rc:
+                print("TARGET_RC", rc, file=sys.stderr)
+        else:
+            runpy.run_path(target, run_name="__main__")
     finally:
         print("REGRADE_STATS", STATS, file=sys.stderr)
 

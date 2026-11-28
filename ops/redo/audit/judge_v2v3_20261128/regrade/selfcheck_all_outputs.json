@@ -1,0 +1,16 @@
+{
+ "reports": 840,
+ "by_arm": {
+  "A|agree": 161,
+  "EB|agree": 611,
+  "EN|agree": 588,
+  "ER|agree": 501,
+  "G|agree": 194,
+  "T|agree": 230,
+  "TB|agree": 255,
+  "c0|agree": 466
+ },
+ "agree": 3006,
+ "disagree": 0,
+ "disagreements": []
+}

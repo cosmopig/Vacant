@@ -85,5 +85,25 @@
    "field": "Services",
    "reason": "寫業務類別、非答案的子公司／品牌清單"
   }
- ]
+ ],
+ "looseness": {
+  "equiv_lines": 184,
+  "month_name_differs": 0,
+  "answer_has_month_value_none": 0,
+  "ticker_value_subset_of_several_listings": 2,
+  "ticker_partial_keys": [
+   "f6f7dcd3928db074d955",
+   "6b263729af166d07ba4c"
+  ],
+  "value_words_not_in_answer": 0,
+  "note": "canon_strict 只比數字，所以『age』規則對月名與地點文字不設限；在這 184 行上實際月名不同 0 行、值多出答案沒有的詞 0 行；代號規則有 2 行值只列了答案多個上市地中的一個。"
+ },
+ "audit_criterion": "人工抽查判『一致』的準則：(1) K-等值／age：把答案鍵的『; N years ago』刪掉後，值與答案寫的是同一個日期（年；有月日時月日也相同），值沒有和答案矛盾的地點或附註；(2) U-等值／ticker：值裡每一個（交易所, 代號）都出現在答案鍵裡，且值沒有答案以外的代號；答案多出的只是指數成分文字或其他上市地。兩條都是人讀原文判，不用程式。",
+ "upper_bound_95": {
+  "per_class_0_of_20": 0.1391,
+  "K_131_max_not_equiv": 18,
+  "U_53_max_not_equiv": 7,
+  "total_max_not_equiv_approx": 25,
+  "note": "精確單尾 95% 上界（0/20 ⇒ 1−0.05^(1/20)＝13.9%），按類別換算：K 131 行最多約 18、U 53 行最多約 7，合計約 25 行不是真等值。"
+ }
 }

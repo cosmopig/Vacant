@@ -1,5 +1,8 @@
 # D2′ 結論（v6，D2′ 結案）：紀錄知道每條宣稱來自哪裡，來源變了只重查受影響的那幾條，有沒有用？
 
+> **（2026-11-28 補註）** D2′ 第五輪真實頁面的答案鍵已查無附帶文字（『N years ago』、指數成分：0 行；`ops/redo/audit/judge_v2v3_20261128/answer_key_artifacts_other_batches.json`）。確認批次公司組的答案鍵評分缺陷不涉及這一輪。
+
+
 > **修訂（第 2 版，2026-11-28）——以這一節為準；下面的原文保留、不改。** 來源：vacant-cloud e87085c79／977ec7c5d 的加註句（逐字）與執行方的前提核對；併入前的審查檔 `ops/redo/review/CONCLUSION_REVISIONS_20261128_for_review.md`。
 
 ### 11/26 刪除事件
