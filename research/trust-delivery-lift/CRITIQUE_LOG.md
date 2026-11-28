@@ -127,6 +127,26 @@ Record of external (Gemini) critiques and responses.
 
 | 2026-11-29 00:05 Asia/Taipei | **Supervisor VAC-1 (hourly)** | Primary seal; dev 20/20 gold; cost pilot audit; gating quarantine; no restart. |
 
+### POST-RUN — Confirmatory complete (2026-11-29 ~00:12 Asia/Taipei)
+
+**Outcome:** 512/512 rows; primary McNemar VACANT vs MAJ3 **p=1.0** (1 discordant). **Verdict:** honest null — no lift claim.
+
+**Exploratory gaps logged:** VACANT visible gate 25% oracle-fail among visible-pass; LPB3 gate invalidated; costs not parity.
+
+| 2026-11-29 ~00:12 Asia/Taipei | **Confirmatory gate** | `recompute_r2.py` + `summary.json`; 1.5B filing started; REPORT primary section updated. |
+
+### PRE-RUN — Failure anatomy + null wording (2026-11-29 ~00:17 Asia/Taipei)
+
+**Objection:** Post-hoc clause mapping could smuggle holdout tuning; reframing null as “release safety win” without measured false-release on gated ship overstates.
+
+**Confounds:** Visible checks ≠ filing contract clauses — invoice **field contracts** only; micro-repair cap 4 may truncate fixable errors.
+
+**Falsifier:** If most oracle fails are **visible-pass**, Goodhart is dominant; if most **visible-fail unrepaired**, capacity story dominates.
+
+**Survival:** Label **exploratory**; use frozen `visible_detail` / re-run checks on stored `final` only; report false-release **only** where visible gate would ship; no new checker edits; 1.5B poll count-only until 12:00 push.
+
+**Verdict:** Proceed anatomy script + REPORT honesty; keep tmux filing alive.
+
 ## Anticipated critic targets (pre-buttress)
 
 1. **Non-paired drafts in pilot v1** — Fixed in v2: `freeze_drafts.py` + `harness.py --drafts`.

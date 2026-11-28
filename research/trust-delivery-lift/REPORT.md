@@ -117,6 +117,25 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 
 **Draft-call floor (1-call):** `draft_oracle_rate` matches final oracle for VACANT/BLIND/LPB3 at **75%** on this slice — field-lock repair moves **≤1** task over Maj3 here.
 
+### What the primary null implies (pre-registered; not a lift claim)
+
+On **Qwen2.5-0.5B**, **128 answerable invoice tasks**, the **field-locked VACANT repair loop does not improve whole-deliverable accuracy** vs **equal-budget Maj3** (McNemar **p=1.0**; one discordant pair). VACANT is **not cheaper in calls than a fair comparison story** would require — it is cheaper in **wall time/tokens** because it often stops after **one greedy JSON + micro passes** while Maj3 always runs **three full samples**.
+
+**Demonstrated value at this scale is not “better answers.”** It is: (1) **release-safety semantics** — a frozen visible contract decides what may ship (exploratory false-release among visible-pass deliveries **32/128 = 25%** on this bank — see anatomy below); (2) **replayable row records** (`final`, costs, per-field visible detail) for accountability after the fact, not McNemar lift.
+
+### Exploratory — VACANT failure anatomy (confirmatory)
+
+Source: `data/holdout_05b_confirmatory/FAILURE_ANATOMY_VACANT_EXPLORATORY.json` (`audit_vacant_failure_anatomy.py`).
+
+| Bucket | n (of 32 oracle fails) | Meaning |
+|--------|------------------------|---------|
+| **A — visible pass, oracle fail (Goodhart / incomplete contract)** | **32 (100%)** | Visible gate would ship; oracle wrong. **All 32** mismatches on **`vendor`** only: visible clause checks **provenance in source text + length**, **not** identity to gold vendor string. |
+| **B — visible fail, still oracle fail (unrepaired)** | **0** | No delivery left with failing visible checks — not a “stuck repair” story on this confirmatory slice. |
+
+**Clause map (invoice visible contract):** failures are **not** spread across `currency` / `arith_mismatch` / dates on this slice; they concentrate on **`vendor`** because that is the only oracle error the visible contract does not catch. **Contract incompleteness:** visible spec does not encode “correct vendor entity,” only “vendor string appears in document.”
+
+**Release-safety (exploratory):** if policy = ship iff `visible_all_pass`, **false-release rate = 25%** here — the mechanism **monitors form, not truth** at 0.5B on this task bank.
+
 ## 6. Verdict paragraph（可否說「問責改善交付」？）
 
 **Pilot 1 + 目前證據：不能**在 0.5B／短文 JSON 上宣稱可測的 whole-deliverable lift。  

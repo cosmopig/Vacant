@@ -1,0 +1,23 @@
+{
+  "label": "exploratory_confirmatory_failure_anatomy",
+  "n_vacant": 128,
+  "oracle_failures": 32,
+  "bucket_A_goodhart_visible_pass_oracle_fail": {
+    "n": 32,
+    "fraction_of_oracle_fails": 1.0,
+    "oracle_wrong_field_counts": {
+      "vendor": 32
+    }
+  },
+  "bucket_B_visible_fail_oracle_fail": {
+    "n": 0,
+    "fraction_of_oracle_fails": 0.0,
+    "failing_clause_reasons": {},
+    "tasks_with_visible_fail_at_delivery": 0
+  },
+  "release_safety_exploratory": {
+    "n_shipped_by_visible_gate": 128,
+    "n_false_release_visible_pass_oracle_fail": 32,
+    "false_release_rate_among_visible_pass": 0.25
+  }
+}
