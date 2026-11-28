@@ -1,0 +1,65 @@
+{
+  "id": "hard_r3_qwen30b_8",
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261123,
+  "arms": {
+    "A": {
+      "policy": "single",
+      "attempt_timeout_s": 900,
+      "budget_s": 900
+    },
+    "R3": {
+      "policy": "restart",
+      "max_attempts": 3,
+      "attempt_timeout_s": 300,
+      "budget_s": 900,
+      "min_attempt_s": 10,
+      "hint": "none"
+    }
+  },
+  "pair": [
+    "A",
+    "R3"
+  ],
+  "attempt_timeout_s": 900,
+  "agent": {
+    "argv": [
+      "opencode",
+      "run",
+      "--pure",
+      "--print-logs",
+      "--log-level",
+      "WARN",
+      "--format",
+      "json",
+      "--thinking",
+      "--title",
+      "Hard task",
+      "--model",
+      "local/qwen3-coder-30b-a3b"
+    ]
+  },
+  "providers": [
+    {
+      "name": "local-llamacpp",
+      "provider": "local",
+      "model": "qwen3-coder-30b-a3b",
+      "jobs": 4
+    }
+  ],
+  "analysis": {
+    "alpha": 0.05,
+    "test": "exact two-sided McNemar, one paired outcome per task"
+  },
+  "tasks": [
+    "mesh",
+    "cache",
+    "intervals",
+    "route",
+    "spans",
+    "patch",
+    "rank",
+    "reconcile"
+  ],
+  "reps": 1
+}
