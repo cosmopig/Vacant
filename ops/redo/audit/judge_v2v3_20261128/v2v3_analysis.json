@@ -1,0 +1,870 @@
+{
+ "note": "事後探索性；規則＝PLAN.md（呼叫前提交）。主分析排除量具等值（U-等值＋K-等值）。分數＝判定說「支持／對」的機率；AUC 標籤＝錯、分數＝1−p。",
+ "lines_with_all_three": 1747,
+ "lines_missing_any": 0,
+ "versions": {
+  "main_excl_U_K_equiv": {
+   "companies": {
+    "lines": 451,
+    "wrong": 35,
+    "V2_vs_V1": {
+     "auc_V2": 0.6911,
+     "auc_V2_ci": [
+      0.5547,
+      0.9833
+     ],
+     "auc_V1": 0.6731,
+     "diff": 0.018,
+     "diff_ci": [
+      -0.0707,
+      0.2021
+     ],
+     "sets": 10,
+     "boot_valid": 9997
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.63,
+     "auc_V3_ci": [
+      0.4556,
+      0.8198
+     ],
+     "auc_V1": 0.6731,
+     "diff": -0.0431,
+     "diff_ci": [
+      -0.1278,
+      0.0572
+     ],
+     "sets": 10,
+     "boot_valid": 9997
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.0333,
+       "err_in": 0.8,
+       "pass_err": 0.0528,
+       "recall": 0.3429,
+       "n_flagged": 15
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.0333,
+       "err_in": 0.8,
+       "pass_err": 0.0528,
+       "recall": 0.3429,
+       "n_flagged": 15
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.1197,
+       "err_in": 0.2963,
+       "pass_err": 0.0479,
+       "recall": 0.4571,
+       "n_flagged": 54
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.0665,
+       "err_in": 0.4667,
+       "pass_err": 0.0499,
+       "recall": 0.4,
+       "n_flagged": 30
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.1641,
+       "err_in": 0.2027,
+       "pass_err": 0.0531,
+       "recall": 0.4286,
+       "n_flagged": 74
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.0776,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 1.0,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.0,
+      "U": 0.0
+     },
+     "V2": {
+      "F": 1.0,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.062,
+      "U": 0.6
+     },
+     "V3": {
+      "F": 1.0,
+      "R-他處": 1.0,
+      "R-單位": 1.0,
+      "R-部分": 0.0,
+      "U": 0.2
+     }
+    },
+    "class_counts": {
+     "F": 9,
+     "R-他處": 4,
+     "R-部分": 16,
+     "U": 5,
+     "R-單位": 1
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.0536,
+      "brier": 0.0568
+     },
+     "V2": {
+      "ece15": 0.1457,
+      "brier": 0.116
+     },
+     "V3": {
+      "ece15": 0.2405,
+      "brier": 0.1947
+     }
+    }
+   },
+   "football": {
+    "lines": 1112,
+    "wrong": 247,
+    "V2_vs_V1": {
+     "auc_V2": 0.8782,
+     "auc_V2_ci": [
+      0.8342,
+      0.9251
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.0352,
+     "diff_ci": [
+      -0.0589,
+      -0.0104
+     ],
+     "sets": 18,
+     "boot_valid": 10000
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.8032,
+     "auc_V3_ci": [
+      0.6888,
+      0.9174
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.1102,
+     "diff_ci": [
+      -0.2059,
+      -0.031
+     ],
+     "sets": 18,
+     "boot_valid": 10000
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.3049,
+       "err_in": 0.5841,
+       "pass_err": 0.0634,
+       "recall": 0.8016,
+       "n_flagged": 339
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.1565,
+       "err_in": 0.7011,
+       "pass_err": 0.1333,
+       "recall": 0.4939,
+       "n_flagged": 174
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.2086,
+       "err_in": 0.7155,
+       "pass_err": 0.092,
+       "recall": 0.6721,
+       "n_flagged": 232
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.2221,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 0.932,
+      "R-他處": 0.787,
+      "R-期": 0.8,
+      "R-部分": 0.153,
+      "S": 0.667,
+      "U": 1.0
+     },
+     "V2": {
+      "F": 1.0,
+      "R-他處": 0.87,
+      "R-期": 1.0,
+      "R-部分": 0.588,
+      "S": 1.0,
+      "U": 1.0
+     },
+     "V3": {
+      "F": 1.0,
+      "R-他處": 1.0,
+      "R-期": 1.0,
+      "R-部分": 0.047,
+      "S": 1.0,
+      "U": 1.0
+     }
+    },
+    "class_counts": {
+     "R-部分": 85,
+     "R-他處": 108,
+     "F": 44,
+     "R-期": 5,
+     "S": 3,
+     "U": 2
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.0483,
+      "brier": 0.0898
+     },
+     "V2": {
+      "ece15": 0.1952,
+      "brier": 0.1654
+     },
+     "V3": {
+      "ece15": 0.1541,
+      "brier": 0.1381
+     }
+    }
+   },
+   "football_V1_flag_rate_at_0.5": 0.1574
+  },
+  "spec_literal_excl_U_equiv": {
+   "companies": {
+    "lines": 582,
+    "wrong": 166,
+    "V2_vs_V1": {
+     "auc_V2": 0.5756,
+     "auc_V2_ci": [
+      0.4914,
+      0.6434
+     ],
+     "auc_V1": 0.3865,
+     "diff": 0.1891,
+     "diff_ci": [
+      0.1279,
+      0.2532
+     ],
+     "sets": 10,
+     "boot_valid": 10000
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.7004,
+     "auc_V3_ci": [
+      0.6099,
+      0.7917
+     ],
+     "auc_V1": 0.3865,
+     "diff": 0.3139,
+     "diff_ci": [
+      0.1955,
+      0.4307
+     ],
+     "sets": 10,
+     "boot_valid": 10000
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.0258,
+       "err_in": 0.8,
+       "pass_err": 0.2716,
+       "recall": 0.0723,
+       "n_flagged": 15
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.0258,
+       "err_in": 0.8,
+       "pass_err": 0.2716,
+       "recall": 0.0723,
+       "n_flagged": 15
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.1735,
+       "err_in": 0.6238,
+       "pass_err": 0.2141,
+       "recall": 0.3795,
+       "n_flagged": 101
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.0584,
+       "err_in": 0.5294,
+       "pass_err": 0.2701,
+       "recall": 0.1084,
+       "n_flagged": 34
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.1856,
+       "err_in": 0.4537,
+       "pass_err": 0.2468,
+       "recall": 0.2952,
+       "n_flagged": 108
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.2852,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 1.0,
+      "K-等值": 0.0,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.0,
+      "U": 0.0
+     },
+     "V2": {
+      "F": 1.0,
+      "K-等值": 0.359,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.062,
+      "U": 0.6
+     },
+     "V3": {
+      "F": 1.0,
+      "K-等值": 0.26,
+      "R-他處": 1.0,
+      "R-單位": 1.0,
+      "R-部分": 0.0,
+      "U": 0.2
+     }
+    },
+    "class_counts": {
+     "K-等值": 131,
+     "F": 9,
+     "R-他處": 4,
+     "R-部分": 16,
+     "U": 5,
+     "R-單位": 1
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.2362,
+      "brier": 0.2518
+     },
+     "V2": {
+      "ece15": 0.197,
+      "brier": 0.2104
+     },
+     "V3": {
+      "ece15": 0.1651,
+      "brier": 0.2292
+     }
+    }
+   },
+   "football": {
+    "lines": 1112,
+    "wrong": 247,
+    "V2_vs_V1": {
+     "auc_V2": 0.8782,
+     "auc_V2_ci": [
+      0.8342,
+      0.9251
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.0352,
+     "diff_ci": [
+      -0.0589,
+      -0.0104
+     ],
+     "sets": 18,
+     "boot_valid": 10000
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.8032,
+     "auc_V3_ci": [
+      0.6888,
+      0.9174
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.1102,
+     "diff_ci": [
+      -0.2059,
+      -0.031
+     ],
+     "sets": 18,
+     "boot_valid": 10000
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.3049,
+       "err_in": 0.5841,
+       "pass_err": 0.0634,
+       "recall": 0.8016,
+       "n_flagged": 339
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.1565,
+       "err_in": 0.7011,
+       "pass_err": 0.1333,
+       "recall": 0.4939,
+       "n_flagged": 174
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.2086,
+       "err_in": 0.7155,
+       "pass_err": 0.092,
+       "recall": 0.6721,
+       "n_flagged": 232
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.2221,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 0.932,
+      "R-他處": 0.787,
+      "R-期": 0.8,
+      "R-部分": 0.153,
+      "S": 0.667,
+      "U": 1.0
+     },
+     "V2": {
+      "F": 1.0,
+      "R-他處": 0.87,
+      "R-期": 1.0,
+      "R-部分": 0.588,
+      "S": 1.0,
+      "U": 1.0
+     },
+     "V3": {
+      "F": 1.0,
+      "R-他處": 1.0,
+      "R-期": 1.0,
+      "R-部分": 0.047,
+      "S": 1.0,
+      "U": 1.0
+     }
+    },
+    "class_counts": {
+     "R-部分": 85,
+     "R-他處": 108,
+     "F": 44,
+     "R-期": 5,
+     "S": 3,
+     "U": 2
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.0483,
+      "brier": 0.0898
+     },
+     "V2": {
+      "ece15": 0.1952,
+      "brier": 0.1654
+     },
+     "V3": {
+      "ece15": 0.1541,
+      "brier": 0.1381
+     }
+    }
+   },
+   "football_V1_flag_rate_at_0.5": 0.1574
+  },
+  "no_exclusion": {
+   "companies": {
+    "lines": 635,
+    "wrong": 219,
+    "V2_vs_V1": {
+     "auc_V2": 0.6774,
+     "auc_V2_ci": [
+      0.5897,
+      0.7382
+     ],
+     "auc_V1": 0.4018,
+     "diff": 0.2756,
+     "diff_ci": [
+      0.2097,
+      0.3349
+     ],
+     "sets": 10,
+     "boot_valid": 2000
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.6185,
+     "auc_V3_ci": [
+      0.5341,
+      0.6983
+     ],
+     "auc_V1": 0.4018,
+     "diff": 0.2167,
+     "diff_ci": [
+      0.0887,
+      0.346
+     ],
+     "sets": 10,
+     "boot_valid": 2000
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.0236,
+       "err_in": 0.8,
+       "pass_err": 0.3339,
+       "recall": 0.0548,
+       "n_flagged": 15
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.0236,
+       "err_in": 0.8,
+       "pass_err": 0.3339,
+       "recall": 0.0548,
+       "n_flagged": 15
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.2425,
+       "err_in": 0.7532,
+       "pass_err": 0.2141,
+       "recall": 0.5297,
+       "n_flagged": 154
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.137,
+       "err_in": 0.8161,
+       "pass_err": 0.2701,
+       "recall": 0.3242,
+       "n_flagged": 87
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.1858,
+       "err_in": 0.5,
+       "pass_err": 0.3095,
+       "recall": 0.2694,
+       "n_flagged": 118
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.3449,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 1.0,
+      "K-等值": 0.0,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.0,
+      "U": 0.0,
+      "U-等值": 0.0
+     },
+     "V2": {
+      "F": 1.0,
+      "K-等值": 0.359,
+      "R-他處": 0.75,
+      "R-單位": 0.0,
+      "R-部分": 0.062,
+      "U": 0.6,
+      "U-等值": 1.0
+     },
+     "V3": {
+      "F": 1.0,
+      "K-等值": 0.26,
+      "R-他處": 1.0,
+      "R-單位": 1.0,
+      "R-部分": 0.0,
+      "U": 0.2,
+      "U-等值": 0.189
+     }
+    },
+    "class_counts": {
+     "K-等值": 131,
+     "F": 9,
+     "R-他處": 4,
+     "U-等值": 53,
+     "R-部分": 16,
+     "U": 5,
+     "R-單位": 1
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.2875,
+      "brier": 0.3053
+     },
+     "V2": {
+      "ece15": 0.1805,
+      "brier": 0.1928
+     },
+     "V3": {
+      "ece15": 0.215,
+      "brier": 0.2743
+     }
+    }
+   },
+   "football": {
+    "lines": 1112,
+    "wrong": 247,
+    "V2_vs_V1": {
+     "auc_V2": 0.8782,
+     "auc_V2_ci": [
+      0.8323,
+      0.9217
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.0352,
+     "diff_ci": [
+      -0.0597,
+      -0.0101
+     ],
+     "sets": 18,
+     "boot_valid": 2000
+    },
+    "V3_vs_V1": {
+     "auc_V3": 0.8032,
+     "auc_V3_ci": [
+      0.6818,
+      0.9079
+     ],
+     "auc_V1": 0.9134,
+     "diff": -0.1102,
+     "diff_ci": [
+      -0.2133,
+      -0.0338
+     ],
+     "sets": 18,
+     "boot_valid": 2000
+    },
+    "thresholds": {
+     "V1": {
+      "p<0.5": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      },
+      "match_football_V1_rate(t=0.5030)": {
+       "flagged_share": 0.1574,
+       "err_in": 0.84,
+       "pass_err": 0.1067,
+       "recall": 0.5951,
+       "n_flagged": 175
+      }
+     },
+     "V2": {
+      "p<0.5": {
+       "flagged_share": 0.3049,
+       "err_in": 0.5841,
+       "pass_err": 0.0634,
+       "recall": 0.8016,
+       "n_flagged": 339
+      },
+      "match_football_V1_rate(t=0.0070)": {
+       "flagged_share": 0.1565,
+       "err_in": 0.7011,
+       "pass_err": 0.1333,
+       "recall": 0.4939,
+       "n_flagged": 174
+      }
+     },
+     "V3": {
+      "p<0.5": {
+       "flagged_share": 0.2086,
+       "err_in": 0.7155,
+       "pass_err": 0.092,
+       "recall": 0.6721,
+       "n_flagged": 232
+      },
+      "match_football_V1_rate(t=0.0000)": {
+       "flagged_share": 0.0,
+       "err_in": null,
+       "pass_err": 0.2221,
+       "recall": 0.0,
+       "n_flagged": 0
+      }
+     }
+    },
+    "recall_by_class_p<0.5": {
+     "V1": {
+      "F": 0.932,
+      "R-他處": 0.787,
+      "R-期": 0.8,
+      "R-部分": 0.153,
+      "S": 0.667,
+      "U": 1.0
+     },
+     "V2": {
+      "F": 1.0,
+      "R-他處": 0.87,
+      "R-期": 1.0,
+      "R-部分": 0.588,
+      "S": 1.0,
+      "U": 1.0
+     },
+     "V3": {
+      "F": 1.0,
+      "R-他處": 1.0,
+      "R-期": 1.0,
+      "R-部分": 0.047,
+      "S": 1.0,
+      "U": 1.0
+     }
+    },
+    "class_counts": {
+     "R-部分": 85,
+     "R-他處": 108,
+     "F": 44,
+     "R-期": 5,
+     "S": 3,
+     "U": 2
+    },
+    "calibration": {
+     "V1": {
+      "ece15": 0.0483,
+      "brier": 0.0898
+     },
+     "V2": {
+      "ece15": 0.1952,
+      "brier": 0.1654
+     },
+     "V3": {
+      "ece15": 0.1541,
+      "brier": 0.1381
+     }
+    }
+   },
+   "football_V1_flag_rate_at_0.5": 0.1574
+  }
+ },
+ "mechanism_swap_field_on_correct_lines": {
+  "companies": {
+   "MECH_V1": {
+    "n": 416,
+    "share_p>=0.9": 0.0072,
+    "share_p>=0.5": 0.0409,
+    "mean": 0.1749
+   },
+   "MECH_V2": {
+    "n": 416,
+    "share_p>=0.9": 0.0,
+    "share_p>=0.5": 0.0024,
+    "mean": 0.0241
+   }
+  },
+  "football": {
+   "MECH_V1": {
+    "n": 865,
+    "share_p>=0.9": 0.0,
+    "share_p>=0.5": 0.0035,
+    "mean": 0.1454
+   },
+   "MECH_V2": {
+    "n": 865,
+    "share_p>=0.9": 0.0,
+    "share_p>=0.5": 0.0012,
+    "mean": 0.0108
+   }
+  },
+  "all": {
+   "MECH_V1": {
+    "n": 1281,
+    "share_p>=0.9": 0.0023,
+    "share_p>=0.5": 0.0156,
+    "mean": 0.155
+   },
+   "MECH_V2": {
+    "n": 1281,
+    "share_p>=0.9": 0.0,
+    "share_p>=0.5": 0.0016,
+    "mean": 0.0151
+   }
+  }
+ },
+ "prereg_style_verdict_main": {
+  "V2": {
+   "companies_effective": false,
+   "football_not_worse": false,
+   "recommend_switch": false
+  },
+  "V3": {
+   "companies_effective": false,
+   "football_not_worse": false,
+   "recommend_switch": false
+  }
+ },
+ "call_errors_by_tag": {
+  "V3": 0,
+  "V2": 0,
+  "MECH_V2": 0,
+  "MECH_V1": 0
+ }
+}
