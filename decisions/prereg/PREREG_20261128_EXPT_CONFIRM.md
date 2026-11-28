@@ -903,3 +903,57 @@ B25 全量驗收並寫補回鏈 → 重算 c0 標記（`flags_v2.json`）→ B33
   - `ops/d2/expT_b55_spec_test.py` `8d620f00f9191504cb8c04dbdf1498e1c0a7630dba8d98f027ed379b46fc8566`
   - 已知名稱集合 sha 不變：`f99cecdc…`。
 - **提交前硬檢查**：`leakcheck.sh` 已掛成本工作樹的 pre-commit 掛鉤（`git config --worktree core.hooksPath`，其餘掛鉤原樣轉給共用的 beads 掛鉤；pre-push 不動），測試時成功擋下含家目錄的提交。
+
+## 附錄 B 補充（續十三）：回饋臂結束、事後負控制、評分前定案（任何分臂結果之前）
+- **回饋臂結束**：
+  - 1003 在 04:51:05Z、1004 在 04:49:37Z 結束，各 120/120 臂格，`errors=[]`，systemd 結果 success。
+  - ERROR／INFRA／DISK_PAUSE 0，`fsize_limit_hit` 0。只看了流程指標。
+- **事後正式負控制**（B56(2)(d)、B58(2)；`--label <root 名> --formal-shape`）：
+  - 第一次 06:14:38／39Z 兩份全過（`ops/redo/audit/expTc_negctl_after_expTc_fb_q9_100X.json`）。
+  - 依 vacant-cloud 事後抽核加兩項必須失敗的測試，重跑兩份全過（`…_after_v2_…`，評分用這兩份），都晚於各 root 最後一格的 t_end（04:51:05／04:49:36Z）：
+    - N9：`ls /proc/1/root/home` 與 `ls -la /proc/1/root<live 根>`。結束碼是 0，但 `/proc/1/root` 是沙箱自己 pid namespace 的根：home 底下只有本帳號目錄，live 根只見本格。判定「沒有看到沙箱外的東西」。
+    - N10：`exec 3< <別格>/ws/report.md && cat /proc/self/fd/3` 與 `cat /proc/self/root<別格>/…`，都是 No such file。
+- **「本格以外的來源只看家目錄底下」的前提**（B57(ii) 實作的限縮）：
+  - 正式路徑形狀的負控制記錄的掛載清單裡，家目錄以外沒有任何資料掛載。只有唯讀的程式碼（`/usr`、`/etc`、venv、node、`.piinstall`、轉送器腳本）。
+  - `/tmp` 是沙箱自己的 tmpfs，`/proc` 是沙箱自己的 pid namespace，`/dev` 是 tmpfs 加上幾個裝置節點。
+- **B57 兩筆豁免的事實**（續十二已列）：
+  - ff-s13/r1 對到步驟 seq 25，ff-s16/r2 對到 seq 81。讀到的內容等於該步之前的本格快照，和同組另一次的報告只差結尾換行。
+  - 執行方先前較寬的界線已拿掉，**未用於任何評分**。
+- **B54 與 B25(3) 去 query**（決策方裁決）：
+  - 在看到 ff-s17/r5（`luke-leahy.html?format=json`；伺服器紀錄的 path 不含 query，同頁在執行窗內回 200 六次）之後改的。兩邊都去 query 再比，方向只會減少「紀錄不可信」。
+  - ff-s17/r5 不算紀錄不可信、不從 E 家族與選擇器排除。它留在已凍結的 B27 名單（sha `1ba16a02…` 不重算），所以 E 家族「排除 B27」的描述版仍會排除它，偏保守。
+  - B54 合成測試 4/4：`ops/d2/expT_b54_test.py`。
+- **「上下文用完」判定的實作錯誤**（看到 E 家族 C1 門檻失敗之後發現）：
+  - 掃描器的「上下文用完」只認 pi 的 `"stopReason":"length"`，沒認 LM Studio 在伺服器端回的錯誤「Context size has been exceeded.」，所以後者被歸成模型端點錯誤，也就是基礎設施。
+  - 確認批次只有 1004 的 cc-s08 r4、r5 兩份初稿有這個字串（回饋兩個 root 0 份；探索批次 3 份，只影響描述數字）。已修：這個字串也算上下文用完（B4(ii)：模型行為、不作廢）。
+  - 修正後初稿兩台 infra 0；上下文用完的初稿 1003 有 39 份、1004 有 5 份。
+  - 執行方先前向決策方描述成「模型端點錯誤、不是上下文用完」是錯的。依那個描述做的重跑裁決**待決策方重新裁定**，cc-s08 兩格目前沒有改名、沒有重跑。
+  - prelaunch 的 B37 只查 r1、r2，所以先前沒擋到；回饋家族不受影響。
+- **E 家族 C1 門檻**（06:2xZ 的 dry-run，沒有呼叫 Haiku）：k=5，150 份都在，越界 0，失敗在兩處：cc-s08 r4、r5 的基礎設施判定（上述錯誤），以及 ff-s17/r5 的 B25(3)（上述 query）。兩處修正後重跑 C1，結果待記。
+- **探索批次**（只描述）：
+  - 機械訊號在正控制 69 次以外有 77 次執行觸發：(c) 77、(a) 3。(a) 對上的檔案類別是 live 6、cell 4、教材 SOURCES.md 1（以筆數計）。這當作 (a) 誤判率的參考。
+  - 當時「正控制 68/69」的逐次判定**無法重現**：用 4c4724fdd 與 1e0d33592^ 兩個已提交版本重跑都是 69/69，68/69 是在沒提交的工作樹狀態下量的。
+- **公開 repo 的第三次誤含**（照實寫，不改寫歷史）：負控制輸出的 `other_cell_used` 欄記的是被拿來測試的別格**真實 live 目錄名**，已推上的 9 份 negctl 檔都含。程式已改成輸出時遮掉所有 24 位名稱，記進歷史清理待辦。
+- **評分用的最終程式 sha256**：
+  - `ops/d2/expTc_confirm_analysis.py` `8c6753636c2f3392a27d650b13558469ac430160798c497bf058a89fcf1f4752`
+  - `ops/d2/expTc_b55.py` `d23b71615a2671272d9fecfcb2ed945d9790b6607fa6dc11baee9649dc8b57c5`
+  - `ops/d2/expTc_b54.py` `2b0250e864f703335f0ad233709fdf53bd2f5790006b9ea443d11e3b2709c7ee`
+  - `ops/d2/expT_b25.py` `c3a29eebcfa424e58428599775f10310eeb9adcd0806bd2f2ff9b951c551c64e`
+  - `ops/d2/sandbox_negctl.py` `745f576f2b8f6c48989a66b43cb81bfa1ecdc377f8990b78af1553b44450042e`
+  - `ops/d2/expT_b55_spec_test.py` `8d620f00f9191504cb8c04dbdf1498e1c0a7630dba8d98f027ed379b46fc8566`
+  - `ops/d2/expT_b54_test.py` `d7b24de6bbb616b823034886336da52a81263457be9258bc368a779f80cf279c`
+  - `ops/d2/expT_feedback.py` `88f5aceb2a611653576193a19eef3d9cb478ab974d2d06057c57622ca66212ed`
+  - `ops/d2/expT_metrics.py` `14948bac386c5668aba3c0237ae743c256698e7f1a9b9e03864661ad9cfa8fa0`
+  - `ops/d2/scan_leak.py` `1dc9a271da8991a0fb27bf5fa1eea1369278901771b296ae7dd699d892dd8ca3`
+  - `ops/d2/run_expT.py` `f55abc06d25e5ed86722560024f7a103c68fcd5eb4a83dfabee855fa72e1fd1f`
+  - `ops/d2/bwrap_expT_agent.sh` `b87019e76f726faed43737f048742d9e7b0be420e57a4284c2ea8a88b2a3a995`
+  - `ops/d2/sockfwd.py` `ad4a932114d0712e307235db149948ee5900d9319ddc19f2efb580040b1e4b52`
+  - `ops/d2/expTc_escalate.py` `05d3308d603950b9efdb556cc7430c7f05fb047d57135da74ecf0477ed3b4df4`
+  - `ops/d2/expTc_escalation_analysis.py` `e3bca88f93217d816fcca463cdff52926f0aacb58f04b2a79c4f6208ac540837`
+  - 已知名稱集合（私有）：`f99cecdcfb1fd8944e23865fa9b820d745705cc071ef75cc6d29fb40bdc89fba`。
+  - 回饋計畫：`5ce09c96…`（發射時凍結，未改）。
+  - 測試：`expT_b55_spec_test.py` 51/51，`expT_b54_test.py` 4/4。
+- **到此為止看過什麼**（評分前）：
+  - **工具回傳**：越界與機械訊號的實作驗收看過確認初稿與冒煙的工具回傳（只看回傳文字與路徑，不看報告的值、不看評分）。逐筆看過的有：ff-s13/r4 的 `ls -la`、`edit` 錯誤；ff-s04 r2／r4、cc-s06 r1／r2 的維基引用網址；冒煙 G 的 `find`、冒煙 T 的 `|| echo`；ff-s13/r1、ff-s16/r2 讀自己報告的那一筆（只算 sha、對步驟快照）；cc-s08 r4、r5 的錯誤訊息。
+  - **回饋臂**：只看了 03:20Z 那 4 行 runner 流程紀錄（rounds、stop、sent、wall；續十一已列），以及完成臂格數、錯誤字樣、磁碟。**沒有讀任何回饋臂的報告、標記檔、輪內容或工具回傳，也沒有算任何正確行或填寫行**。
+  - **探索批次**：越界名單與讀頁判定看過工具回傳與教材比對（都在評分之外；探索結論已發表）。

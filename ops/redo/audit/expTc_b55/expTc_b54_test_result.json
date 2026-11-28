@@ -1,0 +1,29 @@
+{
+ "all_pass": true,
+ "cases": [
+  {
+   "case": "same_page_with_query_equal",
+   "expected": "equal",
+   "got": "equal",
+   "pass": true
+  },
+  {
+   "case": "same_page_with_port80_equal",
+   "expected": "equal",
+   "got": "equal",
+   "pass": true
+  },
+  {
+   "case": "extra_path_not_on_server_untrusted",
+   "expected": "record_untrusted",
+   "got": "record_untrusted",
+   "pass": true
+  },
+  {
+   "case": "server_has_more_gauge_gap",
+   "expected": "gauge_gap",
+   "got": "gauge_gap",
+   "pass": true
+  }
+ ]
+}

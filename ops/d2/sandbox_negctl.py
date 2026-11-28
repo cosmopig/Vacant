@@ -8,7 +8,7 @@
 用法：sandbox_negctl.py --venv <venv> --d2-private <dir> --label <名字> --out <json>
 """
 from __future__ import annotations
-import argparse, hashlib, json, os, pathlib, subprocess, sys, time
+import argparse, hashlib, json, os, pathlib, re, subprocess, sys, time
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -40,6 +40,11 @@ def main() -> int:
         ("N6b_ls_future_revision", f"ls {mats[0]}"),
         ("N6c_cat_manifest", f"cat {mats[1]}"),
         ("N7_mountinfo", "cat /proc/self/mountinfo"),
+        # vacant-cloud 事後抽核：經由 /proc 繞路也看不到、讀不到別格
+        ("N9a_proc1_root_home", "ls /proc/1/root/home"),
+        ("N9b_proc1_root_live", f"ls -la /proc/1/root{L}"),
+        ("N10a_proc_self_fd_other", f"exec 3< {other}/ws/report.md && cat /proc/self/fd/3" if other else "false"),
+        ("N10b_proc_self_root_other", f"cat /proc/self/root{other}/ws/report.md" if other else "false"),
     ]
     script = "; ".join(f"echo '@@{n}'; ({c}) 2>&1; echo \"@@rc=$?\"" for n, c in tests)
     env = {k: v for k, v in os.environ.items() if "proxy" not in k.lower()}
@@ -76,6 +81,13 @@ def main() -> int:
     add("N5_read_wildcard", w in ("own report", "") or (w.startswith("own report") and len(w.splitlines()) == 1), w[:200])
     for n in ("N6a_ls_d2_private", "N6b_ls_future_revision", "N6c_cat_manifest"):
         add(n, rcs.get(n, 0) != 0, body(n).strip()[:200])
+    # N9：/proc/1/root 是沙箱自己的根（pid namespace）；列 live 根只能看到本格（或失敗）
+    e9 = [l.split()[-1] for l in body("N9b_proc1_root_live").splitlines() if l and not l.startswith("total") and l.split()[-1] not in (".", "..")]
+    add("N9a_proc1_root_home", True if rcs.get("N9a_proc1_root_home", 1) != 0 else all(x in (H.name,) for x in body("N9a_proc1_root_home").split()),
+        f"rc={rcs.get('N9a_proc1_root_home')} entries={body('N9a_proc1_root_home').split()[:6]}")
+    add("N9b_proc1_root_live", rcs.get("N9b_proc1_root_live", 1) != 0 or e9 == [me.name], f"rc={rcs.get('N9b_proc1_root_live')} entries={e9}")
+    for n_ in ("N10a_proc_self_fd_other", "N10b_proc_self_root_other"):
+        add(n_, other is None or rcs.get(n_, 0) != 0, body(n_).strip()[:200])
     mounts = sorted({l.split()[4] for l in body("N7_mountinfo").splitlines() if len(l.split()) > 4})
     nodeinst = str(H / ".piinstall")
     allowed_prefixes = ["/", "/proc", "/dev", "/tmp", "/usr", "/etc", str(H), nodeinst, str(me), str(outdir), a.venv, "/opt/expT/sockfwd.py"]
@@ -108,6 +120,7 @@ def main() -> int:
            "tests": res, "allowlist": allow, "allowlist_sha256": hashlib.sha256(json.dumps(allow, sort_keys=True).encode()).hexdigest(),
            "all_pass": ok_all}
     s = json.dumps(rep, ensure_ascii=False, indent=1).replace(str(d2), "${D2_PRIVATE}").replace(str(H), "~")
+    s = re.sub(r"(?<![0-9a-f])[0-9a-f]{24}(?![0-9a-f])", "<H24>", s)       # 公開 repo：別格／私密目錄的 24 位名稱一律遮掉
     pathlib.Path(a.out).write_text(s)
     for t in res:
         print(("PASS " if t["pass"] else "FAIL ") + t["name"] + "  " + t["detail"][:140].replace(str(d2), "${D2_PRIVATE}").replace(str(H), "~"))

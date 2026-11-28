@@ -473,7 +473,11 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
         n404_exist = sum(1 for a in win if a.get("status") == 404 and (site / str(a.get("path", "")).lstrip("/")).is_file())
         n404_missing = sum(1 for a in win if a.get("status") == 404) - n404_exist
         model_err = ('"stopReason":"error"' in txt) or ('"errorMessage"' in txt)
-        ctx = '"stopReason":"length"' in txt
+        # B4(ii) 上下文用完：pi 的 stopReason=length，或 LM Studio 在伺服器端回的「Context size has been exceeded」錯誤
+        # （2026-11-28 修實作：先前只認前者，後者被當成模型端點錯誤＝基礎設施；cc-s08 r4、r5 因此誤判）
+        ctx = ('"stopReason":"length"' in txt) or bool(re.search(r"Context size has been exceeded|context length exceeded|maximum context length", txt, re.I))
+        if ctx and model_err and not re.search(r'"errorMessage":\s*"(?!Context size has been exceeded|[^"]*context length)', txt):
+            model_err = False          # 唯一的錯誤就是上下文用完 ⇒ 不是基礎設施
         runs[(sid, rep, arm, rnd)] = {
             "_sandboxed": sandboxed, "sandbox_failure_signals": dict(mech), "sandbox_failure": bool(mech),
             "b57_exemptions": b57_ex, "b57_not_exempt": b57_fail,

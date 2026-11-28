@@ -52,8 +52,10 @@ def check_cell(c0: pathlib.Path, write_chain: bool) -> dict:
     host = f"{sid}-{rep}.d2-sources.example"
     rj = json.loads((c0 / "run" / "run.json").read_text())
     acc = [json.loads(l) for l in (root / "access.jsonl").read_text().splitlines() if l.strip()]
-    srv = {f"http://{a['host']}{a['path']}" for a in acc if a.get("host") == host and a.get("status") == 200
+    srv = {f"http://{a['host']}{str(a['path']).split('?', 1)[0]}" for a in acc if a.get("host") == host and a.get("status") == 200
            and rj["t_start"] - 1 <= a.get("ts", 0) <= rj["t_end"] + 1}
+    # 2026-11-28（決策方裁決，看到 ff-s17/r5 之後；和 B54 同類的實作修正）：伺服器紀錄的 path 不含 query，兩邊都去 query 再比
+    recorded = {u.split("?", 1)[0].split("#", 1)[0] for u in recorded}
     uniq_restored = {r["url"]: r for r in restored}
     out = {"set": sid, "rep": rep, "egress_200": len(evs), "unique_pages": len({e['url'] for e in evs}),
            "restored_pages": len(uniq_restored), "unrestorable_pages": len(set(unrestorable)), "sha_not_exactly_one_frozen": bad_map,
