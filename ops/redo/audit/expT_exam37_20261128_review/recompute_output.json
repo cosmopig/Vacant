@@ -1012,9 +1012,9 @@
    "TB_not_in_T": 0,
    "T_only": 476,
    "T_only_before_status": {
+    "wrong": 136,
     "correct": 312,
-    "missing": 28,
-    "wrong": 136
+    "missing": 28
    },
    "T_only_outcome_in_T": {
     "correct->correct": 267,
@@ -6253,15 +6253,15 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
-    "G/round_2": 11,
-    "TO/round_1": 6,
-    "T/round_1": 1,
     "TO/round_2": 9,
-    "G/round_1": 4,
     "TB/round_1": 3,
-    "c0/c0": 1,
+    "G/round_1": 4,
+    "TO/round_1": 6,
     "T/round_2": 3,
-    "TB/round_2": 1
+    "TB/round_2": 1,
+    "G/round_2": 11,
+    "c0/c0": 1,
+    "T/round_1": 1
    }
   },
   "old45_subset_of_v2": true,
@@ -8703,13 +8703,13 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
+    "T/round_1": 3,
     "G/round_2": 17,
-    "c0/c0": 2,
-    "G/round_1": 16,
     "TO/round_2": 18,
     "TB/round_1": 6,
-    "T/round_1": 3,
     "TO/round_1": 16,
+    "G/round_1": 16,
+    "c0/c0": 2,
     "T/round_2": 4,
     "TB/round_2": 1
    }
@@ -8765,14 +8765,14 @@
     "other_cell_live_dir": 48
    },
    "added_by_arm_round": {
-    "TO/round_2": 10,
-    "TB/round_1": 3,
-    "G/round_1": 14,
-    "c0/c0": 1,
+    "T/round_1": 2,
     "G/round_2": 7,
+    "TO/round_2": 10,
     "TO/round_1": 10,
+    "G/round_1": 14,
+    "TB/round_1": 3,
     "T/round_2": 1,
-    "T/round_1": 2
+    "c0/c0": 1
    },
    "pairs_prev": 53,
    "pairs_now": 60
@@ -11923,15 +11923,15 @@
     "file_outside_abs+live_root_not_own+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
+    "T/round_1": 7,
     "G/round_2": 24,
     "TO/round_2": 25,
     "TB/round_1": 10,
     "TO/round_1": 28,
-    "c0/c0": 3,
     "G/round_1": 23,
-    "TB/round_2": 3,
-    "T/round_1": 7,
-    "T/round_2": 8
+    "c0/c0": 3,
+    "T/round_2": 8,
+    "TB/round_2": 3
    }
   },
   "old45_subset_of_v2": true,
@@ -11945,14 +11945,14 @@
    },
    "added_by_arm_round": {
     "TO/round_1": 12,
-    "T/round_2": 4,
+    "G/round_2": 7,
     "TO/round_2": 7,
     "TB/round_1": 4,
-    "c0/c0": 1,
     "G/round_1": 7,
-    "G/round_2": 7,
+    "TB/round_2": 2,
+    "c0/c0": 1,
     "T/round_1": 4,
-    "TB/round_2": 2
+    "T/round_2": 4
    },
    "pairs_prev": 60,
    "pairs_now": 64
@@ -15067,14 +15067,14 @@
    },
    "added_by_arm_round": {
     "TO/round_1": 12,
-    "T/round_2": 4,
+    "G/round_2": 7,
     "TO/round_2": 7,
     "TB/round_1": 4,
-    "c0/c0": 1,
     "G/round_1": 7,
-    "G/round_2": 7,
+    "TB/round_2": 2,
+    "c0/c0": 1,
     "T/round_1": 4,
-    "TB/round_2": 2
+    "T/round_2": 4
    },
    "pairs_v3": 60,
    "pairs_v4": 64
@@ -15253,10 +15253,10 @@
     "T": 11
    },
    "cells_by_arm": {
-    "TO": 12,
     "G": 12,
-    "TB": 4,
-    "T": 3
+    "TO": 12,
+    "T": 3,
+    "TB": 4
    },
    "all_revision4": true,
    "rows_with_any_other_cycle_distinct_hit": 0,
@@ -16733,6 +16733,159 @@
   }
  },
  "source_exp1cb": "git:c14d4ee1b",
+ "final_check_4b5": {
+  "later_targets": {
+   "rows": 137,
+   "targets": 15,
+   "by_root": {
+    "exp1cB_1003": 74,
+    "exp1cB_1004": 63
+   },
+   "multiset_equal_to_revision_file": true,
+   "material_page_set_equals_target_set": 137,
+   "page_set_field_ne_target_set": [
+    "fb-s17/r2/G/round_2 george-broadbent-footballer.html",
+    "sc-s05/r1/TO/round_1 dan-burn.html",
+    "sc-s08/r2/TO/round_1 matt-ward-footballer.html",
+    "sc-s12/r1/G/round_1 sonny-carey.html"
+   ]
+  },
+  "exp1cb_reports": {
+   "fb-s04:a/cycle_1": {
+    "lines": 19,
+    "filled": 19,
+    "match_rev0_truth": 2
+   },
+   "fb-s04:a/cycle_2": {
+    "lines": 19,
+    "filled": 19,
+    "match_rev0_truth": 2
+   },
+   "fb-s04:a/cycle_3": {
+    "lines": 19,
+    "filled": 19,
+    "match_rev0_truth": 2
+   },
+   "fb-s04:a/cycle_4": {
+    "lines": 19,
+    "filled": 19,
+    "match_rev0_truth": 2
+   },
+   "fb-s04:c0": {
+    "lines": 19,
+    "filled": 19,
+    "match_rev0_truth": 2
+   },
+   "fb-s08:a/cycle_1": {
+    "lines": 19,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s08:a/cycle_2": {
+    "lines": 19,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s08:a/cycle_3": {
+    "lines": 19,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s08:a/cycle_4": {
+    "lines": 19,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s08:c0": {
+    "lines": 19,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s20:a/cycle_1": {
+    "lines": 20,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s20:a/cycle_2": {
+    "lines": 20,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s20:a/cycle_3": {
+    "lines": 20,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s20:a/cycle_4": {
+    "lines": 20,
+    "filled": 0,
+    "match_rev0_truth": 0
+   },
+   "fb-s20:c0": {
+    "lines": 20,
+    "filled": 0,
+    "match_rev0_truth": 0
+   }
+  },
+  "exp1cb_s04_versions_identical": true,
+  "copy_check": [
+   {
+    "reader": "fb-s04/r1/TB",
+    "new": 19,
+    "new_wrong": 17,
+    "best_version": "a/cycle_1",
+    "equal": 19,
+    "equal_wrong": 17,
+    "equal_future": 0,
+    "report_filled": 19
+   },
+   {
+    "reader": "fb-s04/r2/TO",
+    "new": 0,
+    "new_wrong": 0,
+    "best_version": "a/cycle_1",
+    "equal": 0,
+    "equal_wrong": 0,
+    "equal_future": 0,
+    "report_filled": 19
+   },
+   {
+    "reader": "fb-s08/r2/G",
+    "new": 19,
+    "new_wrong": 5,
+    "best_version": "a/cycle_1",
+    "equal": 0,
+    "equal_wrong": 0,
+    "equal_future": 0,
+    "report_filled": 0
+   },
+   {
+    "reader": "fb-s20/r2/c0",
+    "new": 20,
+    "new_wrong": 20,
+    "best_version": "a/cycle_1",
+    "equal": 0,
+    "equal_wrong": 0,
+    "equal_future": 0,
+    "report_filled": 0
+   }
+  ],
+  "sources_py_versions": {
+   "2a502e9e4": {
+    "sha256_prefix": "35396f85",
+    "plain_contains_count": 0
+   },
+   "7d574c3d3": {
+    "sha256_prefix": "2d461881",
+    "plain_contains_count": 0
+   },
+   "ae3db0086": {
+    "sha256_prefix": "7dbdecf3",
+    "plain_contains_count": 7
+   }
+  }
+ },
+ "source_final": "git:02ea632bc",
  "exp1_recompute_check": {
   "reproduced_equals_original": true,
   "rule": "FAIL：召回 <0.5 或 被標 > max(0.5, 錯誤率+0.25)；PASS：召回 ≥0.7、下界 ≥0.6、比值 ≥3、被標 ≤ max(0.3, 錯誤率+0.15)；否則 UNRESOLVED；合併 PASS 但軟體＋公司不 PASS ⇒ FAIL（exp1_combine.py）",

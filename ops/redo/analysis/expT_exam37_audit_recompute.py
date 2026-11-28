@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f --whoread-rev 0044f935d --exp1cb-rev c14d4ee1b --exp1-rev 545e1e358 | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f --whoread-rev 0044f935d --exp1cb-rev c14d4ee1b --exp1-rev 545e1e358 --final-rev 02ea632bc | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -1603,6 +1603,69 @@ def exp1_recompute_check(src: Src, repo: pathlib.Path) -> dict:
     return out
 
 
+# ───────────────────────────── 最後確認（4b5bf5258／02ea632bc）─────────────────────────────
+def final_check_4b5(src_old: Src, src2: Src, repo: pathlib.Path) -> dict:
+    """137 筆第 4 修訂用 15 個目錄的對應驗完；exp1cB s04／s08／s20 報告逐行 HMAC 對讀者新寫進的值；三個產品提交的 sources.py。"""
+    LT = src2.jsonl("expT/expT_later_revision_reads_targets.jsonl")
+    R2 = src2.jsonl("expT/expT_other_live_reads_revision_v2.jsonl")
+    E = src2.jsonl("expT/exp1cB_s04_s08_s20_report_lines_hmac.jsonl")
+    LH = src2.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_lines_hmac.jsonl")
+    TH = src2.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_truth_hmac.jsonl")
+    R: dict[str, Any] = {}
+    lr = [r for r in R2 if r["label"] == "later_revision"]
+    a = collections.Counter((f'{r["set"]}/r{r["rep"]}/{r["arm"]}/{r["round"]}', r["page"], r["other_live_hmac"][:16]) for r in lr)
+    b = collections.Counter((x["reader"], x["page"], x["target_hmac"]) for x in LT)
+    mp = {(f'{r["set"]}/r{r["rep"]}/{r["arm"]}/{r["round"]}', r["page"]): r["material_page"] for r in lr}
+    R["later_targets"] = {"rows": len(LT), "targets": len({x["target_hmac"] for x in LT}),
+                          "by_root": dict(collections.Counter(x["target_root"] for x in LT)),
+                          "multiset_equal_to_revision_file": a == b,
+                          "material_page_set_equals_target_set": sum(1 for x in LT if mp[(x["reader"], x["page"])].split("/")[0].split("-")[1] == x["target_set"]),
+                          "page_set_field_ne_target_set": [f'{x["reader"]} {x["page"]}' for x in LT if x["page_set"] != x["target_set"]]}
+    T = {(t["set"], t["claim"], t["k"]): t["truth_hmac"] for t in TH}
+    rep: dict[tuple, dict] = collections.defaultdict(dict)
+    for e in E:
+        rep[(e["as_set"], e["report"])][e["claim"]] = e["value_hmac"]
+    versions = sorted({e["report"] for e in E})
+    R["exp1cb_reports"] = {f"{s_}:{v}": {"lines": len(d), "filled": sum(1 for h in d.values() if h),
+                                         "match_rev0_truth": sum(1 for c, h in d.items() if h and h == T.get((s_, c, 0)))}
+                           for (s_, v), d in sorted(rep.items())}
+    R["exp1cb_s04_versions_identical"] = len({tuple(sorted(rep[("fb-s04", v)].items())) for v in versions}) == 1
+    by: dict[tuple, dict] = collections.defaultdict(dict)
+    for x in LH:
+        by[(x["set"], x["rep"], x["arm"])][x["claim"]] = x
+    fut = lambda m: (not m[0]) and any(m[1:])  # noqa: E731
+    rows = []
+    for s_, r_, a_ in (("fb-s04", 1, "TB"), ("fb-s04", 2, "TO"), ("fb-s08", 2, "G"), ("fb-s20", 2, "c0")):
+        X = by[(s_, r_, "A" if a_ == "c0" else a_)]
+        if a_ == "c0":
+            vals = {c: (x["before_hmac"], x["before_matches_k"]) for c, x in X.items()}
+            new = [c for c in vals if vals[c][0]]
+        else:
+            vals = {c: (x["after_hmac"], x["after_matches_k"]) for c, x in X.items()}
+            new = [c for c, x in X.items() if x["after_hmac"] and x["after_hmac"] != x["before_hmac"]]
+        best = None
+        for v in versions:
+            Rp = rep[(s_, v)]
+            row = (v, sum(1 for c in new if vals[c][0] == Rp.get(c)),
+                   sum(1 for c in new if vals[c][0] == Rp.get(c) and not vals[c][1][0]),
+                   sum(1 for c in new if vals[c][0] == Rp.get(c) and fut(vals[c][1])))
+            if best is None or row[2] > best[2]:
+                best = row
+        rows.append({"reader": f"{s_}/r{r_}/{a_}", "new": len(new), "new_wrong": sum(1 for c in new if not vals[c][1][0]),
+                     "best_version": best[0], "equal": best[1], "equal_wrong": best[2], "equal_future": best[3],
+                     "report_filled": sum(1 for h in rep[(s_, best[0])].values() if h)})
+    R["copy_check"] = rows
+    srcs = {}
+    for c in ("2a502e9e4", "7d574c3d3", "ae3db0086"):
+        try:
+            b_ = subprocess.run(["git", "-C", str(repo), "show", f"{c}:vacant_network/trace/sources.py"], check=True, capture_output=True).stdout
+            srcs[c] = {"sha256_prefix": hashlib.sha256(b_).hexdigest()[:8], "plain_contains_count": b_.decode().count("plain_contains")}
+        except subprocess.CalledProcessError:
+            srcs[c] = "not available (shallow clone?)"
+    R["sources_py_versions"] = srcs
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1801,6 +1864,7 @@ def main() -> None:
     ap.add_argument("--whoread-rev", default="0044f935d", help="讀別格報告「誰讀了誰」所在的提交；空字串跳過")
     ap.add_argument("--exp1cb-rev", default="c14d4ee1b", help="exp1cB 反查更正所在的提交；空字串跳過")
     ap.add_argument("--exp1-rev", default="545e1e358", help="實驗一旗標事後重算 summary.json 所在的提交；空字串跳過")
+    ap.add_argument("--final-rev", default="02ea632bc", help="15 目錄對應與 exp1cB 報告逐行 HMAC 所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1881,6 +1945,9 @@ def main() -> None:
         csrc = Src(None if a.dir else a.exp1cb_rev, a.dir, repo)
         out["exp1cb_review"] = exp1cb_review(src, csrc, out["list_v4_review"]["excluded_pairs"])
         out["source_exp1cb"] = a.dir or f"git:{a.exp1cb_rev}"
+    if a.final_rev:
+        out["final_check_4b5"] = final_check_4b5(src, Src(None if a.dir else a.final_rev, a.dir, repo), repo)
+        out["source_final"] = a.dir or f"git:{a.final_rev}"
     if a.exp1_rev:
         out["exp1_recompute_check"] = exp1_recompute_check(Src(None if a.dir else a.exp1_rev, a.dir, repo), repo)
         out["source_exp1"] = a.dir or f"git:{a.exp1_rev}"
