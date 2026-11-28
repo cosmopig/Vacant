@@ -1,0 +1,6367 @@
+{
+ "note": "逐欄答案鍵樣式；不含答案值。",
+ "rounds": {
+  "r4": {
+   "dynamic_noise_templates": {
+    "claims_with_fetch_templates": 1120,
+    "fetch_count": 1080,
+    "fetch_id": 1083,
+    "fetch_ts": 1117
+   },
+   "fields": {
+    "GPS tracker firmware": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 30,
+      "version": 30
+     },
+     "forms": {
+      "version": 30
+     },
+     "lines": 30
+    },
+    "PDU controller firmware": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "version": 20
+     },
+     "forms": {
+      "version": 20
+     },
+     "lines": 20
+    },
+    "PDU load utilization": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 14
+     },
+     "forms": {
+      "percent": 20
+     },
+     "lines": 20
+    },
+    "active firmware": {
+     "dynamic_noise_template_claims": 38,
+     "feature_lines": {
+      "decimal_numeric": 190,
+      "version": 190
+     },
+     "forms": {
+      "version": 190
+     },
+     "lines": 190
+    },
+    "active vehicle count": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "airflow target": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "alarm threshold": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "allocated cabinet count": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "anchorage fee": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "currency": 30,
+      "decimal_numeric": 30
+     },
+     "forms": {
+      "currency_amount": 30
+     },
+     "lines": 30
+    },
+    "annual calibration fee": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "annual maintenance allowance": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "average container lift cycle": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "average cruising speed": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "axle limit": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "axle load rating": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "bank weight": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "base fare": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "currency": 25,
+      "decimal_numeric": 25
+     },
+     "forms": {
+      "currency_amount": 25
+     },
+     "lines": 25
+    },
+    "base lane tariff": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "currency": 30,
+      "decimal_numeric": 30
+     },
+     "forms": {
+      "currency_amount": 30
+     },
+     "lines": 30
+    },
+    "batch quota": {
+     "dynamic_noise_template_claims": 11,
+     "feature_lines": {
+      "unit_like_text": 55
+     },
+     "forms": {
+      "number_with_unit": 55
+     },
+     "lines": 55
+    },
+    "battery ride-through time": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "bench firmware": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10,
+      "version": 10
+     },
+     "forms": {
+      "version": 10
+     },
+     "lines": 10
+    },
+    "berth fee": {
+     "dynamic_noise_template_claims": 10,
+     "feature_lines": {
+      "currency": 50,
+      "decimal_numeric": 50
+     },
+     "forms": {
+      "currency_amount": 50
+     },
+     "lines": 50
+    },
+    "berth occupancy rate": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 12
+     },
+     "forms": {
+      "percent": 20
+     },
+     "lines": 20
+    },
+    "bin fill ratio": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "percent": 30
+     },
+     "lines": 30
+    },
+    "bin sensor firmware": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 30,
+      "version": 30
+     },
+     "forms": {
+      "version": 30
+     },
+     "lines": 30
+    },
+    "blade and bus inspection cycle": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "boiloff rate": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "bollard pull rating": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "boom outreach span": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "brake pressure": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "bypass flow": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "decimal_numeric": 25,
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "bypass rate": {
+     "dynamic_noise_template_claims": 1,
+     "feature_lines": {
+      "decimal_numeric": 5,
+      "unit_like_text": 5
+     },
+     "forms": {
+      "number_with_unit": 5
+     },
+     "lines": 5
+    },
+    "chamber mass": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "chilled water flow rate": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "circuit span": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "decimal_numeric": 70,
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "client SDK version": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 30,
+      "version": 30
+     },
+     "forms": {
+      "version": 30
+     },
+     "lines": 30
+    },
+    "cold aisle setpoint": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "cold aisle width": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "cold-chain hold duration": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "cold-start ramp time": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "committed power draw": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "continuous power": {
+     "dynamic_noise_template_claims": 9,
+     "feature_lines": {
+      "decimal_numeric": 45,
+      "unit_like_text": 45
+     },
+     "forms": {
+      "number_with_unit": 45
+     },
+     "lines": 45
+    },
+    "controller firmware": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 30,
+      "version": 30
+     },
+     "forms": {
+      "version": 30
+     },
+     "lines": 30
+    },
+    "cooling flow": {
+     "dynamic_noise_template_claims": 9,
+     "feature_lines": {
+      "decimal_numeric": 45,
+      "unit_like_text": 45
+     },
+     "forms": {
+      "number_with_unit": 45
+     },
+     "lines": 45
+    },
+    "corridor distance": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "crane PLC firmware": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "version": 20
+     },
+     "forms": {
+      "version": 20
+     },
+     "lines": 20
+    },
+    "crane wind cutoff speed": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "crate capacity": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "crew quota": {
+     "dynamic_noise_template_claims": 16,
+     "feature_lines": {
+      "unit_like_text": 80
+     },
+     "forms": {
+      "number_with_unit": 80
+     },
+     "lines": 80
+    },
+    "cross-connect fee": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "customs clearance buffer": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "cycle budget": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "daily tariff": {
+     "dynamic_noise_template_claims": 8,
+     "feature_lines": {
+      "currency": 40,
+      "decimal_numeric": 40
+     },
+     "forms": {
+      "currency_amount": 40
+     },
+     "lines": 40
+    },
+    "daily wharfage fee": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "currency": 20,
+      "decimal_numeric": 20
+     },
+     "forms": {
+      "currency_amount": 20
+     },
+     "lines": 20
+    },
+    "data logging interval": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "default worker count": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "dispatch lead time": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "dock door clearance": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "draft limit": {
+     "dynamic_noise_template_claims": 24,
+     "feature_lines": {
+      "decimal_numeric": 120,
+      "unit_like_text": 120
+     },
+     "forms": {
+      "number_with_unit": 120
+     },
+     "lines": 120
+    },
+    "duty factor": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {},
+     "forms": {
+      "percent": 35
+     },
+     "lines": 35
+    },
+    "egress surcharge": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "failover recovery target": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "fast-ramp incentive": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "feeder current limit": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "filter load": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {},
+     "forms": {
+      "percent": 35
+     },
+     "lines": 35
+    },
+    "flight firmware": {
+     "dynamic_noise_template_claims": 16,
+     "feature_lines": {
+      "decimal_numeric": 80,
+      "version": 80
+     },
+     "forms": {
+      "version": 80
+     },
+     "lines": 80
+    },
+    "footprint width": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "free window": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "fuel burn": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "fuel reserve": {
+     "dynamic_noise_template_claims": 8,
+     "feature_lines": {
+      "unit_like_text": 40
+     },
+     "forms": {
+      "number_with_unit": 40
+     },
+     "lines": 40
+    },
+    "gas pressure": {
+     "dynamic_noise_template_claims": 9,
+     "feature_lines": {
+      "unit_like_text": 45
+     },
+     "forms": {
+      "number_with_unit": 45
+     },
+     "lines": 45
+    },
+    "handling surcharge": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "harbor pilotage fee": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "harness firmware": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "version": 35
+     },
+     "forms": {
+      "version": 35
+     },
+     "lines": 35
+    },
+    "holdover time": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "hourly detention fee": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "hourly standby fee": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "humidity band": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {},
+     "forms": {
+      "percent": 35
+     },
+     "lines": 35
+    },
+    "kit price": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "line loss": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35
+     },
+     "forms": {
+      "percent": 35
+     },
+     "lines": 35
+    },
+    "line pressure": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "log retention window": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "long-term support window": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "max defect allowance": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {},
+     "forms": {
+      "percent": 15
+     },
+     "lines": 15
+    },
+    "max sample volume": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "maximum acoustic output": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "maximum payload": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "maximum vessel draft": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "maximum working pressure": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "measured bus frequency": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10,
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "memory quota": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "min consist": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "min lift batch": {
+     "dynamic_noise_template_claims": 9,
+     "feature_lines": {
+      "unit_like_text": 45
+     },
+     "forms": {
+      "number_with_unit": 45
+     },
+     "lines": 45
+    },
+    "min order": {
+     "dynamic_noise_template_claims": 21,
+     "feature_lines": {
+      "unit_like_text": 105
+     },
+     "forms": {
+      "number_with_unit": 105
+     },
+     "lines": 105
+    },
+    "min steps": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "min stock": {
+     "dynamic_noise_template_claims": 21,
+     "feature_lines": {
+      "unit_like_text": 105
+     },
+     "forms": {
+      "number_with_unit": 105
+     },
+     "lines": 105
+    },
+    "min torque": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "decimal_numeric": 70,
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "minimum order quantity": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "module weight": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "decimal_numeric": 25,
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "monthly availability": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "percent": 30
+     },
+     "lines": 30
+    },
+    "monthly license fee": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "monthly rack lease": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "monthly transit commit": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "monthly zone pass": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "mooring rate": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "nameplate capacity": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "net capacity factor": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 8
+     },
+     "forms": {
+      "percent": 20
+     },
+     "lines": 20
+    },
+    "nominal supply voltage": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "oil mass": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "on-time arrival rate": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 11
+     },
+     "forms": {
+      "percent": 30
+     },
+     "lines": 30
+    },
+    "operating humidity ceiling": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 13
+     },
+     "forms": {
+      "percent": 15
+     },
+     "lines": 15
+    },
+    "overnight maintenance window": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "p95 response latency": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "packet loss": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35
+     },
+     "forms": {
+      "percent": 35
+     },
+     "lines": 35
+    },
+    "pallet capacity": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "part mass": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "decimal_numeric": 70,
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "peak headway": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "peak load": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "peak load factor": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "percent": 10
+     },
+     "lines": 10
+    },
+    "peak output": {
+     "dynamic_noise_template_claims": 8,
+     "feature_lines": {
+      "decimal_numeric": 40,
+      "unit_like_text": 40
+     },
+     "forms": {
+      "number_with_unit": 40
+     },
+     "lines": 40
+    },
+    "platform length": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "power budget": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "decimal_numeric": 25,
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "preventive service interval": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "primary breaker rating": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "primary firmware": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "decimal_numeric": 70,
+      "version": 70
+     },
+     "forms": {
+      "version": 70
+     },
+     "lines": 70
+    },
+    "probe firmware": {
+     "dynamic_noise_template_claims": 21,
+     "feature_lines": {
+      "decimal_numeric": 105,
+      "version": 105
+     },
+     "forms": {
+      "version": 105
+     },
+     "lines": 105
+    },
+    "production release version": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 30,
+      "version": 30
+     },
+     "forms": {
+      "version": 30
+     },
+     "lines": 30
+    },
+    "proof pressure": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "protection relay firmware": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "version": 20
+     },
+     "forms": {
+      "version": 20
+     },
+     "lines": 20
+    },
+    "pump rate": {
+     "dynamic_noise_template_claims": 8,
+     "feature_lines": {
+      "decimal_numeric": 40,
+      "unit_like_text": 40
+     },
+     "forms": {
+      "number_with_unit": 40
+     },
+     "lines": 40
+    },
+    "rated capacity": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "rated drive speed": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "rated load": {
+     "dynamic_noise_template_claims": 28,
+     "feature_lines": {
+      "decimal_numeric": 140,
+      "unit_like_text": 140
+     },
+     "forms": {
+      "number_with_unit": 140
+     },
+     "lines": 140
+    },
+    "rated output": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "rated power draw": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "rated service life": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "reagent kit price": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "redundant uplink capacity": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "relative humidity target": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {},
+     "forms": {
+      "percent": 10
+     },
+     "lines": 10
+    },
+    "reorder threshold": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "repeatability score": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "decimal_numeric": 11
+     },
+     "forms": {
+      "percent": 30
+     },
+     "lines": 30
+    },
+    "replacement filter cost": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "currency": 15,
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "currency_amount": 15
+     },
+     "lines": 15
+    },
+    "reserve charge": {
+     "dynamic_noise_template_claims": 1,
+     "feature_lines": {
+      "unit_like_text": 5
+     },
+     "forms": {
+      "number_with_unit": 5
+     },
+     "lines": 5
+    },
+    "reserve window": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "reserved replenishment lot": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "reserved seats": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "round-trip efficiency": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "percent": 20
+     },
+     "lines": 20
+    },
+    "safe working lift load": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "safety quota": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "schedule adherence rate": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 9
+     },
+     "forms": {
+      "percent": 20
+     },
+     "lines": 20
+    },
+    "scheduled export ceiling": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10,
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "scheduled stop count": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "scheduled transit time": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "seal life": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "seat quota": {
+     "dynamic_noise_template_claims": 9,
+     "feature_lines": {
+      "unit_like_text": 45
+     },
+     "forms": {
+      "number_with_unit": 45
+     },
+     "lines": 45
+    },
+    "seated passenger capacity": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "service interval": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "setpoint load": {
+     "dynamic_noise_template_claims": 11,
+     "feature_lines": {
+      "decimal_numeric": 55,
+      "unit_like_text": 55
+     },
+     "forms": {
+      "number_with_unit": 55
+     },
+     "lines": 55
+    },
+    "shelf window": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "shore power hookup fee": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "signal margin": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "signaling unit firmware": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "decimal_numeric": 20,
+      "version": 20
+     },
+     "forms": {
+      "version": 20
+     },
+     "lines": 20
+    },
+    "speed ceiling": {
+     "dynamic_noise_template_claims": 21,
+     "feature_lines": {
+      "unit_like_text": 105
+     },
+     "forms": {
+      "number_with_unit": 105
+     },
+     "lines": 105
+    },
+    "spoilage threshold": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 5
+     },
+     "forms": {
+      "percent": 15
+     },
+     "lines": 15
+    },
+    "standard single fare": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "station dwell time": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "stock on hand": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "storage allocation": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "stored energy reserve": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "stroke time": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15,
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "strut charge": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "supply pressure": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "sustained throughput": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "tare mass": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10,
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "tare weight": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "decimal_numeric": 35,
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "target batch": {
+     "dynamic_noise_template_claims": 1,
+     "feature_lines": {
+      "unit_like_text": 5
+     },
+     "forms": {
+      "number_with_unit": 5
+     },
+     "lines": 5
+    },
+    "target pressure": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "telemetry beacon interval": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "telemetry poll interval": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "telemetry scan cycle": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "terminal turnaround buffer": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "test pressure": {
+     "dynamic_noise_template_claims": 10,
+     "feature_lines": {
+      "unit_like_text": 50
+     },
+     "forms": {
+      "number_with_unit": 50
+     },
+     "lines": 50
+    },
+    "track length": {
+     "dynamic_noise_template_claims": 14,
+     "feature_lines": {
+      "decimal_numeric": 70,
+      "unit_like_text": 70
+     },
+     "forms": {
+      "number_with_unit": 70
+     },
+     "lines": 70
+    },
+    "traction power": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "decimal_numeric": 25,
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "trip time": {
+     "dynamic_noise_template_claims": 5,
+     "feature_lines": {
+      "decimal_numeric": 25,
+      "unit_like_text": 25
+     },
+     "forms": {
+      "number_with_unit": 25
+     },
+     "lines": 25
+    },
+    "turnaround time": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "unit_like_text": 35
+     },
+     "forms": {
+      "number_with_unit": 35
+     },
+     "lines": 35
+    },
+    "under-keel tide margin": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {},
+     "forms": {
+      "percent": 10
+     },
+     "lines": 10
+    },
+    "unit cost": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "currency": 35,
+      "decimal_numeric": 35
+     },
+     "forms": {
+      "currency_amount": 35
+     },
+     "lines": 35
+    },
+    "unit price": {
+     "dynamic_noise_template_claims": 10,
+     "feature_lines": {
+      "currency": 50,
+      "decimal_numeric": 50
+     },
+     "forms": {
+      "currency_amount": 50
+     },
+     "lines": 50
+    },
+    "unit tariff": {
+     "dynamic_noise_template_claims": 7,
+     "feature_lines": {
+      "currency": 35,
+      "decimal_numeric": 35
+     },
+     "forms": {
+      "currency_amount": 35
+     },
+     "lines": 35
+    },
+    "unit test coverage": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "percent": 15
+     },
+     "lines": 15
+    },
+    "unlimited day pass fee": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "currency": 10,
+      "decimal_numeric": 10
+     },
+     "forms": {
+      "currency_amount": 10
+     },
+     "lines": 10
+    },
+    "vessel turnaround time": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "unit_like_text": 20
+     },
+     "forms": {
+      "number_with_unit": 20
+     },
+     "lines": 20
+    },
+    "warm-up duration": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "unit_like_text": 15
+     },
+     "forms": {
+      "number_with_unit": 15
+     },
+     "lines": 15
+    },
+    "warranty period": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {
+      "unit_like_text": 30
+     },
+     "forms": {
+      "number_with_unit": 30
+     },
+     "lines": 30
+    },
+    "wear index": {
+     "dynamic_noise_template_claims": 6,
+     "feature_lines": {},
+     "forms": {
+      "percent": 30
+     },
+     "lines": 30
+    },
+    "wholesale dispatch tariff": {
+     "dynamic_noise_template_claims": 4,
+     "feature_lines": {
+      "currency": 20,
+      "decimal_numeric": 20
+     },
+     "forms": {
+      "currency_amount": 20
+     },
+     "lines": 20
+    },
+    "winding temp": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "decimal_numeric": 10,
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "yard stack capacity": {
+     "dynamic_noise_template_claims": 2,
+     "feature_lines": {
+      "unit_like_text": 10
+     },
+     "forms": {
+      "number_with_unit": 10
+     },
+     "lines": 10
+    },
+    "yield rate": {
+     "dynamic_noise_template_claims": 3,
+     "feature_lines": {
+      "decimal_numeric": 15
+     },
+     "forms": {
+      "percent": 15
+     },
+     "lines": 15
+    }
+   },
+   "materials": {
+    "r4h3seen_v3": {
+     "dynamic_noise_templates": {
+      "claims_with_fetch_templates": 400,
+      "fetch_count": 360,
+      "fetch_id": 363,
+      "fetch_ts": 397
+     },
+     "summary": {
+      "claims": 400,
+      "currency": 290,
+      "decimal_numeric": 838,
+      "footnote": 0,
+      "form:currency_amount": 290,
+      "form:number_with_unit": 1170,
+      "form:percent": 310,
+      "form:version": 230,
+      "index_component": 0,
+      "label_year_or_period": 0,
+      "label_year_range": 0,
+      "lines": 2000,
+      "multi_value": 0,
+      "numeric_parenthesis": 0,
+      "range": 0,
+      "relative_age": 0,
+      "scale_word": 0,
+      "sets": 20,
+      "unit_like_text": 1170,
+      "version": 230,
+      "year_or_period_paren": 0
+     }
+    },
+    "r4main_v4": {
+     "dynamic_noise_templates": {
+      "claims_with_fetch_templates": 720,
+      "fetch_count": 720,
+      "fetch_id": 720,
+      "fetch_ts": 720
+     },
+     "summary": {
+      "claims": 720,
+      "currency": 275,
+      "decimal_numeric": 2095,
+      "footnote": 0,
+      "form:currency_amount": 275,
+      "form:number_with_unit": 2615,
+      "form:percent": 220,
+      "form:version": 490,
+      "index_component": 0,
+      "label_year_or_period": 0,
+      "label_year_range": 0,
+      "lines": 3600,
+      "multi_value": 0,
+      "numeric_parenthesis": 0,
+      "range": 0,
+      "relative_age": 0,
+      "scale_word": 0,
+      "sets": 36,
+      "unit_like_text": 2615,
+      "version": 490,
+      "year_or_period_paren": 0
+     }
+    }
+   },
+   "note": "行數是答案鍵行：set × claim × cycle（D2′ truth 有逐週期答案）；同一套教材不因不同模型/root 重複計。label_* 是欄位標籤本身的形式（第五輪年份在標籤，不在答案值）；dynamic_noise_templates 是來源模板含 FETCH_TS/COUNT/ID 的 claim 數，不是答案鍵被雜訊污染。",
+   "summary": {
+    "currency": 565,
+    "decimal_numeric": 2933,
+    "footnote": 0,
+    "form:currency_amount": 565,
+    "form:number_with_unit": 3785,
+    "form:percent": 530,
+    "form:version": 720,
+    "index_component": 0,
+    "label_year_or_period": 0,
+    "label_year_range": 0,
+    "lines": 5600,
+    "multi_value": 0,
+    "numeric_parenthesis": 0,
+    "range": 0,
+    "relative_age": 0,
+    "scale_word": 0,
+    "unit_like_text": 3785,
+    "version": 720,
+    "year_or_period_paren": 0
+   }
+  },
+  "r5": {
+   "dynamic_noise_templates": {},
+   "fields": {
+    "1990–1991 Leicester City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "1992–1993 Swansea City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "1993–1999 Nottingham Forest apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "1998 → Port Vale (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "1999–2000 Watford apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2000 → West Bromwich Albion (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2000–2003 West Bromwich Albion apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2001–2004 Sunderland apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2002–2003 → Notts County (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2003–2004 Northampton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2004–2006 Grimsby Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2006–2009 Rochdale apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2009–2010 → Arbroath (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2009–2011 Jove Español apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2009–2012 Bradford City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2009–2015 St Mirren apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2010–2011 Wellington Phoenix apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2011 → Preston North End (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2011–2012 Dénia apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2011–2012 Team Wellington apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2011–2013 Southampton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2011–2014 Sarpsborg 08 apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012 → Rotherham United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012–2013 Alavés apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012–2013 Fulham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012–2013 Sheffield Wednesday apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012–2015 Motherwell apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2012–2024 St Johnstone apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013 Gillingham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013 → Gillingham (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013 → Hereford United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013 → Stevenage (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013– Oxford United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2014 Asteras Tripolis apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2014 Team Wellington apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2014 → Maidenhead United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2015 Watford apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2015 Yeovil Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2016 Accrington Stanley apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2016 Kilmarnock apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2016 Southampton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2013–2020 Rochdale apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 Bromley apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 OH Leuven apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 South Melbourne apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 → Barnet (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 → Dumbarton (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 → Harrogate Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 → Kidderminster Harriers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014 → Wealdstone (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 Hull City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 Kalloni apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 Team Wellington apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 → Dumbarton (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 → Farnborough (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 → Harrogate Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 → Southport (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2015 → Wealdstone (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2016 Lokeren apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2016 Molde apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2016 → Swindon Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2018 Maidenhead United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2019 Blackburn Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2014–2020 Leeds United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015 Hayes & Yeading United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015 Saint Louis FC apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015– Northampton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2016 Chippenham Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2016 Gateshead apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2016 Harrogate Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2017 Bastia apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2017 Hearts apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2017 Newport County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2018 Aberdeen apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2018 Wycombe Wanderers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2015–2023 Greenock Morton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016 → Tamworth (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 Genoa apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 Kilmarnock apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 NAC Breda apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 North Ferriby United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 → Salisbury (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 → Staines Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2017 → UCAM Murcia (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2018 Basel apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2018 Birmingham City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2018 Coventry City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2018 Rangers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2018 Wolverhampton Wanderers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2016–2020 Dunfermline Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017 Gloucester City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017 St Mirren apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017 → Rangers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017 → Solihull Moors (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 Hashtag United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 Hurlford United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 V-Varen Nagasaki apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 Whitby Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 → Barrow (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 → Elgin City (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 → Morecambe (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 → Partick Thistle (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2018 → Queen of the South (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2019 Everton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2019 FC Utrecht apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2019 Manchester City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2019 Ross County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2019 → Fleetwood Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2020 SV Mattersburg II apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2021 Angers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2021 Burnley apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2022 Celtic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2022 Harrogate Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2017–2024 Wigan Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 Kalev apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 Sligo Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 → Aberdeen (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 → Accrington Stanley (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 → Go Ahead Eagles (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018 → Hampton & Richmond Borough (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018– Norwich City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018– Sunderland apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 Ermis Aradippou apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Annan Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Heart of Midlothian (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Kingstonian (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Oldham Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Rangers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2019 → Tubize (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2020 Northampton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2020 SV Mattersburg apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2020 Southend United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2020 Wigan Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2021 Charlton Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2021 Dundalk apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2021 Northampton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2022 Chippenham Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2022 Hurlford United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2022 Northampton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2022 Swansea City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2023 Southampton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2018–2025 Leyton Orient apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 Cavalry FC apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 Fátima apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 Longford Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 → AFC Rushden & Diamonds (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 → Bromley (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 → Falkirk (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2019 → St Neots Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019 → Sunderland (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 Heracles Almelo apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Banbury United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Bishop's Stortford (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Cercle Brugge (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Fleetwood Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Ross County (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2020 → Shrewsbury Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2021 Fulham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2021 Linfield apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2021 Manchester City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2021 Torquay United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2021 → Celtic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2019–2024 Brentford apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 Calgary Foothills apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 Fleetwood Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 Wrexham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 → Ashton United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 → Brackley Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 → Hemel Hempstead Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 → Sheffield Wednesday (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020 → Woking (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020– Hull City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 Bohemians apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 Dulwich Hamlet apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 SKN St. Pölten apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 West Ham United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 → Chester (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 → Leyton Orient (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 → Lommel (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 → Motherwell (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2021 → Southport (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Blackpool apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Fleetwood Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Forest Green Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Genk apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Oldham Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2022 Salford City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2023 Maidenhead United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2024 Dundee apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2025 Blackpool apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2025 Sheffield Wednesday apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2020–2025 Wigan Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 Dungannon Swifts apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 → AFC Telford United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 → Bamber Bridge (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 → Dunfermline Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 → Hampton & Richmond Borough (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021 → Wealdstone (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021– Doncaster Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021– Queens Park Rangers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 Aldershot Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 Banbury United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 Cavalry FC apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 Stoke City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 → Bristol Rovers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 → Feyenoord (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2022 → Rochdale (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2023 Partick Thistle apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2023 Stoke City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2024 Blackpool apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "label_year_range": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2021–2024 Notts County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2024 Salernitana apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2024 TSV Hartberg apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2021–2026 Derby County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 Oulu apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 St Johnstone apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Boston United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2022 → Bradford (Park Avenue) (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Cardiff City (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Chester (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Dartford (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Frickley Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022 → Hibernian (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– Bath City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– Charlton Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– Shamrock Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– St Patrick's Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– Stockport County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– Tranmere Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022– York City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 Boston United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 Burton Albion apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 Cremonese apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 Darvel apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 Swindon Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 → Annan Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 → Kilmarnock (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2023 → Scunthorpe United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 Bradford City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 Cardiff City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 Carlisle United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "label_year_range": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2022–2024 Hibernian apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 Hull City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 Ross County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2024 West Bromwich Albion apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2025 Hibernian apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2025 Luton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2025 Ross County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2025 Salford City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2022–2026 Sheffield United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 Barnet apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Aldershot Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Annan Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Barrow (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Boston United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Burton Albion (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Maidenhead United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Nantwich Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Ross County (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Spennymoor Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023 → Worksop Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023-2026 Hurlford United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023– Copenhagen apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023– Reading apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023– Woking apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 Al-Qaisumah apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 Greenock Morton apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 Mansfield Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 Queens Park Rangers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 Yeovil Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Arsenal (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Bolton Wanderers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Doncaster Rovers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Eastleigh (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Oostende (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Shrewsbury Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Swindon Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2024 → Tranmere Rovers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2025 Bristol Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2026 Brackley Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2023–2026 Maidenhead United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 Morecambe apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 SJK II apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 SJK apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 → Altrincham (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 → Dundalk (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 → Dunfermline Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 → Hartlepool United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2024 → Queen of the South (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024 → Raith Rovers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Annan Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Arsenal apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Blackpool apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Cambridge United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Dagenham & Redbridge apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Doncaster Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Dunfermline Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Heart of Midlothian apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Lecce apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024– Partick Thistle apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2025 Beerschot apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2025 IFK Värnamo apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2025 Plymouth Argyle apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2025 → Gateshead (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Barnsley apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Brackley Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Milton Keynes Dons apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Newport County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Nottingham Forest apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Portsmouth apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Stevenage apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2024–2026 Sutton United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025 Luton Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025 → Buxton (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025 → Lincoln United (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025 → Ross County (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2025 → St Patrick's Athletic (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025 → Walsall (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– CF Montréal apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Charlton Athletic apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Grimsby Town apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Millwall apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Norwich City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Rangers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Wrexham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025– Wycombe Wanderers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 10,
+      "label_year_range": 10,
+      "multi_value": 10,
+      "numeric_parenthesis": 10
+     },
+     "forms": {
+      "apps_goals_parentheses": 10
+     },
+     "lines": 10
+    },
+    "2025–2026 Airdrieonians apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 Heart of Midlothian apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 Rochdale apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 Tranmere Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 → AFC Wimbledon (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 → Dundee (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2025–2026 → Harrogate Town (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026 Kilwinning Rangers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026 → Altrincham (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026 → Bolton Wanderers (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026 → Hereford (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Altrincham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Darlington apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Doncaster Rovers apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Farnborough apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Gillingham apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Heart of Midlothian apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Maccabi Akhi Nazareth apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Norwich City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Oxford City apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Preston North End apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Ross County apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Rotherham United apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– St Mirren apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– VfL Bochum apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– Wealdstone apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    },
+    "2026– → Arbroath (loan) apps (goals)": {
+     "feature_lines": {
+      "label_year_or_period": 5,
+      "label_year_range": 5,
+      "multi_value": 5,
+      "numeric_parenthesis": 5
+     },
+     "forms": {
+      "apps_goals_parentheses": 5
+     },
+     "lines": 5
+    }
+   },
+   "materials": {
+    "r5real": {
+     "dynamic_noise_templates": {},
+     "summary": {
+      "claims": 360,
+      "currency": 0,
+      "decimal_numeric": 0,
+      "footnote": 0,
+      "form:apps_goals_parentheses": 1800,
+      "index_component": 0,
+      "label_year_or_period": 1800,
+      "label_year_range": 1330,
+      "lines": 1800,
+      "multi_value": 1800,
+      "numeric_parenthesis": 1800,
+      "range": 0,
+      "relative_age": 0,
+      "scale_word": 0,
+      "sets": 20,
+      "unit_like_text": 0,
+      "version": 0,
+      "year_or_period_paren": 0
+     }
+    }
+   },
+   "note": "行數是答案鍵行：set × claim × cycle（D2′ truth 有逐週期答案）；同一套教材不因不同模型/root 重複計。label_* 是欄位標籤本身的形式（第五輪年份在標籤，不在答案值）；dynamic_noise_templates 是來源模板含 FETCH_TS/COUNT/ID 的 claim 數，不是答案鍵被雜訊污染。",
+   "summary": {
+    "currency": 0,
+    "decimal_numeric": 0,
+    "footnote": 0,
+    "form:apps_goals_parentheses": 1800,
+    "index_component": 0,
+    "label_year_or_period": 1800,
+    "label_year_range": 1330,
+    "lines": 1800,
+    "multi_value": 1800,
+    "numeric_parenthesis": 1800,
+    "range": 0,
+    "relative_age": 0,
+    "scale_word": 0,
+    "unit_like_text": 0,
+    "version": 0,
+    "year_or_period_paren": 0
+   }
+  }
+ }
+}

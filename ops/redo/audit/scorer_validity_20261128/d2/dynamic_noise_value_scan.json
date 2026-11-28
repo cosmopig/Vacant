@@ -1,0 +1,57 @@
+{
+ "by_batch": {
+  "r4h3seen": {
+   "filled_rows": 8284
+  },
+  "r4haiku": {
+   "filled_rows": 13465
+  },
+  "r4main_1003": {
+   "answer_repeated": 3,
+   "embedded_colon": 5,
+   "extra_numeric_tokens": 9,
+   "filled_rows": 9837,
+   "rows_with_any_shape": 9
+  },
+  "r4main_1004": {
+   "filled_rows": 4968
+  }
+ },
+ "feature_definitions": {
+  "answer_repeated": "答案字串在值內重複出現",
+  "embedded_colon": "值內嵌冒號（常見於把鄰欄一起抄入）",
+  "extra_numeric_tokens": "值比答案多數字/版本成分",
+  "fetch_or_count_word": "值內有 fetch/count 字樣",
+  "hex12": "值內有 12 位十六進位 token",
+  "iso_timestamp": "值內有 ISO 日期/時間形狀"
+ },
+ "fields_with_any_shape": {
+  "rated capacity": {
+   "embedded_colon": 2,
+   "extra_numeric_tokens": 2,
+   "filled_rows": 289,
+   "rows_with_any_shape": 2
+  },
+  "seat quota": {
+   "answer_repeated": 1,
+   "extra_numeric_tokens": 4,
+   "filled_rows": 372,
+   "rows_with_any_shape": 4
+  },
+  "speed ceiling": {
+   "answer_repeated": 2,
+   "embedded_colon": 3,
+   "extra_numeric_tokens": 3,
+   "filled_rows": 875,
+   "rows_with_any_shape": 3
+  }
+ },
+ "note": "這是第四輪 report 值的形式普查（分母是有值行），不是答案鍵行數；只報形狀與行數，不報值。FETCH_TS/COUNT/ID 的模板暴露量見 answer_key_styles.json。",
+ "total": {
+  "answer_repeated": 3,
+  "embedded_colon": 5,
+  "extra_numeric_tokens": 9,
+  "filled_rows": 36554,
+  "rows_with_any_shape": 9
+ }
+}

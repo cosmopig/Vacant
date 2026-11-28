@@ -1,0 +1,212 @@
+{
+ "actual_scorer_evidence": {
+  "c0_recomputed": {
+   "r4h3seen": {
+    "default_correct": 394,
+    "rows": 400,
+    "strict_correct": 394
+   },
+   "r4haiku": {
+    "default_correct": 640,
+    "rows": 720,
+    "strict_correct": 640
+   },
+   "r4main_1003": {
+    "default_correct": 479,
+    "rows": 480,
+    "strict_correct": 479
+   },
+   "r4main_1004": {
+    "default_correct": 238,
+    "rows": 240,
+    "strict_correct": 238
+   },
+   "r5real_haiku": {
+    "default_correct": 360,
+    "rows": 360,
+    "strict_correct": 360
+   },
+   "r5real_qwen_merged": {
+    "default_correct": 197,
+    "rows": 360,
+    "strict_correct": 190
+   }
+  },
+  "c0_recomputed_combined": {
+   "r4main_qwen_components": {
+    "default_correct": 717,
+    "rows": 720,
+    "strict_correct": 717
+   }
+  },
+  "comparison_recomputed": {
+   "r4h3seen": {
+    "default_correct": 394,
+    "rows": 400,
+    "strict_correct": 394
+   },
+   "r4haiku": {
+    "default_correct": 640,
+    "rows": 720,
+    "strict_correct": 640
+   },
+   "r4main_qwen_components": {
+    "default_correct": 717,
+    "rows": 720,
+    "strict_correct": 717
+   },
+   "r5real_haiku": {
+    "default_correct": 360,
+    "rows": 360,
+    "strict_correct": 360
+   },
+   "r5real_qwen_merged": {
+    "default_correct": 197,
+    "rows": 360,
+    "strict_correct": 190
+   }
+  },
+  "decisive_check": "r5real_qwen_merged c0：default 197/360、strict 190/360；repo 的 published score_summary 是 197/360，對上 default。",
+  "history_note": "r4 開跑 commit 與 r5 開跑/重跑 commit 都早於 score_d2 --strict 的引入；report_d2.py 也不設定 STRICT。strict 因此只是對照。",
+  "published_score_summary_c0": {
+   "r4h3seen": {
+    "claims": 400,
+    "correct": 394
+   },
+   "r4haiku": {
+    "claims": 720,
+    "correct": 640
+   },
+   "r4main_qwen_components": {
+    "claims": 720,
+    "correct": 717
+   },
+   "r5real_haiku": {
+    "claims": 360,
+    "correct": 360
+   },
+   "r5real_qwen_merged": {
+    "claims": 360,
+    "correct": 197
+   }
+  }
+ },
+ "population_summary": {
+  "r4": {
+   "by_batch": {
+    "r4h3seen": {
+     "correct": 7907,
+     "missing": 116,
+     "stale": 243,
+     "wrong": 134
+    },
+    "r4haiku": {
+     "correct": 13020,
+     "missing": 1655,
+     "stale": 445
+    },
+    "r4main_1003": {
+     "correct": 9403,
+     "missing": 243,
+     "stale": 350,
+     "wrong": 84
+    },
+    "r4main_1004": {
+     "correct": 4714,
+     "missing": 72,
+     "stale": 198,
+     "wrong": 56
+    }
+   },
+   "gc_unrestorable_sets_separate": {
+    "mechanical_false_block_numeric": 0,
+    "mechanical_false_pass_numeric": 0,
+    "rows": 2100,
+    "sets_by_batch": {
+     "r4h3seen": [
+      "s05",
+      "s06",
+      "s15"
+     ],
+     "r4main_1003": [
+      "s07",
+      "s11"
+     ]
+    },
+    "status_counts": {
+     "correct": 1970,
+     "missing": 71,
+     "stale": 51,
+     "wrong": 8
+    }
+   },
+   "judged_correct": 35044,
+   "judged_wrong": 3596,
+   "mechanical_false_block_numeric": 0,
+   "mechanical_false_pass_kinds": {
+    "extra_numeric_component": 4
+   },
+   "mechanical_false_pass_numeric": 4,
+   "rows": 38640,
+   "status_counts": {
+    "correct": 35044,
+    "missing": 2086,
+    "stale": 1236,
+    "wrong": 274
+   }
+  },
+  "r5": {
+   "by_batch": {
+    "r5real_haiku": {
+     "correct": 5835,
+     "stale": 195,
+     "wrong": 10
+    },
+    "r5real_qwen_merged": {
+     "correct": 3479,
+     "missing": 1898,
+     "stale": 185,
+     "wrong": 558
+    }
+   },
+   "gc_unrestorable_sets_separate": {
+    "mechanical_false_block_numeric": 0,
+    "mechanical_false_pass_numeric": 0,
+    "rows": 0,
+    "sets_by_batch": {},
+    "status_counts": {}
+   },
+   "judged_correct": 9314,
+   "judged_wrong": 2846,
+   "mechanical_false_block_numeric": 0,
+   "mechanical_false_pass_kinds": {
+    "mismatched_numeric_component": 12,
+    "missing_numeric_component": 168
+   },
+   "mechanical_false_pass_numeric": 180,
+   "rows": 12160,
+   "status_counts": {
+    "correct": 9314,
+    "missing": 1898,
+    "stale": 380,
+    "wrong": 568
+   }
+  }
+ },
+ "strict_population_sensitivity": {
+  "r4": {
+   "default_correct": 35044,
+   "default_correct_strict_wrong": 4,
+   "default_wrong_strict_correct": 0,
+   "rows": 38640,
+   "strict_correct": 35040
+  },
+  "r5": {
+   "default_correct": 9314,
+   "default_correct_strict_wrong": 180,
+   "default_wrong_strict_correct": 0,
+   "rows": 12160,
+   "strict_correct": 9134
+  }
+ }
+}
