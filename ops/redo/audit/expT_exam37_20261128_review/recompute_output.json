@@ -1012,8 +1012,8 @@
    "TB_not_in_T": 0,
    "T_only": 476,
    "T_only_before_status": {
-    "correct": 312,
     "wrong": 136,
+    "correct": 312,
     "missing": 28
    },
    "T_only_outcome_in_T": {
@@ -6253,15 +6253,15 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
-    "G/round_2": 11,
-    "G/round_1": 4,
-    "TO/round_2": 9,
-    "c0/c0": 1,
-    "T/round_2": 3,
     "TO/round_1": 6,
+    "G/round_2": 11,
+    "TO/round_2": 9,
     "TB/round_1": 3,
-    "TB/round_2": 1,
-    "T/round_1": 1
+    "T/round_2": 3,
+    "T/round_1": 1,
+    "G/round_1": 4,
+    "c0/c0": 1,
+    "TB/round_2": 1
    }
   },
   "old45_subset_of_v2": true,
@@ -8703,15 +8703,15 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
+    "TO/round_1": 16,
+    "G/round_2": 17,
     "G/round_1": 16,
+    "TO/round_2": 18,
     "T/round_1": 3,
     "TB/round_1": 6,
-    "TO/round_2": 18,
     "T/round_2": 4,
-    "TO/round_1": 16,
-    "TB/round_2": 1,
-    "G/round_2": 17,
-    "c0/c0": 2
+    "c0/c0": 2,
+    "TB/round_2": 1
    }
   },
   "old45_subset_of_v2": true,
@@ -8765,12 +8765,12 @@
     "other_cell_live_dir": 48
    },
    "added_by_arm_round": {
-    "TO/round_1": 10,
-    "G/round_1": 14,
-    "G/round_2": 7,
-    "T/round_1": 2,
-    "TB/round_1": 3,
     "TO/round_2": 10,
+    "TO/round_1": 10,
+    "G/round_2": 7,
+    "G/round_1": 14,
+    "TB/round_1": 3,
+    "T/round_1": 2,
     "T/round_2": 1,
     "c0/c0": 1
    },
@@ -11923,15 +11923,15 @@
     "file_outside_abs+live_root_not_own+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
-    "G/round_1": 23,
-    "T/round_2": 8,
-    "T/round_1": 7,
-    "TB/round_1": 10,
-    "TO/round_2": 25,
     "TO/round_1": 28,
-    "TB/round_2": 3,
+    "c0/c0": 3,
     "G/round_2": 24,
-    "c0/c0": 3
+    "G/round_1": 23,
+    "TO/round_2": 25,
+    "T/round_1": 7,
+    "TB/round_2": 3,
+    "TB/round_1": 10,
+    "T/round_2": 8
    }
   },
   "old45_subset_of_v2": true,
@@ -11944,15 +11944,15 @@
     "live_root_not_own": 48
    },
    "added_by_arm_round": {
-    "TO/round_2": 7,
-    "T/round_1": 4,
+    "c0/c0": 1,
     "TO/round_1": 12,
-    "T/round_2": 4,
-    "G/round_1": 7,
     "G/round_2": 7,
+    "G/round_1": 7,
+    "T/round_1": 4,
     "TB/round_1": 4,
+    "TO/round_2": 7,
     "TB/round_2": 2,
-    "c0/c0": 1
+    "T/round_2": 4
    },
    "pairs_prev": 60,
    "pairs_now": 64
@@ -15066,15 +15066,15 @@
     "live_root_not_own": 48
    },
    "added_by_arm_round": {
-    "TO/round_2": 7,
-    "T/round_1": 4,
+    "c0/c0": 1,
     "TO/round_1": 12,
-    "T/round_2": 4,
-    "G/round_1": 7,
     "G/round_2": 7,
+    "G/round_1": 7,
+    "T/round_1": 4,
     "TB/round_1": 4,
+    "TO/round_2": 7,
     "TB/round_2": 2,
-    "c0/c0": 1
+    "T/round_2": 4
    },
    "pairs_v3": 60,
    "pairs_v4": 64
@@ -15253,10 +15253,10 @@
     "T": 11
    },
    "cells_by_arm": {
-    "T": 3,
     "TO": 12,
+    "G": 12,
     "TB": 4,
-    "G": 12
+    "T": 3
    },
    "all_revision4": true,
    "rows_with_any_other_cycle_distinct_hit": 0,
@@ -15793,6 +15793,517 @@
    }
   }
  },
+ "who_read_review": {
+  "reads": 47,
+  "resolved": 26,
+  "resolved_by_root": {
+   "unresolved": 21,
+   "expT_q9": 25,
+   "expT_q9_VOID_mixedsigner_1430": 1
+  },
+  "reader_arms": {
+   "TB": 2,
+   "TO": 19,
+   "G": 22,
+   "c0": 4
+  },
+  "same_set": {
+   "None": 21,
+   "False": 14,
+   "True": 12
+  },
+  "same_set_reader_arms": {
+   "TO": 6,
+   "G": 5,
+   "TB": 1
+  },
+  "cross_set_reader_arms": {
+   "TO": 7,
+   "G": 7
+  },
+  "unresolved_reader_arms": {
+   "TB": 1,
+   "TO": 6,
+   "G": 10,
+   "c0": 4
+  },
+  "null_new_shared_wrong": {
+   "cells": 275,
+   "max": 5,
+   "ge4": 9,
+   "ge6": 0,
+   "note": "最大值出現在空白初稿的對（從零寫、同一頁讀錯同樣的值）"
+  },
+  "c0_vs_c0_shared_wrong": {
+   "max": 9,
+   "median": 0
+  },
+  "same_set_evidence": [
+   {
+    "reader": "fb-s04/r2/TO",
+    "target_pair": "fb-s04/r1",
+    "filled": 11,
+    "new": 0,
+    "their_lines_equal": 0,
+    "best_target_cell": "A",
+    "filled_equal": 0,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有新寫進的行（最終＝自己的初稿），不是抄寫",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": false,
+     "b_prime_v2": false
+    }
+   },
+   {
+    "reader": "fb-s08/r2/G",
+    "target_pair": "fb-s08/r1",
+    "filled": 19,
+    "new": 19,
+    "their_lines_equal": 8,
+    "best_target_cell": "T",
+    "filled_equal": 14,
+    "new_equal": 14,
+    "new_equal_wrong": 0,
+    "verdict": "沒有相同的錯值，不算證據",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": true,
+     "b_prime_v2": true
+    }
+   },
+   {
+    "reader": "sc-s01/r1/TO",
+    "target_pair": "sc-s01/r2",
+    "filled": 20,
+    "new": 0,
+    "their_lines_equal": 19,
+    "best_target_cell": "A",
+    "filled_equal": 19,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有新寫進的行（最終＝自己的初稿），不是抄寫",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": false,
+     "b_prime_v2": false
+    }
+   },
+   {
+    "reader": "sc-s01/r2/G",
+    "target_pair": "sc-s01/r1",
+    "filled": 19,
+    "new": 0,
+    "their_lines_equal": 19,
+    "best_target_cell": "A",
+    "filled_equal": 19,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有新寫進的行（最終＝自己的初稿），不是抄寫",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": true,
+     "b_prime_v2": true
+    }
+   },
+   {
+    "reader": "sc-s02/r2/TO",
+    "target_pair": "sc-s02/r1",
+    "filled": 19,
+    "new": 15,
+    "their_lines_equal": 19,
+    "best_target_cell": "A",
+    "filled_equal": 19,
+    "new_equal": 15,
+    "new_equal_wrong": 11,
+    "verdict": "抄寫的強證據",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": true,
+     "b_prime_v2": true
+    }
+   },
+   {
+    "reader": "sc-s08/r2/TO",
+    "target_pair": "sc-s08/r1",
+    "filled": 20,
+    "new": 0,
+    "their_lines_equal": 0,
+    "best_target_cell": "A",
+    "filled_equal": 19,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有新寫進的行（最終＝自己的初稿），不是抄寫",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": false,
+     "b_prime_v2": false
+    }
+   },
+   {
+    "reader": "sc-s12/r1/G",
+    "target_pair": "sc-s12/r2",
+    "filled": 0,
+    "new": 0,
+    "their_lines_equal": 0,
+    "best_target_cell": "A",
+    "filled_equal": 0,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有新寫進的行（最終＝自己的初稿），不是抄寫",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": true,
+     "b_prime_v2": true
+    }
+   },
+   {
+    "reader": "sc-s13/r2/TO",
+    "target_pair": "sc-s13/r1",
+    "filled": 20,
+    "new": 2,
+    "their_lines_equal": 16,
+    "best_target_cell": "T",
+    "filled_equal": 19,
+    "new_equal": 2,
+    "new_equal_wrong": 0,
+    "verdict": "沒有相同的錯值，不算證據",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": true,
+     "b_prime_v2": true
+    }
+   },
+   {
+    "reader": "sc-s15/r2/TB",
+    "target_pair": "sc-s15/r1",
+    "filled": 20,
+    "new": 20,
+    "their_lines_equal": 19,
+    "best_target_cell": "A",
+    "filled_equal": 19,
+    "new_equal": 19,
+    "new_equal_wrong": 4,
+    "verdict": "和沒讀報告的格同一水準，分不出",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": false,
+     "b_prime_v2": false
+    }
+   },
+   {
+    "reader": "sc-s16/r2/G",
+    "target_pair": "sc-s16/r1",
+    "filled": 17,
+    "new": 1,
+    "their_lines_equal": 16,
+    "best_target_cell": "A",
+    "filled_equal": 16,
+    "new_equal": 0,
+    "new_equal_wrong": 0,
+    "verdict": "沒有相同的錯值，不算證據",
+    "in_lists": {
+     "a_v2": true,
+     "b_v2": false,
+     "b_prime_v2": false
+    }
+   }
+  ],
+  "copy_pairs": [
+   "sc-s02/r2"
+  ],
+  "reader_pairs": [
+   "fb-s04/r1",
+   "fb-s04/r2",
+   "fb-s06/r1",
+   "fb-s08/r2",
+   "fb-s17/r1",
+   "fb-s17/r2",
+   "fb-s20/r2",
+   "sc-s01/r1",
+   "sc-s01/r2",
+   "sc-s02/r2",
+   "sc-s05/r1",
+   "sc-s06/r1",
+   "sc-s08/r1",
+   "sc-s08/r2",
+   "sc-s11/r2",
+   "sc-s12/r1",
+   "sc-s12/r2",
+   "sc-s13/r2",
+   "sc-s15/r2",
+   "sc-s16/r2",
+   "sc-s17/r2"
+  ],
+  "reader_pairs_not_in_b_prime": [
+   "fb-s04/r2",
+   "fb-s17/r1",
+   "sc-s01/r1",
+   "sc-s08/r1",
+   "sc-s08/r2",
+   "sc-s11/r2",
+   "sc-s12/r2",
+   "sc-s15/r2",
+   "sc-s16/r2",
+   "sc-s17/r2"
+  ],
+  "versions": {
+   "b_v4_plus_report_readers": {
+    "T_vs_G": {
+     "n_sets": 26,
+     "diff": 8.12,
+     "boot95": [
+      -4.42,
+      21.94
+     ],
+     "t95": [
+      -6.0,
+      22.24
+     ],
+     "signflip_p": 0.2631,
+     "pairs": 32
+    },
+    "T_vs_TB": {
+     "n_sets": 26,
+     "diff": 4.62,
+     "boot95": [
+      -0.48,
+      10.54
+     ],
+     "t95": [
+      -1.32,
+      10.57
+     ],
+     "signflip_p": 0.127,
+     "pairs": 32
+    },
+    "T_vs_TO": {
+     "n_sets": 26,
+     "diff": 0.33,
+     "boot95": [
+      -7.69,
+      10.37
+     ],
+     "t95": [
+      -9.33,
+      9.99
+     ],
+     "signflip_p": 0.9548,
+     "pairs": 32
+    },
+    "TE_vs_TER": {
+     "n_sets": 26,
+     "diff": 0.04,
+     "boot95": [
+      -3.91,
+      2.93
+     ],
+     "t95": [
+      -3.63,
+      3.71
+     ],
+     "signflip_p": 1.0,
+     "pairs": 32
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.12
+    }
+   },
+   "b_prime_v4_plus_report_readers": {
+    "T_vs_G": {
+     "n_sets": 24,
+     "diff": 0.46,
+     "boot95": [
+      -8.88,
+      9.32
+     ],
+     "t95": [
+      -9.28,
+      10.21
+     ],
+     "signflip_p": 0.9365,
+     "pairs": 30
+    },
+    "T_vs_TB": {
+     "n_sets": 24,
+     "diff": 1.8,
+     "boot95": [
+      -2.08,
+      6.64
+     ],
+     "t95": [
+      -2.95,
+      6.54
+     ],
+     "signflip_p": 0.4978,
+     "pairs": 30
+    },
+    "T_vs_TO": {
+     "n_sets": 24,
+     "diff": -4.43,
+     "boot95": [
+      -10.05,
+      -0.38
+     ],
+     "t95": [
+      -9.72,
+      0.85
+     ],
+     "signflip_p": 0.0622,
+     "pairs": 30
+    },
+    "TE_vs_TER": {
+     "n_sets": 24,
+     "diff": 0.05,
+     "boot95": [
+      -4.19,
+      3.17
+     ],
+     "t95": [
+      -3.95,
+      4.04
+     ],
+     "signflip_p": 1.0,
+     "pairs": 30
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.46
+    }
+   },
+   "b_v4_plus_report_readers_minus_empty": {
+    "T_vs_G": {
+     "n_sets": 25,
+     "diff": 4.05,
+     "boot95": [
+      -7.0,
+      16.22
+     ],
+     "t95": [
+      -8.35,
+      16.44
+     ],
+     "signflip_p": 0.5368,
+     "pairs": 30
+    },
+    "T_vs_TB": {
+     "n_sets": 25,
+     "diff": 2.23,
+     "boot95": [
+      -1.8,
+      7.25
+     ],
+     "t95": [
+      -2.65,
+      7.1
+     ],
+     "signflip_p": 0.4158,
+     "pairs": 30
+    },
+    "T_vs_TO": {
+     "n_sets": 25,
+     "diff": -3.75,
+     "boot95": [
+      -9.22,
+      0.49
+     ],
+     "t95": [
+      -9.04,
+      1.53
+     ],
+     "signflip_p": 0.1481,
+     "pairs": 30
+    },
+    "TE_vs_TER": {
+     "n_sets": 25,
+     "diff": 0.44,
+     "boot95": [
+      -3.67,
+      3.6
+     ],
+     "t95": [
+      -3.47,
+      4.36
+     ],
+     "signflip_p": 0.8678,
+     "pairs": 30
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 4.05
+    }
+   },
+   "b_prime_v4_plus_report_readers_minus_empty": {
+    "T_vs_G": {
+     "n_sets": 24,
+     "diff": 0.05,
+     "boot95": [
+      -9.17,
+      8.84
+     ],
+     "t95": [
+      -9.62,
+      9.72
+     ],
+     "signflip_p": 1.0,
+     "pairs": 29
+    },
+    "T_vs_TB": {
+     "n_sets": 24,
+     "diff": 0.86,
+     "boot95": [
+      -2.5,
+      5.29
+     ],
+     "t95": [
+      -3.3,
+      5.02
+     ],
+     "signflip_p": 0.8109,
+     "pairs": 29
+    },
+    "T_vs_TO": {
+     "n_sets": 24,
+     "diff": -4.54,
+     "boot95": [
+      -10.15,
+      -0.49
+     ],
+     "t95": [
+      -9.8,
+      0.73
+     ],
+     "signflip_p": 0.0524,
+     "pairs": 29
+    },
+    "TE_vs_TER": {
+     "n_sets": 24,
+     "diff": 0.46,
+     "boot95": [
+      -3.82,
+      3.75
+     ],
+     "t95": [
+      -3.63,
+      4.55
+     ],
+     "signflip_p": 0.8673,
+     "pairs": 29
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.05
+    }
+   }
+  }
+ },
+ "source_whoread": "git:0044f935d",
  "source_reclass": "git:812b7bf1f",
  "mismatches": []
 }

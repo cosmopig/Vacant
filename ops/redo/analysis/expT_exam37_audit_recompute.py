@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f --whoread-rev 0044f935d | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -1412,6 +1412,98 @@ def reclass_812(src_old: Src, src8: Src, v4_runs: list[dict]) -> dict:
     return R
 
 
+# ───────────────────────────── 誰讀了誰（0044f935d）─────────────────────────────
+def who_read_review(src_old: Src, srcw: Src, excl_lists: dict) -> dict:
+    """讀別格 ws/report.md 的 47 次：反查得到的同組讀取，用最終值 HMAC 比「新寫進的行」和被讀那一對各格的重合（錯值相同另計），
+    對照沒讀報告的 275 格的同一統計（虛無分布）；讀者臂分布；把讀報告的對加進排除名單重算。"""
+    cells = src_old.json("expT/expT_cells.json")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    W = srcw.jsonl("expT/expT_other_report_reads_who_read_whom.jsonl")
+    LH = srcw.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_lines_hmac.jsonl")
+    by: dict[tuple, dict] = collections.defaultdict(dict)
+    for x in LH:
+        by[(x["set"], x["rep"], x["arm"])][x["claim"]] = x
+    pc = lambda r: (r.split("/")[0], int(r.split("/")[1][1:]), r.split("/")[2])  # noqa: E731
+    R: dict[str, Any] = {"reads": len(W), "resolved": sum(1 for w in W if w["target_root"]),
+                         "resolved_by_root": dict(collections.Counter(w["target_root"] or "unresolved" for w in W)),
+                         "reader_arms": dict(collections.Counter(pc(w["reader"])[2] for w in W)),
+                         "same_set": dict(collections.Counter(str(w["same_set"]) for w in W)),
+                         "same_set_reader_arms": dict(collections.Counter(pc(w["reader"])[2] for w in W if w["same_set"])),
+                         "cross_set_reader_arms": dict(collections.Counter(pc(w["reader"])[2] for w in W if w["same_set"] is False)),
+                         "unresolved_reader_arms": dict(collections.Counter(pc(w["reader"])[2] for w in W if not w["target_root"]))}
+    # 虛無分布：沒讀報告的格，新寫進的行和同組另一次初稿相同、而且是錯值的行數
+    readers = {pc(w["reader"]) for w in W}
+    null = []
+    for (s_, r_, a_), X in by.items():
+        if a_ not in ("G", "T", "TB", "TO") or (s_, r_, a_) in readers:
+            continue
+        Y = by[(s_, 3 - r_, "A")]
+        new = [c for c, x in X.items() if x["after_hmac"] is not None and x["after_hmac"] != x["before_hmac"]]
+        null.append(sum(1 for c in new if X[c]["after_hmac"] == Y[c]["before_hmac"] and not X[c]["after_matches_k"][0]))
+    R["null_new_shared_wrong"] = {"cells": len(null), "max": max(null), "ge4": sum(1 for n in null if n >= 4), "ge6": sum(1 for n in null if n >= 6),
+                                  "note": "最大值出現在空白初稿的對（從零寫、同一頁讀錯同樣的值）"}
+    c0c0 = []
+    for s_ in sorted({k[0] for k in by}):
+        A1, A2 = by[(s_, 1, "A")], by[(s_, 2, "A")]
+        c0c0.append(sum(1 for c in A1 if A1[c]["before_hmac"] and A1[c]["before_hmac"] == A2[c]["before_hmac"] and not A1[c]["before_matches_k"][0]))
+    R["c0_vs_c0_shared_wrong"] = {"max": max(c0c0), "median": sorted(c0c0)[len(c0c0) // 2]}
+    ev = []
+    seen = set()
+    for w in W:
+        if not w["same_set"]:
+            continue
+        s_, r_, a_ = pc(w["reader"])
+        tr = int(w["target_rep"][1:])
+        if (s_, r_, a_, tr) in seen:
+            continue
+        seen.add((s_, r_, a_, tr))
+        X = by[(s_, r_, a_)] if a_ != "c0" else {c: dict(x, after_hmac=x["before_hmac"], after_matches_k=x["before_matches_k"]) for c, x in by[(s_, r_, "A")].items()}
+        filled = [c for c, x in X.items() if x["after_hmac"] is not None]
+        new = [c for c, x in X.items() if x["after_hmac"] is not None and x["after_hmac"] != x["before_hmac"]] if a_ != "c0" else filled
+        best = None
+        for b in ("A", "G", "T", "TB", "TO", "TE", "TER"):
+            Y = by[(s_, tr, b)]
+            row = (b, sum(1 for c in filled if X[c]["after_hmac"] == Y[c]["after_hmac"]),
+                   sum(1 for c in new if X[c]["after_hmac"] == Y[c]["after_hmac"]),
+                   sum(1 for c in new if X[c]["after_hmac"] == Y[c]["after_hmac"] and not X[c]["after_matches_k"][0]))
+            if best is None or (row[3], row[2], row[1]) > (best[3], best[2], best[1]):
+                best = row
+        verdict = ("抄寫的強證據" if best[3] > R["null_new_shared_wrong"]["max"] else
+                   "沒有新寫進的行（最終＝自己的初稿），不是抄寫" if not new else
+                   "和沒讀報告的格同一水準，分不出" if best[3] >= 1 else "沒有相同的錯值，不算證據")
+        ev.append({"reader": f"{s_}/r{r_}/{a_}", "target_pair": f"{s_}/r{tr}", "filled": len(filled), "new": len(new),
+                   "their_lines_equal": w.get("lines_equal_to_read"), "best_target_cell": best[0], "filled_equal": best[1],
+                   "new_equal": best[2], "new_equal_wrong": best[3], "verdict": verdict,
+                   "in_lists": {k: f"{s_}/r{r_}" in v for k, v in excl_lists.items() if k in ("a_v2", "b_v2", "b_prime_v2")}})
+    R["same_set_evidence"] = ev
+    R["copy_pairs"] = sorted({e["reader"].rsplit("/", 1)[0] for e in ev if e["verdict"] == "抄寫的強證據"})
+    # 讀報告的對全部加進排除名單（敏感度）
+    reader_pairs = {(s_, r_) for s_, r_, _ in readers}
+    R["reader_pairs"] = sorted(f"{s_}/r{r_}" for s_, r_ in reader_pairs)
+    tolist = lambda v: {tuple([x.split("/")[0], int(x.split("/")[1][1:])]) for x in v}  # noqa: E731
+    bb, bp = tolist(excl_lists["b_v2"]), tolist(excl_lists["b_prime_v2"])
+    R["reader_pairs_not_in_b_prime"] = sorted(f"{s_}/r{r_}" for s_, r_ in reader_pairs - bp)
+    emp = {k for k in pairs if C[(*k, "A")]["c0_filled"] == 0}
+
+    def cmp_(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(C[(s_, r_, t)]["final_correct"] / C[(s_, r_, t)]["n_lines"] - C[(s_, r_, c)]["final_correct"] / C[(s_, r_, c)]["n_lines"])
+        o = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        o["pairs"] = sum(len(v) for v in d.values())
+        return o
+    ext = {}
+    for name, ex in (("b_v4_plus_report_readers", bb | reader_pairs), ("b_prime_v4_plus_report_readers", bp | reader_pairs),
+                     ("b_v4_plus_report_readers_minus_empty", bb | reader_pairs | emp), ("b_prime_v4_plus_report_readers_minus_empty", bp | reader_pairs | emp)):
+        keep = set(pairs) - ex
+        ext[name] = {f"{t}_vs_{c}": cmp_(t, c, keep) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"))}
+        ext[name]["min_drop"] = min_drop_exact(C, pairs, keep, "T", "G")
+    R["versions"] = ext
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1607,6 +1699,7 @@ def main() -> None:
     ap.add_argument("--list3-rev", default="f1fdcfab3", help="第三版越界名單（expT_escape_v3_runs.jsonl）所在的提交；空字串跳過")
     ap.add_argument("--list4-rev", default="e1abc4bf0", help="第四版（B48 字面）名單與讀別格修訂判定所在的提交；空字串跳過")
     ap.add_argument("--reclass-rev", default="812b7bf1f", help="讀頁判定第二版、正控制逐次標記所在的提交；空字串跳過")
+    ap.add_argument("--whoread-rev", default="0044f935d", help="讀別格報告「誰讀了誰」所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1679,6 +1772,10 @@ def main() -> None:
             out["reclass_812"]["copy_pairs_already_in"] = {"b_v4": sorted(f"{s_}/r{r_}" for s_, r_ in copy_pairs & bb),
                                                            "b_prime_v4": sorted(f"{s_}/r{r_}" for s_, r_ in copy_pairs & bp)}
             out["reclass_812"]["versions_with_copy_pairs"] = ext
+    if a.whoread_rev and "list_v4_review" in out:
+        wsrc = Src(None if a.dir else a.whoread_rev, a.dir, repo)
+        out["who_read_review"] = who_read_review(src, wsrc, out["list_v4_review"]["excluded_pairs"])
+        out["source_whoread"] = a.dir or f"git:{a.whoread_rev}"
         out["source_reclass"] = a.dir or f"git:{a.reclass_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
