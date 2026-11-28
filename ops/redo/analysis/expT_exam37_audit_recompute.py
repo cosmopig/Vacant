@@ -24,7 +24,9 @@
 
 補核（0dd266544）：讀新包的 `expT_escape_calls.jsonl` 自己判定越界的對，重算排除後的比較（`escape_review`）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 | --dir D] [--out J]
+名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
+
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -65,6 +67,14 @@ class Src:
 
     def jsonl(self, rel: str) -> list[dict]:
         return [json.loads(x) for x in self.text(rel).splitlines() if x.strip()]
+
+    def jsonl_rel(self, repo_rel: str) -> list[dict]:
+        """以 repo 根為基準的路徑（給稽核包以外的子目錄，例如 expT_hmac_supplement）。"""
+        if self.dir is not None:
+            t = (self.dir.parent / pathlib.Path(repo_rel).relative_to(PKG).as_posix()).read_text() if repo_rel.startswith(PKG) else (self.dir / repo_rel).read_text()
+        else:
+            t = subprocess.run(["git", "-C", str(self.repo), "show", f"{self.rev}:{repo_rel}"], check=True, capture_output=True).stdout.decode()
+        return [json.loads(x) for x in t.splitlines() if x.strip()]
 
     def listdir(self, rel: str) -> list[str]:
         if self.dir is not None:
@@ -998,6 +1008,193 @@ def network_fingerprint(src: Src, esc_calls: list[dict], bprime_excl: set) -> di
     return R
 
 
+# ───────────────────────────── 名單核對（2e99dd9a1）─────────────────────────────
+def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
+    """新名單（expT_escape_v2_runs.jsonl，108 次）對我的名單（舊路徑命中 45 次 ∪ 網路紀錄裡非本對來源主機的指令）；
+    直連分「指令」與「回傳像 HTML」；用新名單重算 (a)(b)(b′)＋拿掉空白初稿；HMAC 匯出做未來值對照（只比相等，不碰值）。"""
+    cells = src_old.json("expT/expT_cells.json")
+    lines = src_old.jsonl("expT/expT_lines.jsonl")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    LB: dict[tuple, list[dict]] = collections.defaultdict(list)
+    for x in lines:
+        LB[(x["set"], x["rep"], x["arm"])].append(x)
+    V = src_new.jsonl("expT/expT_escape_v2_runs.jsonl")
+    N = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_net_calls.jsonl")
+    LH = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_lines_hmac.jsonl")
+    TH = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_truth_hmac.jsonl")
+    key = lambda x: (x["set"], x["rep"], x["arm"], x["round"])  # noqa: E731
+    R: dict[str, Any] = {"v2_runs": len(V), "v2_escape_runs": sum(v["escape"] for v in V)}
+    R["v2_escape_by_arm_round"] = {f"{a}/{r}": n for (a, r), n in sorted(collections.Counter((v["arm"], v["round"]) for v in V if v["escape"]).items())}
+    R["v2_kinds_in_escape_runs"] = dict(collections.Counter(k for v in V if v["escape"] for k in v["escape_kinds"]))
+    rule = lambda v: bool(set(v["escape_kinds"]) - {"path_pattern"}) or v["unlogged_server_200"] > 0  # noqa: E731
+    R["v2_rule_inferred"] = "escape ⇔ 有 path_pattern 以外的任一類，或 unlogged_server_200>0"
+    R["v2_rule_exceptions"] = [list(key(v)) + [sorted(v["escape_kinds"])] for v in V if rule(v) != v["escape"]]
+    c0 = [v for v in V if v["round"] == "c0" and v["escape"]]
+    R["c0_escape"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "unlogged_server_200": v["unlogged_server_200"],
+                       "server_200": v["server_200"]} for v in c0]
+    # 我的名單
+    old = {key(x) for x in esc_old}
+    ext_any = {key(n) for n in N if not n["own_source_host"]}
+    mine = old | ext_any
+    v2 = {key(v) for v in V if v["escape"]}
+    R["mine_runs"] = len(mine)
+    R["mine_not_v2"] = sorted(map(list, mine - v2))
+    R["v2_not_mine"] = {"runs": len(v2 - mine),
+                        "by_kinds": {"+".join(k) or "(none: unlogged_server_200)": n for k, n in collections.Counter(
+                            tuple(sorted(set(v["escape_kinds"]) - {"path_pattern"})) for v in V if key(v) in v2 - mine).items()},
+                        "by_arm_round": dict(collections.Counter(f"{k[2]}/{k[3]}" for k in v2 - mine))}
+    R["old45_subset_of_v2"] = old <= v2
+    pv2 = {(k[0], k[1]) for k in v2}
+    pmine = {(k[0], k[1]) for k in mine}
+    R["pairs"] = {"v2": len(pv2), "mine": len(pmine), "v2_not_mine": sorted(f"{s}/r{r}" for s, r in pv2 - pmine),
+                  "mine_not_v2": sorted(f"{s}/r{r}" for s, r in pmine - pv2)}
+    # 直連：指令 vs 回傳像 HTML，逐臂逐輪
+    ext = [n for n in N if not n["own_source_host"]]
+    R["net"] = {"calls_total": len(N), "own_source_host_calls": sum(n["own_source_host"] for n in N),
+                "own_source_unmatched": sum(1 for n in N if n["own_source_host"] and not n["matched_egress_or_server"]),
+                "external_commands": len(ext),
+                "external_commands_matched_server": sum(n["matched_egress_or_server"] for n in ext),
+                "external_html_returned": sum(n["output_looks_like_html"] for n in ext),
+                "by_host_commands": dict(collections.Counter(n["target_host"] for n in ext).most_common()),
+                "by_host_html": dict(collections.Counter(n["target_host"] for n in ext if n["output_looks_like_html"]).most_common()),
+                "by_arm_round_commands": {f"{a}/{r}": c for (a, r), c in sorted(collections.Counter((n["arm"], n["round"]) for n in ext).items())},
+                "by_arm_round_html": {f"{a}/{r}": c for (a, r), c in sorted(collections.Counter((n["arm"], n["round"]) for n in ext if n["output_looks_like_html"]).items())},
+                "runs_with_external_command": len({key(n) for n in ext}),
+                "runs_with_external_html": sorted(map(list, {key(n) for n in ext if n["output_looks_like_html"]})),
+                "command_class": dict(collections.Counter(n["command_class"] for n in ext)),
+                "c0_external": sum(1 for n in ext if n["round"] == "c0")}
+    # 重算排除版本
+    def prop(c: dict) -> float:
+        return c["final_correct"] / c["n_lines"]
+
+    def comp(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(prop(C[(s_, r_, t)]) - prop(C[(s_, r_, c)]))
+        out = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        out["pairs"] = sum(len(v) for v in d.values())
+        return out
+    empty = {(s, r) for s, r in pairs if C[(s, r, "A")]["c0_filled"] == 0}
+    c0pairs = {(v["set"], v["rep"]) for v in c0}
+    old_strong = {(x["set"], x["rep"]) for x in esc_old if x["kind"] in STRONG_B}
+    ext_pairs = {(n["set"], n["rep"]) for n in ext if not n["matched_egress_or_server"]}
+    ext_html_pairs = {(n["set"], n["rep"]) for n in ext if n["output_looks_like_html"]}
+    cross = set()
+    for x in esc_old:
+        if x["kind"] == "pair_other" and x["detail"].split("/")[2] not in ("c0", "A"):
+            cross.add((x["set"], x["rep"]))
+        if x["tool"] == "write":
+            t_, r_ = x["detail"].split("/")[:2]
+            cross.add((t_, int(r_[1:])))
+    excl = {"a_v2": pv2 | c0pairs,
+            "b_v2": old_strong | ext_pairs | c0pairs,
+            "b_v2_html_only": old_strong | ext_html_pairs | c0pairs,
+            "b_prime_v2": old_strong | ext_pairs | c0pairs | cross}
+    R["exclusion_definitions"] = {
+        "a_v2": "新名單任一臂任一輪越界的對（含 c0 那一對）",
+        "b_v2": "舊 (b)（flags.json／未來頁面／答案）∪ 有直連外站指令（非本對來源主機、沒進伺服器紀錄）的對 ∪ c0 那一對",
+        "b_v2_html_only": "同上，但直連只算回傳像 HTML 的",
+        "b_prime_v2": "b_v2 ∪ 讀同一對別臂（非 c0／A）產出 ∪ 被別格寫入的對"}
+    R["excluded_counts"] = {k: len(v) for k, v in excl.items()}
+    vers = {"all": set(pairs)}
+    for k, v in excl.items():
+        vers[k] = set(pairs) - v
+        vers[k + "_minus_empty"] = set(pairs) - v - empty
+    COMPS = [("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"), ("T", "A"), ("TO", "A")]
+    R["comparisons"] = {v: {f"{t}_vs_{c}": comp(t, c, k) for t, c in COMPS} for v, k in vers.items()}
+    R["T_vs_G_pass_by_version"] = {v: (r["T_vs_G"]["diff"] >= 10 and r["T_vs_G"]["boot95"][0] > 0) for v, r in R["comparisons"].items()}
+    R["fb_s10_r2_in_12_football_candidates"] = False  # 候選名單只有 fb-s10/r1（見 network_fingerprint）
+    # HMAC 未來值對照
+    T = {(t["set"], t["claim"], t["k"]): t["truth_hmac"] for t in TH}
+    chk = 0
+    for x in LH:
+        K = len(x["after_matches_k"])
+        calc = [x["after_hmac"] is not None and x["after_hmac"] == T.get((x["set"], x["claim"], k)) for k in range(K)]
+        chk += calc != x["after_matches_k"]
+    I = {(x["set"], x["rep"], x["arm"], x["claim_id"]): x for x in lines}
+    st_mis = sum(1 for x in LH if (I[(x["set"], x["rep"], x["arm"], x["claim"])]["after_status"] == "correct") != x["after_matches_k"][0])
+    R["hmac_checks"] = {"lines": len(LH), "revisions_per_claim": dict(collections.Counter(collections.Counter((t["set"], t["claim"]) for t in TH).values())),
+                        "after_matches_k_vs_truth_hmac_mismatch": chk, "after_status_correct_vs_k0_mismatch": st_mis,
+                        "latest_is_last_k": all(x["after_matches_latest"] == x["after_matches_k"][-1] for x in LH),
+                        "note": "after_matches_latest 是教材裡最後一個修訂，不是直連當下的線上版本；線上版本的真值沒有匯出"}
+    fut = lambda m: (not m[0]) and any(m[1:])  # noqa: E731
+    v2_cell = {(k[0], k[1], k[2]) for k in v2}
+    ext_cell = {(n["set"], n["rep"], n["arm"]) for n in ext}
+    ext_html_cell = {(n["set"], n["rep"], n["arm"]) for n in ext if n["output_looks_like_html"]}
+    fut_cell = {(x["set"], x["rep"], x["arm"]) for x in esc_old if x["kind"] == "mat_future"}
+    by = {}
+    for a in ["A", "G", "T", "TB", "TO", "TE", "TER"]:
+        rows = [x for x in LH if x["arm"] == a]
+
+        def cnt(cond: Callable[[dict], bool]) -> dict:
+            rs = [x for x in rows if cond(x)]
+            return {"lines": len(rs), "after_future_not_rev0": sum(fut(x["after_matches_k"]) for x in rs),
+                    "introduced": sum(fut(x["after_matches_k"]) and not fut(x["before_matches_k"]) and x["after_hmac"] != x["before_hmac"] for x in rs),
+                    "before_future_not_rev0": sum(fut(x["before_matches_k"]) for x in rs)}
+        ck = lambda x: (x["set"], x["rep"], x["arm"])  # noqa: E731
+        by[a] = {"all": cnt(lambda x: True),
+                 "v2_escape_cells": cnt(lambda x: ck(x) in v2_cell),
+                 "external_command_cells": cnt(lambda x: ck(x) in ext_cell),
+                 "external_html_cells": cnt(lambda x: ck(x) in ext_html_cell),
+                 "read_future_page_cells": cnt(lambda x: ck(x) in fut_cell),
+                 "no_v2_escape_cells": cnt(lambda x: ck(x) not in v2_cell)}
+    R["future_match_by_arm"] = by
+    # 引入的未來值對 (a) 的影響（組平均，pp）：每對權重 1/(2×組數)
+    nsets = len({s for s, _ in pairs})
+    eff = {}
+    for a in ["G", "T", "TB", "TO", "TE", "TER"]:
+        tot = 0.0
+        for x in LH:
+            if x["arm"] == a and fut(x["after_matches_k"]) and not fut(x["before_matches_k"]) and x["after_hmac"] != x["before_hmac"]:
+                tot += 100 / C[(x["set"], x["rep"], a)]["n_lines"] / 2 / nsets
+        eff[a] = round(tot, 2)
+    R["introduced_future_max_effect_pp"] = eff
+    # 各版本：把 G 與 T「引入的未來值」行改算成對（＝假設沒有污染就會寫對），T−G 最多移動多少
+    intro = collections.defaultdict(int)
+    for x in LH:
+        if fut(x["after_matches_k"]) and not fut(x["before_matches_k"]) and x["after_hmac"] != x["before_hmac"]:
+            intro[(x["set"], x["rep"], x["arm"])] += 1
+
+    def comp_adj(keep: set, fix_arm: str) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                ct = C[(s_, r_, "T")]["final_correct"] + (intro[(s_, r_, "T")] if fix_arm == "T" else 0)
+                cg = C[(s_, r_, "G")]["final_correct"] + (intro[(s_, r_, "G")] if fix_arm == "G" else 0)
+                d[s_].append((ct - cg) / C[(s_, r_, "T")]["n_lines"])
+        return cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+    sig = sorted({(k[0], k[1], k[2]) for k, n in intro.items() if n > 0 and k not in v2_cell})
+    R["future_lines_in_cells_without_v2_escape"] = [[f"{a_}/r{b_}/{c_}", intro[(a_, b_, c_)],
+                                                     sorted({kk for v in V if (v["set"], v["rep"], v["arm"]) == (a_, b_, c_) for kk in v["escape_kinds"]})]
+                                                    for a_, b_, c_ in sig]
+    sigp = {(a_, b_) for a_, b_, _ in sig}
+    vers["b_prime_v2_plus_future_signature"] = set(pairs) - excl["b_prime_v2"] - sigp
+    vers["b_v2_plus_future_signature"] = set(pairs) - excl["b_v2"] - sigp
+    for v in ("b_prime_v2_plus_future_signature", "b_v2_plus_future_signature"):
+        R["comparisons"][v] = {f"{t}_vs_{c}": comp(t, c, vers[v]) for t, c in COMPS}
+        R["T_vs_G_pass_by_version"][v] = R["comparisons"][v]["T_vs_G"]["diff"] >= 10 and R["comparisons"][v]["T_vs_G"]["boot95"][0] > 0
+    R["T_vs_G_future_adjusted"] = {v: {"G_fixed_worst_for_T": comp_adj(k, "G"), "T_fixed_best_for_T": comp_adj(k, "T")}
+                                   for v, k in vers.items()}
+    # 各版本：拿掉 T−G 最大的幾對就不過
+    mk = {}
+    for v, keep in vers.items():
+        ranked = sorted(keep, key=lambda p_: -(prop(C[(*p_, "T")]) - prop(C[(*p_, "G")])))
+        for kx in range(0, 15):
+            r_ = comp("T", "G", keep - set(ranked[:kx]))
+            if not (r_["diff"] >= 10 and r_["boot95"][0] > 0):
+                mk[v] = {"k": kx, "dropped": [f"{s_}/r{r_2}" for s_, r_2 in ranked[:kx]], "diff": r_["diff"], "boot95": r_["boot95"]}
+                break
+    R["T_vs_G_min_pairs_to_lose_pass"] = mk
+    R["n_sets_by_version"] = {v: len({s_ for s_, _ in k}) for v, k in vers.items()}
+    R["introduced_future_cells"] = sorted(
+        [f"{s}/r{r}/{a}", n] for (s, r, a), n in collections.Counter(
+            (x["set"], x["rep"], x["arm"]) for x in LH
+            if fut(x["after_matches_k"]) and not fut(x["before_matches_k"]) and x["after_hmac"] != x["before_hmac"]).items())
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1189,6 +1386,7 @@ def main() -> None:
     ap.add_argument("--dir")
     ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument("--escape-rev", default="0dd266544", help="越界逐筆結果所在的提交（新包）")
+    ap.add_argument("--list-rev", default="2e99dd9a1", help="新越界名單＋HMAC 補充匯出所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1213,6 +1411,10 @@ def main() -> None:
             _w.add((t_, int(r_[1:])))
     out["extra_scans"] = extra_scans(src, _calls, _pairs - _b - _bp - _w)
     out["network_fingerprint"] = network_fingerprint(src, _calls, _b | _bp | _w)
+    if a.list_rev:
+        lsrc = Src(None if a.dir else a.list_rev, a.dir, repo)
+        out["list_v2_review"] = list_v2_review(src, lsrc, _calls)
+        out["source_list_v2"] = a.dir or f"git:{a.list_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
