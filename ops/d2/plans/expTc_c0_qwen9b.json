@@ -25,7 +25,7 @@
   "mode": "per-worker proxy, OS-assigned port"
  },
  "server": {
-  "port": 18261
+  "port": 18262
  },
  "providers": [
   {
@@ -138,6 +138,7 @@
   "scope": "c0 drafts only (arm A). No feedback, no Haiku, no scoring readout in this step.",
   "requested_by": "vacant-hope 12h review 2026-11-28 (keep 1004 busy; drafts independent of T results).",
   "note": "Answer keys of realrev3 are NOT read by this step (no TO arm).",
-  "analysis": "none in this step"
+  "analysis": "none in this step",
+  "void_note": "First launch 2026-11-28 00:36Z voided: server port 18261 was held by the running expT 1003 half; agent got 404 from the other server, all drafts blank. Root renamed *_VOID_port_clash_0036 (kept). Port changed to 18262."
  }
 }
