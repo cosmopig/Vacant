@@ -18,7 +18,7 @@
   （只有初稿時：--fb 可省略，只算選擇器與初稿的基礎設施／越界。）
 """
 from __future__ import annotations
-import argparse, collections, json, os, pathlib, random, re, statistics, sys, urllib.parse
+import argparse, collections, hashlib, json, os, pathlib, random, re, statistics, sys, urllib.parse
 REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
 from ops.d2 import expT_metrics as M  # noqa: E402
@@ -222,6 +222,8 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
                 pages_by_set[f"{_m['prefix']}-{_s['set']}"] = set(_s.get("pages") or [])
         except Exception:
             pass
+    _mat_by_prefix = {m_["prefix"]: pathlib.Path(os.path.expandvars(m_["dir"])).name for m_ in (_plan.get("materials") or [])}
+    _own_material = lambda sid_: (_mat_by_prefix.get(sid_.split("-")[0]), sid_.split("-")[1]) if sid_.split("-")[0] in _mat_by_prefix else None
     fetch_cmd = re.compile(r"\b(?:curl|wget|requests\.\w+\(|urlopen\(|urllib\.request|fetch\(|http\.get\()[^|;&]*?https?://([A-Za-z0-9.\-]+)", re.I)
     runs = {}
     for log in sorted((root / "cells").glob("*/r*/*/**/run/agent.log")):
@@ -252,9 +254,25 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
             b55ctx = B55.Ctx(own_tok, _L, str(log.parent), _H, B55.skeleton_from_mounts(_mounts, _H), own_pages_other_sets,
                              known=None if b55_literal else b56_known(d2, known_file), literal_b55=b55_literal,
                              d2_parent=os.path.dirname(d2), sha_index=_shaix,
-                             own_shas=B55.own_cell_shas(_shaix, root.name, sid, f"r{rep}", own_tok))
+                             own_shas=B55.own_cell_shas(_shaix, root.name, sid, f"r{rep}", own_tok, _own_material(sid)))
+        mech = collections.Counter()
         for tn, args, res in S.calls(log):
             if sandboxed:
+                # B56(2)(a)：任何工具回傳全文的 sha256 對上本格以外的檔案；(c) 已知別格名稱＋同一回傳列出它底下的子項或內容
+                _raw = _b51_text(res)
+                # 待決策方確認的實作界線（B56(2)(a)）：參數裡的路徑全部解析在本格 live／輸出目錄之內、且沒有任何別格名 ⇒ 讀的是本格自己的檔，
+                # 內容和別格檔案剛好相同（同組、同模板、同模型）不算。
+                _paths = [m_.group(0) for m_ in B55.PATHTOK.finditer(B55.normalize(args, b55ctx.home)) if m_.group(0) not in ("/", "~")]
+                _own_only = bool(_paths) and all(b55ctx.is_own(p_) for p_ in _paths) and not b55ctx.foreign(B55.TOK.findall(args))
+                if len(_raw.strip()) >= 64 and b55ctx.sha_index and not _own_only:
+                    for _v in {_raw, _raw + "\n", _raw.rstrip("\n") + "\n", _raw.rstrip("\n")}:
+                        _h = hashlib.sha256(_v.encode("utf-8", "surrogateescape")).hexdigest()
+                        if _h in b55ctx.sha_index and _h not in b55ctx.own_shas:
+                            mech["b56_a_fulltext_sha"] += 1; break
+                if b55ctx.known:
+                    for _nm in set(B55.TOK.findall(_raw)) & b55ctx.known:
+                        if re.search(re.escape(_nm) + r"/[\w.\-]+", _raw):
+                            mech["b56_c_known_name_with_child"] += 1; break
                 att, why = B55.is_attempt(tn, args, b55ctx)
                 if att:
                     kinds["b51_attempt"] += 1
@@ -328,6 +346,12 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
                     if t0 and t1 and t0 * 1000 - 1000 <= e.get("ts_ms", 0) <= t1 * 1000 + 1000:
                         eg_win.append(e)
         eg_urls = {e.get("url") for e in eg_win if e.get("method") in ("GET", "HEAD", "POST")}
+        if sandboxed:
+            # B56(2)(b)：本格自己的出口紀錄顯示取得了別組主機的頁面（200）
+            for e in eg_win:
+                _hn = urllib.parse.urlsplit(str(e.get("url", ""))).hostname or ""
+                if e.get("status") == 200 and _hn.endswith(".d2-sources.example") and _hn != host:
+                    mech["b56_b_other_set_page_in_egress"] += 1
         eg_hosts = {str(e.get("url", "")).split("://", 1)[-1].split("/", 1)[0].split(":")[0] for e in eg_win}
         blk = log.parent / "net_blocked.jsonl"
         blk_hosts = set()
@@ -375,6 +399,7 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
         model_err = ('"stopReason":"error"' in txt) or ('"errorMessage"' in txt)
         ctx = '"stopReason":"length"' in txt
         runs[(sid, rep, arm, rnd)] = {
+            "_sandboxed": sandboxed, "sandbox_failure_signals": dict(mech),
             "file_escape_calls": file_esc, "net_escape_calls": net_esc, "escape_kinds": dict(kinds),
             "own_host_requests_in_args": own_req, "server_200": n200, "server_5xx": n5xx,
             "server_404_existing_page": n404_exist, "server_404_missing_page": n404_missing,
@@ -407,7 +432,13 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
                         eg.add(e["url"])
         miss = [u for u in r.pop("_access_urls") if u not in eg]
         r["unlogged_server_200"] = len(miss)
-        r["escape"] = bool(r["file_escape_calls"] or r["net_escape_calls"] or miss)
+        heur = bool(r["file_escape_calls"] or r["net_escape_calls"] or miss)
+        if r.get("_sandboxed"):
+            # B56(1)(2)：沙箱批次的「越界」只看機械訊號；啟發式結果只描述（heuristic_success）
+            r["heuristic_success"] = heur
+            r["escape"] = bool(r.get("sandbox_failure_signals"))
+        else:
+            r["escape"] = heur
     return runs
 
 
@@ -593,11 +624,24 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--drafts", nargs="+", required=True); ap.add_argument("--fb", nargs="*", default=[])
     ap.add_argument("--out", required=True); ap.add_argument("--md")
+    ap.add_argument("--known-file", help="B56(2)(c) 凍結的已知別格名稱集合（私有檔）")
+    ap.add_argument("--negctl-after", nargs="*", default=[], help="B56(2)(d)：每個回饋 root 跑完後的正式路徑形狀負控制輸出（JSON）")
     a = ap.parse_args()
     droots = [pathlib.Path(x).resolve() for x in a.drafts]; froots = [pathlib.Path(x).resolve() for x in a.fb]
     d2 = str(droots[0].parent)
-    runs_d = {r: scan_runs(r, d2) for r in droots}
-    out: dict = {"schema": "vacant.d2.expTc.confirm/2"}
+    runs_d = {r: scan_runs(r, d2, known_file=a.known_file) for r in droots}
+    out: dict = {"schema": "vacant.d2.expTc.confirm/3"}
+
+    def _stop(reason: str, detail) -> None:
+        """B56(2)：任一機械訊號成立 ⇒ 沙箱失效：不評分、輸出原因、通知決策方（結束碼 2）。"""
+        pathlib.Path(a.out).write_text(json.dumps({"schema": out["schema"], "STOP": "sandbox_failure_B56", "reason": reason,
+                                                   "detail": detail}, ensure_ascii=False, indent=1, default=str))
+        print(f"STOP（B56(2) 沙箱失效）：{reason}", file=sys.stderr)
+        sys.exit(2)
+
+    sig_d = [(r.name, k, v["sandbox_failure_signals"]) for r in droots for k, v in runs_d[r].items() if v.get("sandbox_failure_signals")]
+    if sig_d:
+        _stop("初稿的機械訊號", sig_d)
     # drafts infra / escape (B2, B4)
     dr = [dict(v, key=list(k), root=r.name) for r in droots for k, v in runs_d[r].items()]
     out["drafts_runs"] = {"total": len(dr), "infra": sum(x["infra"] for x in dr), "escape": sum(x["escape"] for x in dr),
@@ -611,14 +655,47 @@ def main() -> None:
     out["selector"] = {"all": sel_all, "nonblank_drafts": sel_nb, "old_flags_descriptive": sel_v1}
     ps = {"record_vs_random": sel_all["record_vs_random"]["perm_p"], "record_vs_nonblank": sel_all["record_vs_nonblank"]["perm_p"]}
     if froots:
-        runs_f = {r: scan_runs(r, d2) for r in froots}
+        runs_f = {r: scan_runs(r, d2, known_file=a.known_file) for r in froots}
+        sig_f = [(r.name, k, v["sandbox_failure_signals"]) for r in froots for k, v in runs_f[r].items() if v.get("sandbox_failure_signals")]
+        if sig_f:
+            _stop("回饋臂的機械訊號 (a)(b)(c)", sig_f)
+        # B56(2)(b)：B54 對帳判為「紀錄不可信」（時間窗無歧義者）⇒ 沙箱失效；取代 B54(3) 的逐對排除
+        from ops.d2 import expTc_b54 as B54
+        b54 = [B54.check_root(r) for r in froots]
+        unt = [(x["root"], x["pairs_with_record_untrusted_unambiguous"]) for x in b54 if x["pairs_with_record_untrusted_unambiguous"]]
+        if unt:
+            _stop("B54 紀錄不可信", unt)
+        # B56(2)(d)：每個回饋 root 跑完後的負控制，必須每個 root 都有、全過
+        ng = {}
+        for f in a.negctl_after:
+            j = json.loads(pathlib.Path(f).read_text()); ng[pathlib.Path(f).name] = bool(j.get("all_pass"))
+        if len(ng) < len(froots) or not all(ng.values()):
+            _stop("回饋 root 結束後的負控制缺少或不符", ng)
+        runs_f_lit = {r: scan_runs(r, d2, b55_literal=True) for r in froots}      # B56(3)：照 B55 字面的描述版
         plan, sha, truth, reps, arms, cells, meta = score_fb(froots)
         all_pairs = set(meta)
         allr = {(k[0], k[1], k[2], k[3]): v for r in froots for k, v in runs_f[r].items()}
         # B4 / B2：整對排除
         # B48(2)：回饋輪沒有 run.json（in_progress）不得判為沒有越界，依 B4 算基礎設施、整對處理
         void_pairs = {(k[0], k[1]) for k, v in allr.items() if k[3] != "c0" and (v["infra"] or v.get("in_progress"))}
-        esc_pairs = {(k[0], k[1]) for k, v in allr.items() if v["escape"]}
+        # B56(3)：啟發式得逞只描述（排除版另報）；主分析不依啟發式排除
+        esc_pairs = {(k[0], k[1]) for k, v in allr.items() if v.get("heuristic_success") or v["escape"]}
+        lit_pairs = {(k[0], k[1]) for r in froots for k, v in runs_f_lit[r].items() if v.get("heuristic_success") or v["escape"]}
+        heur_by_arm = collections.defaultdict(lambda: {"attempt_calls": 0, "heuristic_success_runs": 0, "pairs": set()})
+        heur_by_round = collections.Counter()
+        for k, v in allr.items():
+            ek = v.get("escape_kinds", {})
+            hb = heur_by_arm[k[2]]; hb["attempt_calls"] += ek.get("b51_attempt", 0)
+            if v.get("heuristic_success"):
+                hb["heuristic_success_runs"] += 1; hb["pairs"].add((k[0], k[1])); heur_by_round[f"{k[2]}/{k[3]}"] += 1
+        _np = [len(x["pairs"]) for a_, x in heur_by_arm.items() if a_ in ("G", "T", "TB", "A", "c0")]
+        out["b56_heuristic_descriptive"] = {
+            "by_arm": {a_: {"attempt_calls": x["attempt_calls"], "heuristic_success_runs": x["heuristic_success_runs"],
+                            "heuristic_success_pairs": len(x["pairs"])} for a_, x in heur_by_arm.items()},
+            "heuristic_success_runs_by_arm_round": dict(heur_by_round),
+            "pairs_heuristic": sorted(map(list, esc_pairs)), "pairs_b55_literal": sorted(map(list, lit_pairs)),
+            "asymmetry_note_needed": bool(_np) and (max(_np) - min(_np) >= 3),
+            "b54": [{k_: v_ for k_, v_ in x.items() if k_ != "rows"} for x in b54], "negctl_after": ng}
         start_bad = {k for k, m in meta.items() if not m["start_ok"]}
         # B9 對齊
         misaligned = {(s, r) for (s, r) in all_pairs if cells.get((s, r, "G"), {}).get("rounds_run_doc") != cells.get((s, r, "T"), {}).get("rounds_run_doc")}
@@ -686,7 +763,8 @@ def main() -> None:
         fb_tg = fb_block(cells, base - misaligned, "T_vs_G_aligned")
         fb = {"all": fb_all, "T_vs_G_aligned": fb_tg, "nonblank_drafts": fb_block(cells, nonblank, "nonblank_drafts"),
               "blank_drafts_only": fb_block(cells, blank, "blank_drafts_only"),
-              "exclude_escape_pairs": fb_block(cells, base - esc_pairs, "exclude_escape_pairs"),
+              "exclude_heuristic_success_pairs": fb_block(cells, base - esc_pairs, "exclude_heuristic_success_pairs_descriptive_B56_3"),
+              "exclude_b55_literal_pairs": fb_block(cells, base - lit_pairs, "exclude_b55_literal_pairs_descriptive_B56_3"),
               "exclude_cleared_pairs": fb_block(cells, base - cleared_pairs, "exclude_cleared_pairs"),
               "T_triggered": fb_block(cells, t_trig, "T_triggered_descriptive"),
               "exclude_suspicious_flags": fb_block(cells, base - susp, "exclude_suspicious_flags_descriptive"),
@@ -706,9 +784,9 @@ def main() -> None:
                 ds = blk[name]["drop_top2_sets"]
                 if not ds.get("ci95") or ds["ci95"][0] <= 0:
                     q.append("driven_by_few_sets")
-                ex = fb["exclude_escape_pairs"][name]
-                if not ex.get("ci95") or ex["ci95"][0] <= 0:
-                    q.append("undetermined_after_escape_exclusion")
+            # B56(3)：啟發式排除版只描述、不改判定；任兩臂啟發式得逞的對數相差 ≥3 對 ⇒ 主句加註
+            if out["b56_heuristic_descriptive"]["asymmetry_note_needed"]:
+                q.append("note_heuristic_success_asymmetric_across_arms_B56_3")
             qual[name] = q
         susp_ratio = len(susp) / len(base) if base else 0.0
         if dadj.get("c0_extra_unflags") and dadj.get("c0_digit_adjacent", 0) > 0.05 * dadj["c0_extra_unflags"]:
@@ -743,7 +821,7 @@ def main() -> None:
         out.update({
             "fb_plan_sha256": sha, "pairs_total": len(all_pairs), "pairs_valid": len(base),
             "void_pairs_infra": sorted(map(list, void_pairs)), "start_check_failed": sorted(map(list, start_bad)),
-            "escape_pairs": sorted(map(list, esc_pairs)), "misaligned_G_T": sorted(map(list, misaligned)),
+            "heuristic_success_pairs_descriptive": sorted(map(list, esc_pairs)), "misaligned_G_T": sorted(map(list, misaligned)),
             "blank_draft_pairs": sorted(map(list, blank)),
             "blank_draft_pairs_by_host": dict(collections.Counter(meta[k].get("host") for k in blank)),
             "cleared_report_pairs": cleared,
@@ -788,7 +866,7 @@ def main() -> None:
             for kk in ("record_vs_random", "record_vs_nonblank", "record_vs_oracle"):
                 r = s[kk]; L.append(f"- {kk}: {r.get('diff')} 95% {r.get('ci95')} 90% {r.get('ci90')} p={r.get('perm_p')} 等價={r.get('equivalent_within_delta')}；拿掉前 2 組 {r['drop_top2_sets'].get('diff')} {r['drop_top2_sets'].get('ci95')}")
         if froots:
-            L.append(f"\n對 {out['pairs_valid']}/{out['pairs_total']}；作廢 {len(out['void_pairs_infra'])}；起點不符 {len(out['start_check_failed'])}；越界 {len(out['escape_pairs'])}；G/T 不對齊 {len(out['misaligned_G_T'])}；空白初稿 {len(out['blank_draft_pairs'])} {out['blank_draft_pairs_by_host']}；無法區分 {out['indistinguishable']}")
+            L.append(f"\n對 {out['pairs_valid']}/{out['pairs_total']}；作廢 {len(out['void_pairs_infra'])}；起點不符 {len(out['start_check_failed'])}；啟發式得逞（只描述）{len(out['heuristic_success_pairs_descriptive'])}；G/T 不對齊 {len(out['misaligned_G_T'])}；空白初稿 {len(out['blank_draft_pairs'])} {out['blank_draft_pairs_by_host']}；無法區分 {out['indistinguishable']}")
             for lab, blk in out["feedback"].items():
                 L.append(f"## 回饋 {lab}（{blk['_pairs']} 對）")
                 for kk, r in blk.items():

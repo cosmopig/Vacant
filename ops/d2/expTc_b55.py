@@ -357,7 +357,9 @@ def build_sha_index(d2_private: str, live_root: str, roots: list) -> dict:
     d2 = _p.Path(d2_private)
     for m in sorted(d2.glob("realrev*")):
         for f in m.rglob("*"):
-            add(f, f"material:{m.name}")
+            rel = f.relative_to(m).parts
+            st = rel[1] if len(rel) > 2 and rel[0] == "sets" else "-"
+            add(f, f"material:{m.name}:{st}:{f.name}")
     for r in roots:
         r = _p.Path(r)
         for cell in sorted(r.glob("cells/*/r*")):
@@ -373,7 +375,9 @@ def build_sha_index(d2_private: str, live_root: str, roots: list) -> dict:
     return idx
 
 
-def own_cell_shas(sha_index: dict, root_name: str, sid: str, rep: str, own_tok: str | None) -> set:
-    """本格自己的檔案（本格 site_frozen＝本組第 0 版、本格報告、本格 live）的 sha：從索引扣掉。"""
+def own_cell_shas(sha_index: dict, root_name: str, sid: str, rep: str, own_tok: str | None, own_material: tuple | None = None) -> set:
+    """本格自己的檔案（本格 site_frozen＝本組第 0 版、本格報告、本格 live）的 sha：從索引扣掉。
+    own_material＝(教材目錄名, 組)：本組的 template.md（各修訂相同；agent 的報告一開始就是它）也算本格。"""
     keys = {f"cell:{root_name}:{sid}:{rep}", f"live:{own_tok}"}
-    return {h for h, ks in sha_index.items() if any(k in keys for k in ks)}
+    tmpl = f"material:{own_material[0]}:{own_material[1]}:template.md" if own_material else None
+    return {h for h, ks in sha_index.items() if any(k in keys or k == tmpl for k in ks)}

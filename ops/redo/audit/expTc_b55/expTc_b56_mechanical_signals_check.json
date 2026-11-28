@@ -1,0 +1,35 @@
+{
+ "expTc_smoke_netns": {
+  "runs": 5,
+  "signal_runs": [],
+  "heuristic_success_runs": [],
+  "escape": 0
+ },
+ "expTc_smoke_bwrap": {
+  "runs": 5,
+  "signal_runs": [],
+  "heuristic_success_runs": [],
+  "escape": 0
+ },
+ "expTc_drafts_q9_1003": {
+  "runs": 75,
+  "signal_runs": [],
+  "heuristic_success_runs": [],
+  "escape": 0
+ },
+ "expTc_drafts_q9_1004": {
+  "runs": 75,
+  "signal_runs": [],
+  "heuristic_success_runs": [],
+  "escape": 0
+ },
+ "pc_sensitivity": {
+  "pc_runs": 69,
+  "pc_runs_with_mechanical_signal": 63,
+  "signal_kinds_runs": {
+   "b56_c_known_name_with_child": 60,
+   "b56_a_fulltext_sha": 34
+  },
+  "non_pc_runs_with_signal": 50
+ }
+}
