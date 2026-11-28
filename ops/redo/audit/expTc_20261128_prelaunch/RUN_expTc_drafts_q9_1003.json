@@ -1,0 +1,195 @@
+{
+  "fake": false,
+  "head": "ee801fcf3a66bc90fc4bc30e997306bcd55ee702",
+  "manifest_sha256": {
+    "cc": "3a2a1d6dbdfb340d14ca998e578aeddfcf6ccb3bb283c4a4152e7525e95ea3a9",
+    "ff": "39e665bdda084cf16cb142fe8611262b8ac8d069ea54ae0b8d0fb323ccaa9a87"
+  },
+  "plan": "~/dev/wt/e1prime/ops/d2/plans/expTc_drafts_qwen9b.json",
+  "plan_body": {
+    "agent_sandbox": "bwrap_netns",
+    "agent_timeout_s": 600,
+    "agentcfg": {
+      "copy": [
+        "models.json",
+        "extensions"
+      ],
+      "dir": "~/dev/ops/agentcfg/d2v52",
+      "install_json": "~/dev/ops/agentcfg/d2v52_state/adapters/install.json"
+    },
+    "arms": [
+      "A"
+    ],
+    "budget_s": 1800,
+    "egress": {
+      "mode": "per-worker proxy, OS-assigned port"
+    },
+    "escalation": {
+      "api_url": "https://api.anthropic.com/v1/messages",
+      "ledger_path": "~/dev/ops/ctl/api_credit_ledger.jsonl",
+      "max_tokens": 1024,
+      "model": "claude-haiku-5-5",
+      "price_per_mtok_in": 1.0,
+      "price_per_mtok_out": 5.0,
+      "timeout_s": 120
+    },
+    "haiku_full_root": null,
+    "id": "expTc_drafts_qwen9b",
+    "materials": [
+      {
+        "dir": "${D2_PRIVATE}/realrev3_companies",
+        "manifest_sha256": "3a2a1d6dbdfb340d14ca998e578aeddfcf6ccb3bb283c4a4152e7525e95ea3a9",
+        "prefix": "cc",
+        "sets": [
+          "s01",
+          "s02",
+          "s03",
+          "s04",
+          "s05",
+          "s06",
+          "s07",
+          "s08",
+          "s09",
+          "s10"
+        ]
+      },
+      {
+        "dir": "${D2_PRIVATE}/realrev3_football",
+        "manifest_sha256": "39e665bdda084cf16cb142fe8611262b8ac8d069ea54ae0b8d0fb323ccaa9a87",
+        "prefix": "ff",
+        "sets": [
+          "s01",
+          "s02",
+          "s03",
+          "s04",
+          "s05",
+          "s06",
+          "s07",
+          "s08",
+          "s09",
+          "s10",
+          "s11",
+          "s12",
+          "s13",
+          "s14",
+          "s15",
+          "s16",
+          "s17",
+          "s18",
+          "s19",
+          "s20"
+        ]
+      }
+    ],
+    "max_rounds": 2,
+    "no_tool_mention": true,
+    "prereg": {
+      "code_sha256": {
+        "ops/d2/bwrap_expT_agent.sh": "abe82f415123a5f56dab02cd604f89103cfed6a38da74ead39d10fb9beaeeef7",
+        "ops/d2/expT_metrics.py": "a73b5df5d5bbbe00050095d8ace4ec66c61c2ac1e2a17bd9e06eaa14b0a2057a",
+        "ops/d2/expTc_confirm_analysis.py": "350d3e58313a66da67d1b9544ae901d13495d9845f98e433045354aceb7eb86d",
+        "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
+        "ops/d2/netns_selftest.py": "09e0713ddfc99d10783272c777bb4d744562fd65e4fb100c9b93d5b152ae7b57",
+        "ops/d2/run_expT.py": "fefa1d129e48ce009ad0c3ff3bcfdb289a1bd631f8d0a5226a83032e44bc24a3",
+        "ops/d2/sockfwd.py": "ad4a932114d0712e307235db149948ee5900d9319ddc19f2efb580040b1e4b52"
+      },
+      "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
+      "sandbox_note": "bwrap_netns (Appendix B supplement B13): --unshare-net; only the egress proxy port is forwarded in via a unix socket with a per-request allowlist (own source host:80, LM Studio inference paths). Self-test ops/d2/netns_selftest.py must pass before launch."
+    },
+    "private_live": "~/dev/ops/d2_private_live",
+    "product_version": {
+      "commit": "auto/redo ae3db0086",
+      "hooks": "`vacant install --agents pi --mode observe` using d2v52_venv",
+      "venv": "~/dev/ops/d2v52_venv (non-editable install)",
+      "wheel": "~/dev/ops/d2_release/ae3db0086/vacant_network-0.9.2-py3-none-any.whl",
+      "wheel_sha256": "fccf569cd9cf75b8df595465c44c45e0a8d9a6a4604fbc9e9b9e0ba5ddbf554e"
+    },
+    "providers": [
+      {
+        "ctx": 131072,
+        "jobs": 2,
+        "model": "qwen/qwen3.5-9b",
+        "name": "lms1003",
+        "parallel": 2,
+        "provider": "lms1003q9",
+        "sets": [
+          "cc-s01",
+          "cc-s02",
+          "cc-s03",
+          "cc-s04",
+          "cc-s05",
+          "ff-s01",
+          "ff-s02",
+          "ff-s03",
+          "ff-s04",
+          "ff-s05",
+          "ff-s06",
+          "ff-s07",
+          "ff-s08",
+          "ff-s09",
+          "ff-s10"
+        ],
+        "thinking": "off (reasoning_effort none)"
+      },
+      {
+        "ctx": 131072,
+        "jobs": 2,
+        "model": "qwen/qwen3.5-9b",
+        "name": "lms1004",
+        "parallel": 2,
+        "provider": "lms1004q9",
+        "sets": [
+          "cc-s06",
+          "cc-s07",
+          "cc-s08",
+          "cc-s09",
+          "cc-s10",
+          "ff-s11",
+          "ff-s12",
+          "ff-s13",
+          "ff-s14",
+          "ff-s15",
+          "ff-s16",
+          "ff-s17",
+          "ff-s18",
+          "ff-s19",
+          "ff-s20"
+        ],
+        "thinking": "off (reasoning_effort none)"
+      }
+    ],
+    "purpose": "Experiment T confirmation, part 1: 5 shared cycle-0 drafts (arm A) per set on 30 NEW realrev3 sets (10 companies + 20 football), qwen3.5-9b, bwrap sandbox, both hosts. Used for the pre-registered record-based draft selection and (reps 1-2) as the shared drafts of part 2.",
+    "reps": 5,
+    "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently.",
+    "schema": "vacant.d2.expT.plan/2",
+    "seed": 20261228,
+    "server": {
+      "port": 0
+    },
+    "vacant_python": "~/dev/ops/d2v52_venv/bin/python"
+  },
+  "plan_sha256": "a0297678c5dfb49fe44e2fedf1913d719800d19ec34ca071c6cd89afc2343bf5",
+  "resumes": [
+    {
+      "head": "45669d1a8b99acb835ce246fcc0499b4dafa5935",
+      "script_sha256": {
+        "ops/d2/expT_feedback.py": "88f5aceb2a611653576193a19eef3d9cb478ab974d2d06057c57622ca66212ed",
+        "ops/d2/expT_metrics.py": "14948bac386c5668aba3c0237ae743c256698e7f1a9b9e03864661ad9cfa8fa0",
+        "ops/d2/run_expT.py": "51f699734d13cc5eb6bff555ad8a22d92ab50311e6f183916d7b288edb6411ea",
+        "ops/d2/score_d2.py": "a226c618822438b8fc2e4a3b85987f21e2458ea82f7e8e3e61dcb222a66775da",
+        "ops/d2/source_server.py": "e9195157ea40f5a06bfc473f8c9ff7db21d913d1c7b1d1329b7808d4f1d70f26"
+      },
+      "ts": "2026-11-28T02:18:53Z"
+    }
+  ],
+  "runner_sha256": "fefa1d129e48ce009ad0c3ff3bcfdb289a1bd631f8d0a5226a83032e44bc24a3",
+  "schema": "vacant.d2.expT.run/2",
+  "script_sha256": {
+    "ops/d2/expT_feedback.py": "f210e922a7c21a7132427e580d267813f94f8c0d171b8da543d153bf32aa6fea",
+    "ops/d2/expT_metrics.py": "a73b5df5d5bbbe00050095d8ace4ec66c61c2ac1e2a17bd9e06eaa14b0a2057a",
+    "ops/d2/run_expT.py": "fefa1d129e48ce009ad0c3ff3bcfdb289a1bd631f8d0a5226a83032e44bc24a3",
+    "ops/d2/score_d2.py": "a226c618822438b8fc2e4a3b85987f21e2458ea82f7e8e3e61dcb222a66775da",
+    "ops/d2/source_server.py": "e9195157ea40f5a06bfc473f8c9ff7db21d913d1c7b1d1329b7808d4f1d70f26"
+  },
+  "started": "2026-11-28T01:39:27Z"
+}

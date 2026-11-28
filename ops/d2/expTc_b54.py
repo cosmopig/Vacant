@@ -12,7 +12,7 @@
 用法：expTc_b54.py ROOT [ROOT ...] --out OUT.json
 """
 from __future__ import annotations
-import argparse, collections, json, pathlib, sys
+import argparse, collections, json, pathlib, re, sys
 
 SLACK = 1.0
 
@@ -40,25 +40,29 @@ def check_root(root: pathlib.Path) -> dict:
         if r["t0"] is None or r["t1"] is None:
             continue
         lo, hi = r["t0"] - SLACK, r["t1"] + SLACK
-        srv = {f"http://{a['host']}{a['path']}" for a in acc if a.get("host") == r["host"] and a.get("status") == 200 and lo <= a.get("ts", 0) <= hi}
+        srv = {f"http://{a['host']}{str(a['path']).split('?', 1)[0]}" for a in acc if a.get("host") == r["host"] and a.get("status") == 200 and lo <= a.get("ts", 0) <= hi}
         srv_arm_field = collections.Counter(str(a.get("arm")) for a in acc if a.get("host") == r["host"] and a.get("status") == 200 and lo <= a.get("ts", 0) <= hi)
         vh = r["arm_dir"] / "final" / "vh"
         if not vh.is_dir():
-            rows.append({k: r[k] for k in ("set", "rep", "arm", "round")} | {"status": "arm_not_final"}); continue
-        rec = set()
+            # 抽核第 7 點：臂沒有 final ⇒ 依 B4 當基礎設施（整對作廢），不是對帳通過
+            rows.append({k: r[k] for k in ("set", "rep", "arm", "round")} | {"status": "arm_not_final_infra_B4"}); continue
+        rec = set(); missing_ts = 0
         for ej in vh.glob("trace/projects/*/egress.jsonl"):
             for e in _load_jsonl(ej):
-                u = str(e.get("url", ""))
-                if e.get("method") == "GET" and e.get("status") == 200 and u.startswith(f"http://{r['host']}/") \
-                        and lo * 1000 <= e.get("ts_ms", 0) <= hi * 1000:
-                    rec.add(u)
+                u = re.sub(r"^(http://[^/:]+):80/", r"\1/", str(e.get("url", "")))      # 抽核第 7 點：帶 :80 的網址正規化
+                u = u.split("?", 1)[0].split("#", 1)[0]                                    # 伺服器紀錄的 path 不含 query（ff-s17/r5 的 ?format=json）
+                if e.get("method") == "GET" and e.get("status") == 200 and u.startswith(f"http://{r['host']}/"):
+                    if e.get("ts_ms") is None:                                        # 缺 ts_ms：不當成 0，另計
+                        missing_ts += 1; continue
+                    if lo * 1000 <= e["ts_ms"] <= hi * 1000:
+                        rec.add(u)
         overl = sum(1 for o in runs if o is not r and o["host"] == r["host"] and o["t0"] is not None and o["t1"] is not None
                     and o["t0"] - SLACK <= hi and lo <= o["t1"] + SLACK)
         rows.append({k: r[k] for k in ("set", "rep", "arm", "round")} | {
             "status": "ok", "recorded_200": len(rec), "server_200": len(srv), "equal": rec == srv,
             "gauge_gap": sorted(u.split("/", 3)[-1] for u in srv - rec),          # 少頁：伺服器有、紀錄沒有
             "record_untrusted": sorted(u.split("/", 3)[-1] for u in rec - srv),   # 多頁：紀錄有、伺服器沒有
-            "server_arm_field": dict(srv_arm_field), "window_ambiguous_overlaps": overl})
+            "server_arm_field": dict(srv_arm_field), "window_ambiguous_overlaps": overl, "egress_missing_ts_ms": missing_ts})
     ok = [x for x in rows if x.get("status") == "ok"]
     by_arm = collections.defaultdict(lambda: {"rounds": 0, "gauge_gap_rounds": 0, "record_untrusted_rounds": 0, "ambiguous_rounds": 0})
     for x in ok:
@@ -67,6 +71,7 @@ def check_root(root: pathlib.Path) -> dict:
         b["ambiguous_rounds"] += x["window_ambiguous_overlaps"] > 0
     untrusted_pairs = sorted({f"{x['set']}/{x['rep']}" for x in ok if x["record_untrusted"] and not x["window_ambiguous_overlaps"]})
     return {"root": root.name, "rounds_checked": len(ok), "rounds_not_final": sum(1 for x in rows if x.get("status") != "ok"),
+            "pairs_arm_not_final_infra": sorted({f"{x['set']}/{x['rep']}" for x in rows if x.get("status") == "arm_not_final_infra_B4"}),
             "by_arm": dict(by_arm), "pairs_with_record_untrusted_unambiguous": untrusted_pairs,
             "pairs_with_record_untrusted_any": sorted({f"{x['set']}/{x['rep']}" for x in ok if x["record_untrusted"]}),
             "pairs_with_gauge_gap": sorted({f"{x['set']}/{x['rep']}" for x in ok if x["gauge_gap"]}), "rows": rows}

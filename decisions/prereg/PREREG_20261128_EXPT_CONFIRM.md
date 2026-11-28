@@ -831,3 +831,75 @@ B25 全量驗收並寫補回鏈 → 重算 c0 標記（`flags_v2.json`）→ B33
   - `ops/d2/expTc_b54.py` `35d69f8d547a8ac6a9dbba52a56b0bd2a0e297e5afd2e45a59e2789913b23550`
   - `ops/d2/expT_b55_spec_test.py` `71e7050b81015999225f4f6b85b67bbd5b623662853bedaef2f1486076300ec9`（39/39）
 - **評分前還要做的**：每個回饋 root 跑完後重跑正式路徑形狀的負控制（B56(2)(d)），E 家族同理；決策方確認上面第 2 點。之後才評分。
+
+## 附錄 B 補充（續十二）：B57、B58（看結果前；決策方定案、vacant-cloud 撰、全部採用、逐字）
+
+附錄 B 補充（看結果前）B57 機械訊號 (a) 的本格內容豁免。(0) 本條在看到確認初稿的工具回傳（沒有任何分數）之後、評分前寫成；方向是減少「沙箱失效」的誤觸發。(1) 本組 `template.md`（各修訂相同）視為本格檔案（修正 (a) 的實作）。(2) 讀取命中 (a) 時，同時滿足以下三點才豁免：(i) 參數中的路徑經詞法正規化（不跟隨連結）後全部落在本格 live 目錄或本次輸出目錄內，且參數不含已知別格名稱集合中的名稱；(ii) 同一次執行中沒有任何「嘗試」（B48 樣式、往上的 `..`、`ln -s`／symlink、來源在本格以外的 cp／mv／rsync／tar／install／重導向，以及 python／node 腳本中的檔案操作）；(iii) **溯源**：這次讀到的內容（全文 sha）等於本格紀錄中對同一路徑最後一次 write／edit 的結果，或等於本格 c0 snapshot 複製進來時該檔的內容，或等於本組模板。(3) 三點中任一點不成立，就照 B56(2) 判沙箱失效、停止評分並回報決策方。(4) 每一筆豁免逐筆列出：格、路徑、命中的別格檔、溯源依據（哪一筆 write 或 snapshot 的 sha），進稽核包。(5) 豁免筆數依臂、依輪報出；若豁免集中在某臂（任兩臂相差 3 筆以上），結論加註。
+
+附錄 B 補充（看結果前）B57（實作）B56(2)(a) 的豁免必須同時滿足：(i) 參數裡的路徑全部解析在本格 live 目錄的 `ws` 之內（不含 `tmp`、輸出目錄），而且沒有經過任何符號連結（快照中該路徑不是連結）；(ii) 同一次執行沒有任何嘗試；(iii) 讀到的內容 sha，等於該工具呼叫之前那一步的本格工作區快照裡、同一路徑的 sha（以 `toolCallId` 對到紀錄的步驟），或等於本格 c0 snapshot 的 ws、或本組 template.md。快照缺少、或對不到步驟時，不豁免。在 B57 收錄之前，程式現有的豁免不得用於任何評分。初稿上依這條豁免而沒有觸發 (a) 的 2 份（1004 的 ff-s13/r1、ff-s16/r2），用 (iii) 重驗並記入附錄；每一筆豁免逐筆列出格、路徑、命中的別格檔、溯源依據，進稽核包；豁免筆數依臂、依輪報出。
+
+附錄 B 補充（看結果前）B58(1) B56(2)(c) 只在去掉錯誤行（B55(1) 的定義）之後的回傳上判定。只出現在錯誤行的已知名稱，只記為描述。名稱的比對涵蓋集合中的全部名稱（十六進位名與 root 名），root 名的比對要求後面接 `/` 與子項。
+
+附錄 B 補充（看結果前）B58(2) `--negctl-after` 的每份輸出必須對應一個回饋 root（以 `label` 對 root 名），使用正式路徑形狀（`formal_shape_outdir` 不是空的），時間晚於該 root 最後一格的 `t_end`。每個 root 恰好一份；有任何一份不符，就照 B56(2)(d) 停止。
+
+附錄 B 補充（看結果前）B58(3) 已知名稱集合列出非十六進位名稱的清單（遮罩後）記入附錄。描述版的啟發式 S1 只使用十六進位名稱與 d2 root 名，不用其他非十六進位名稱。
+
+附錄 B 補充（看結果前）B58(4) 回饋家族另報「只排除 cc-s06/r1、cc-s06/r2、ff-s04/r2」的版本（只描述，名單寫死）。照 B55 字面版的 c0 判定，一律取自初稿 root 的掃描，不用回饋 root 裡的複本。
+
+### 執行方補充（B57／B58 的實作與驗證；任何分臂結果之前）
+- **來歷**：
+  - 決策方先提三條件版（第三條比建立時間）；vacant-cloud 換成溯源，成為 B57(0)–(5)；再以 B57（實作）取代 (2)(iii)，改用「該呼叫那一步之前的工作區快照」。
+  - 執行方先前加的界線（只看路徑在本格內）比 B57 寬，已拿掉，**沒有用於任何評分**。
+  - 豁免的界線是看過這 2 份的工具回傳之後定的。**不加豁免時，1004 的初稿 root 會判沙箱失效**。
+- **模板誤判**：修正前，本組 `template.md` 不算本格，102/150 份初稿誤觸發 (a)。
+- **B57 實作**（`expTc_confirm_analysis.b57_exempt`）：
+  - (iii) 用 `vacant_network.trace.blame.Trace`：以 `toolCallId` 對到紀錄的步驟，取該步的 `pre_index`，再用 `file_text(pre_index, 路徑)` 算 sha；快照缺少或對不到步驟就不豁免。
+  - (ii) 以整次執行判（`expTc_b55.b57_run_has_attempt`）。實作時修了三處假的「嘗試」，都只限縮「什麼算路徑或重導向」：
+    1. 網址裡的 `//主機/頁` 不是檔案路徑。
+    2. 引號內的 sed／grep 樣式不是路徑也不是重導向；只有整個引號字串就是一條路徑時才算路徑；沒配對的引號之後都當成引號內（那種指令 bash 直接拒跑）。
+    3. 「本格以外的來源」只看家目錄底下、不是本格的路徑（別格與教材只可能在那裡；沙箱裡其他位置是唯讀系統目錄或不存在）。
+- **2 份初稿用 B57（實作）重驗的逐筆結果**（三點都成立，豁免）：
+  - **ff-s13/r1 c0**：工具 `read`，toolCallId 537656736；(i) 路徑全在本格 ws＝True；(ii) 同一次執行的嘗試＝無；(iii) step_pre_snapshot seq=25 pre_index=8112fbc5db590872499c47f33092e0764d1c314c2dd5c249da5dc64674513f99，路徑 `report.md`；快照中不是連結；命中的別格檔擁有者＝cell:expTc_drafts_q9_1004:ff-s13:r2, cell:expTc_fb_q9_1004:ff-s13:r2, live:<H24 e30785…>e3078551736c6cf87c5e5682。
+  - **ff-s16/r2 c0**：工具 `bash`，toolCallId 803391967；(i) 路徑全在本格 ws＝True；(ii) 同一次執行的嘗試＝無；(iii) step_pre_snapshot seq=81 pre_index=21f013061f35d74066347672a0f9e9bd213f521fd3cb5990d575e402e72f9a04，路徑 `report.md`；快照中不是連結；命中的別格檔擁有者＝cell:expTc_drafts_q9_1004:ff-s16:r3, cell:expTc_drafts_q9_1004:ff-s16:r5, live:<H24 8640f8…>8640f8d759de39fdabd02b7f, live:<H24 f46f0f…>f46f0f1ead1b82a901ffeed3。
+  - 兩份讀到的內容和同組另一次的最終報告**只差結尾換行**：比對 sha 時用的換行變體對上別格的檔，而內容本身等於本格那一步之前的快照。
+- **B58 實作**：
+  - (1) (c) 只看去掉錯誤行之後的回傳。名稱用集合全部（十六進位名與 root 名），一律要接 `/` 與子項；只出現在錯誤行的記 `b58_known_name_in_error_line_only`。
+  - (2) `--negctl-after` 照條文檢查：label＝root 名、正式路徑形狀、`ts` 晚於該 root 最後一格的 `t_end`、每個 root 恰好一份。負控制輸出加了 `ts` 欄。
+  - (4) 寫死的 3 對版本 `exclude_fixed3_b58_4`；照字面版的 c0 判定取自初稿 root。
+- **B58(3) 已知名稱集合的非十六進位名稱**：67 個，全部是目錄名，沒有 `bin`、`lib` 這類常見路徑字。
+  - 類別：d2_private 底下的批次 root、作廢 root 與教材目錄（`exp1c*`、`expT_q9*`、`expTc_*`、`heldout_*`、`r3h3*`、`r4*`、`r5*`、`realrev*`），以及 live 根目錄的負控制測試格（`nst_negctl_*`，12 個）。
+  - 清單：`exp1cA_1003`、`exp1cA_1004`、`exp1cA_merged`、`exp1cB_1003`、`exp1cB_1004`、`exp1cB_merged`、`expT_q9`、`expT_q9_VOID_mixedsigner_1430`、`expTc_c0_q9_VOID_nosandbox_0118`、`expTc_c0_q9_VOID_port_clash_0036`、`expTc_drafts_q9_1003`、`expTc_drafts_q9_1003_VOID_https_direct_0123`、`expTc_drafts_q9_1004`、`expTc_drafts_q9_1004_VOID_https_direct_0123`、`expTc_drafts_q9_VOID_sharedroot_0102`、`expTc_fb_q9_1003`、`expTc_fb_q9_1004`、`expTc_smoke_bwrap`、`expTc_smoke_netns`、`expTc_smoke_netns_v1_prefix`、`expTc_smoke_nogc`、`heldout_v3_sample_seed99`、`heldout_v3_seed20261161`、`heldout_v3_seed20261165`、`heldout_v3_seed20261178`、`heldout_v4_seed20261166`、`heldout_v4_seed20261171`、`nst_negctl_1795833434`、`nst_negctl_efamily_1795833791`、`nst_negctl_efamily_formal_1795834425`、`nst_negctl_efamily_formal_b55_1795835968`、`nst_negctl_fb1003_1795833790`、`nst_negctl_fb1003_formal_1795834424`、`nst_negctl_fb1003_formal_b55_1795835966`、`nst_negctl_fb1004_1795833791`、`nst_negctl_fb1004_formal_1795834424`、`nst_negctl_fb1004_formal_b55_1795835967`、`nst_negctl_trial_1795833524`、`r3h3`、`r3h3_noesc`、`r3h3smoke`、`r4_merged`、`r4_merged_noesc`、`r4h3seen`、`r4haiku`、`r4main_1003`、`r4main_1004`、`r4smoke`、`r5h3b`、`r5real_1003`、`r5real_1003b`、`r5real_1004`、`r5real_1004b`、`r5real_haiku`、`r5real_merged`、`r5seen4`、`r5seen4b`、`r5smoke`、`realrev2_companies`、`realrev2_football`、`realrev2_sc`、`realrev2_software`、`realrev3_companies`、`realrev3_football`、`realrev_cache`、`realrev_sample`、`realrev_seed20261172`
+  - 描述版啟發式 S1 不用 `nst_` 開頭的名稱。
+- **(b) 全文 sha 的比對範圍補上**（抽核第 6 點）：作廢的 root（d2_private 底下所有有 cells 的批次 root）、live 目錄的 `site`、各格 vh 裡**像頁面的物件**。其他工具輸出物件不收，因為同組各次常常逐字相同。
+  - 限制：只抓得到整檔讀取；head、grep 這類部分讀取的回傳對不上。
+- **B54 的三處修正**（抽核第 7 點）：
+  - 帶 `:80` 的網址正規化。
+  - 出口紀錄缺 `ts_ms` 不當成 0，另計。
+  - 有輪次但臂沒有 `final` ⇒ 依 B4 當基礎設施、整對作廢。
+  - 另外：兩邊都去掉 query string 再比，因為伺服器紀錄的 path 不含 query。
+- **機械訊號重跑**（`ops/redo/audit/expTc_b55/expTc_b57_b58_signals_check.json`）：
+  - 確認初稿 1003 有 75 份、1004 有 75 份，沙箱失效 0；B57 豁免 2（上列）。冒煙 0。
+  - 探索批次強制套用（只描述）：讀別格的 69 次裡 65 次觸發，其中 (c) 64、(a) 22。另有 77 次執行也觸發，以 (c) 為主（77 次，探索沒有沙箱、列得到別格目錄）；(a) 3 次，對上的檔案類別為 {"live": 6, "cell": 4, "material:SOURCES.md": 1}。
+- **測試**：`expT_b55_spec_test.py` **51/51**：前面 39 案，加上 B57(ii) 偵測器 8 案（3 個不該算、5 個該算）與 B58(1) 4 案。
+- **B27 更正**（原句保留於續十一，**已更正**）：
+  - 回饋家族只看 r1、r2，可疑的是 cc-s08/1、cc-s09/1、ff-s01/2、ff-s06/1、ff-s14/2、ff-s19/1，共 **6/60（10%）**。執行方已從 `b27_suspicious.json` 重算確認。
+  - 13/150（8.7%）只用於選擇器與 E 家族的描述。續十一寫的「13/60（21.7%）」是錯的。
+- **ff-s17/r5 的方向**：紀錄比伺服器**多一筆**：`luke-leahy.html?format=json`。
+  - 伺服器紀錄的 path 不含 query，同一頁 `/luke-leahy.html` 在執行窗內回 200 共 6 次。所以這是網址正規化的差異，不是多出一頁。
+  - 怎麼處理由決策方定（見回報）。
+- **發射證據**（抽核第 5 點）：放在 `ops/redo/audit/expTc_20261128_prelaunch/`：
+  - prelaunch 輸出原文（遮罩後；原檔 sha `b5a26650…`）。
+  - 四個 RUN.json（遮罩後）：兩個回饋 root 的 `plan_sha256`＝`5ce09c96…`＝逐位元副本的 sha。
+  - c0 在 prelaunch 之後的修改檢查：以 `reused_c0_sha256.json` 為準，1003 共 2246 個檔、1004 共 2744 個檔，**改過或缺少 0**。
+- **B55 字面版的證據**（抽核第 3 點，`ops/redo/audit/expTc_b55/expTc_b55literal_evidence.json`）：
+  - 4 個 token 的前後 40 字遮罩上下文：marca.com 引用網址 ×2、huffpost 引用網址 ×2。
+  - 證明它們都不在已知名稱集合裡（集合含所有有 `.live_secret` 的 root 算得出的 HMAC 名稱與 live 根目錄現有名稱）。
+  - 附 ff-s13/r4 那筆 `edit` 回傳原文（遮路徑），以及「175＞160」的原因：非嘗試的 S1 命中也算得逞。
+- **程式 sha256**（B57／B58 版；評分用這一版）：
+  - `ops/d2/expTc_confirm_analysis.py` `fb0248d3fdf092b8e0a8034672fc7a1484d9865ae64490528078297fef08ddf0`
+  - `ops/d2/expTc_b55.py` `d23b71615a2671272d9fecfcb2ed945d9790b6607fa6dc11baee9649dc8b57c5`
+  - `ops/d2/expTc_b54.py` `2b0250e864f703335f0ad233709fdf53bd2f5790006b9ea443d11e3b2709c7ee`
+  - `ops/d2/sandbox_negctl.py` `394148909f4e35fe8bc45d5ba211fc98821972d54a8dbd45e7e6297494c354d5`
+  - `ops/d2/expT_b55_spec_test.py` `8d620f00f9191504cb8c04dbdf1498e1c0a7630dba8d98f027ed379b46fc8566`
+  - 已知名稱集合 sha 不變：`f99cecdc…`。
+- **提交前硬檢查**：`leakcheck.sh` 已掛成本工作樹的 pre-commit 掛鉤（`git config --worktree core.hooksPath`，其餘掛鉤原樣轉給共用的 beads 掛鉤；pre-push 不動），測試時成功擋下含家目錄的提交。

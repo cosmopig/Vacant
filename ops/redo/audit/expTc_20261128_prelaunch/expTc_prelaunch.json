@@ -1,0 +1,107 @@
+{
+ "b37": {
+  "expected_c0": 60,
+  "missing": [],
+  "infra_void_done_json": [],
+  "scanned_c0_runs": 60,
+  "escape_runs": [],
+  "infra_runs_by_scan": [],
+  "scanned_eq_expected": true
+ },
+ "b25": {
+  "cells": 150,
+  "restored_pages": 191,
+  "unrestorable_pages": 0,
+  "cells_with_restore": 82,
+  "sha_map_failures": 0,
+  "recorded_ne_server": [
+   "expTc_drafts_q9_1004/ff-s17/r5"
+  ],
+  "positive_control_pass": true,
+  "by_root": {
+   "expTc_drafts_q9_1003": {
+    "cells": 75,
+    "restored": 70,
+    "unrestorable": 0,
+    "gc_ran_cells": 75
+   },
+   "expTc_drafts_q9_1004": {
+    "cells": 75,
+    "restored": 121,
+    "unrestorable": 0,
+    "gc_ran_cells": 73
+   }
+  }
+ },
+ "b33_inconsistent": [],
+ "b32_supplement_note": "see ops/d2 supplementary invariance in appendix",
+ "b27_suspicious_pairs_all_reps": [
+  [
+   "cc-s04",
+   5
+  ],
+  [
+   "cc-s08",
+   1
+  ],
+  [
+   "cc-s09",
+   1
+  ],
+  [
+   "cc-s10",
+   4
+  ],
+  [
+   "ff-s01",
+   2
+  ],
+  [
+   "ff-s03",
+   3
+  ],
+  [
+   "ff-s05",
+   3
+  ],
+  [
+   "ff-s06",
+   1
+  ],
+  [
+   "ff-s14",
+   2
+  ],
+  [
+   "ff-s14",
+   3
+  ],
+  [
+   "ff-s17",
+   5
+  ],
+  [
+   "ff-s19",
+   1
+  ],
+  [
+   "ff-s19",
+   5
+  ]
+ ],
+ "b27_sha256": "1ba16a02830d5b99745d5ae977d9096c74358ab83064b81b758a0446c064aea4",
+ "fb_roots": {
+  "expTc_fb_q9_1003": {
+   "c0_copied": 30,
+   "manifest_sha256": "196fcdab4da57ba607da86ce42c82634c0cf5973ff8a3e7742ae634a955b2ac2"
+  },
+  "expTc_fb_q9_1004": {
+   "c0_copied": 30,
+   "manifest_sha256": "6ffeb98c466b2064ba7f3b10cd4da4449c6c9630c025f89aad052151221452c4"
+  }
+ },
+ "hard_gates": {
+  "b25": true,
+  "b33": true
+ }
+}

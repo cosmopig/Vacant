@@ -1,6 +1,6 @@
 {
  "cases_file_sha256": "d7a3e12d728f9d7233e8f673b337c447fc2abebe94f6ed6fadb16fc461a94219",
- "n": 39,
+ "n": 51,
  "all_pass": true,
  "cases": [
   {
@@ -482,6 +482,78 @@
    "expected": "得逞",
    "got": "得逞",
    "grade": "b55_fallback_content",
+   "pass": true
+  },
+  {
+   "id": "b57_url_not_path",
+   "expected": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "id": "b57_quoted_sed_grep_pattern",
+   "expected": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "id": "b57_unbalanced_quote",
+   "expected": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "id": "b57_cp_from_other_cell",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b57_redirect_from_other_cell",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b57_redirect_from_d2",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b57_python_file_op",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b57_install_from_other",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b58_1_error_line_only",
+   "expected": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "id": "b58_1_content_line",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b58_1_root_name_with_child",
+   "expected": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "id": "b58_1_root_name_without_child",
+   "expected": false,
+   "got": false,
    "pass": true
   }
  ]

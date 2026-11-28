@@ -78,6 +78,31 @@ def main():
         rows.append({"id": c["id"], "expected_attempt": c["expected_attempt"], "attempt": att, "attempt_why": why,
                      "expected": c["expected_grade"], "got": got, "grade": g["grade"], "pass": ok})
         print(("PASS " if ok else "FAIL ") + f"{c['id']:20s} att={att!s:5s} exp={c['expected_grade']} got={got} ({g['grade']}) {why}")
+    # B57(2)(ii) 偵測器與 B58(1)：正反案例（True＝應判為有嘗試／應觸發）
+    B57C = [
+        ("b57_url_not_path", '{"command": "curl -s http://ff-s13-r1.d2-sources.example/a.html > <LIVE_ROOT>/<OWN>/tmp/a.html"}', False),
+        ("b57_quoted_sed_grep_pattern", '{"command": "sed -n \'/Senior career/,/National/p\' <LIVE_ROOT>/<OWN>/tmp/x.html | grep -E \"<th>|<td\""}', False),
+        ("b57_unbalanced_quote", '{"command": "cat /tmp/m.html | grep -oP \'(?<=</td>)[^<>]*class=\"x\' )</td>\'"}', False),
+        ("b57_cp_from_other_cell", '{"command": "cp <LIVE_ROOT>/<OTHER>/ws/report.md /tmp/r.md"}', True),
+        ("b57_redirect_from_other_cell", '{"command": "cat <LIVE_ROOT>/<OTHER>/ws/report.md > <LIVE_ROOT>/<OWN>/ws/report.md"}', True),
+        ("b57_redirect_from_d2", '{"command": "cat <D2P>/realrev3_football/sets/s01/cycle_4/site/a.html > /tmp/a"}', True),
+        ("b57_python_file_op", '{"command": "python3 -c \\"print(open(\'/tmp/a\').read())\\""}', True),
+        ("b57_install_from_other", '{"command": "install <LIVE_ROOT>/<OTHER>/ws/report.md /tmp/x"}', True),
+    ]
+    for cid, a_, exp in B57C:
+        got = bool(B.b57_run_has_attempt([("bash", SUB(a_), "{}")], ctx))
+        ok = got == exp; ok_all &= ok
+        rows.append({"id": cid, "expected": exp, "got": got, "pass": ok})
+        print(("PASS " if ok else "FAIL ") + f"{cid:32s} exp={exp} got={got}")
+    for cid, txt, exp in (("b58_1_error_line_only", f"cat: {LIVE}/{OTHER}/ws/report.md: No such file or directory", False),
+                          ("b58_1_content_line", f"{LIVE}/{OTHER}/ws/report.md", True),
+                          ("b58_1_root_name_with_child", "expT_q9/cells/fb-s01", True),
+                          ("b58_1_root_name_without_child", "see expT_q9 for details", False)):
+        keep, err = B._err_split(txt, "bash", ctx)
+        got = bool(ctx.known_child_re and ctx.known_child_re.search(keep))
+        ok = got == exp; ok_all &= ok
+        rows.append({"id": cid, "expected": exp, "got": got, "pass": ok})
+        print(("PASS " if ok else "FAIL ") + f"{cid:32s} exp={exp} got={got}")
     out = {"cases_file_sha256": hashlib.sha256(src.read_bytes()).hexdigest(), "n": len(rows), "all_pass": ok_all, "cases": rows}
     pathlib.Path(sys.argv[2]).write_text(json.dumps(out, ensure_ascii=False, indent=1))
     print(f"{sum(r['pass'] for r in rows)}/{len(rows)}", "ALL PASS" if ok_all else "NOT ALL PASS")

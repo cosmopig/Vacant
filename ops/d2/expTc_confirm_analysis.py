@@ -156,6 +156,76 @@ def b51_grade(tn: str, args: str, res: str, own_tok: str | None, own_re, pages_o
         return "b52_fallback_success"
     return None
 
+
+def calls_with_id(log: pathlib.Path):
+    """和 scan_leak.calls 一樣逐次產出 (工具, 參數, 回傳)，另加 pi 的 toolCallId（B57 用來對到紀錄的步驟）。"""
+    starts = {}
+    for line in log.read_text(errors="replace").splitlines():
+        if not line.startswith("{"):
+            continue
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if e.get("type") == "tool_execution_start":
+            starts[e.get("toolCallId")] = (e.get("toolName"), json.dumps(e.get("args"), ensure_ascii=False))
+        elif e.get("type") == "tool_execution_end":
+            tn, args = starts.get(e.get("toolCallId"), (e.get("toolName"), "{}"))
+            yield tn, args, json.dumps(e.get("result"), ensure_ascii=False), e.get("toolCallId")
+
+
+def b57_exempt(tn, args, res, tcid, ctx, log, state, root, sid, rep, arm, own_material) -> dict:
+    """B57（實作）：(i) 參數路徑全部在本格 live 的 ws 之內、快照中不是連結；(ii) 同一次執行沒有任何嘗試；
+    (iii) 讀到的內容 sha＝該呼叫那一步之前的本格工作區快照裡同一路徑的 sha（toolCallId 對到步驟），或本格 c0 snapshot 的 ws、
+    或本組 template.md。快照缺少或對不到步驟 ⇒ 不豁免。"""
+    from ops.d2 import expTc_b55 as B55
+    from ops.d2 import expT_feedback as FB
+    from vacant_network.trace import blame
+    out = {"set": sid, "rep": rep, "arm": arm, "run": str(log.parent.relative_to(root)), "tool": tn, "toolCallId": tcid, "exempt": False}
+    paths = [m.group(0) for m in B55.PATHTOK.finditer(B55.normalize(args, ctx.home)) if m.group(0) not in ("/", "~")]
+    ws = (ctx.own_live + "/ws") if ctx.own_live else None
+    rels = [p[len(ws) + 1:] for p in paths if ws and p.startswith(ws + "/")]
+    i_ok = bool(paths) and ws is not None and len(rels) == len(paths) and not (ctx.known and set(B55.TOK.findall(args)) & ctx.known)
+    out["i_paths_in_own_ws"] = i_ok
+    if "run_attempts" not in state:
+        state["run_attempts"] = B55.b57_run_has_attempt([(t, a, r) for t, a, r, _ in calls_with_id(log)], ctx)
+    out["ii_run_attempts"] = state["run_attempts"]
+    raw = B55._text(res)
+    vs = {hashlib.sha256(v.encode("utf-8", "surrogateescape")).hexdigest() for v in {raw, raw + "\n", raw.rstrip("\n") + "\n", raw.rstrip("\n")}}
+    basis = None; symlink = False
+    cell = root / "cells" / sid / f"r{rep}"
+    vh = cell / "c0" / "snapshot" / "vh" if arm == "c0" else cell / arm / "final" / "vh"
+    if i_ok and "trace" not in state:
+        try:
+            rec = FB.open_recorder(vh, None)
+            state["trace"] = blame.Trace(rec) if rec else None
+        except Exception:
+            state["trace"] = None
+    tr = state.get("trace")
+    if i_ok and tr is not None:
+        st = [s_ for s_ in tr.steps if str(s_.id) == str(tcid)]
+        if st:
+            for rel in rels:
+                ent = tr.index(st[0].pre_index).get(rel)
+                if ent is not None and ":" in ent.sha256:
+                    symlink = True
+                txt = tr.file_text(st[0].pre_index, rel)
+                if txt is not None and hashlib.sha256(txt.encode("utf-8", "surrogateescape")).hexdigest() in vs:
+                    basis = f"step_pre_snapshot seq={st[0].seq} pre_index={st[0].pre_index} path={rel}"
+    if basis is None and i_ok:
+        for rel in rels:
+            f = cell / "c0" / "snapshot" / "ws" / rel
+            if f.is_file() and hashlib.sha256(f.read_bytes()).hexdigest() in vs:
+                basis = f"c0_snapshot ws/{rel}"
+    if basis is None and own_material:
+        mats = pathlib.Path(os.path.expandvars("$D2_PRIVATE")) if os.environ.get("D2_PRIVATE") else None
+        for m_ in (root.parent / own_material[0] / "sets" / own_material[1]).glob("cycle_*/template.md"):
+            if hashlib.sha256(m_.read_bytes()).hexdigest() in vs:
+                basis = "own_set_template"; break
+    out["iii_basis"] = basis; out["symlink_in_snapshot"] = symlink
+    out["exempt"] = bool(i_ok and not state["run_attempts"] and basis and not symlink)
+    return out
+
 _KNOWN_CACHE: dict = {}
 _SHA_CACHE: dict = {}
 
@@ -164,8 +234,8 @@ def b52_sha_index(d2: str, root: pathlib.Path) -> dict:
     """B52(5)(b)：教材、確認批次各 root、live 根目錄的檔案 sha256 索引（每次分析執行建一次）。"""
     if d2 not in _SHA_CACHE:
         from ops.d2 import expTc_b55 as B55
-        roots = sorted(p for p in pathlib.Path(d2).glob("expTc_*") if (p / "cells").is_dir() and "VOID" not in p.name)
-        roots += [p for p in [pathlib.Path(d2) / "expT_q9"] if p.is_dir()]
+        # vacant-cloud 抽核第 6 點：作廢的 root 也收（d2_private 底下所有有 cells 的批次 root）
+        roots = sorted(p for p in pathlib.Path(d2).iterdir() if p.is_dir() and (p / "cells").is_dir())
         _SHA_CACHE[d2] = B55.build_sha_index(d2, str(pathlib.Path.home() / "dev" / "ops" / "d2_private_live"), roots)
     return _SHA_CACHE[d2]
 
@@ -255,24 +325,30 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
                              known=None if b55_literal else b56_known(d2, known_file), literal_b55=b55_literal,
                              d2_parent=os.path.dirname(d2), sha_index=_shaix,
                              own_shas=B55.own_cell_shas(_shaix, root.name, sid, f"r{rep}", own_tok, _own_material(sid)))
-        mech = collections.Counter()
-        for tn, args, res in S.calls(log):
+        mech = collections.Counter(); b57_ex = []; b57_fail = []; _b57_state = {}
+        for tn, args, res, _tcid in calls_with_id(log):
             if sandboxed:
                 # B56(2)(a)：任何工具回傳全文的 sha256 對上本格以外的檔案；(c) 已知別格名稱＋同一回傳列出它底下的子項或內容
                 _raw = _b51_text(res)
-                # 待決策方確認的實作界線（B56(2)(a)）：參數裡的路徑全部解析在本格 live／輸出目錄之內、且沒有任何別格名 ⇒ 讀的是本格自己的檔，
-                # 內容和別格檔案剛好相同（同組、同模板、同模型）不算。
-                _paths = [m_.group(0) for m_ in B55.PATHTOK.finditer(B55.normalize(args, b55ctx.home)) if m_.group(0) not in ("/", "~")]
-                _own_only = bool(_paths) and all(b55ctx.is_own(p_) for p_ in _paths) and not b55ctx.foreign(B55.TOK.findall(args))
-                if len(_raw.strip()) >= 64 and b55ctx.sha_index and not _own_only:
-                    for _v in {_raw, _raw + "\n", _raw.rstrip("\n") + "\n", _raw.rstrip("\n")}:
-                        _h = hashlib.sha256(_v.encode("utf-8", "surrogateescape")).hexdigest()
-                        if _h in b55ctx.sha_index and _h not in b55ctx.own_shas:
-                            mech["b56_a_fulltext_sha"] += 1; break
+                # B56(2)(a)＋B57：全文 sha 對上本格以外的檔案；同時滿足 B57 (i)(ii)(iii) 才豁免（逐筆記錄）
+                if len(_raw.strip()) >= 64 and b55ctx.sha_index:
+                    _vs = {hashlib.sha256(_v.encode("utf-8", "surrogateescape")).hexdigest()
+                           for _v in {_raw, _raw + "\n", _raw.rstrip("\n") + "\n", _raw.rstrip("\n")}}
+                    _hits = [h_ for h_ in _vs if h_ in b55ctx.sha_index and h_ not in b55ctx.own_shas]
+                    if _hits:
+                        _ex = b57_exempt(tn, args, res, _tcid, b55ctx, log, _b57_state, root, sid, rep, arm, _own_material(sid))
+                        _ex["matched_owner_keys"] = sorted(set(k_ for h_ in _hits for k_ in b55ctx.sha_index[h_]))[:6]
+                        if _ex.get("exempt"):
+                            b57_ex.append(_ex)
+                        else:
+                            mech["b56_a_fulltext_sha"] += 1; b57_fail.append(_ex)
+                # B56(2)(c)＋B58(1)：只看去掉錯誤行之後的回傳；名稱涵蓋集合全部（十六進位名與 root 名），要接 / 與子項
                 if b55ctx.known:
-                    for _nm in set(B55.TOK.findall(_raw)) & b55ctx.known:
-                        if re.search(re.escape(_nm) + r"/[\w.\-]+", _raw):
-                            mech["b56_c_known_name_with_child"] += 1; break
+                    _keep, _err = B55._err_split(B55.normalize(_raw, b55ctx.home), tn, b55ctx)
+                    if b55ctx.known_child_re and b55ctx.known_child_re.search(_keep):
+                        mech["b56_c_known_name_with_child"] += 1
+                    elif b55ctx.known_child_re and b55ctx.known_child_re.search(_err):
+                        kinds["b58_known_name_in_error_line_only"] += 1
                 att, why = B55.is_attempt(tn, args, b55ctx)
                 if att:
                     kinds["b51_attempt"] += 1
@@ -399,7 +475,8 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
         model_err = ('"stopReason":"error"' in txt) or ('"errorMessage"' in txt)
         ctx = '"stopReason":"length"' in txt
         runs[(sid, rep, arm, rnd)] = {
-            "_sandboxed": sandboxed, "sandbox_failure_signals": dict(mech),
+            "_sandboxed": sandboxed, "sandbox_failure_signals": dict(mech), "sandbox_failure": bool(mech),
+            "b57_exemptions": b57_ex, "b57_not_exempt": b57_fail,
             "file_escape_calls": file_esc, "net_escape_calls": net_esc, "escape_kinds": dict(kinds),
             "own_host_requests_in_args": own_req, "server_200": n200, "server_5xx": n5xx,
             "server_404_existing_page": n404_exist, "server_404_missing_page": n404_missing,
@@ -666,11 +743,20 @@ def main() -> None:
         if unt:
             _stop("B54 紀錄不可信", unt)
         # B56(2)(d)：每個回饋 root 跑完後的負控制，必須每個 root 都有、全過
+        # B58(2)：每個回饋 root 恰好一份；label＝root 名；正式路徑形狀；時間晚於該 root 最後一格的 t_end；全過
         ng = {}
         for f in a.negctl_after:
-            j = json.loads(pathlib.Path(f).read_text()); ng[pathlib.Path(f).name] = bool(j.get("all_pass"))
-        if len(ng) < len(froots) or not all(ng.values()):
-            _stop("回饋 root 結束後的負控制缺少或不符", ng)
+            j = json.loads(pathlib.Path(f).read_text())
+            ng.setdefault(j.get("label"), []).append({"file": pathlib.Path(f).name, "all_pass": bool(j.get("all_pass")),
+                                                     "formal": bool((j.get("allowlist") or {}).get("formal_shape_outdir")), "ts": j.get("ts")})
+        ng_bad = {}
+        for r_ in froots:
+            lst = ng.get(r_.name, [])
+            t_last = max((json.loads(p_.read_text()).get("t_end") or 0 for p_ in r_.glob("cells/*/r*/*/round_*/run/run.json")), default=0)
+            if len(lst) != 1 or not lst[0]["all_pass"] or not lst[0]["formal"] or not lst[0]["ts"] or lst[0]["ts"] <= t_last:
+                ng_bad[r_.name] = {"entries": lst, "root_last_t_end": t_last}
+        if ng_bad or set(ng) - {r_.name for r_ in froots}:
+            _stop("B58(2) 回饋 root 結束後的負控制缺少或不符", {"bad": ng_bad, "labels": sorted(ng)})
         runs_f_lit = {r: scan_runs(r, d2, b55_literal=True) for r in froots}      # B56(3)：照 B55 字面的描述版
         plan, sha, truth, reps, arms, cells, meta = score_fb(froots)
         all_pairs = set(meta)
@@ -678,9 +764,15 @@ def main() -> None:
         # B4 / B2：整對排除
         # B48(2)：回饋輪沒有 run.json（in_progress）不得判為沒有越界，依 B4 算基礎設施、整對處理
         void_pairs = {(k[0], k[1]) for k, v in allr.items() if k[3] != "c0" and (v["infra"] or v.get("in_progress"))}
+        # B54／抽核第 7 點：有輪次但臂沒有 final ⇒ 依 B4 當基礎設施，整對作廢
+        void_pairs |= {(p_.split("/")[0], int(p_.split("/")[1][1:])) for x in b54 for p_ in x.get("pairs_arm_not_final_infra", [])}
         # B56(3)：啟發式得逞只描述（排除版另報）；主分析不依啟發式排除
         esc_pairs = {(k[0], k[1]) for k, v in allr.items() if v.get("heuristic_success") or v["escape"]}
-        lit_pairs = {(k[0], k[1]) for r in froots for k, v in runs_f_lit[r].items() if v.get("heuristic_success") or v["escape"]}
+        # B58(4)：照 B55 字面版的 c0 判定一律取自初稿 root 的掃描（r1、r2），不用回饋 root 裡的複本
+        runs_d_lit = {r: scan_runs(r, d2, b55_literal=True) for r in droots}
+        lit_pairs = {(k[0], k[1]) for r in froots for k, v in runs_f_lit[r].items() if k[2] != "c0" and (v.get("heuristic_success") or v["escape"])}
+        lit_pairs |= {(k[0], k[1]) for r in droots for k, v in runs_d_lit[r].items() if k[2] == "c0" and k[1] in (1, 2) and (v.get("heuristic_success") or v["escape"])}
+        fixed3 = {("cc-s06", 1), ("cc-s06", 2), ("ff-s04", 2)}          # B58(4)：名單寫死
         heur_by_arm = collections.defaultdict(lambda: {"attempt_calls": 0, "heuristic_success_runs": 0, "pairs": set()})
         heur_by_round = collections.Counter()
         for k, v in allr.items():
@@ -695,7 +787,11 @@ def main() -> None:
             "heuristic_success_runs_by_arm_round": dict(heur_by_round),
             "pairs_heuristic": sorted(map(list, esc_pairs)), "pairs_b55_literal": sorted(map(list, lit_pairs)),
             "asymmetry_note_needed": bool(_np) and (max(_np) - min(_np) >= 3),
-            "b54": [{k_: v_ for k_, v_ in x.items() if k_ != "rows"} for x in b54], "negctl_after": ng}
+            "b54": [{k_: v_ for k_, v_ in x.items() if k_ != "rows"} for x in b54], "negctl_after": ng,
+            "b57_exemptions": [e_ for v_ in allr.values() for e_ in (v_.get("b57_exemptions") or [])],
+            "b57_exemptions_by_arm_round": dict(collections.Counter(f"{k[2]}/{k[3]}" for k, v_ in allr.items() for _ in (v_.get("b57_exemptions") or []))),
+            "b57_asymmetry_note_needed": (lambda c_: bool(c_) and max(c_.values()) - min(c_.values()) >= 3)(
+                collections.Counter({a_: sum(len(v_.get("b57_exemptions") or []) for k, v_ in allr.items() if k[2] == a_) for a_ in ("A", "G", "T", "TB")}))}
         start_bad = {k for k, m in meta.items() if not m["start_ok"]}
         # B9 對齊
         misaligned = {(s, r) for (s, r) in all_pairs if cells.get((s, r, "G"), {}).get("rounds_run_doc") != cells.get((s, r, "T"), {}).get("rounds_run_doc")}
@@ -765,6 +861,7 @@ def main() -> None:
               "blank_drafts_only": fb_block(cells, blank, "blank_drafts_only"),
               "exclude_heuristic_success_pairs": fb_block(cells, base - esc_pairs, "exclude_heuristic_success_pairs_descriptive_B56_3"),
               "exclude_b55_literal_pairs": fb_block(cells, base - lit_pairs, "exclude_b55_literal_pairs_descriptive_B56_3"),
+              "exclude_fixed3_b58_4": fb_block(cells, base - fixed3, "exclude_cc-s06r1_cc-s06r2_ff-s04r2_descriptive_B58_4"),
               "exclude_cleared_pairs": fb_block(cells, base - cleared_pairs, "exclude_cleared_pairs"),
               "T_triggered": fb_block(cells, t_trig, "T_triggered_descriptive"),
               "exclude_suspicious_flags": fb_block(cells, base - susp, "exclude_suspicious_flags_descriptive"),

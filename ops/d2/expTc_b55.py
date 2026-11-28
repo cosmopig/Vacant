@@ -123,7 +123,11 @@ class Ctx:
         # B56(i)：已知的別格／別批名稱，扣掉本格名稱與本格掛載路徑成分
         own_parts = set(self.outdir.split("/")) | (set(self.own_live.split("/")) if self.own_live else set())
         self.known = None if (literal_b55 or known is None) else (set(known) - {own_tok} - self.skeleton - own_parts)
-        nonhex = sorted((n for n in (self.known or ()) if not TOK.fullmatch(n)), key=len, reverse=True)
+        # B58(3)：描述版的啟發式 S1 只用十六進位名與 d2 root 名（nst_ 開頭的 live 測試格名不用）
+        nonhex = sorted((n for n in (self.known or ()) if not TOK.fullmatch(n) and not n.startswith("nst_")), key=len, reverse=True)
+        # B56(2)(c)／B58(1)：機械訊號用集合全部名稱，名稱後面要接 / 與子項
+        _alln = sorted(self.known or (), key=len, reverse=True)
+        self.known_child_re = re.compile(r"(?<![\w.\-])(?:" + "|".join(map(re.escape, _alln)) + r")/[\w.\-]+") if _alln else None
         self.known_nonhex = re.compile(r"(?<![\w.\-])(" + "|".join(map(re.escape, nonhex)) + r")(?![\w\-])") if nonhex else None
         anc = set()
         for base in filter(None, (self.own_live, self.outdir)):
@@ -345,7 +349,8 @@ def known_names(d2_private_parent: str, live_root: str) -> dict:
 def build_sha_index(d2_private: str, live_root: str, roots: list) -> dict:
     """B52(5)(b) 的檔案 sha256 索引：{sha: [擁有者鍵]}。擁有者鍵：material:<目錄>、cell:<root>:<組>:<r次>、live:<目錄名>。
     範圍：d2_private 底下的教材目錄（realrev*，各修訂的頁面）、給定批次 root 各格的 site_frozen、報告、final／snapshot 的 ws，
-    以及 live 根目錄各格的 ws 與 tmp。單檔 >8 MB 不收（回傳全文不會那麼大）。"""
+    以及 live 根目錄各格的 ws、tmp、site（D2′ 批次放修訂頁的地方），與各格 vh 裡像頁面的物件。單檔 >8 MB 不收。
+    限制：只抓得到整檔讀取（head、grep 等部分讀取的回傳對不上）。"""
     import os, pathlib as _p
     idx: dict = {}
     def add(f, key):
@@ -360,6 +365,13 @@ def build_sha_index(d2_private: str, live_root: str, roots: list) -> dict:
             rel = f.relative_to(m).parts
             st = rel[1] if len(rel) > 2 and rel[0] == "sets" else "-"
             add(f, f"material:{m.name}:{st}:{f.name}")
+    def page_like(f):
+        try:
+            with open(f, "rb") as fh:
+                h = fh.read(256).lower()
+            return b"<!doctype" in h or b"<html" in h
+        except OSError:
+            return False
     for r in roots:
         r = _p.Path(r)
         for cell in sorted(r.glob("cells/*/r*")):
@@ -367,9 +379,13 @@ def build_sha_index(d2_private: str, live_root: str, roots: list) -> dict:
             for pat in ("c0/site_frozen/*", "*/report.md", "*/final/ws/**/*", "*/snapshot/ws/**/*", "*/round_*/report.md"):
                 for f in cell.glob(pat):
                     add(f, key)
+            # vacant-cloud 抽核第 6 點：vh 裡的頁面（只收像頁面的物件；其他工具輸出物件同組各次常常逐字相同，不收）
+            for f in cell.glob("*/*/vh/trace/objects/*/*"):
+                if page_like(f):
+                    add(f, key)
     lr = _p.Path(live_root)
     for d in sorted(lr.iterdir()) if lr.is_dir() else []:
-        for sub in ("ws", "tmp"):
+        for sub in ("ws", "tmp", "site"):
             for f in (d / sub).rglob("*") if (d / sub).is_dir() else []:
                 add(f, f"live:{d.name}")
     return idx
@@ -381,3 +397,65 @@ def own_cell_shas(sha_index: dict, root_name: str, sid: str, rep: str, own_tok: 
     keys = {f"cell:{root_name}:{sid}:{rep}", f"live:{own_tok}"}
     tmpl = f"material:{own_material[0]}:{own_material[1]}:template.md" if own_material else None
     return {h for h, ks in sha_index.items() if any(k in keys or k == tmpl for k in ks)}
+
+
+B57_PYNODE_FILEOP = re.compile(r"\b(python3?|node)\b[^|;&]*(open\(|read_text|write_text|Path\(|os\.|shutil|glob|fs\.|readFile|writeFile|listdir|walk)")
+B57_COPYLIKE = re.compile(r"(?:^|[\s;&|(\"'])(cp|mv|rsync|tar|install)\s")
+
+
+def b57_run_has_attempt(calls: list, ctx: Ctx) -> list:
+    """B57(2)(ii)：同一次執行中有沒有任何「嘗試」（B48 樣式、往上的 ..、ln -s／symlink、來源在本格以外的
+    cp／mv／rsync／tar／install／重導向、python／node 腳本中的檔案操作）。回傳命中的理由清單（空＝沒有）。"""
+    why = []
+    for tn, args, res in calls:
+        att, w = is_attempt(tn, args, ctx)
+        if att:
+            why += w
+        try:
+            cmd = json.loads(args).get("command", "") if tn == "bash" else ""
+        except Exception:
+            cmd = ""
+        if not cmd:
+            continue
+        if B57_PYNODE_FILEOP.search(cmd):
+            why.append("b57_python_node_file_op")
+        cmd_np = re.sub(r"[a-z]+://[^\s\"'|;&)]*", " ", cmd)          # 網址不是檔案路徑（//主機/頁 不算）
+        # 引號內的字串（sed／grep 的樣式等）不是重導向也不是路徑；只有整個引號字串就是一條路徑時才算路徑
+        quoted = re.findall(r"'([^']*)'|\"((?:\\.|[^\"\\])*)\"", cmd_np)
+        unq = re.sub(r"'[^']*'|\"(?:\\.|[^\"\\])*\"", " ", cmd_np)
+        unq = re.split(r"['\"]", unq, maxsplit=1)[0]          # 沒配對的引號之後都當成引號內（指令本身不完整）
+        cand = [m.group(0) for m in PATHTOK.finditer(normalize(unq, ctx.home))]
+        cand += [normalize(q, ctx.home) for pair in quoted for q in pair if q and re.fullmatch(r"[~/][^\s]*", q)]
+        # 別格與教材只可能在家目錄底下（沙箱裡其他位置是唯讀系統目錄或不存在）；所以「本格以外的來源」只看家目錄底下、不是本格的路徑
+        outside = [p_ for p_ in cand if (p_ == ctx.home or p_.startswith(ctx.home + "/")) and not ctx.is_own(p_)]
+        if outside and (B57_COPYLIKE.search(unq) or re.search(r"(?<![0-9&2])>", unq)):
+            why.append("b57_copy_or_redirect_from_outside")
+    return sorted(set(why))
+
+
+def b57_provenance(res: str, args: str, ctx: Ctx, write_afters: dict, snapshot_ws=None,
+                   template_shas: set = frozenset()) -> str | None:
+    """B57(2)(iii)：讀到的內容（全文 sha，含結尾換行變體）等於本格紀錄中對同一路徑的 write／edit 結果（Vacant 紀錄的
+    writes[].after）、或本格 c0 snapshot 的同一檔、或本組模板。回傳依據字串或 None。"""
+    raw = _text(res)
+    vs = {hashlib.sha256(v.encode("utf-8", "surrogateescape")).hexdigest()
+          for v in {raw, raw + "\n", raw.rstrip("\n") + "\n", raw.rstrip("\n")}}
+    rels = set()
+    for m in PATHTOK.finditer(normalize(args, ctx.home)):
+        p = m.group(0)
+        if ctx.own_live and p.startswith(ctx.own_live + "/ws/"):
+            rels.add(p[len(ctx.own_live) + 4:])
+    for rel in rels:
+        for seq, after in write_afters.get(rel, []):
+            if after in vs:
+                return f"recorded_write seq={seq} after={after}"
+        if snapshot_ws is not None:
+            f = snapshot_ws / rel
+            try:
+                if f.is_file() and hashlib.sha256(f.read_bytes()).hexdigest() in vs:
+                    return f"c0_snapshot ws/{rel}"
+            except OSError:
+                pass
+    if vs & set(template_shas):
+        return "own_set_template"
+    return None

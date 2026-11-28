@@ -103,7 +103,7 @@ def main() -> int:
     allow = {"allowed_mount_prefixes": sorted(set(allowed_prefixes)), "observed_mounts": mounts, "mount_detail": detail,
              "mountinfo_raw": body("N7_mountinfo"),          # B55(8)：/proc/self/mountinfo 原文（輸出時照樣遮罩路徑）
              "formal_shape_outdir": str(outdir) if a.formal_shape else None}
-    rep = {"label": a.label, "test_cell": str(me).replace(str(H), "~"), "other_cell_used": other.name if other else None,
+    rep = {"label": a.label, "ts": time.time(), "test_cell": str(me).replace(str(H), "~"), "other_cell_used": other.name if other else None,
            "wrapper_sha256": hashlib.sha256((HERE / "bwrap_expT_agent.sh").read_bytes()).hexdigest(),
            "tests": res, "allowlist": allow, "allowlist_sha256": hashlib.sha256(json.dumps(allow, sort_keys=True).encode()).hexdigest(),
            "all_pass": ok_all}
