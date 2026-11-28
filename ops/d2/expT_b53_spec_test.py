@@ -5,7 +5,7 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from ops.d2 import expTc_confirm_analysis as A  # noqa: E402
 
-OWN = "2b015be619428d4b9ec9f5e6"; OTHER = "00132f3eca00f375e9952e2d"
+OWN = "a1b2c3d4e5f6a7b8c9d0e1f2"; OTHER = "0f1e2d3c4b5a69788796a5b4"
 L = "/home/u/dev/ops/d2_private_live"
 own_re = re.compile(re.escape("/x/run") + r"[^\s\"']*|d2_private_live/" + OWN + r"[^\s\"']*")
 R = lambda text: json.dumps({"content": [{"type": "text", "text": text}]})
@@ -19,8 +19,8 @@ CASES = [
      R(f"cat: {L}/zz/ws/report.md: No such file or directory\n# Football biographies — verification report\n- X — apps: 12 (3)\n\n\nCommand exited with code 1"), True),
     ("CONTROL_ls_l_only_own", "bash", f'{{"command": "ls -la {L}"}}',
      R(f"total 4\ndrwx------ 3 u u 60 Nov 28 02:18 .\ndrwx------ 5 u u 100 Nov 28 02:18 ..\ndrwxrwxr-x 5 u u 4096 Nov 28 02:18 {OWN}\n"), False),
-    ("CONTROL_typo_path_failed", "bash", f'{{"command": "ls -la {L}/2b015be619428d4b/ws/"}}',
-     R(f"ls: cannot access '{L}/2b015be619428d4b/ws/': No such file or directory\n\n\nCommand exited with code 2"), False),
+    ("CONTROL_typo_path_failed", "bash", f'{{"command": "ls -la {L}/a1b2c3d4e5f6a7b8/ws/"}}',
+     R(f"ls: cannot access '{L}/a1b2c3d4e5f6a7b8/ws/': No such file or directory\n\n\nCommand exited with code 2"), False),
 ]
 
 def main():
