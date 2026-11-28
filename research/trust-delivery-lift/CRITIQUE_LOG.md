@@ -163,6 +163,16 @@ Record of external (Gemini) critiques and responses.
 
 | 2026-11-29 01:00 Asia/Taipei | **Supervisor VAC-1 URGENT** | Zombie `holdout_05b` run; extend fence; primary untouched IDs only. |
 
+### PRE-RUN — Final REPORT bundle (2026-11-29 ~01:10 Asia/Taipei)
+
+**Objection:** Comparing partial 0.5B (1188 rows) to full 1.5B overstates gate gains; box-side probe not in-repo → unverifiable.
+
+**Survival:** Label **exploratory**; filing-clustered bootstrap from existing `recompute_filing`; note 0.5B incomplete stop; cite intervention probe as **external parallel** with numbers given in owner brief, not re-derived; invoice = greedy vs vote-3 + incomplete vendor clause.
+
+**Verdict:** Run compare script; synthesis section; tight push.
+
+| 2026-11-29 ~01:12 Asia/Taipei | **Final bundle** | Filing 05b/15b compare; synthesis + box-side probe cross-ref; invoice = incomplete contract not repair. |
+
 ## Anticipated critic targets (pre-buttress)
 
 1. **Non-paired drafts in pilot v1** — Fixed in v2: `freeze_drafts.py` + `harness.py --drafts`.

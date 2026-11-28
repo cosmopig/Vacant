@@ -1,0 +1,222 @@
+{
+  "label": "exploratory_filing_05b_vs_15b_same_subset",
+  "n_rows_05b": 1188,
+  "n_rows_15b": 1320,
+  "model_05b": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_15b": "Qwen/Qwen2.5-1.5B-Instruct",
+  "per_arm_05b": {
+    "BLIND": {
+      "n_questions": 198,
+      "released_correct": 38,
+      "released_wrong": 155,
+      "released_total": 193,
+      "false_release_rate_given_delivered": 0.8031088082901554,
+      "filings_with_any_delivery": 16,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "PLAIN": {
+      "n_questions": 198,
+      "released_correct": 36,
+      "released_wrong": 160,
+      "released_total": 196,
+      "false_release_rate_given_delivered": 0.8163265306122449,
+      "filings_with_any_delivery": 16,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "QUOTE_RETRY": {
+      "n_questions": 198,
+      "released_correct": 24,
+      "released_wrong": 173,
+      "released_total": 197,
+      "false_release_rate_given_delivered": 0.8781725888324873,
+      "filings_with_any_delivery": 16,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "RULE": {
+      "n_questions": 198,
+      "released_correct": 56,
+      "released_wrong": 131,
+      "released_total": 187,
+      "false_release_rate_given_delivered": 0.7005347593582888,
+      "filings_with_any_delivery": 16,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "TYPED_REASK": {
+      "n_questions": 198,
+      "released_correct": 14,
+      "released_wrong": 18,
+      "released_total": 32,
+      "false_release_rate_given_delivered": 0.5625,
+      "filings_with_any_delivery": 14,
+      "filings_zero_wrong": 3,
+      "filing_zero_wrong_rate": {
+        "point": 0.21428571428571427,
+        "ci95": [
+          0.0,
+          0.42857142857142855
+        ]
+      }
+    },
+    "TYPED_REFUSE": {
+      "n_questions": 198,
+      "released_correct": 8,
+      "released_wrong": 7,
+      "released_total": 15,
+      "false_release_rate_given_delivered": 0.4666666666666667,
+      "filings_with_any_delivery": 10,
+      "filings_zero_wrong": 5,
+      "filing_zero_wrong_rate": {
+        "point": 0.5,
+        "ci95": [
+          0.2,
+          0.8
+        ]
+      }
+    }
+  },
+  "per_arm_15b": {
+    "BLIND": {
+      "n_questions": 220,
+      "released_correct": 63,
+      "released_wrong": 94,
+      "released_total": 157,
+      "false_release_rate_given_delivered": 0.5987261146496815,
+      "filings_with_any_delivery": 19,
+      "filings_zero_wrong": 1,
+      "filing_zero_wrong_rate": {
+        "point": 0.05263157894736842,
+        "ci95": [
+          0.0,
+          0.15789473684210525
+        ]
+      }
+    },
+    "PLAIN": {
+      "n_questions": 220,
+      "released_correct": 71,
+      "released_wrong": 76,
+      "released_total": 147,
+      "false_release_rate_given_delivered": 0.5170068027210885,
+      "filings_with_any_delivery": 19,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "QUOTE_RETRY": {
+      "n_questions": 220,
+      "released_correct": 52,
+      "released_wrong": 50,
+      "released_total": 102,
+      "false_release_rate_given_delivered": 0.49019607843137253,
+      "filings_with_any_delivery": 19,
+      "filings_zero_wrong": 2,
+      "filing_zero_wrong_rate": {
+        "point": 0.10526315789473684,
+        "ci95": [
+          0.0,
+          0.2631578947368421
+        ]
+      }
+    },
+    "RULE": {
+      "n_questions": 220,
+      "released_correct": 60,
+      "released_wrong": 149,
+      "released_total": 209,
+      "false_release_rate_given_delivered": 0.7129186602870813,
+      "filings_with_any_delivery": 19,
+      "filings_zero_wrong": 0,
+      "filing_zero_wrong_rate": {
+        "point": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "TYPED_REASK": {
+      "n_questions": 220,
+      "released_correct": 37,
+      "released_wrong": 23,
+      "released_total": 60,
+      "false_release_rate_given_delivered": 0.38333333333333336,
+      "filings_with_any_delivery": 18,
+      "filings_zero_wrong": 6,
+      "filing_zero_wrong_rate": {
+        "point": 0.3333333333333333,
+        "ci95": [
+          0.1111111111111111,
+          0.5555555555555556
+        ]
+      }
+    },
+    "TYPED_REFUSE": {
+      "n_questions": 220,
+      "released_correct": 37,
+      "released_wrong": 23,
+      "released_total": 60,
+      "false_release_rate_given_delivered": 0.38333333333333336,
+      "filings_with_any_delivery": 18,
+      "filings_zero_wrong": 6,
+      "filing_zero_wrong_rate": {
+        "point": 0.3333333333333333,
+        "ci95": [
+          0.1111111111111111,
+          0.5555555555555556
+        ]
+      }
+    }
+  },
+  "gate_false_release_note": "Arms treated as contract-gated ship candidates",
+  "gate_arms_combined_0.5B": {
+    "arms": [
+      "RULE",
+      "TYPED_REFUSE"
+    ],
+    "released_wrong": 138,
+    "released_total": 202,
+    "false_release_rate_given_delivered": 0.6831683168316832
+  },
+  "gate_arms_combined_1.5B": {
+    "arms": [
+      "RULE",
+      "TYPED_REFUSE"
+    ],
+    "released_wrong": 172,
+    "released_total": 269,
+    "false_release_rate_given_delivered": 0.6394052044609665
+  }
+}

@@ -95,14 +95,26 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 
 **Interpretation:** Judgment relocation works for **replay**; **contract authoring is not interchangeable** without changing ship/hold rates. Primary profile **silently** ships on multi-number spans; independent profile **ESCALATEs** → divergence.
 
-## 4. Filing online — small models (stopped; exploratory partial only)
+## 4. Filing online — exploratory (0.5B partial vs 1.5B complete)
 
-**Supervisor order:** holdout confirmatory first; **0.5B filing run stopped** (~1100+/1320 rows exploratory, **not** labeled confirmatory). **1.5B** only if holdout completes with time left.
+**Label:** exploratory only; **not** confirmatory. Subset: `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).
 
-- **Pre-registered subset:** `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).  
-- **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). **Interim (~32% rows):** ~71 Q/arm; **0/6** filings with zero-wrong deliveries so far (0.5B capacity); see `online_05b_seed42_interim_summary.json` (updates as run continues).  
-- **1.5B:** tmux `filing-15b` — started after holdout gate (**exploratory**; not confirmatory delivery evidence).  
-- **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
+| Model | Rows | Status |
+|-------|------|--------|
+| 0.5B | 1188 / 1320 | stopped early (supervisor holdout priority) |
+| 1.5B | **1320 / 1320** | complete |
+
+**Per-arm delivered correct/wrong + filing-clustered bootstrap** (`filing/recompute_filing_compare.py` → `data/filing_05b_vs_15b_exploratory.json`):
+
+| Arm | 1.5B released correct / wrong | false-release \|delivered | zero-wrong filing rate (95% CI) |
+|-----|------------------------------|---------------------------|----------------------------------|
+| PLAIN | 71 / 76 | 51.7% | 0% [0,0] |
+| TYPED_REFUSE | 37 / 23 | **38.3%** | **33%** [11%, 56%] |
+| RULE | 60 / 149 | 71.3% | 0% [0,0] |
+
+**Gate false-release (RULE + TYPED_REFUSE combined, exploratory):** **0.5B 68.3%** (138/202 delivered wrong) vs **1.5B 63.9%** (172/269) — **modest drop**, not removal. **TYPED_REFUSE** alone improves at 1.5B: false-release **46.7% → 38.3%**; zero-wrong filing rate **50% → 33%** point with wide CIs (partial 0.5B n≈198/arm).
+
+**Does the gate’s false-release fall at 1.5B?** **Somewhat on TYPED_REFUSE deliveries**, but **still high**; model capacity does not make incomplete span contracts safe.
 
 ## 5. Invoice Round 2 — fenced primary + contamination
 
@@ -141,9 +153,9 @@ Source: `summary_fenced.json` · Spec: `PREREG_HOLDOUT_FENCE_ADDENDUM_20261129.m
 
 ### What the primary null implies (pre-registered; not a lift claim)
 
-On **Qwen2.5-0.5B**, **128 answerable invoice tasks**, the **field-locked VACANT repair loop does not improve whole-deliverable accuracy** vs **equal-budget Maj3** (McNemar **p=1.0**; one discordant pair). VACANT is **not cheaper in calls than a fair comparison story** would require — it is cheaper in **wall time/tokens** because it often stops after **one greedy JSON + micro passes** while Maj3 always runs **three full samples**.
+On **Qwen2.5-0.5B**, **fenced primary n=54** (hold_096–hold_149), the test was **not a repair loop**: **repair never fired** (`n_calls=1` on every VACANT row). The comparison is **greedy single decode vs vote-of-3**, with **identical** McNemar vs Maj3 (**p=1.0**). The **binding constraint exposed here is contract incompleteness** (visible `vendor` = provenance-only), **not** failure of micro-repair.
 
-**Demonstrated value at this scale is not “better answers.”** It is: (1) **release-safety semantics** — a frozen visible contract decides what may ship (exploratory false-release among visible-pass deliveries **32/128 = 25%** on this bank — see anatomy below); (2) **replayable row records** (`final`, costs, per-field visible detail) for accountability after the fact, not McNemar lift.
+**Demonstrated value at this scale is not “better answers.”** It is: (1) **release-safety semantics** — ship rules frozen before the run; (2) **replayable receipts**; (3) honest reporting when the visible contract **cannot** encode truth (exploratory **25%** false-release if shipping on visible pass on the wider secondary slice — all **vendor** oracle errors).
 
 ### Exploratory — VACANT failure anatomy (confirmatory)
 
@@ -169,7 +181,22 @@ Source: `data/holdout_05b_confirmatory/FAILURE_ANATOMY_VACANT_EXPLORATORY.json` 
 3. **獨立契約作者測試失敗**（48% 一致）→ 任何「lift」都 **綁在特定凍結條款**，不能泛化成「契約」概念。  
 4. **ESCALATE** 須由具名負責人處理語意爭議；primary 合約目前 **ESCALATE 率 0%** = 語意風險仍可能被當 PASS 出貨（false release 3.6%）。
 
-**Holdout confirmatory (0.5B invoice):** **未建立** VACANT vs MAJ3 delivery lift (McNemar null). Mechanism still shows **unequal cost** and **visible-pass ⊉ oracle** (25% silent failure under VACANT gate). **不能**宣稱「問責改善 whole-deliverable 交付」 on this bank at 0.5B; **能**宣稱 primary endpoint **pre-registered and honestly null** at n=128.
+**Holdout (0.5B invoice, fenced n=54):** **未建立** delivery lift; measured **greedy vs vote-3** with **incomplete vendor clause**, not repair. **能**宣稱 pre-registered primary **honestly null** after contamination fence.
+
+---
+
+## Synthesis and next experiment
+
+**Synthesis.** One story ties the lines: **frozen acceptance contracts** buy **replayable release decisions**, not **accuracy** at 0.5B on these banks. Invoices: visible spec is **incomplete** → **pass-but-wrong** dominates; repair path **never ran**. Filing: typed gate **withholds** some deliveries but **false-release among what ships** stays high unless the model is stronger—and even **1.5B** only **shifts** error rates.
+
+**Parallel intervention probe (box-side, exploratory; not re-run in this repo):** on a **44-item** slice at 0.5B, **contract-compiled decoding** moved **correct 5→17** but **pass-but-wrong 4→27** (incompleteness / wrong constraint surface). **Token mean-logprob** for pass-but-wrong: **AUROC ~0.56–0.60** (weak ranker). **Dual-decode agreement gate:** precision **~69%** vs **~56%** baseline — **matches self-consistency**, not independent evidence.
+
+**Next experiment (pre-registered shape, not launched here):**
+
+1. **Tighten clauses** that caused pass-but-wrong (invoice: vendor **identity** not just provenance; filing: column/period opcodes already in contract executor).  
+2. **Measure repair only when visible fails** — force a spec where greedy draft does **not** all-pass, or score **conditional repair gain** on that subset.  
+3. **Do not** treat logprob or dual-decode agreement as oracle; use only as **exploratory** withhold signals with reported AUROC / precision.  
+4. **Holdout discipline:** single writer, fenced IDs, no dual harness.
 
 ---
 
