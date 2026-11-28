@@ -74,6 +74,31 @@ def compile_contract_primary(question: Mapping[str, Any], *, profile: str = "pri
     return body
 
 
+def compile_contract_question_only(question: Mapping[str, Any]) -> dict[str, Any]:
+    """Third blind author: question + form only, minimal clauses, always ESCALATE multi-column."""
+    unit = _unit_from_question_text(question)
+    clauses: list[dict[str, Any]] = [
+        {"id": "Q1_provenance", "op": "provenance_span_substr"},
+        {"id": "Q2_value_in_span", "op": "value_in_span_numbers", "tolerance_relative": 0.001, "tolerance_floor": 0.5},
+        {"id": "Q3_multi", "op": "multi_column_escalate", "distinct_numbers_escalate_above": 2},
+    ]
+    body = {
+        "v": 1,
+        "task_id": question["id"],
+        "requester": "question_only_compiler",
+        "owner_escalate": "contract_owner@requester",
+        "field_type": "money",
+        "declared_unit": unit,
+        "declared_scale_exponent": None,
+        "declared_period_instant": None,
+        "frozen_at": FROZEN_AT,
+        "profile": "question_only",
+        "clauses": clauses,
+    }
+    body["sha256"] = sha256_obj({k: v for k, v in body.items() if k != "sha256"})
+    return body
+
+
 def compile_contract_independent(question: Mapping[str, Any]) -> dict[str, Any]:
     """Blind author: task text + form only; stricter ESCALATE on ambiguous tables (no gold JSON)."""
     unit = _unit_from_question_text(question)
