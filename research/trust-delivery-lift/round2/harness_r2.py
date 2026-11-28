@@ -109,7 +109,7 @@ def run_stitch(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
     return _row(task, "STITCH", docs[0], merged, rs, vis, ora)
 
 
-def run_vacant(task: dict[str, Any], lm: SmallLM, max_micro: int = 8) -> dict[str, Any]:
+def run_vacant(task: dict[str, Any], lm: SmallLM, max_micro: int = 4) -> dict[str, Any]:
     calls: list[GenResult] = []
     r1 = lm.generate(SYSTEM, full_prompt(task), max_new_tokens=220)
     calls.append(r1)

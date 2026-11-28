@@ -72,7 +72,7 @@ def get_call1(q: dict, page_text: str, lm: SmallLM, out: Path, reuse: bool) -> t
     if reuse and cp.is_file():
         blob = json.loads(cp.read_text(encoding="utf-8"))
         return blob["answer"], [GenResult(**c) for c in blob["calls"]]
-    r = lm.generate(SYSTEM, prompt_for(q, page_text), max_new_tokens=120)
+    r = lm.generate(SYSTEM, prompt_for(q, page_text), max_new_tokens=96)
     ans = parse_answer(r.text)
     cp.parent.mkdir(parents=True, exist_ok=True)
     cp.write_text(

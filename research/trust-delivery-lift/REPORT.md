@@ -82,16 +82,16 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 
 ## 4. Filing online — small models (in progress)
 
-- **0.5B:** `harness_online.py` → `filing/data/online_05b/` (~20 filings / 300 questions prereg subset; 220 cap optional).  
-- **Arms:** PLAIN, QUOTE_RETRY, BLIND, TYPED_REASK, TYPED_REFUSE, RULE.  
-- **Metric:** filing-level **zero-wrong** delivery share + bootstrap CI (`recompute_filing.py`).  
-- **1.5B:** queued after 0.5B.
+- **Pre-registered subset:** `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).  
+- **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). Progress tracked in repo; ETA CPU-bound.  
+- **1.5B:** tmux `filing-15b-queue` waits for 0.5B completion → `online_15b_seed42/`.  
+- **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
 
-## 5. Invoice Round 2 — field-lock vs BLIND (in progress)
+## 5. Invoice Round 2 — field-lock vs BLIND (queued)
 
-- **Holdout:** n=150 answerable (`holdout_answerable_ids`).  
-- **Arms:** `VACANT` (lock + micro-merge) vs **`BLIND`** (2× full JSON, deliver second).  
-- **McNemar:** `recompute_r2.py` after `data/holdout_05b/rows.jsonl`.
+- **Holdout:** n=150 answerable; arms **BLIND** vs **VACANT** (micro budget capped at **4** for CPU).  
+- **Resume:** `data/holdout_05b/rows.jsonl` has **2** rows (hold_000); tmux `holdout-queue` runs after 0.5B filing releases CPU.  
+- **McNemar:** `recompute_r2.py` when complete.
 
 ## 6. Verdict paragraph（可否說「問責改善交付」？）
 
