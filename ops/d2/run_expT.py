@@ -631,8 +631,14 @@ class ExpTRun:
         else:
             u = usage_from_log(out / "agent.log")
         res = {"rc": rc, "wall_s": wall_s, "usage": u, "t_start": t0, "t_end": time.time()}
+        # B44(2)：被沙箱的單檔上限（ulimit -f）以 SIGXFSZ 終止＝模型行為：不當基礎設施、不重試，照磁碟上的樣子評分
+        try:
+            tail = (out / "agent.log").read_bytes()[-20000:].decode("utf-8", "replace")
+        except OSError:
+            tail = ""
+        res["fsize_limit_hit"] = rc in (153, -25) or "File size limit exceeded" in tail
         write_json(out / "run.json", res)
-        if not self.fake and (u is None or (u.get("calls") == 0 and u.get("errors"))):
+        if not self.fake and not res["fsize_limit_hit"] and (u is None or (u.get("calls") == 0 and u.get("errors"))):
             raise InfraError(f"infra: {out} usage={u}")
         return res
 

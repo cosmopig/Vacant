@@ -35,7 +35,7 @@ LMS_HOSTS = {"w1003", "w1004"}
 # 相對路徑、家目錄、萬用字元、程式拼接的路徑（vacant-cloud 補核：絕對路徑比對抓不到這些）。沙箱裡多半只看到空目錄，
 # 所以只有「工具回傳裡出現教材或別格的內容特徵」時才算越界；命中次數一律照報。
 PATH_SUSPECT = re.compile(r"\.\./|(?:^|[\s\"'=(])~/|\$\{?HOME\}?|(?:^|[\s\"'])/\*|\*\*/|os\.path\.join|glob\.glob|\bglob\(|pathlib\.Path\(|\bfind\s+[/~.]|\bls\s+(?:-\w+\s+)*[/~]", re.I)
-MATERIAL = re.compile(r"site_frozen|flags\.json|manifest\.json|SOURCES\.md|cycle_\d|realrev\w*|d2_private|/cells/|reused_c0|routes\.json|access\.jsonl|\.live_secret")
+MATERIAL = re.compile(r"site_frozen|flags\.json|manifest\.json|SOURCES\.md|cycle_\d|realrev\w*|d2_private(?!_live)|/cells/|reused_c0|routes\.json|access\.jsonl|\.live_secret")
 URL = re.compile(r"https?://([A-Za-z0-9.\-]+)(?::(\d+))?(/[^\s\"'\\]*)?")
 
 
@@ -122,6 +122,11 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
     """
     acc = [json.loads(l) for l in (root / "access.jsonl").read_text().splitlines() if l.strip()] if (root / "access.jsonl").is_file() else []
     pm = re.compile(re.escape(d2) + r"/|" + re.escape(str(root)) + r"/")
+    # 2026-11-28（名單核對後補）：d2_private_live 是各批次共用的工作區根目錄；別格（含以前 D2′ 批次、裡面放過各修訂頁面）的
+    # live 目錄也算工作區外。agent 自己的 live 目錄用 root/.live_secret 精確算出（和 run_expT.live_dir 同一個 HMAC），只排除它。
+    import hmac as _hmac
+    secret = (root / ".live_secret").read_text().strip() if (root / ".live_secret").is_file() else None
+    live_pat = re.compile(r"d2_private_live/([0-9a-f]{24})(?![0-9a-f])")   # live 目錄名固定 24 個十六進位字；打錯的截斷路徑不算
     fetch_cmd = re.compile(r"\b(?:curl|wget|requests\.\w+\(|urlopen\(|urllib\.request|fetch\(|http\.get\()[^|;&]*?https?://([A-Za-z0-9.\-]+)", re.I)
     runs = {}
     for log in sorted((root / "cells").glob("*/r*/*/**/run/agent.log")):
@@ -130,12 +135,21 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
         rnd = rel[3] if rel[3].startswith("round_") else "c0"
         host = f"{sid}-r{rep}.d2-sources.example"
         site = root / "cells" / sid / f"r{rep}" / "c0" / "site_frozen"
-        rj = json.loads((log.parent / "run.json").read_text()) if (log.parent / "run.json").is_file() else {}
+        if not (log.parent / "run.json").is_file():
+            runs[(sid, rep, arm, rnd)] = {"in_progress": True, "escape": False, "infra": False, "escape_kinds": {}, "file_escape_calls": 0,
+                                          "net_escape_calls": 0, "context_exhausted": False, "timeout": False, "no_fetch": False,
+                                          "server_200": 0, "unlogged_server_200": 0, "requested_own_pages": 0, "egress_own_pages_200": 0}
+            continue          # 還在跑（沒有 run.json）：不判定；門檻只看已完成的格
+        rj = json.loads((log.parent / "run.json").read_text())
         t0, t1 = rj.get("t_start"), rj.get("t_end")
         txt = log.read_text(errors="replace")
-        own = re.compile(re.escape(str(log.parent)) + r"[^\s\"']*|d2_private_live/[0-9a-f]+[^\s\"']*")
+        own_tok = _hmac.new(bytes.fromhex(secret), f"{sid}_r{rep}".encode(), "sha256").hexdigest()[:24] if secret else None
+        own = re.compile(re.escape(str(log.parent)) + r"[^\s\"']*" + (r"|d2_private_live/" + own_tok + r"[^\s\"']*" if own_tok else ""))
         file_esc = net_esc = own_req = 0; kinds = collections.Counter(); fetched_hosts: set = set()
         for tn, args, res in S.calls(log):
+            other_live = [t for t in live_pat.findall(args) if own_tok is None or t != own_tok]
+            if other_live:
+                file_esc += 1; kinds["other_cell_live_dir"] += 1
             if pm.search(own.sub("", args)):            # agent 自己的輸出目錄（掛在沙箱裡）不算
                 file_esc += 1; kinds["file_outside_abs"] += 1
             elif PATH_SUSPECT.search(args):
@@ -224,6 +238,8 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
             "infra": bool(n5xx or n404_exist or (own_req > 0 and len(win) == 0) or (model_err and not ctx)),
             "_access_urls": sorted({f"http://{a['host']}{a['path']}" for a in win if a.get("status") == 200})}
     for key, r in runs.items():
+        if r.get("in_progress"):
+            continue
         sid, rep, arm, rnd = key
         cell = root / "cells" / sid / f"r{rep}"
         # egress 紀錄＝Vacant 出口代理的 egress.jsonl（c0 看快照；各臂看 final，內含 c0 起點與各輪）。
