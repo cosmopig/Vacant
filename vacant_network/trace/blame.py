@@ -471,9 +471,10 @@ class Origin:
 
 
 class Blamer:
-    def __init__(self, trace: Trace, contract: Any = None):
+    def __init__(self, trace: Trace, contract: Any = None, *, matching: str = L.DEFAULT_MATCHING):
         self.t = trace
         self.contract = contract
+        self.matching = L.validate_matching(matching)
         self.inputs: dict[str, tuple[str, pathlib.Path]] = {}   # 工作區相對路徑 → (名字, 絕對路徑)
         self.intro_line: dict[str, int | None] = {}             # 「引入」的那個轉變之後，那一行在哪
         ws = trace.rec.workspace
@@ -514,10 +515,10 @@ class Blamer:
         for tr, txt in vers[1:]:
             if txt is None and isinstance(tr, Transition) and self.t.file_missing_blob(tr.after, path):
                 return "missing_blob"
-        prev = len(L.occurrences(vers[0][1], value)) if vers[0][1] is not None else 0
+        prev = len(L.occurrences(vers[0][1], value, matching=self.matching)) if vers[0][1] is not None else 0
         intro: Transition | str | None = "initial" if prev else None
         for tr, txt in vers[1:]:
-            now = len(L.occurrences(txt, value)) if txt is not None else 0
+            now = len(L.occurrences(txt, value, matching=self.matching)) if txt is not None else 0
             if now > prev:
                 intro = tr
             elif now == 0:
@@ -530,7 +531,7 @@ class Blamer:
             and self.t.file_missing_blob(self.t.initial, path)
             and intro.step is not None
             and tool_kind(intro.step.tool) != "shell"
-            and not L.contains(self.t.input_text(intro.step), value)
+            and not L.contains(self.t.input_text(intro.step), value, matching=self.matching)
         ):
             return "missing_blob"
         return intro
@@ -541,7 +542,7 @@ class Blamer:
         if last_txt is None:
             return None
         cur = last_txt.splitlines()
-        if not (0 <= idx < len(cur)) or not L.contains(cur[idx], value):
+        if not (0 <= idx < len(cur)) or not L.contains(cur[idx], value, matching=self.matching):
             return None
         for k in range(len(vers) - 1, 0, -1):
             prev_tag, prev_txt = vers[k - 1]
@@ -558,7 +559,7 @@ class Blamer:
                         and isinstance(tag, Transition)
                         and tag.step is not None
                         and tool_kind(tag.step.tool) != "shell"
-                        and not L.contains(self.t.input_text(tag.step), value)
+                        and not L.contains(self.t.input_text(tag.step), value, matching=self.matching)
                     ):
                         return "missing_blob"
                 return tag
@@ -572,7 +573,7 @@ class Blamer:
                     mapped = i1 + (idx - j1)
                 elif op == "replace":
                     # 那一行改過：舊區塊裡對應位置附近有這個值 ⇒ 值早就在，只是那一行被改寫
-                    cands = [i for i in range(i1, i2) if L.contains(prev[i], value)]
+                    cands = [i for i in range(i1, i2) if L.contains(prev[i], value, matching=self.matching)]
                     if cands:
                         want = i1 + (idx - j1)
                         mapped = min(cands, key=lambda i: abs(i - want))
@@ -816,7 +817,7 @@ class Blamer:
                 continue
             for p in sorted(tr.paths):
                 txt = self.t.file_text(j.pre_index, p)
-                if txt is not None and L.contains(txt, value):
+                if txt is not None and L.contains(txt, value, matching=self.matching):
                     return p
         return None
 
@@ -897,14 +898,14 @@ class Blamer:
 
     def _line_of(self, index_sha: str | None, path: str, value: str) -> dict[str, Any]:
         txt = self.t.file_text(index_sha, path) or ""
-        occ = L.occurrences(txt, value)
+        occ = L.occurrences(txt, value, matching=self.matching)
         return {"line": occ[0][0]} if occ else {}
 
     def step_origin(self, s: Step, value: str, chain: list[dict[str, Any]], *,
                     depth: int, path: str | None = None) -> Origin:
         if depth > MAX_DEPTH:
             return Origin("unknown", note="lineage too deep")
-        typed = L.contains(self.t.input_text(s), value)
+        typed = L.contains(self.t.input_text(s), value, matching=self.matching)
         if tool_kind(s.tool) == "shell" and not typed:
             # 值不在指令字串裡：可能是指令算出來的，也可能只是編碼過（`base64 -d`）——
             # 後者和直接打字一樣，往下看行動者之前觀察到什麼
@@ -912,7 +913,7 @@ class Blamer:
             if o is not None:
                 return o
         for kind, j, text, ref in self.sources(s):
-            if not L.contains(text, value):
+            if not L.contains(text, value, matching=self.matching):
                 continue
             if kind == "prompt":
                 chain.append({"via": "the task message"})
@@ -958,7 +959,7 @@ class Blamer:
                 return self.step_origin(j, value, chain, depth=depth + 1)
             if kind == "shell":
                 chain.append({**j.brief(), "via": "a command's output"})
-                if L.contains(self.t.input_text(j), value):
+                if L.contains(self.t.input_text(j), value, matching=self.matching):
                     return self.step_origin(j, value, chain, depth=depth + 1)
                 return self._shell_origin(j, value, chain, depth, in_output=True) or \
                     Origin("agent", step=j, note="the command itself produced the value")
@@ -983,7 +984,7 @@ class Blamer:
         for rel, (name, p) in self.inputs.items():
             txt = self.t.file_text(self.t.initial, rel) if self._pinned_ok(rel, self.t.initial) \
                 else None
-            if txt is not None and L.contains(txt, value):
+            if txt is not None and L.contains(txt, value, matching=self.matching):
                 return Origin("input", step=s, source={"kind": "input", "name": name,
                                                        "path": rel, "observed": False},
                               note="a pinned input has this value, but no recorded read "
@@ -1034,14 +1035,14 @@ class Blamer:
             rel = self._rel(m.group(1))
             if rel and rel in idx:
                 txt = self.t.file_text(index_sha, rel)
-                if txt is not None and L.contains(txt, value):
+                if txt is not None and L.contains(txt, value, matching=self.matching):
                     return rel
         return None
 
     def _instruction_source(self, s: Step, value: str) -> dict[str, Any] | None:
         for rel in INSTRUCTION_FILES:
             txt = self.t.file_text(s.pre_index, rel)
-            if txt is not None and L.contains(txt, value):
+            if txt is not None and L.contains(txt, value, matching=self.matching):
                 return {"kind": "instructions", "path": rel, **self._line_of(s.pre_index, rel,
                                                                               value)}
         home = pathlib.Path(os.path.expanduser("~"))
@@ -1050,7 +1051,7 @@ class Blamer:
                 txt = (home / rel).read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
-            if L.contains(txt, value):
+            if L.contains(txt, value, matching=self.matching):
                 return {"kind": "instructions", "path": f"~/{rel}", "observed": False}
         return None
 
@@ -1062,7 +1063,7 @@ class Blamer:
         reads, scripts, runs_code = self._referenced_files(j)
         for f in reads + scripts:
             txt = self.t.file_text(j.pre_index, f)
-            if txt is not None and L.contains(txt, value):
+            if txt is not None and L.contains(txt, value, matching=self.matching):
                 chain.append({**j.brief(), "via": f"the command read {f}"})
                 return self.value_origin(f, value, chain, before_seq=j.seq, depth=depth + 1)
         for f in scripts:
@@ -1090,7 +1091,7 @@ class Blamer:
         fetch = None if runs_code else self._fetch_of(j)
         if fetch is not None:
             for kind, w, text, _ref in self.sources(j):
-                if kind == "own_write" and w is not None and L.contains(text, value):
+                if kind == "own_write" and w is not None and L.contains(text, value, matching=self.matching):
                     # 這個行動者自己之前打過這個值（寫到工作區外面也算）：不是網頁說的
                     chain.append({**w.brief(), "via": "its own earlier write"})
                     return self.step_origin(w, value, chain, depth=depth + 1)
@@ -1141,8 +1142,9 @@ class Blamer:
         named = [s for s in subs if str(s.actor.get("agent")) in out]
         pool = named or subs
         for s in reversed(pool):
-            if L.contains(self.t.input_text(s), value) or L.contains(self.t.output_text(s), value) \
-                    or any(L.contains(self.t.file_text(s.post_index, str(w["path"])) or "", value)
+            if L.contains(self.t.input_text(s), value, matching=self.matching) \
+                    or L.contains(self.t.output_text(s), value, matching=self.matching) \
+                    or any(L.contains(self.t.file_text(s.post_index, str(w["path"])) or "", value, matching=self.matching)
                            for w in s.writes):
                 return s
         return None
@@ -1181,7 +1183,7 @@ class Blamer:
         if s is None or not expected:
             return None
         for kind, j, text, _ref in self.sources(s):
-            if L.contains(text, expected):
+            if L.contains(text, expected, matching=self.matching):
                 return {"seen": True, "step": j.n if j is not None else None, "via": kind}
         return {"seen": False}
 
@@ -1277,10 +1279,12 @@ class _Seen:
 
 
 def rerun_flip(trace: Trace, contract: Any, claim_id: str, step: Step, loc: L.Location,
-               *, sandbox: str = "auto", line_after: int | None = None) -> dict[str, Any]:
+               *, sandbox: str = "auto", line_after: int | None = None,
+               matching: str = L.DEFAULT_MATCHING) -> dict[str, Any]:
     """在第 k 步之前與之後重建出來的狀態上重跑主張。`flipped`＝之後不過而且錯的值就在**那一行**、
     之前那一行沒有這個值；重建不出來的檔只算這條主張看得到的那些（blame#10）。"""
     from . import rerun
+    mode = L.validate_matching(matching)
     claim = rerun.claim_by_id(contract, claim_id)
     sees = _Seen(contract, claim)
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="vacant-blame-"))
@@ -1297,7 +1301,7 @@ def rerun_flip(trace: Trace, contract: Any, claim_id: str, step: Step, loc: L.Lo
                 hit = False
             else:
                 hit = any(x.path == loc.path and x.value is not None and loc.value is not None
-                          and L.contains(x.value, loc.value)
+                          and L.contains(x.value, loc.value, matching=mode)
                           and (line_after is None or x.line is None or x.line == line_after)
                           for x in locs)
             out[tag] = {"status": r["status"], "value_here": hit,
@@ -1312,10 +1316,12 @@ def rerun_flip(trace: Trace, contract: Any, claim_id: str, step: Step, loc: L.Lo
 
 def blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                    claim_id: str | None = None, sandbox: str = "auto",
-                   expected: str | None = None) -> dict[str, Any]:
+                   expected: str | None = None,
+                   matching: str = L.DEFAULT_MATCHING) -> dict[str, Any]:
     """一個位置 → 一個追緝結論（dict，可直接進鏈與報告）。"""
+    mode = L.validate_matching(matching)
     res = _blame_location(trace, loc, contract=contract, claim_id=claim_id, sandbox=sandbox,
-                          expected=expected)
+                          expected=expected, matching=mode)
     if trace.unreadable and res.get("state") not in ("UNOBSERVED",):
         # 有記下來的狀態讀不回來（版本庫被改過或壞了）：沿著版本往回追的結論都可能被換掉，
         # 不歸給任何人（竄改一個關鍵幀曾經把 provable 移到另一個行動者身上）
@@ -1341,8 +1347,9 @@ def _existence_is_the_problem(contract: Any, claim_id: str | None) -> bool:
 
 def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                     claim_id: str | None = None, sandbox: str = "auto",
-                    expected: str | None = None) -> dict[str, Any]:
-    b = Blamer(trace, contract)
+                    expected: str | None = None,
+                    matching: str = L.DEFAULT_MATCHING) -> dict[str, Any]:
+    b = Blamer(trace, contract, matching=matching)
     chain: list[dict[str, Any]] = []
     value = loc.value
     if value is None and loc.line is not None:
@@ -1421,7 +1428,8 @@ def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
             flip = rerun_flip(trace, contract, claim_id, origin.step,
                               dataclasses.replace(loc, value=value), sandbox=sandbox,
                               line_after=b.intro_line.get(f"{origin.step.seq}")
-                              if loc.line is not None else None)
+                              if loc.line is not None else None,
+                              matching=b.matching)
         except (KeyError, OSError, ValueError) as e:
             flip = {"error": str(e)[:200]}
     state, fault, conf = _grade(origin, direct, flip)
@@ -1527,10 +1535,12 @@ def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pat
 
 def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
                   state_dir: str | pathlib.Path, *, sandbox: str = "auto",
-                  max_per_claim: int = 5) -> list[dict[str, Any]]:
+                  max_per_claim: int = 5,
+                  matching: str = L.DEFAULT_MATCHING) -> list[dict[str, Any]]:
     """每一條**不過**的主張：定位 → 追緝。UNKNOWN／CONFLICT 不追（那不是繳付物的錯：
     驗證器、證據或人還沒到位）。"""
     from . import rerun
+    mode = L.validate_matching(matching)
     trace = Trace(rec)
     sd = pathlib.Path(state_dir)
     allowed = _allowed_paths(contract, sd)
@@ -1550,7 +1560,7 @@ def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
         expected = next((s.get("value") for s in sources if s.get("value") is not None), None)
         for loc in locs[:max_per_claim]:
             b = blame_location(trace, loc, contract=contract, claim_id=str(r["claim_id"]),
-                               sandbox=sandbox, expected=expected)
+                               sandbox=sandbox, expected=expected, matching=mode)
             b["detail"] = r.get("detail")
             b["hidden"] = bool(getattr(claim, "hidden", False))
             b["required"] = bool(r.get("required", True))

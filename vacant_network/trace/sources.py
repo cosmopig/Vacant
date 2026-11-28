@@ -93,14 +93,16 @@ def _plain(text: str) -> str:
     return " ".join(_html.unescape(re.sub(r"<[^>]+>", " ", t)).split())
 
 
-def plain_contains(text: str, key: str) -> bool:
-    """原文裡有，或轉成純文字後有（值由相鄰儲存格拼成時，例如『45 (3)』）。v5.2。"""
-    return L.contains(text or "", key) or L.contains(_plain(text), key)
+def plain_contains(text: str, key: str, *, matching: str = L.DEFAULT_MATCHING) -> bool:
+    """原文裡有，或轉成純文字後有（值由相鄰儲存格拼成時，例如『45 (3)』）。v5.2；`matching` 支援 `"literal"`／`"b24"`。"""
+    mode = L.validate_matching(matching)
+    raw = text or ""
+    return L.contains(raw, key, matching=mode) or L.contains(_plain(raw), key, matching=mode)
 
 
-def _carriers(text: str, key: str) -> set[str]:
+def _carriers(text: str, key: str, *, matching: str = L.DEFAULT_MATCHING) -> set[str]:
     """來源裡帶著這個值的片段。"""
-    return {seg for seg in _segments(text) if L.contains(seg, key)}
+    return {seg for seg in _segments(text) if L.contains(seg, key, matching=matching)}
 
 
 _SEG_SPLIT = re.compile(r"\s*(&&|;)\s*")
@@ -298,7 +300,7 @@ def _context_score(line: str, key: str, text: str) -> int:
 
 
 def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None,
-               contract: Any = None) -> list[dict[str, Any]]:
+               contract: Any = None, matching: str | None = None) -> list[dict[str, Any]]:
     """每個具體值 → 來源（外部網址）、當時讀到的內容雜湊、之後再讀時仍支持它的最後一次（基準）。
 
     1. `blame` 找寫下這一行的那一步，以及它的出處。
@@ -308,10 +310,11 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
        ⇒ 基準換成最後那一次；否則用寫入前讀到的那一次。⚠ 新頁面上的值若只剩在別的地方（例如舊版本移進版本紀錄），
        agent 沒改也會被當成確認過——那是 agent 被交辦後沒改對，不會再被重複交辦。
     """
+    mode = L.resolve_matching(matching)
     ws = pathlib.Path(ws).resolve()
     rec = rec or Recorder(ws)
     trace = B.Trace(rec)
-    blamer = B.Blamer(trace)
+    blamer = B.Blamer(trace, matching=mode)
     by_n = {st.n: st for st in trace.steps}
     recs = _fetch_records(trace, blamer)
     p = (ws / path)
@@ -320,10 +323,10 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
     out: list[dict[str, Any]] = []
     for c in claims_in(text):
         line = lines[c["line"] - 1]
-        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=contract)
+        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=contract, matching=mode)
         matched = c["key"]
         if c["key"] != c["value"] and not (b.get("source") or {}).get("ref"):
-            b2 = B.blame_location(trace, Location(path, c["line"], value=c["value"]), contract=contract)
+            b2 = B.blame_location(trace, Location(path, c["line"], value=c["value"]), contract=contract, matching=mode)
             if (b2.get("source") or {}).get("ref"):
                 b, matched = b2, c["value"]
         writer = next((x for x in b.get("chain") or [] if str(x.get("via", "")).startswith("wrote ")), None)
@@ -338,7 +341,8 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
             continue
         cands = []
         for key in dict.fromkeys([matched, c["key"], c["value"]]):
-            cands = [r for r in recs if r["seq"] < w.seq and r["ctx"] == w.ctx and L.contains(r["text"], key)]
+            cands = [r for r in recs if r["seq"] < w.seq and r["ctx"] == w.ctx
+                     and L.contains(r["text"], key, matching=mode)]
             if cands:
                 matched = key
                 break
@@ -354,7 +358,7 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
         base = origin
         for r in recs:
             # 寫入之後 agent 又讀了同一頁、那一頁仍帶著這個值，而這一行到現在都沒再改 ⇒ 等於它對著新的來源再確認過
-            if r["url"] == url and r["seq"] > max(base["seq"], w.seq) and _carriers(r["text"], matched):
+            if r["url"] == url and r["seq"] > max(base["seq"], w.seq) and _carriers(r["text"], matched, matching=mode):
                 base = r
         e["matched"] = matched
         e["source"] = {"url": url, "into": origin["into"], "step": origin["step"], "step_n": origin["n"],
@@ -374,9 +378,9 @@ def default_fetch(url: str) -> str:
         return r.read(MAX_BODY).decode("utf-8", "replace")
 
 
-def _still_there(seen: str, now: str, key: str) -> bool:
+def _still_there(seen: str, now: str, key: str, *, matching: str = L.DEFAULT_MATCHING) -> bool:
     """基準裡帶著這個值的每一個片段，現在的來源裡都還在。基準裡找不到帶值的片段 ⇒ 退回比整份的每一行。"""
-    car = _carriers(seen, key)
+    car = _carriers(seen, key, matching=matching)
     if car:
         return car <= _segments(now)
     lines = [ln.strip() for ln in seen.splitlines() if ln.strip()]
@@ -384,13 +388,14 @@ def _still_there(seen: str, now: str, key: str) -> bool:
 
 
 def check(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
-          record: bool = True, contract: Any = None) -> dict[str, Any]:
+          record: bool = True, contract: Any = None, matching: str | None = None) -> dict[str, Any]:
     """重讀每條宣稱的來源。回 `{"claims": [...], "affected_lines": [...], "counts": {...}}`；
     `record` ⇒ 整份結果（不含讀到的內文，只有雜湊）簽進鏈，事件類型 `source_check`。"""
+    mode = L.resolve_matching(matching)
     ws = pathlib.Path(ws).resolve()
     rec = Recorder(ws)
     rec.checkpoint("source_check")            # 行號要對得上現在的檔（和 `trace blame` 一樣）
-    prov = provenance(ws, path, rec=rec, contract=contract)
+    prov = provenance(ws, path, rec=rec, contract=contract, matching=mode)
     cache: dict[str, tuple[str | None, str | None]] = {}
     for e in prov:
         seen = e.pop("_seen", "")
@@ -410,7 +415,7 @@ def check(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = de
             e["status"], e["error"] = "unknown", err
             continue
         src["now_sha256"] = _sha(body)
-        e["status"] = "unchanged" if seen and _still_there(seen, body, e["matched"]) else "changed"
+        e["status"] = "unchanged" if seen and _still_there(seen, body, e["matched"], matching=mode) else "changed"
     counts: dict[str, int] = {}
     for e in prov:
         counts[e["status"]] = counts.get(e["status"], 0) + 1
@@ -472,13 +477,15 @@ def _blob_text(rec: Recorder, sha: str | None) -> str | None:
 
 
 def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None,
-               egress: bool = False, skip_given: bool = False) -> list[dict[str, Any]]:
+               egress: bool = False, skip_given: bool = False,
+               matching: str | None = None) -> list[dict[str, Any]]:
     """每個具體值 → 候選來源網址（集合）。寫下這一行的那一步之前、同一個工作階段裡，輸入提到網址、輸出含這個值的步驟。
     `egress`（v4）：另外收網路出口紀錄（`source_fetch` 事件）裡、寫下這一行之前實際抓過、內容含這個值的網址——不靠指令文字。"""
+    mode = L.resolve_matching(matching)
     ws = pathlib.Path(ws).resolve()
     rec = rec or Recorder(ws)
     trace = B.Trace(rec)
-    blamer = B.Blamer(trace)
+    blamer = B.Blamer(trace, matching=mode)
     by_n = {st.n: st for st in trace.steps}
     recs = _fetch_records(trace, blamer)
     fetched = egress_records(rec) if egress else []
@@ -500,7 +507,7 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
             i = ln_txt.find(c["value"])
             if i >= 0 and ln_txt[:i + len(c["value"])].strip() and ln_txt[:i + len(c["value"])] in initial:
                 continue
-        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=None)
+        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=None, matching=mode)
         writer = next((x for x in b.get("chain") or [] if str(x.get("via", "")).startswith("wrote ")), None)
         w = by_n.get(writer.get("n")) if writer else None
         urls: list[str] = []
@@ -512,23 +519,23 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                 if not us:
                     continue
                 o = trace.output_text(st) or ""
-                if any(plain_contains(o, k) for k in dict.fromkeys([c["key"], c["value"]])):
+                if any(plain_contains(o, k, matching=mode) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls += [u for u in us if u not in urls]
             for r in recs:
                 if r["seq"] < w.seq and r["ctx"] == w.ctx and r["url"] not in urls and \
-                        any(plain_contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                        any(plain_contains(r["text"], k, matching=mode) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls.append(r["url"])
         egress_seen: dict[str, str] = {}
         if egress and w is not None:
             t_w = ts_of.get(int(w.seq), 0)
             for f in fetched:                   # 實際抓過的（任何工具）：寫入那一步記下之前抓的、內容含這個值
-                if f["ts_ms"] <= t_w and any(plain_contains(f["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                if f["ts_ms"] <= t_w and any(plain_contains(f["text"], k, matching=mode) for k in dict.fromkeys([c["key"], c["value"]])):
                     if f["url"] not in urls:
                         urls.append(f["url"])
                     egress_seen[f["url"]] = f["text"]
         seen: dict[str, str] = {}
         for r in recs:                          # 每個網址取「含這個值」的最近一筆（同一頁可能被 grep 過好幾次、各取不同欄）
-            if r["url"] in urls and any(plain_contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+            if r["url"] in urls and any(plain_contains(r["text"], k, matching=mode) for k in dict.fromkeys([c["key"], c["value"]])):
                 seen[r["url"]] = r["text"]
         for u, t in egress_seen.items():
             seen.setdefault(u, t)
@@ -538,15 +545,16 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
 
 
 def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
-             record: bool = True, egress: bool = False) -> dict[str, Any]:
+             record: bool = True, egress: bool = False, matching: str | None = None) -> dict[str, Any]:
     """把交件裡每條宣稱的候選網址現在的內容抓一份，存進內容定址庫、簽進鏈（`source_snapshot`）。0 token。"""
+    mode = L.resolve_matching(matching)
     ws = pathlib.Path(ws).resolve()
     rec = Recorder(ws)
     rec.checkpoint("source_snapshot")
     if egress:
         ingest_egress(rec)
     urls: list[str] = []
-    for e in candidates(ws, path, rec=rec, egress=egress, skip_given=egress):
+    for e in candidates(ws, path, rec=rec, egress=egress, skip_given=egress, matching=mode):
         urls += [u for u in e["candidates"] if u not in urls]
     pages: dict[str, str] = {}
     errors: dict[str, str] = {}
@@ -563,17 +571,18 @@ def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] =
 
 def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
                      record: bool = True, by_value: bool = False, egress: bool = False,
-                     by_field: bool = False) -> dict[str, Any]:
+                     by_field: bool = False, matching: str | None = None) -> dict[str, Any]:
     """候選集合版的來源檢查。每條宣稱：拿每個候選網址的「上一次快照」（沒有快照就用 agent 當時讀到的內容）裡帶著這個值的片段，
     和現在的頁面比；任一候選頁的那些片段不在了 ⇒ changed；有候選頁帶著這個值、而且都沒變 ⇒ unchanged；
     沒有任何候選頁帶著這個值 ⇒ no_source；抓不到 ⇒ 當成 changed（寧可多交辦）。檢查完把現在的頁面記成新的快照。"""
+    mode = L.resolve_matching(matching)
     ws = pathlib.Path(ws).resolve()
     rec = Recorder(ws)
     rec.checkpoint("source_check")
     if egress:
         ingest_egress(rec)
     snaps = _snapshots(rec)
-    cands = candidates(ws, path, rec=rec, egress=egress, skip_given=by_value or egress)
+    cands = candidates(ws, path, rec=rec, egress=egress, skip_given=by_value or egress, matching=mode)
     now_cache: dict[str, str | None] = {}
 
     def now(u: str) -> str | None:
@@ -590,15 +599,15 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
         per: dict[str, str] = {}
         for u in e["candidates"]:
             prev = _blob_text(rec, snaps.get(u)) or seen.get(u) or ""
-            key = e["key"] if (_carriers(prev, e["key"]) or plain_contains(prev, e["key"])) else e["value"]
-            car = _carriers(prev, key)
-            if not car and not (by_value and plain_contains(prev, key)):
+            key = e["key"] if (_carriers(prev, e["key"], matching=mode) or plain_contains(prev, e["key"], matching=mode)) else e["value"]
+            car = _carriers(prev, key, matching=mode)
+            if not car and not (by_value and plain_contains(prev, key, matching=mode)):
                 continue
             cur = now(u)
             if cur is None:
                 per[u] = "unknown"
             elif by_value:
-                per[u] = value_status(prev, cur, key, by_field=by_field) or "changed"
+                per[u] = value_status(prev, cur, key, by_field=by_field, matching=mode) or "changed"
             else:
                 per[u] = "unchanged" if car <= _segments(cur) else "changed"
         if not per:
@@ -773,19 +782,19 @@ def _json_follow(prev: Any, cur: Any, path: tuple) -> tuple[bool, Any]:
     return True, cur
 
 
-def _json_status(prev: Any, cur: Any, key: str) -> str | None:
-    hits = [p for p, v in _json_leaves(prev) if v is not None and L.contains(str(v), key)]
+def _json_status(prev: Any, cur: Any, key: str, *, matching: str = L.DEFAULT_MATCHING) -> str | None:
+    hits = [p for p, v in _json_leaves(prev) if v is not None and L.contains(str(v), key, matching=matching)]
     if not hits:
         return None
     for p in hits:
         ok, v = _json_follow(prev, cur, p)
-        if not ok or v is None or not L.contains(str(v), key):
+        if not ok or v is None or not L.contains(str(v), key, matching=matching):
             return "changed"
     return "unchanged"
 
 
-def _line_status(prev: str, cur: str, key: str) -> str | None:
-    plines = [x for x in _text_lines(prev) if L.contains(x, key)]
+def _line_status(prev: str, cur: str, key: str, *, matching: str = L.DEFAULT_MATCHING) -> str | None:
+    plines = [x for x in _text_lines(prev) if L.contains(x, key, matching=matching)]
     if not plines:
         return None
     clines = _text_lines(cur)
@@ -800,24 +809,26 @@ def _line_status(prev: str, cur: str, key: str) -> str | None:
                 best, tied = r, [c]
             elif abs(r - best) <= 1e-9:
                 tied.append(c)
-        if best < 0.5 or not tied or not all(L.contains(c, key) for c in tied):
+        if best < 0.5 or not tied or not all(L.contains(c, key, matching=matching) for c in tied):
             return "changed"
     return "unchanged"
 
 
-def value_status(prev: str, cur: str, key: str, *, by_field: bool = False) -> str | None:
+def value_status(prev: str, cur: str, key: str, *, by_field: bool = False,
+                 matching: str = L.DEFAULT_MATCHING) -> str | None:
     """值所在的位置還是不是這個值。None＝prev 裡沒有這個值（這一頁不是它的來源）。
     `by_field`（v5）：表格類（CSV／TSV／管線表格／定寬表格／HTML 表格）照「表頭＋列」定位、XML 照元素路徑，
     不再用「最像的一行」——同一列別的欄位剛好也是這個值時不會被騙。"""
+    mode = L.validate_matching(matching)
     try:
         pj, cj = _json.loads(prev), _json.loads(cur)
         if isinstance(pj, (dict, list)) and isinstance(cj, (dict, list)):
-            return _json_status(pj, cj, key)
+            return _json_status(pj, cj, key, matching=mode)
     except ValueError:
         pass
     if by_field:
-        return _field_status(prev, cur, key)
-    return _line_status(prev, cur, key)
+        return _field_status(prev, cur, key, matching=mode)
+    return _line_status(prev, cur, key, matching=mode)
 
 
 # ---------- v5（2026-11-25 第五輪）：非 JSON 來源也照欄位定位 ----------
@@ -919,12 +930,14 @@ def _text_tables(text: str) -> list[list[list[str]]]:
     return tables
 
 
-def _table_hits(tables: list[list[list[str]]], key: str) -> list[tuple[int, int, int]]:
+def _table_hits(tables: list[list[list[str]]], key: str, *,
+                matching: str = L.DEFAULT_MATCHING) -> list[tuple[int, int, int]]:
     return [(ti, ri, ci) for ti, t in enumerate(tables) for ri, row in enumerate(t) for ci, c in enumerate(row)
-            if ri > 0 and L.contains(c, key)]
+            if ri > 0 and L.contains(c, key, matching=matching)]
 
 
-def _table_cell_status(pt: list[list[str]], ri: int, ci: int, cts: list[list[list[str]]], key: str) -> str | None:
+def _table_cell_status(pt: list[list[str]], ri: int, ci: int, cts: list[list[list[str]]], key: str, *,
+                       matching: str = L.DEFAULT_MATCHING) -> str | None:
     """prev 那一格：在 cur 的表裡找「表頭一樣、其他格相同最多」的那一列，看同名欄還是不是這個值。"""
     head, row = pt[0], pt[ri]
     col = head[ci] if ci < len(head) else None
@@ -943,13 +956,13 @@ def _table_cell_status(pt: list[list[str]], ri: int, ci: int, cts: list[list[lis
                 tied.append((crow, cc))
     if best == 0:
         return None
-    return "unchanged" if all(cc < len(r) and L.contains(r[cc], key) for r, cc in tied) else "changed"
+    return "unchanged" if all(cc < len(r) and L.contains(r[cc], key, matching=matching) for r, cc in tied) else "changed"
 
 
-def _field_status(prev: str, cur: str, key: str) -> str | None:
+def _field_status(prev: str, cur: str, key: str, *, matching: str = L.DEFAULT_MATCHING) -> str | None:
     px, cx = _xml_tree(prev), _xml_tree(cur)
     if px is not None and cx is not None:
-        return _json_status(px, cx, key)
+        return _json_status(px, cx, key, matching=matching)
     is_html = bool(re.search(r"(?is)<(table|html|body|div|p)\b", prev))
     if is_html:
         hp, hc = _Tables(), _Tables()
@@ -962,22 +975,22 @@ def _field_status(prev: str, cur: str, key: str) -> str | None:
         pts, cts = _text_tables(prev), _text_tables(cur)
         rest_p, rest_c = prev, cur
     statuses = []
-    for ti, ri, ci in _table_hits(pts, key):
-        st = _table_cell_status(pts[ti], ri, ci, cts, key)
-        statuses.append(st if st is not None else (_line_status(prev, cur, key) or "changed"))
+    for ti, ri, ci in _table_hits(pts, key, matching=matching):
+        st = _table_cell_status(pts[ti], ri, ci, cts, key, matching=matching)
+        statuses.append(st if st is not None else (_line_status(prev, cur, key, matching=matching) or "changed"))
     if is_html:
-        ls = _line_status(rest_p, rest_c, key)
+        ls = _line_status(rest_p, rest_c, key, matching=matching)
         if not statuses and ls is None:
             # v5.2：值跨相鄰儲存格（沒有任何單一格含這個值）⇒ 把每一列的儲存格以空白相接成一行，再用「最像的一行」
             rp = "\n".join(" ".join(r) for t in pts for r in t)
             rc = "\n".join(" ".join(r) for t in cts for r in t)
-            ls = _line_status(rp, rc, key)
+            ls = _line_status(rp, rc, key, matching=matching)
     else:
         # 不在表格裡的出現（表格行以外的文字）用「最像的一行」
         tbl_lines = {"|".join(r) for t in pts for r in t}
         others = "\n".join(ln for ln in prev.splitlines()
                            if not (_split_cells(ln) and "|".join(_split_cells(ln)[1]) in tbl_lines))
-        ls = _line_status(others, rest_c, key) if L.contains(others, key) else None
+        ls = _line_status(others, rest_c, key, matching=matching) if L.contains(others, key, matching=matching) else None
     if ls is not None:
         statuses.append(ls)
     if not statuses:

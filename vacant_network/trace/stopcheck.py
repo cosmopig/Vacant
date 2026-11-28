@@ -39,11 +39,12 @@ def _coverage(rec: Recorder) -> dict[str, Any]:
     return F.coverage_summary(rec)
 
 
-def _flag_blames(rec: Recorder, contract: Any) -> list[dict[str, Any]]:
+def _flag_blames(rec: Recorder, contract: Any, *, matching: str = "literal") -> list[dict[str, Any]]:
     """人標記過、還沒撤銷、而且那個值**還在**那個位置的：和不過的主張一起回饋給 agent。"""
     from . import locate as L
     from .blame import Trace, blame_location
     from .cli import open_flags
+    mode = L.validate_matching(matching)
     out = []
     trace = None
     for f in open_flags(rec):
@@ -53,10 +54,10 @@ def _flag_blames(rec: Recorder, contract: Any) -> list[dict[str, Any]]:
             txt = p.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
-        if loc.value and not L.contains(txt, loc.value):
+        if loc.value and not L.contains(txt, loc.value, matching=mode):
             continue                                     # 已經改掉了 ⇒ 這個標記解決了
         trace = trace or Trace(rec)
-        b = blame_location(trace, loc, contract=contract)
+        b = blame_location(trace, loc, contract=contract, matching=mode)
         b.update(claim=f"flag:{f['flag_id']}", detail=f.get("note") or "flagged by the task owner",
                  required=True, hidden=False, finding_id=str(f["flag_id"]))
         out.append(b)
@@ -86,7 +87,10 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
              why_open: str | None = None, sandbox: str = "auto",
              workspace: pathlib.Path | None = None,
              session: str | None = None,
-             scan_deadline_s: float | None = None) -> dict[str, Any] | None:
+             scan_deadline_s: float | None = None,
+             matching: str | None = None) -> dict[str, Any] | None:
+    from . import locate as L
+    mode = L.resolve_matching(matching)
     ws = workspace or capture.workspace_for(cwd, contract)
     if ws is None:
         return None
@@ -101,8 +105,8 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
     for r in results:
         r.setdefault("hidden", r.get("claim_id") in hidden)
     scope = rec.dir.name                         # 專案鍵：結論的 id 不跨專案撞在一起
-    blames = blame_results(rec, contract, results, ws, sandbox=sandbox)
-    blames += _flag_blames(rec, contract)
+    blames = blame_results(rec, contract, results, ws, sandbox=sandbox, matching=mode)
+    blames += _flag_blames(rec, contract, matching=mode)
     for b in blames:
         b.setdefault("finding_id", F.finding_id(b, scope=scope))
         b["source_hidden"] = _hidden_source(contract, b)
