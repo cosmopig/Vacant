@@ -1,0 +1,22 @@
+{
+  "BLIND": {
+    "n": 22,
+    "visible_pass_coverage": 0.0,
+    "p_oracle_fail_given_visible_pass": NaN
+  },
+  "LPB3": {
+    "n": 22,
+    "visible_pass_coverage": 0.0,
+    "p_oracle_fail_given_visible_pass": NaN
+  },
+  "MAJ3": {
+    "n": 22,
+    "visible_pass_coverage": 0.0,
+    "p_oracle_fail_given_visible_pass": NaN
+  },
+  "VACANT": {
+    "n": 22,
+    "visible_pass_coverage": 0.0,
+    "p_oracle_fail_given_visible_pass": NaN
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "216",
+    "scale": "in millions",
+    "in billions": "0.00216",
+    "page": 7,
+    "span": "2026-09-30 Purchases of investments in operating joint ventures"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"216\",\"scale\":\"in millions\",\"in billions\":\"0.00216\",\"page\":7,\"span\":\"2026-09-30 Purchases of investments in operating joint ventures\"}",
+      "prompt_tokens": 158,
+      "completion_tokens": 52,
+      "latency_s": 1.5189164140001594,
+      "mean_logprob": null
+    }
+  ]
+}

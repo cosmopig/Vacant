@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,536",
+    "scale": "in millions",
+    "in billions": "0.2536",
+    "page": 9,
+    "span": "Current debt obligations"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,536\",\"scale\":\"in millions\",\"in billions\":\"0.2536\",\"page\":9,\"span\":\"Current debt obligations\"}",
+      "prompt_tokens": 173,
+      "completion_tokens": 38,
+      "latency_s": 1.1428883670000687,
+      "mean_logprob": null
+    }
+  ]
+}

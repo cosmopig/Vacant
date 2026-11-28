@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "5",
+    "scale": "in millions",
+    "in billions": "0.005",
+    "page": 3,
+    "span": "Total Net Asset"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"5\",\"scale\":\"in millions\",\"in billions\":\"0.005\",\"page\":3,\"span\":\"Total Net Asset\"}",
+      "prompt_tokens": 140,
+      "completion_tokens": 33,
+      "latency_s": 0.9817484249997506,
+      "mean_logprob": null
+    }
+  ]
+}

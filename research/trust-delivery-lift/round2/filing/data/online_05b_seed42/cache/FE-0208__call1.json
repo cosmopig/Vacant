@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "10",
+    "scale": "in millions",
+    "in billions": "0.01",
+    "page": 4,
+    "span": "Less: Net income attributable to noncontrolling interests"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"10\", \"scale\":\"in millions\",\"in billions\":\"0.01\",\"page\":4,\"span\":\"Less: Net income attributable to noncontrolling interests\"}",
+      "prompt_tokens": 162,
+      "completion_tokens": 41,
+      "latency_s": 1.2211693489998652,
+      "mean_logprob": null
+    }
+  ]
+}

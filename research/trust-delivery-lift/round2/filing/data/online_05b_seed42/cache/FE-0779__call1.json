@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "-4.8",
+    "scale": "in millions",
+    "in billions": "-0.0048",
+    "page": 6,
+    "span": "Change in Hulu income tax classification (27.3) \u2014 "
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"-4.8\",\"scale\":\"in millions\",\"in billions\":\"-0.0048\",\"page\":6,\"span\":\"Change in Hulu income tax classification (27.3) \u2014 \"}",
+      "prompt_tokens": 152,
+      "completion_tokens": 48,
+      "latency_s": 1.4306238069998471,
+      "mean_logprob": null
+    }
+  ]
+}

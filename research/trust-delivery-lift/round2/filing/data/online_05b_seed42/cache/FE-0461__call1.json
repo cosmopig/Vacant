@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "654.696",
+    "scale": "in millions",
+    "in billions": "0.00654696",
+    "page": 8,
+    "span": "Private equity securities at cost"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"654.696\",\"scale\":\"in millions\",\"in billions\":\"0.00654696\",\"page\":8,\"span\":\"Private equity securities at cost\"}",
+      "prompt_tokens": 148,
+      "completion_tokens": 46,
+      "latency_s": 1.341314345000228,
+      "mean_logprob": null
+    }
+  ]
+}

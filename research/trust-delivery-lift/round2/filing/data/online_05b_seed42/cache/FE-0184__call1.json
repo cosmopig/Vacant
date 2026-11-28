@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "28,241",
+    "scale": "in millions",
+    "in billions": "0.0028241",
+    "page": 7,
+    "span": "2026-09-30 Net property and equipment"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"28,241\",\"scale\":\"in millions\",\"in billions\":\"0.0028241\",\"page\":7,\"span\":\"2026-09-30 Net property and equipment\"}",
+      "prompt_tokens": 151,
+      "completion_tokens": 53,
+      "latency_s": 1.559135513000001,
+      "mean_logprob": null
+    }
+  ]
+}

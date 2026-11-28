@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "316",
+    "scale": "in millions",
+    "in billions": "0.00316",
+    "page": 5,
+    "span": "Occupancy and equipment"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"316\",\"scale\":\"in millions\",\"in billions\":\"0.00316\",\"page\":5,\"span\":\"Occupancy and equipment\"}",
+      "prompt_tokens": 175,
+      "completion_tokens": 38,
+      "latency_s": 1.1484049379996577,
+      "mean_logprob": null
+    }
+  ]
+}

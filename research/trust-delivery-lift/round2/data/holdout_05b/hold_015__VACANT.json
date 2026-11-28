@@ -1,0 +1,52 @@
+{
+  "task_id": "hold_015",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "VACANT",
+  "draft": {
+    "vendor": "Northwind Traders",
+    "invoice_date": "2024-11-16",
+    "due_date": "2024-12-01",
+    "currency": "EUR",
+    "subtotal": "6215.5",
+    "tax": "310.78",
+    "total": "6526.28",
+    "order_id": "PO-347431"
+  },
+  "final": {
+    "vendor": "Northwind Traders",
+    "invoice_date": "2024-11-16",
+    "due_date": "2024-12-01",
+    "currency": "EUR",
+    "subtotal": "6215.5",
+    "tax": "310.78",
+    "total": "6526.28",
+    "order_id": "PO-347431"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 362,
+  "completion_tokens": 109,
+  "cpu_seconds": 3.3012426440000127,
+  "n_calls": 2,
+  "locked_fields": [
+    "currency",
+    "due_date",
+    "invoice_date",
+    "order_id",
+    "subtotal",
+    "tax",
+    "total"
+  ],
+  "visible_detail": {
+    "vendor": "unknown_field",
+    "invoice_date": "ok",
+    "due_date": "ok",
+    "currency": "ok",
+    "subtotal": "ok",
+    "tax": "ok",
+    "total": "ok",
+    "order_id": "ok"
+  }
+}

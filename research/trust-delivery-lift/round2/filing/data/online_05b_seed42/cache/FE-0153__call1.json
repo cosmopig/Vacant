@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,237",
+    "scale": "in millions",
+    "in billions": "0.02237",
+    "page": 1,
+    "span": "Federal and other taxes on income"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,237\", \"scale\":\"in millions\",\"in billions\":\"0.02237\",\"page\":1,\"span\":\"Federal and other taxes on income\"}",
+      "prompt_tokens": 149,
+      "completion_tokens": 43,
+      "latency_s": 1.2723856239999805,
+      "mean_logprob": null
+    }
+  ]
+}

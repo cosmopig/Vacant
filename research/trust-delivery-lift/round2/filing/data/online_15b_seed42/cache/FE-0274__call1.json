@@ -1,0 +1,17 @@
+{
+  "answer": {
+    "status": "found",
+    "value": 26789,
+    "scale": "in millions",
+    "span": "Programming and production 7,515 8,655 26,789 24,646"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":26789,\"scale\":\"in millions\",\"span\":\"Programming and production 7,515 8,655 26,789 24,646\"}",
+      "prompt_tokens": 168,
+      "completion_tokens": 50,
+      "latency_s": 5.258987312000045,
+      "mean_logprob": null
+    }
+  ]
+}

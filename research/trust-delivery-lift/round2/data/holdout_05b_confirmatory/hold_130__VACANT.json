@@ -1,0 +1,60 @@
+{
+  "task_id": "hold_130",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "VACANT",
+  "draft": {
+    "vendor": "Contoso Ltd.",
+    "invoice_date": "2024-01-17",
+    "due_date": "2024-02-01",
+    "currency": "USD",
+    "subtotal": "936.72",
+    "tax": "46.84",
+    "total": "983.56",
+    "order_id": "PO-171206"
+  },
+  "final": {
+    "vendor": "Contoso Ltd.",
+    "invoice_date": "2024-01-17",
+    "due_date": "2024-02-01",
+    "currency": "USD",
+    "subtotal": "936.72",
+    "tax": "46.84",
+    "total": "983.56",
+    "order_id": "PO-171206"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": false,
+  "visible_x_oracle": "V+_O-",
+  "prompt_tokens": 173,
+  "completion_tokens": 102,
+  "cpu_seconds": 2.987498439999399,
+  "n_calls": 1,
+  "draft_visible_pass": true,
+  "draft_oracle_success": false,
+  "draft_prompt_tokens": 173,
+  "draft_completion_tokens": 102,
+  "draft_cpu_seconds": 2.987498439999399,
+  "gated_ship_exploratory": true,
+  "locked_fields": [
+    "currency",
+    "due_date",
+    "invoice_date",
+    "order_id",
+    "subtotal",
+    "tax",
+    "total",
+    "vendor"
+  ],
+  "visible_detail": {
+    "vendor": "ok",
+    "invoice_date": "ok",
+    "due_date": "ok",
+    "currency": "ok",
+    "subtotal": "ok",
+    "tax": "ok",
+    "total": "ok",
+    "order_id": "ok",
+    "__global__": "ok"
+  }
+}

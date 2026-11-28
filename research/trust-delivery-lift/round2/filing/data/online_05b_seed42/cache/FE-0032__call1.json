@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,248",
+    "scale": "in millions",
+    "in billions": "0.0013",
+    "page": 1,
+    "span": "Deferred revenue and other"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,248\",\"scale\":\"in millions\",\"in billions\":\"0.0013\",\"page\":1,\"span\":\"Deferred revenue and other\"}",
+      "prompt_tokens": 149,
+      "completion_tokens": 39,
+      "latency_s": 1.1291938340000343,
+      "mean_logprob": null
+    }
+  ]
+}

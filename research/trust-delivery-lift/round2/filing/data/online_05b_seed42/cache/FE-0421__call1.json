@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "17,391",
+    "scale": "in millions",
+    "in billions": "0.17391",
+    "page": 4,
+    "span": "Total intangible assets with indefinite lives $17,391"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"17,391\",\"scale\":\"in millions\",\"in billions\":\"0.17391\",\"page\":4,\"span\":\"Total intangible assets with indefinite lives $17,391\"}",
+      "prompt_tokens": 157,
+      "completion_tokens": 51,
+      "latency_s": 1.4884451640000407,
+      "mean_logprob": null
+    }
+  ]
+}

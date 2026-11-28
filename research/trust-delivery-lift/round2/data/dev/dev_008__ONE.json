@@ -1,0 +1,33 @@
+{
+  "task_id": "dev_008",
+  "template_id": "T4",
+  "answerable": true,
+  "arm": "ONE",
+  "draft": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-10-14",
+    "due_date": "2024-11-28",
+    "currency": "GBP",
+    "subtotal": "3978.38",
+    "tax": "198.92",
+    "total": "4177.3",
+    "order_id": "PO-487903"
+  },
+  "final": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-10-14",
+    "due_date": "2024-11-28",
+    "currency": "GBP",
+    "subtotal": "3978.38",
+    "tax": "198.92",
+    "total": "4177.3",
+    "order_id": "PO-487903"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 176,
+  "completion_tokens": 105,
+  "cpu_seconds": 3.449745802000052,
+  "n_calls": 1
+}

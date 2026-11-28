@@ -1,0 +1,33 @@
+{
+  "task_id": "hold_043",
+  "template_id": "T4",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Northwind Traders",
+    "invoice_date": "2024-12-19",
+    "due_date": "2025-02-02",
+    "currency": "EUR",
+    "subtotal": "9261.25",
+    "tax": "463.06",
+    "total": "9724.31",
+    "order_id": "PO-643400"
+  },
+  "final": {
+    "vendor": "Northwind Traders",
+    "invoice_date": "2024-12-19",
+    "due_date": "2025-02-02",
+    "currency": "EUR",
+    "subtotal": "9261.25",
+    "tax": "463.06",
+    "total": "9724.31",
+    "order_id": "PO-643400"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 531,
+  "completion_tokens": 322,
+  "cpu_seconds": 11.573760433000643,
+  "n_calls": 3
+}

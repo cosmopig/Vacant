@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "12,804",
+    "scale": "in millions",
+    "in billions": "0.128",
+    "page": 5,
+    "span": "2026-09-30 Cash and cash equivalents"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"12,804\",\"scale\":\"in millions\",\"in billions\":\"0.128\",\"page\":5,\"span\":\"2026-09-30 Cash and cash equivalents\"}",
+      "prompt_tokens": 150,
+      "completion_tokens": 49,
+      "latency_s": 1.427094906000093,
+      "mean_logprob": null
+    }
+  ]
+}

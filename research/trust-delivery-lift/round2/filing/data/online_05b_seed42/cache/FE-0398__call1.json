@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "26,789",
+    "scale": "in millions",
+    "in billions": "0.26789",
+    "page": 1,
+    "span": "Total programming and production costs"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"26,789\",\"scale\":\"in millions\",\"in billions\":\"0.26789\",\"page\":1,\"span\":\"Total programming and production costs\"}",
+      "prompt_tokens": 170,
+      "completion_tokens": 42,
+      "latency_s": 1.2490366659999381,
+      "mean_logprob": null
+    }
+  ]
+}

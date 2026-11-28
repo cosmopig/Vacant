@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "16,310",
+    "scale": "in millions",
+    "in billions": "0.093",
+    "page": 1,
+    "span": "Biopharma total revenues"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"16,310\",\"scale\":\"in millions\",\"in billions\":\"0.093\",\"page\":1,\"span\":\"Biopharma total revenues\"}",
+      "prompt_tokens": 175,
+      "completion_tokens": 40,
+      "latency_s": 1.2036324480000076,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "4,534",
+    "scale": "in millions",
+    "in billions": "0.004534",
+    "page": 7,
+    "span": "Accrued compensation and employee related obligations"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"4,534\",\"scale\":\"in millions\",\"in billions\":\"0.004534\",\"page\":7,\"span\":\"Accrued compensation and employee related obligations\"}",
+      "prompt_tokens": 155,
+      "completion_tokens": 45,
+      "latency_s": 1.3085490270000264,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$315 million",
+    "scale": "in millions",
+    "in billions": "0.0315",
+    "page": 7,
+    "span": "In the three months ended September 30, 2026"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$315 million\",\"scale\":\"in millions\",\"in billions\":\"0.0315\",\"page\":7,\"span\":\"In the three months ended September 30, 2026\"}",
+      "prompt_tokens": 315,
+      "completion_tokens": 50,
+      "latency_s": 1.5465403510002034,
+      "mean_logprob": null
+    }
+  ]
+}

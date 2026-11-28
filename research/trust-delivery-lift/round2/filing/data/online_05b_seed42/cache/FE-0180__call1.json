@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "296",
+    "scale": "in millions",
+    "in billions": "0.30",
+    "page": 1,
+    "span": "Non-service FAS pension expense"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"296\",\"scale\":\"in millions\",\"in billions\":\"0.30\",\"page\":1,\"span\":\"Non-service FAS pension expense\"}",
+      "prompt_tokens": 161,
+      "completion_tokens": 37,
+      "latency_s": 1.1023894929999187,
+      "mean_logprob": null
+    }
+  ]
+}

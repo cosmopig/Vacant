@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,560.4",
+    "scale": "in millions",
+    "in billions": "0.0256",
+    "page": 3,
+    "span": "line from text"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,560.4\",\"scale\":\"in millions\",\"in billions\":\"0.0256\",\"page\":3,\"span\":\"line from text\"}",
+      "prompt_tokens": 172,
+      "completion_tokens": 40,
+      "latency_s": 1.1822198089998892,
+      "mean_logprob": null
+    }
+  ]
+}

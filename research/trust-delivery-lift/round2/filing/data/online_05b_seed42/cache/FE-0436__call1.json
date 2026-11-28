@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,258",
+    "scale": "in millions",
+    "in billions": "0.6258",
+    "page": 4,
+    "span": "Total Company-operated restaurant expenses"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,258\",\"scale\":\"in millions\",\"in billions\":\"0.6258\",\"page\":4,\"span\":\"Total Company-operated restaurant expenses\"}",
+      "prompt_tokens": 172,
+      "completion_tokens": 41,
+      "latency_s": 1.232889693999823,
+      "mean_logprob": null
+    }
+  ]
+}

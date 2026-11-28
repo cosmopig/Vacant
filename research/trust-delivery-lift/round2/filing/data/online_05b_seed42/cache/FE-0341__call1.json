@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,811",
+    "scale": "in millions",
+    "in billions": "0.02811",
+    "page": 4,
+    "span": "2026-09-30 Net Income Available to Common Stockholders $ 2,811"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,811\",\"scale\":\"in millions\",\"in billions\":\"0.02811\",\"page\":4,\"span\":\"2026-09-30 Net Income Available to Common Stockholders $ 2,811\"}",
+      "prompt_tokens": 176,
+      "completion_tokens": 60,
+      "latency_s": 1.7784502980002799,
+      "mean_logprob": null
+    }
+  ]
+}

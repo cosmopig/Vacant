@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "not_found",
+    "value": 0,
+    "scale": "in millions",
+    "in billions": "0",
+    "page": 3,
+    "span": "verbatim line from text"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"not_found\",\"value\":0,\"scale\":\"in millions\",\"in billions\":\"0\",\"page\":3,\"span\":\"verbatim line from text\"}",
+      "prompt_tokens": 147,
+      "completion_tokens": 31,
+      "latency_s": 0.9252877019998778,
+      "mean_logprob": null
+    }
+  ]
+}

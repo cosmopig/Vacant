@@ -1,0 +1,33 @@
+{
+  "task_id": "hold_053",
+  "template_id": "T4",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-05-02",
+    "due_date": "2024-05-17",
+    "currency": "USD",
+    "subtotal": "8109.58",
+    "tax": "1621.92",
+    "total": "9731.5",
+    "order_id": "PO-796225"
+  },
+  "final": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-05-02",
+    "due_date": "2024-05-17",
+    "currency": "USD",
+    "subtotal": "8109.58",
+    "tax": "1621.92",
+    "total": "9731.5",
+    "order_id": "PO-796225"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 528,
+  "completion_tokens": 319,
+  "cpu_seconds": 11.410749731001488,
+  "n_calls": 3
+}

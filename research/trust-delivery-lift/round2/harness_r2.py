@@ -144,17 +144,26 @@ def run_vacant(task: dict[str, Any], lm: SmallLM, max_micro: int = 4) -> dict[st
     return _row(task, "VACANT", parse_json_delivery(r1.text), doc, calls, vis, ora, extra={"locked_fields": sorted(locked), "visible_detail": {k: v[1] for k, v in per.items()}})
 
 
+def _deliverable_dict(d: dict) -> bool:
+    """Parsed JSON with all invoice fields present (non-empty); blocks {} parse-fail equality."""
+    return bool(d) and all(str(d.get(f, "")).strip() for f in FIELDS)
+
+
 def _gating_ship(arm: str, calls: list[GenResult], doc: dict, draft_docs: list[dict], visible_pass: bool) -> bool:
-    """Exploratory secondary gate (no extra model calls). LPB3_LOGPROB_TAU frozen in amendment."""
+    """Exploratory secondary gate (no extra model calls). LPB3 τ quarantined — see amendment."""
     if arm == "VACANT":
         return visible_pass
     if arm == "BLIND" and len(draft_docs) >= 2:
+        if not all(_deliverable_dict(x) for x in draft_docs[:2]):
+            return False
         return draft_docs[0] == draft_docs[1]
     if arm == "MAJ3" and len(draft_docs) >= 3:
+        if not all(_deliverable_dict(x) for x in draft_docs[:3]):
+            return False
         return draft_docs[0] == draft_docs[1] == draft_docs[2]
-    if arm == "LPB3" and calls:
-        lp = max((c.mean_logprob if c.mean_logprob is not None else -1e9) for c in calls)
-        return lp >= -12.5
+    # LPB3 gate DISABLED (invalid τ) — always no-ship until dev logprob artifact exists.
+    if arm == "LPB3":
+        return False
     return False
 
 

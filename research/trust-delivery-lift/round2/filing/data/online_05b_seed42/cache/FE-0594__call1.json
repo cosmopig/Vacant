@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "7,094",
+    "scale": "in millions",
+    "in billions": "7.094",
+    "page": 1,
+    "span": "2026-09-27 Research and development expenses"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"7,094\",\"scale\":\"in millions\",\"in billions\":\"7.094\",\"page\":1,\"span\":\"2026-09-27 Research and development expenses\"}",
+      "prompt_tokens": 169,
+      "completion_tokens": 48,
+      "latency_s": 1.4479688199999146,
+      "mean_logprob": null
+    }
+  ]
+}

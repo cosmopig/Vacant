@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "219,027",
+    "scale": "in millions",
+    "in billions": "0.219",
+    "page": 4,
+    "span": "Retained earnings"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"219,027\",\"scale\":\"in millions\",\"in billions\":\"0.219\",\"page\":4,\"span\":\"Retained earnings\"}",
+      "prompt_tokens": 148,
+      "completion_tokens": 39,
+      "latency_s": 1.160901838999962,
+      "mean_logprob": null
+    }
+  ]
+}

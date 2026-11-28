@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,578",
+    "scale": "in millions",
+    "in billions": "0.006578",
+    "page": 4,
+    "span": "Total other comprehensive income/(loss), after-tax"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,578\",\"scale\":\"in millions\",\"in billions\":\"0.006578\",\"page\":4,\"span\":\"Total other comprehensive income/(loss), after-tax\"}",
+      "prompt_tokens": 187,
+      "completion_tokens": 46,
+      "latency_s": 1.3729892799997288,
+      "mean_logprob": null
+    }
+  ]
+}

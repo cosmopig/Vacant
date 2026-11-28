@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "8",
+    "scale": "in millions",
+    "in billions": "0.008",
+    "page": 4,
+    "span": "Comprehensive income attributable to noncontrolling interests"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"8\",\"scale\":\"in millions\",\"in billions\":\"0.008\",\"page\":4,\"span\":\"Comprehensive income attributable to noncontrolling interests\"}",
+      "prompt_tokens": 155,
+      "completion_tokens": 39,
+      "latency_s": 1.1511976299998423,
+      "mean_logprob": null
+    }
+  ]
+}

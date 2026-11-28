@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,418",
+    "scale": "in millions",
+    "in billions": "0.1418",
+    "page": 3,
+    "span": "Current operating lease liabilities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,418\",\"scale\":\"in millions\",\"in billions\":\"0.1418\",\"page\":3,\"span\":\"Current operating lease liabilities\"}",
+      "prompt_tokens": 151,
+      "completion_tokens": 39,
+      "latency_s": 1.151830979999886,
+      "mean_logprob": null
+    }
+  ]
+}

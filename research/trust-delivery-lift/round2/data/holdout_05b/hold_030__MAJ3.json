@@ -1,0 +1,34 @@
+{
+  "task_id": "hold_030",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "MAJ3",
+  "draft": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-09-14",
+    "due_date": "2024-09-29",
+    "currency": "EUR",
+    "subtotal": "2433.0",
+    "tax": "194.64",
+    "total": "2627.64",
+    "order_id": "PO-787801",
+    "previous_balance": "{'reference_quote_number': '1387', 'billing_address': None, 'ship_to': 'Warehouse 7'}"
+  },
+  "final": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-09-14",
+    "due_date": "2024-09-29",
+    "currency": "EUR",
+    "subtotal": "2433.0",
+    "tax": "194.64",
+    "total": "2627.64",
+    "order_id": "PO-787801"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 528,
+  "completion_tokens": 353,
+  "cpu_seconds": 12.526192778000222,
+  "n_calls": 3
+}

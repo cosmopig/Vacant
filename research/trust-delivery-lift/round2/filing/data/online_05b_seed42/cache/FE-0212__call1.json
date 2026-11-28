@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,611",
+    "scale": "in millions",
+    "in billions": "0.01611",
+    "page": 1,
+    "span": "Total net unrealized gains (losses) on fixed-maturity securities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,611\",\"scale\":\"in millions\",\"in billions\":\"0.01611\",\"page\":1,\"span\":\"Total net unrealized gains (losses) on fixed-maturity securities\"}",
+      "prompt_tokens": 182,
+      "completion_tokens": 50,
+      "latency_s": 1.5005810279999423,
+      "mean_logprob": null
+    }
+  ]
+}

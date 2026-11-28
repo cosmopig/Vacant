@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$145.9 million",
+    "scale": "in millions",
+    "in billions": "0.1459",
+    "page": 6,
+    "span": "This note is a secured loan that provides us with funds to finance certain projects or acquisitions."
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$145.9 million\",\"scale\":\"in millions\",\"in billions\":\"0.1459\",\"page\":6,\"span\":\"This note is a secured loan that provides us with funds to finance certain projects or acquisitions.\"}",
+      "prompt_tokens": 197,
+      "completion_tokens": 55,
+      "latency_s": 1.6431614770003762,
+      "mean_logprob": null
+    }
+  ]
+}

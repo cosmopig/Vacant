@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "125,240",
+    "scale": "in millions",
+    "in billions": "0.12524",
+    "page": 8,
+    "span": "payables to brokerage clients"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"125,240\",\"scale\":\"in millions\",\"in billions\":\"0.12524\",\"page\":8,\"span\":\"payables to brokerage clients\"}",
+      "prompt_tokens": 157,
+      "completion_tokens": 43,
+      "latency_s": 1.3611443149998195,
+      "mean_logprob": null
+    }
+  ]
+}

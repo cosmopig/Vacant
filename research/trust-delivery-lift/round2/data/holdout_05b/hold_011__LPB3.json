@@ -1,0 +1,33 @@
+{
+  "task_id": "hold_011",
+  "template_id": "T2",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Contoso Ltd.",
+    "invoice_date": "2024-07-07",
+    "due_date": "2024-08-06",
+    "currency": "EUR",
+    "subtotal": "3244.23",
+    "tax": "648.85",
+    "total": "3893.08",
+    "order_id": "PO-595758"
+  },
+  "final": {
+    "vendor": "Contoso Ltd.",
+    "invoice_date": "2024-07-07",
+    "due_date": "2024-08-06",
+    "currency": "EUR",
+    "subtotal": "3244.23",
+    "tax": "648.85",
+    "total": "3893.08",
+    "order_id": "PO-595758"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": false,
+  "visible_x_oracle": "V-_O-",
+  "prompt_tokens": 528,
+  "completion_tokens": 323,
+  "cpu_seconds": 11.396213726000042,
+  "n_calls": 3
+}

@@ -1,0 +1,42 @@
+{
+  "task_id": "hold_069",
+  "template_id": "T5",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Humongous Insurance",
+    "invoice_date": "2024-04-22",
+    "due_date": "2024-05-07",
+    "currency": "USD",
+    "subtotal": "9092.32",
+    "tax": "1818.46",
+    "total": "10910.78",
+    "order_id": "PO-425288",
+    "previous_balance": "{'purchase_order': 'PO-425288', 'reference_quote': '4594', 'ship_to': 'Warehouse 7'}"
+  },
+  "final": {
+    "vendor": "Humongous Insurance",
+    "invoice_date": "2024-04-22",
+    "due_date": "2024-05-07",
+    "currency": "USD",
+    "subtotal": "9092.32",
+    "tax": "1818.46",
+    "total": "10910.78",
+    "order_id": "PO-425288",
+    "previous_balance": "{'ignore': 491.04, 'ship_to': 'Warehouse 7, not billing address'}",
+    "reference_quote_number": "4594"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 537,
+  "completion_tokens": 444,
+  "cpu_seconds": 15.69054086199958,
+  "n_calls": 3,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 179,
+  "draft_completion_tokens": 152,
+  "draft_cpu_seconds": 5.367347237999638,
+  "gated_ship_exploratory": true
+}

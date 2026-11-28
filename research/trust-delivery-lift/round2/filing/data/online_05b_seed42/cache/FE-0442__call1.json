@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,104",
+    "scale": "in millions",
+    "in billions": "0.01104",
+    "page": 7,
+    "span": "Employee-related costs (direct)"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,104\", \"scale\":\"in millions\",\"in billions\":\"0.01104\",\"page\":7,\"span\":\"Employee-related costs (direct)\"}",
+      "prompt_tokens": 169,
+      "completion_tokens": 43,
+      "latency_s": 1.2782881370003452,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,102",
+    "scale": "in millions",
+    "in billions": "1.102",
+    "page": 3,
+    "span": "Investment in U.S. entities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,102\",\"scale\":\"in millions\",\"in billions\":\"1.102\",\"page\":3,\"span\":\"Investment in U.S. entities\"}",
+      "prompt_tokens": 157,
+      "completion_tokens": 41,
+      "latency_s": 1.1882940810000946,
+      "mean_logprob": null
+    }
+  ]
+}

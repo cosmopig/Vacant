@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": 2,
+    "scale": "in millions",
+    "in billions": "0.002",
+    "page": 4,
+    "span": "2025-12-31 Total deferred tax liabilities $ 2,681 $ 2,883"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":2, \"scale\":\"in millions\",\"in billions\":\"0.002\",\"page\":4,\"span\":\"2025-12-31 Total deferred tax liabilities $ 2,681 $ 2,883\"}",
+      "prompt_tokens": 160,
+      "completion_tokens": 59,
+      "latency_s": 1.735444230000212,
+      "mean_logprob": null
+    }
+  ]
+}

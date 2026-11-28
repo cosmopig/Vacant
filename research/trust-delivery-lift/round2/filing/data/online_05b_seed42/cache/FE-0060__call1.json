@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,149",
+    "scale": "in millions",
+    "in billions": "0.11",
+    "page": 5,
+    "span": "Accounts payable"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,149\",\"scale\":\"in millions\",\"in billions\":\"0.11\",\"page\":5,\"span\":\"Accounts payable\"}",
+      "prompt_tokens": 151,
+      "completion_tokens": 35,
+      "latency_s": 1.052082141000028,
+      "mean_logprob": null
+    }
+  ]
+}

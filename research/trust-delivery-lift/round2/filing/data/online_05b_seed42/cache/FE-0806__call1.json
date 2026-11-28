@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$1.77",
+    "scale": "in thousands",
+    "in billions": "0.0177",
+    "page": 4,
+    "span": "Dividends declared per common share"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$1.77\",\"scale\":\"in thousands\",\"in billions\":\"0.0177\",\"page\":4,\"span\":\"Dividends declared per common share\"}",
+      "prompt_tokens": 172,
+      "completion_tokens": 42,
+      "latency_s": 1.2735511260002568,
+      "mean_logprob": null
+    }
+  ]
+}

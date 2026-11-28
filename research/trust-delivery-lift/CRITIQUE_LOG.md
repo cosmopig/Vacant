@@ -111,6 +111,22 @@ Record of external (Gemini) critiques and responses.
 
 | 2026-11-28 23:47 Asia/Taipei | **Owner** (push cadence) | Commit locally during long runs; **push ≤1 / ~3h** + final REPORT before 12:00 Taipei — reduce PR email noise. |
 
+### PRE-RUN — Supervisor VAC-1 (2026-11-29 00:05 Asia/Taipei) — seal primary, no confirmatory peek
+
+**Objection:** “170/170 dev” looped holdout gold; LPB3 τ ad hoc; `{}=={}` gating bias; cost parity asserted without distributions; Goodhart on VACANT visible gate unreported.
+
+**Confounds:** Confirmatory harness still running — code fixes to gating affect **future rows only**; primary McNemar untouched.
+
+**Falsifier:** Primary seal + dev-only tests pass without editing `checks.py` after holdout feedback.
+
+**Survival:** Doc-only primary seal + manifest in confirmatory dir; restrict gold test to **dev_ids n=20** + specificity perturbations; cost/Goodhart on **pilot_excluded only**; quarantine LPB3 gate; disclose answerable-only scope; **no** confirmatory outcome reads this turn.
+
+**Attestation:** `checks.py` logic unchanged in this patch (vendor fix from prior commit only); `test_visible_checker_dev.py` scope narrowed, not tuned on holdout.
+
+**Verdict:** Act doc + gating guard + pilot audits; keep confirmatory run alive.
+
+| 2026-11-29 00:05 Asia/Taipei | **Supervisor VAC-1 (hourly)** | Primary seal; dev 20/20 gold; cost pilot audit; gating quarantine; no restart. |
+
 ## Anticipated critic targets (pre-buttress)
 
 1. **Non-paired drafts in pilot v1** — Fixed in v2: `freeze_drafts.py` + `harness.py --drafts`.

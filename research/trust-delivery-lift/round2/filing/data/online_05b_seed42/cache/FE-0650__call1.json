@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$23.4 billion",
+    "scale": "in millions",
+    "in billions": "2.34",
+    "page": 5,
+    "span": "verbatim line from text"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$23.4 billion\",\"scale\":\"in millions\",\"in billions\":\"2.34\",\"page\":5,\"span\":\"verbatim line from text\"}",
+      "prompt_tokens": 352,
+      "completion_tokens": 38,
+      "latency_s": 1.1895296909997342,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "task_id": "hold_117",
+  "template_id": "T3",
+  "answerable": true,
+  "arm": "VACANT",
+  "draft": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-09-02",
+    "due_date": "2024-10-02",
+    "currency": "GBP",
+    "subtotal": "9755.02",
+    "tax": "1951.0",
+    "total": "11706.02",
+    "order_id": "PO-347243"
+  },
+  "final": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-09-02",
+    "due_date": "2024-10-02",
+    "currency": "GBP",
+    "subtotal": "9755.02",
+    "tax": "1951.0",
+    "total": "11706.02",
+    "order_id": "PO-347243"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 178,
+  "completion_tokens": 107,
+  "cpu_seconds": 3.1381023499998264,
+  "n_calls": 1,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 178,
+  "draft_completion_tokens": 107,
+  "draft_cpu_seconds": 3.1381023499998264,
+  "gated_ship_exploratory": true,
+  "locked_fields": [
+    "currency",
+    "due_date",
+    "invoice_date",
+    "order_id",
+    "subtotal",
+    "tax",
+    "total",
+    "vendor"
+  ],
+  "visible_detail": {
+    "vendor": "ok",
+    "invoice_date": "ok",
+    "due_date": "ok",
+    "currency": "ok",
+    "subtotal": "ok",
+    "tax": "ok",
+    "total": "ok",
+    "order_id": "ok",
+    "__global__": "ok"
+  }
+}

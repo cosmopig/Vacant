@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "(2,199)",
+    "scale": "in millions",
+    "in billions": "0.002199",
+    "page": 3,
+    "span": "2026-09-27 Payments on short-term borrowings \u2014"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"(2,199)\",\"scale\":\"in millions\",\"in billions\":\"0.002199\",\"page\":3,\"span\":\"2026-09-27 Payments on short-term borrowings \u2014\"}",
+      "prompt_tokens": 150,
+      "completion_tokens": 55,
+      "latency_s": 1.617187332999947,
+      "mean_logprob": null
+    }
+  ]
+}

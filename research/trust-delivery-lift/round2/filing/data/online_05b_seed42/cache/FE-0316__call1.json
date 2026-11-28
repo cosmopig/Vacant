@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,570",
+    "scale": "in millions",
+    "in billions": "0.0257",
+    "page": 1,
+    "span": "2026-09-30 Net income (loss) attributable to MetLife, Inc."
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,570\",\"scale\":\"in millions\",\"in billions\":\"0.0257\",\"page\":1,\"span\":\"2026-09-30 Net income (loss) attributable to MetLife, Inc.\"}",
+      "prompt_tokens": 181,
+      "completion_tokens": 57,
+      "latency_s": 1.6642073889997846,
+      "mean_logprob": null
+    }
+  ]
+}

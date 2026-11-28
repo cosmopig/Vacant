@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "51,835",
+    "scale": "in millions",
+    "in billions": "0.031",
+    "page": 1,
+    "span": "Total operating costs and expenses"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"51,835\",\"scale\":\"in millions\",\"in billions\":\"0.031\",\"page\":1,\"span\":\"Total operating costs and expenses\"}",
+      "prompt_tokens": 173,
+      "completion_tokens": 40,
+      "latency_s": 1.4080153639997661,
+      "mean_logprob": null
+    }
+  ]
+}

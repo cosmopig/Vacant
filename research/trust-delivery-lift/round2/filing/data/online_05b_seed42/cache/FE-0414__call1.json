@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,463",
+    "scale": "in millions",
+    "in billions": "0.0109",
+    "page": 7,
+    "span": "Total deferred tax liabilities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,463\",\"scale\":\"in millions\",\"in billions\":\"0.0109\",\"page\":7,\"span\":\"Total deferred tax liabilities\"}",
+      "prompt_tokens": 152,
+      "completion_tokens": 39,
+      "latency_s": 1.1464318739999726,
+      "mean_logprob": null
+    }
+  ]
+}
