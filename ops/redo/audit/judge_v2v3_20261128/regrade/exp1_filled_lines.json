@@ -1,0 +1,511 @@
+{
+ "note": "事後敏感度（2026-11-28）：實驗一重評後「有填行版」比值與被標比例。合併方式與判準照 ops/d2/exp1_combine.py（組以 A_/B_ 前綴區分）。分母 (a) excl_status_missing 排除 status=='missing'（與 exp1_combine.py 的 combined_excl_missing / sc_excl_missing 逐位一致）；分母 (b) excl_empty_value 只排除值為空（None / '' / 'None'）的行，值欄由對應 score_strict 檔依 (set, arm, eval==cycle, claim) 對齊並驗證 status 一致。本檔只含計數與比例，不含任何值。",
+ "prereg_criterion_verbatim": "有填行上比值仍 ≥3 且被標比例 ≤30% ⇒「人工複查引導」列為候選；比值 <2 ⇒ 7.63 主要來自抓空白。",
+ "bootstrap": {
+  "method": "cluster_by_set",
+  "n_boot": 2000,
+  "seed": 20261128,
+  "ci_level": 0.95,
+  "quantile_rule": "[sorted[int(0.025*len)], sorted[int(0.975*len)-1]]"
+ },
+ "inputs": {
+  "flags_a_repro": "~/dev/ops/ctl/regrade_20261128/exp1cA_flags_regrade_repro.json",
+  "flags_a_b24": "~/dev/ops/ctl/regrade_20261128/exp1cA_flags_regrade_b24.json",
+  "flags_b_repro": "~/dev/ops/d2_results/exp1_recompute_20261128/exp1cB_flags_repro.json",
+  "flags_b_b24": "~/dev/ops/d2_results/exp1_recompute_20261128/exp1cB_flags_b24.json",
+  "score_a": "~/dev/ops/ctl/regrade_20261128/exp1cA_score_strict_regrade.json",
+  "score_b": "~/dev/ops/d2_results/exp1cB/score_strict.json"
+ },
+ "row_counts_audit": {
+  "A": {
+   "total_rows": 1700,
+   "status_missing_rows": 525,
+   "empty_value_rows": 500,
+   "status_missing_with_nonempty_value_rows": 25,
+   "nonmissing_with_empty_value_rows": 0,
+   "excl_status_missing_rows": 1175,
+   "excl_empty_value_rows": 1200
+  },
+  "B": {
+   "total_rows": 1775,
+   "status_missing_rows": 650,
+   "empty_value_rows": 650,
+   "status_missing_with_nonempty_value_rows": 0,
+   "nonmissing_with_empty_value_rows": 0,
+   "excl_status_missing_rows": 1125,
+   "excl_empty_value_rows": 1125
+  },
+  "combined": {
+   "total_rows": 3475,
+   "status_missing_rows": 1175,
+   "empty_value_rows": 1150,
+   "status_missing_with_nonempty_value_rows": 25,
+   "nonmissing_with_empty_value_rows": 0,
+   "excl_status_missing_rows": 2300,
+   "excl_empty_value_rows": 2325
+  }
+ },
+ "matches_exp1_combine_excl_missing": true,
+ "results": {
+  "repro": {
+   "combined": {
+    "excl_status_missing": {
+     "units": 2300,
+     "sets": 25,
+     "flagged": 1617,
+     "flagged_share": 0.7030434782608695,
+     "errors": 772,
+     "error_rate": 0.3356521739130435,
+     "error_rate_flagged": 0.4427952999381571,
+     "error_rate_unflagged": 0.08199121522693997,
+     "rate_ratio": 5.400521247460023,
+     "rate_ratio_ci95": [
+      3.261449275362319,
+      10.468046256847229
+     ],
+     "recall": 0.927461139896373,
+     "recall_ci95": [
+      0.8770186335403727,
+      0.9676300578034682
+     ],
+     "recall_lower95_boot20261128": 0.8845108695652174,
+     "exp1_combine_recall_lower95": 0.883495145631068,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|flagged": 415,
+      "stale|missed": 14,
+      "stale|flagged": 212,
+      "wrong_read|missed": 42,
+      "wrong_read|flagged": 89
+     },
+     "recall_by_type": {
+      "fabricated": 1.0,
+      "stale": 0.9380530973451328,
+      "wrong_read": 0.6793893129770993
+     },
+     "plain": {
+      "look_share": 0.7030434782608695,
+      "miss_share_of_errors": 0.07253886010362698,
+      "random_same_size_miss_share": 0.29695652173913045
+     }
+    },
+    "excl_empty_value": {
+     "units": 2325,
+     "sets": 25,
+     "flagged": 1637,
+     "flagged_share": 0.7040860215053764,
+     "errors": 797,
+     "error_rate": 0.34279569892473116,
+     "error_rate_flagged": 0.44960293219303604,
+     "error_rate_unflagged": 0.08866279069767442,
+     "rate_ratio": 5.070931431947685,
+     "rate_ratio_ci95": [
+      3.1843601862252644,
+      9.02256169212691
+     ],
+     "recall": 0.9234629861982434,
+     "recall_ci95": [
+      0.8717632552404438,
+      0.9624697336561744
+     ],
+     "recall_lower95_boot20261128": 0.880354505169867,
+     "exp1_combine_recall_lower95": 0.8802631578947369,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|flagged": 415,
+      "missing|missed": 5,
+      "missing|flagged": 20,
+      "stale|missed": 14,
+      "stale|flagged": 212,
+      "wrong_read|missed": 42,
+      "wrong_read|flagged": 89
+     },
+     "recall_by_type": {
+      "fabricated": 1.0,
+      "missing": 0.8,
+      "stale": 0.9380530973451328,
+      "wrong_read": 0.6793893129770993
+     },
+     "plain": {
+      "look_share": 0.7040860215053764,
+      "miss_share_of_errors": 0.07653701380175659,
+      "random_same_size_miss_share": 0.29591397849462364
+     }
+    }
+   },
+   "software_plus_companies": {
+    "excl_status_missing": {
+     "units": 1175,
+     "sets": 12,
+     "flagged": 648,
+     "flagged_share": 0.5514893617021277,
+     "errors": 264,
+     "error_rate": 0.2246808510638298,
+     "error_rate_flagged": 0.36419753086419754,
+     "error_rate_unflagged": 0.05313092979127135,
+     "rate_ratio": 6.854717813051146,
+     "rate_ratio_ci95": [
+      3.6821880650994574,
+      24.157731958762888
+     ],
+     "recall": 0.8939393939393939,
+     "recall_ci95": [
+      0.8125,
+      0.970873786407767
+     ],
+     "recall_lower95_boot20261128": 0.8237179487179487,
+     "exp1_combine_recall_lower95": 0.824,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 1,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|flagged": 79,
+      "stale|flagged": 157,
+      "wrong_read|missed": 28
+     },
+     "recall_by_type": {
+      "fabricated": 1.0,
+      "stale": 1.0,
+      "wrong_read": 0.0
+     },
+     "plain": {
+      "look_share": 0.5514893617021277,
+      "miss_share_of_errors": 0.10606060606060608,
+      "random_same_size_miss_share": 0.4485106382978723
+     }
+    },
+    "excl_empty_value": {
+     "units": 1200,
+     "sets": 12,
+     "flagged": 668,
+     "flagged_share": 0.5566666666666666,
+     "errors": 289,
+     "error_rate": 0.24083333333333334,
+     "error_rate_flagged": 0.38323353293413176,
+     "error_rate_unflagged": 0.06203007518796992,
+     "rate_ratio": 6.17818907639267,
+     "rate_ratio_ci95": [
+      3.4905853790126784,
+      17.028822055137844
+     ],
+     "recall": 0.8858131487889274,
+     "recall_ci95": [
+      0.8085808580858086,
+      0.960431654676259
+     ],
+     "recall_lower95_boot20261128": 0.822289156626506,
+     "exp1_combine_recall_lower95": 0.8215488215488216,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|flagged": 79,
+      "missing|missed": 5,
+      "missing|flagged": 20,
+      "stale|flagged": 157,
+      "wrong_read|missed": 28
+     },
+     "recall_by_type": {
+      "fabricated": 1.0,
+      "missing": 0.8,
+      "stale": 1.0,
+      "wrong_read": 0.0
+     },
+     "plain": {
+      "look_share": 0.5566666666666666,
+      "miss_share_of_errors": 0.11418685121107264,
+      "random_same_size_miss_share": 0.44333333333333336
+     }
+    }
+   }
+  },
+  "b24": {
+   "combined": {
+    "excl_status_missing": {
+     "units": 2300,
+     "sets": 25,
+     "flagged": 1279,
+     "flagged_share": 0.5560869565217391,
+     "errors": 772,
+     "error_rate": 0.3356521739130435,
+     "error_rate_flagged": 0.5293197810789679,
+     "error_rate_unflagged": 0.0930460333006856,
+     "rate_ratio": 5.688794699806592,
+     "rate_ratio_ci95": [
+      3.869281045751634,
+      8.957104861989555
+     ],
+     "recall": 0.8769430051813472,
+     "recall_ci95": [
+      0.7936507936507936,
+      0.9368029739776952
+     ],
+     "recall_lower95_boot20261128": 0.8076358296622613,
+     "exp1_combine_recall_lower95": 0.8031496062992126,
+     "exp1_combine_verdict": "UNRESOLVED",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|missed": 3,
+      "fabricated|flagged": 412,
+      "stale|missed": 50,
+      "stale|flagged": 176,
+      "wrong_read|missed": 42,
+      "wrong_read|flagged": 89
+     },
+     "recall_by_type": {
+      "fabricated": 0.9927710843373494,
+      "stale": 0.7787610619469026,
+      "wrong_read": 0.6793893129770993
+     },
+     "plain": {
+      "look_share": 0.5560869565217391,
+      "miss_share_of_errors": 0.12305699481865284,
+      "random_same_size_miss_share": 0.4439130434782609
+     }
+    },
+    "excl_empty_value": {
+     "units": 2325,
+     "sets": 25,
+     "flagged": 1299,
+     "flagged_share": 0.5587096774193548,
+     "errors": 797,
+     "error_rate": 0.34279569892473116,
+     "error_rate_flagged": 0.5365665896843725,
+     "error_rate_unflagged": 0.09746588693957114,
+     "rate_ratio": 5.505173210161662,
+     "rate_ratio_ci95": [
+      3.814348306151585,
+      8.351729064809232
+     ],
+     "recall": 0.8745294855708908,
+     "recall_ci95": [
+      0.7928571428571428,
+      0.9311408016443987
+     ],
+     "recall_lower95_boot20261128": 0.8071216617210683,
+     "exp1_combine_recall_lower95": 0.802653399668325,
+     "exp1_combine_verdict": "UNRESOLVED",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|missed": 3,
+      "fabricated|flagged": 412,
+      "missing|missed": 5,
+      "missing|flagged": 20,
+      "stale|missed": 50,
+      "stale|flagged": 176,
+      "wrong_read|missed": 42,
+      "wrong_read|flagged": 89
+     },
+     "recall_by_type": {
+      "fabricated": 0.9927710843373494,
+      "missing": 0.8,
+      "stale": 0.7787610619469026,
+      "wrong_read": 0.6793893129770993
+     },
+     "plain": {
+      "look_share": 0.5587096774193548,
+      "miss_share_of_errors": 0.12547051442910917,
+      "random_same_size_miss_share": 0.44129032258064516
+     }
+    }
+   },
+   "software_plus_companies": {
+    "excl_status_missing": {
+     "units": 1175,
+     "sets": 12,
+     "flagged": 635,
+     "flagged_share": 0.5404255319148936,
+     "errors": 264,
+     "error_rate": 0.2246808510638298,
+     "error_rate_flagged": 0.3669291338582677,
+     "error_rate_unflagged": 0.05740740740740741,
+     "rate_ratio": 6.3916687833375665,
+     "rate_ratio_ci95": [
+      3.5274238727749165,
+      20.885064065786956
+     ],
+     "recall": 0.8825757575757576,
+     "recall_ci95": [
+      0.8016528925619835,
+      0.964
+     ],
+     "recall_lower95_boot20261128": 0.8142857142857143,
+     "exp1_combine_recall_lower95": 0.8137651821862348,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 1,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|missed": 3,
+      "fabricated|flagged": 76,
+      "stale|flagged": 157,
+      "wrong_read|missed": 28
+     },
+     "recall_by_type": {
+      "fabricated": 0.9620253164556962,
+      "stale": 1.0,
+      "wrong_read": 0.0
+     },
+     "plain": {
+      "look_share": 0.5404255319148936,
+      "miss_share_of_errors": 0.11742424242424243,
+      "random_same_size_miss_share": 0.4595744680851064
+     }
+    },
+    "excl_empty_value": {
+     "units": 1200,
+     "sets": 12,
+     "flagged": 655,
+     "flagged_share": 0.5458333333333333,
+     "errors": 289,
+     "error_rate": 0.24083333333333334,
+     "error_rate_flagged": 0.38625954198473283,
+     "error_rate_unflagged": 0.06605504587155964,
+     "rate_ratio": 5.8475402883799825,
+     "rate_ratio_ci95": [
+      3.403699537557805,
+      14.679839737752687
+     ],
+     "recall": 0.8754325259515571,
+     "recall_ci95": [
+      0.8032786885245902,
+      0.950354609929078
+     ],
+     "recall_lower95_boot20261128": 0.8135593220338984,
+     "exp1_combine_recall_lower95": 0.8140243902439024,
+     "exp1_combine_verdict": "FAIL",
+     "criterion_eval": {
+      "ratio_ge_3": true,
+      "flagged_share_le_30pct": false,
+      "ratio_lt_2": false,
+      "outcome": "neither_branch_ratio_ge3_but_flagged_gt30pct",
+      "description": "兩條事前判準皆未落入：比值仍 ≥3（不落入「比值 <2 ⇒ 7.63 主要來自抓空白」），但被標比例 >30%（未達「人工複查引導」候選條件）"
+     },
+     "bootstrap_diag": {
+      "n_boot": 2000,
+      "seed": 20261128,
+      "recall_valid_draws": 2000,
+      "ratio_valid_draws": 2000,
+      "ratio_inf_draws": 0,
+      "ratio_undef_draws": 0
+     },
+     "errors_by_type": {
+      "fabricated|missed": 3,
+      "fabricated|flagged": 76,
+      "missing|missed": 5,
+      "missing|flagged": 20,
+      "stale|flagged": 157,
+      "wrong_read|missed": 28
+     },
+     "recall_by_type": {
+      "fabricated": 0.9620253164556962,
+      "missing": 0.8,
+      "stale": 1.0,
+      "wrong_read": 0.0
+     },
+     "plain": {
+      "look_share": 0.5458333333333333,
+      "miss_share_of_errors": 0.12456747404844293,
+      "random_same_size_miss_share": 0.4541666666666667
+     }
+    }
+   }
+  }
+ }
+}
