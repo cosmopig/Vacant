@@ -1,69 +1,120 @@
 # trust-delivery-lift 結果報告
 
 **分支：** `research/trust-delivery-lift`  
-**模型：** Qwen2.5-0.5B-Instruct（CPU，transformers）  
-**截止：** 2026-11-28（台北）；確認性批次同日跑完  
+**模型（依回合）：** Qwen2.5-0.5B-Instruct CPU；Filing 線另含 1.5B（進行中）  
+**截止目標：** 2026-11-29 12:00 Asia/Taipei  
 
 ## English abstract
 
-We tested **evidence-located repair (EVR)** vs cheap baselines under a **fixed two-call budget** and **paired call-1 drafts**, using a typed visible/hidden scorer with synthetic must-equal/must-differ controls. On **24 held-out org-profile tasks** (12 pilot mechanism, 12 confirmatory), **Qwen2.5-0.5B** achieved **1/12 whole-deliverable success** for both **BLIND** and **EVR** (8.3%, Wilson 95% CI [1.5%, 35.4%]). **No net lift** (0 paired wrong→right exclusive to EVR; 0 harms exclusive to BLIND). **Conclusion:** under this small model and task mix, **accountability-style feedback does not measurably improve delivery**; failure is mostly **capacity/formatting**, not missing repair signal after visible checks were strengthened.
+**Pilot 1 (n=12):** EVR vs BLIND under paired 2-call budget → **null** (1/12 each).  
+**Filing checker validity (qwen3.5-9b C1, not small-model delivery):** requester **frozen contract** executed by fixed opcode table; quote-pass-wrong catch **74%**, false reject **~4.9%** (bootstrap CI crosses 5%). **Contract-author stress test fails pre-registered rule:** independent vs primary same ship/hold decision **48%** — lift cannot be attributed to “the contract” abstractly; judgment lives in **which clauses are frozen**. **Invoice Round 2 holdout** BLIND vs VACANT **running**. **Verdict:** accountability **relocates** judgment to requester + named ESCALATE owner; it does **not** eliminate residual risk or guarantee stable lift across contract authors.
 
 ---
 
-## 1. 測了什麼
+## Where judgment lives
 
-| 項目 | 內容 |
-|------|------|
-| 任務 | 24 份合成「公司簡介」結構化抽取（5 必填欄位／來源段落） |
-| 機制 | **EVR**：可見檢查失敗欄位 + 來源摘錄；**BLIND** 全量重寫；**BLANKS**／**KEEP** 等基線 |
-| 成本 | 每題 **2 次模型呼叫**：共用 **call-1 初稿**（`freeze_drafts.py`）+ 各臂 **call-2** |
-| 評分 | **可見**：格式、幣別、城市不含逗號、數字需出現在來源；**隱藏**：typed gold（事後） |
+| Locus | Who decides | What | Residual risk (honest) |
+|-------|-------------|------|-------------------------|
+| **Acceptance contract** | Requester / benchmark operator (before any model run) | Field types, units, tolerances (`0.001`/`0.5`), opcode set, `owner_escalate` | Wrong or incomplete clauses → false release or false reject; **not** fixed by re-tuning after seeing errors |
+| **VACANT runtime** | Nobody (executor only) | `PASS` / `FAIL` / `ESCALATE` per clause + spans + `executor_sha256` | Cannot resolve semantics; **must not** pick accounting definitions |
+| **ESCALATE queue** | Named reviewer (`contract_owner@requester` in contract JSON) | Multi-column period disputes, items outside contract | Until resolved, delivery withheld (`TYPED_REFUSE` arm) |
+| **Held-out oracle** | Experiment runner only (post hoc) | Whether value matches HF gold | Never visible to model or acceptance during run |
+| **Page context stub** | Harness limitation | Evidence-line text, not full HTML | Provenance clause incomplete → **35–36 false rejects classified as contract incompleteness**, not tuned away |
 
-預註冊：`PREREG.md`（確認性主比較 **EVR vs BLIND**，baseline 由 pilot_v2 凍結為 **BLIND**）。
+**Owner objection addressed:** We do **not** claim “typed check = trusted taste.” We claim: **given a byte-stable contract file**, any party re-running `contract/executor.py` gets **identical** clause verdicts (`third_party_reproducibility` = **100%** on 2000 re-runs).
 
-## 2. 主要結果（確認性，holdout）
+---
 
-| 臂 | 完整交付成功 | 率 | 95% Wilson CI | wrong→right | right→wrong | completion tokens |
-|----|-------------|-----|---------------|-------------|-------------|-------------------|
-| BLIND | 1/12 | 8.3% | [1.5%, 35.4%] | 0 | 0 | 801 |
-| EVR | 1/12 | 8.3% | [1.5%, 35.4%] | 0 | 0 | 781 |
+## 1. Pilot 1 — org-profile JSON (complete)
 
-- **配對差異：** EVR − BLIND = **0 pp**（同一題成功：1 題兩臂皆過；11 題兩臂皆敗）。
-- **預註冊門檻（≥5 pp 且 CI 下界 > baseline）：** **未達成**。
+| 臂 | 完整交付 (confirmatory n=12) | Wilson 95% |
+|----|------------------------------|------------|
+| BLIND | 1/12 (8.3%) | [1.5%, 35.4%] |
+| EVR | 1/12 (8.3%) | [1.5%, 35.4%] |
 
-## 3. 機制篩選（pilot_v2，paired）
+Δ = **0 pp**；預註冊 ≥5 pp 門檻 **未達成**。
 
-| 臂 | 成功率 | net_gain_pp | 備註 |
-|----|--------|-------------|------|
-| BLIND / BLANKS / EVR | 1/12 (8.3%) | 0 | 同一初稿下 call-2 未翻轉成敗 |
-| KEEP | 0/12 | −8.3 | 1 次右→左（相對初稿） |
+## 2. P0 — extraction controls (complete)
 
-增強可見檢查後，EVR 確實收到欄位級證據提示（例：`money_missing_currency`、`hq_city_must_be_city_only`），但 **0.5B 仍常原樣輸出**。
+`validate_controls.py`: **15/15** must-match/must-differ（scale/sign/currency/percent/sets）。  
+Round-2 invoice oracle uses `typed_equal` for money/currency.
 
-## 4. 評分器（P0）
+## 3. Filing-Evidence — checker validity (qwen3.5-9b C1)
 
-`synthetic_controls`：**must-equal / must-differ** 全過（含百萬/十億、正負號、幣別、10% vs 10）。
+**Label:** validates **contract executor** on released large-model answers — **not** 0.5B/1.5B delivery.
 
-## 5. 是否支持「問責／信任機制改善交付」？
+| Metric | Value |
+|--------|------:|
+| Quote pass, value wrong | 101 |
+| Contract catch (primary profile) | 75/101 (**74.3%**) |
+| Quote pass, value correct | 724 |
+| False reject | 36 (**4.97%**; bootstrap 95% CI **[3.3%, 6.5%]**) |
+| Missed wrong (in span, wrong column) | **26** (`wrong_column_or_value_in_span`) |
+| False-reject tags (incompleteness) | 19 `span_not_in_page_text`, 16 `scale_mismatch` |
 
-**在此設定下：否（null）。**
+Stop rule (≥30% catch, ≤5% false reject): **borderline pass** (CI touches 5%).
 
-條件：
+### Contract metrics (`contract_metrics_qwen_c1.json`)
 
-- 模型：**Qwen2.5-0.5B** CPU
-- 任務：短文來源、5 欄 JSON
-- 預算：2 calls，無人工
+| Metric | Value |
+|--------|------:|
+| Re-run agreement | **100%** |
+| False-release among contract `PASS` | 26/721 (**3.6%**) |
+| ESCALATE rate (primary) | **0%** (no `multi_column_escalate` opcode on primary — **known incompleteness**) |
+| Independent vs primary same delivery decision | **47.9%** (**fails** pre-registered ≥90% survival) |
 
-**未排除**在較強小模型、更長上下文、或程式驗收任務上出現差異；本線僅證明 **訊號已到達但修復能力不足以改變整份成功率**。
+**Interpretation:** Judgment relocation works for **replay**; **contract authoring is not interchangeable** without changing ship/hold rates. Primary profile **silently** ships on multi-number spans; independent profile **ESCALATEs** → divergence.
 
-## 6. 重現
+## 4. Filing online — small models (in progress)
+
+- **0.5B:** `harness_online.py` → `filing/data/online_05b/` (~20 filings / 300 questions prereg subset; 220 cap optional).  
+- **Arms:** PLAIN, QUOTE_RETRY, BLIND, TYPED_REASK, TYPED_REFUSE, RULE.  
+- **Metric:** filing-level **zero-wrong** delivery share + bootstrap CI (`recompute_filing.py`).  
+- **1.5B:** queued after 0.5B.
+
+## 5. Invoice Round 2 — field-lock vs BLIND (in progress)
+
+- **Holdout:** n=150 answerable (`holdout_answerable_ids`).  
+- **Arms:** `VACANT` (lock + micro-merge) vs **`BLIND`** (2× full JSON, deliver second).  
+- **McNemar:** `recompute_r2.py` after `data/holdout_05b/rows.jsonl`.
+
+## 6. Verdict paragraph（可否說「問責改善交付」？）
+
+**Pilot 1 + 目前證據：不能**在 0.5B／短文 JSON 上宣稱可測的 whole-deliverable lift。  
+
+**可以說的（有邊界）：**
+
+1. **Vacant 路徑** = 先把驗收寫進 **可雜湊的 requester contract**，執行層 **零裁量**（僅 PASS/FAIL/ESCALATE），第三方重跑 **100% 一致**。  
+2. **Filing 線**上，同一份契約對 9b 輸出有 **~74%** 錯誤攔截力，但 **~5%** 誤拒 + **條款不完整**（欄位/期間）與 **stub 頁面** 仍在。  
+3. **獨立契約作者測試失敗**（48% 一致）→ 任何「lift」都 **綁在特定凍結條款**，不能泛化成「契約」概念。  
+4. **ESCALATE** 須由具名負責人處理語意爭議；primary 合約目前 **ESCALATE 率 0%** = 語意風險仍可能被當 PASS 出貨（false release 3.6%）。
+
+**未排除：** 在補齊 period/column 條款、完整頁面、較大模型、invoice holdout 完成後，**VACANT vs BLIND** 仍可能出現 measurable 差異 — **待 holdout 列寫入後更新本節**。
+
+---
+
+## 7. 重現
 
 ```bash
 cd research/trust-delivery-lift
-../../.venv/bin/python harness.py --selftest-scorer
-../../.venv/bin/python freeze_drafts.py --split confirm_ids --out data/confirm/drafts.jsonl
+# Pilot 1
 ../../.venv/bin/python harness.py --split confirm_ids --arms BLIND,EVR --drafts data/confirm/drafts.jsonl --out data/confirm
-../../.venv/bin/python recompute.py --rows data/confirm/rows.jsonl --out data/confirm/summary.json
+
+# P0 + contract
+cd round2
+../../.venv/bin/python validate_controls.py
+../../.venv/bin/python -m contract.freeze_contracts --questions filing/data/questions.jsonl --subset filing/data/subset_20filings.json --out filing/data/contracts_frozen
+PYTHONPATH=. ../../.venv/bin/python contract/metrics.py
+
+# Filing offline audit
+cd filing
+../../.venv/bin/python offline_audit.py --questions data/questions.jsonl --answers data/qwen_c1_answers.jsonl --out data/offline_typed_audit_qwen_c1.json
+../../.venv/bin/python offline_audit_detail.py
+
+# Round 2 holdout (running)
+cd ..
+../../.venv/bin/python harness_r2.py --split holdout_answerable_ids --arms BLIND,VACANT --out data/holdout_05b
+../../.venv/bin/python recompute_r2.py --rows data/holdout_05b/rows.jsonl --mcnemar BLIND VACANT --out data/holdout_05b/summary.json
 ```
 
-原始列：`data/pilot_v2/rows.jsonl`、`data/confirm/rows.jsonl`。
+設計與反駁紀錄：`CRITIQUE_LOG.md` · 合約凍結：`round2/contract/PREREG_CONTRACT.md`

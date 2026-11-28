@@ -1,0 +1,35 @@
+{
+  "label": "qwen3.5-9b C1 \u2014 contract execution metrics (checker validity)",
+  "executor_sha256": "bfd38ee06d594502d553d67bdda141b967b4a10ae49e40cc6c9c0f02f03a51aa",
+  "third_party_reproducibility": {
+    "n_executions": 2000,
+    "mismatched_reruns": 0,
+    "agreement_rate": 1.0
+  },
+  "false_release_rate": {
+    "n_delivered_pass": 721,
+    "n_false_release": 26,
+    "rate": 0.036061026352288486
+  },
+  "escalate_rate_primary": {
+    "n_rows": 1000,
+    "n_escalate": 0,
+    "rate": 0.0
+  },
+  "independent_contract_delivery_agreement": {
+    "n": 1000,
+    "n_same_delivery_decision": 479,
+    "rate": 0.479
+  },
+  "contract_metadata_oracle_agreement": {
+    "n": 1000,
+    "n_agree": 1000,
+    "rate": 1.0
+  },
+  "false_reject_incompleteness_tags_among_correct_quote_pass": {
+    "span_not_in_page_text": 19,
+    "scale_mismatch": 16,
+    "missing:value": 1
+  },
+  "note_false_rejects_35": "Recorded as contract incompleteness (evidence page stub lacks full span; no period/column clause), not post-hoc threshold tuning."
+}

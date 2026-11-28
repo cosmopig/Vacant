@@ -1,0 +1,1 @@
+"""Requester-frozen acceptance contracts (VACANT executes only)."""

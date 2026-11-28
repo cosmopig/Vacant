@@ -62,7 +62,7 @@ def main() -> None:
         else:
             n_pass_wrong += 1
 
-        typed = check_answer_typed(row, page)
+        typed = check_answer_typed(row, page, question=q)
         if oracle_ok is False and not typed.ok:
             n_catch_wrong += 1
         if oracle_ok is True and not typed.ok:

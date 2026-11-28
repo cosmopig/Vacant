@@ -5,9 +5,9 @@
   "n_pass_value_wrong": 101,
   "n_pass_value_correct": 724,
   "n_typed_catch_wrong": 75,
-  "n_typed_false_reject_correct": 35,
+  "n_typed_false_reject_correct": 36,
   "catch_rate_among_quote_pass_wrong": 0.7425742574257426,
-  "false_reject_rate_among_quote_pass_correct": 0.04834254143646409,
+  "false_reject_rate_among_quote_pass_correct": 0.049723756906077346,
   "stop_rule_ineffective": false,
   "stop_rule_detail": "ineffective if catch<30% on pass-but-wrong OR false_reject>5% on correct",
   "examples": [

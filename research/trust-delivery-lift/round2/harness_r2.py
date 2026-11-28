@@ -31,6 +31,16 @@ def full_prompt(task: dict[str, Any]) -> str:
     return f"TEXT:\n{task['source_text']}\n\nJSON:"
 
 
+def run_blind(task: dict[str, Any], lm: SmallLM, rng: random.Random) -> dict[str, Any]:
+    """Equal-cost baseline: second independent full JSON sample is delivered (call-1 logged only as draft)."""
+    r1 = lm.generate(SYSTEM, full_prompt(task), max_new_tokens=220)
+    r2 = lm.generate(SYSTEM, full_prompt(task), max_new_tokens=220, temperature=0.7)
+    doc = parse_json_delivery(r2.text)
+    vis, _ = visible_all_pass(doc, task)
+    ora = oracle_whole(doc, task) if task.get("answerable", True) else False
+    return _row(task, "BLIND", parse_json_delivery(r1.text), doc, [r1, r2], vis, ora)
+
+
 def run_one(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
     r = lm.generate(SYSTEM, full_prompt(task), max_new_tokens=220, with_logprob=True)
     doc = parse_json_delivery(r.text)
@@ -167,6 +177,7 @@ def _row(
 
 
 ARM_FN = {
+    "BLIND": lambda t, lm, r: run_blind(t, lm, r),
     "ONE": lambda t, lm, r: run_one(t, lm),
     "MAJ3": lambda t, lm, r: run_maj3(t, lm, r),
     "LPB3": lambda t, lm, r: run_lpb3(t, lm),

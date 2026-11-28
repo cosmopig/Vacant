@@ -1,9 +1,15 @@
-"""Typed receipt checks for Filing-Evidence JSON answers (visible: quote, header scale, sign)."""
+"""Contract-backed check (legacy TypedVerdict surface). VACANT executes frozen contract only."""
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Mapping
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from contract.executor import execute_contract  # noqa: E402
+from contract.filing_contract import compile_contract_primary  # noqa: E402
 
 _NUM = re.compile(r"(-?\d[\d,]*(?:\.\d+)?)")
 
@@ -62,39 +68,17 @@ def check_answer_typed(
     *,
     gold: Mapping[str, Any] | None = None,
     for_audit: bool = False,
+    question: Mapping[str, Any] | None = None,
 ) -> TypedVerdict:
-    """Gold-free runtime check. `for_audit` enables optional gold-only diagnostics (not used in stop rule)."""
+    """Execute requester contract deterministically (question required for clause parameters)."""
     _ = for_audit, gold
-    ans = _answer_payload(row)
-    status = str(ans.get("status", "found")).lower()
-    if status in ("not_found", "none", ""):
-        return TypedVerdict(False, "not_found")
-
-    span = str(ans.get("span", ""))
-    if not span or span not in page_text:
-        return TypedVerdict(False, "provenance_fail")
-
-    raw_val = ans.get("value")
-    if raw_val is None:
-        return TypedVerdict(False, "no_value")
-    try:
-        shown = float(raw_val)
-    except (TypeError, ValueError):
-        return TypedVerdict(False, "bad_value")
-
-    header_scale = parse_header_scale(page_text)
-    if ans.get("scale") is not None:
-        ans_scale = _scale_to_mult(ans.get("scale"))
-        if header_scale >= 1e6 and ans_scale >= 1e9:
-            return TypedVerdict(False, "scale_mismatch")
-        if header_scale >= 1e6 and ans_scale <= 1e3 and ans_scale > 1:
-            return TypedVerdict(False, "scale_mismatch")
-        if header_scale >= 1e9 and ans_scale <= 1e6 and ans_scale > 1:
-            return TypedVerdict(False, "scale_mismatch")
-
-    nums = _numbers_in_line(span)
-    cmp_val = abs(shown)
-    if nums and not any(abs(cmp_val - abs(n)) <= max(0.5, 0.001 * abs(n)) for n in nums):
-        return TypedVerdict(False, "value_not_in_span")
-
-    return TypedVerdict(True, "ok")
+    q = question or row
+    contract = compile_contract_primary(q)
+    receipt = execute_contract(contract, row, page_text)
+    if receipt.aggregate == "PASS":
+        return TypedVerdict(True, "ok")
+    if receipt.aggregate == "ESCALATE":
+        fail = next((c for c in receipt.clauses if c.verdict == "ESCALATE"), receipt.clauses[-1])
+        return TypedVerdict(False, f"escalate:{fail.detail}")
+    fail = next((c for c in receipt.clauses if c.verdict == "FAIL"), receipt.clauses[-1])
+    return TypedVerdict(False, fail.detail)
