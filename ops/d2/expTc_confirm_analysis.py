@@ -204,7 +204,8 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None) -> dict:
                 # 去掉錯誤行，以及去掉本格路徑後只剩目錄前綴的行（例如 find 列出本格檔案時殘留的上層路徑）
                 body_ = "\n".join(l for l in res_clean.splitlines() if not B51_ERR.search(l) and not re.fullmatch(r"\s*/?[\w./\-]*/\s*", l))
                 errish = (not inner.strip()) or ('"isError": true' in res) or (bool(B51_ERR.search(inner)) and not body_.strip())
-                s3 = bool(B51_READ.search(args)) and bool(B51_LOOKS_DATA.search(body_) or len(body_) > 200)     # (c) 操作化／S3
+                is_read = bool(B51_READ.search(args)) or tn.lower() in ("read", "view", "read_file")   # pi 的 read 工具參數只有 path
+                s3 = is_read and bool(B51_LOOKS_DATA.search(body_) or len(body_) > 200)                     # (c) 操作化／S3
                 s4 = bool(B51_COPY.search(args)) and not B51_ERR.search(inner)                         # S4 先複製再讀
                 fname_other = bool(own_pages_other_sets) and any(fn in res_clean for fn in own_pages_other_sets)   # (b) 檔名比對
                 multi = len(re.findall(r"/[\w.\-/*]+", args)) > 1
