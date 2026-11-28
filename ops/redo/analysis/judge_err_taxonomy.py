@@ -5,11 +5,10 @@
 from __future__ import annotations
 import argparse, collections, json, pathlib, random, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from audit_key import audit_hmac  # noqa: E402
 import judge_pages as P  # noqa: E402
 from judge_pages import M, SRC  # noqa: E402
-import hashlib, hmac  # noqa: E402
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-lk = lambda sid, rep, cid: hmac.new(KEY, f"{sid}|r{rep}|{cid}".encode(), hashlib.sha256).hexdigest()[:20]
+lk = lambda sid, rep, cid: audit_hmac(f"{sid}|r{rep}|{cid}")
 
 
 def classify(val, ans_list, label, pages):

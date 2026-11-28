@@ -3,12 +3,13 @@
 重算同一批行的 5 份一致度旗標（值≠多數 或 同意份數≤1），算：AUC、各門檻的旗標內／外錯誤率與召回（分足球／公司）、三種旗標的重疊、
 10 桶校準、一致度 OR 判別模型。輸出只有計數與比例。用法：judge_gemini_analysis.py <drafts_root> <drafts_root> --dir OUTDIR"""
 from __future__ import annotations
-import argparse, collections, hashlib, hmac, json, pathlib, sys
+import argparse, collections, json, pathlib, sys
 REPO = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
+from audit_key import audit_hmac  # noqa: E402
 from ops.d2 import expT_metrics as M  # noqa: E402
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-lk = lambda sid, rep, cid: hmac.new(KEY, f"{sid}|r{rep}|{cid}".encode(), hashlib.sha256).hexdigest()[:20]
+lk = lambda sid, rep, cid: audit_hmac(f"{sid}|r{rep}|{cid}")
 
 
 def auc(scores, labels):

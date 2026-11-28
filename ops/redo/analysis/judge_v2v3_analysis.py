@@ -3,13 +3,13 @@
 算三種問法的 AUC 與配對差（組群集 bootstrap 10,000 次）、兩個事先定的門檻、分類別召回、ECE／Brier、機制對照。輸出無值。
 用法：judge_v2v3_analysis.py R1 R2 --dir ops/redo/audit/judge_v2v3_20261128"""
 from __future__ import annotations
-import argparse, collections, hashlib, hmac, json, pathlib, random, sys
+import argparse, collections, json, pathlib, random, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from audit_key import audit_hmac  # noqa: E402
 from judge_gemini_analysis import auc  # noqa: E402
 import judge_pages as P  # noqa: E402
 M = P.M
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-lk = lambda sid, rep, cid: hmac.new(KEY, f"{sid}|r{rep}|{cid}".encode(), hashlib.sha256).hexdigest()[:20]
+lk = lambda sid, rep, cid: audit_hmac(f"{sid}|r{rep}|{cid}")
 NB, SEED = 10000, 20261128
 
 

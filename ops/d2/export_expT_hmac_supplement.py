@@ -19,8 +19,17 @@ sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
 from ops.d2 import expT_metrics as M  # noqa: E402
 import scan_leak as S  # noqa: E402
 
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-H = lambda s: None if s is None else hmac.new(KEY, s.encode("utf-8"), hashlib.sha256).hexdigest()
+_KEY = None
+
+
+def key() -> bytes:
+    global _KEY
+    if _KEY is None:
+        _KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
+    return _KEY
+
+
+H = lambda s: None if s is None else hmac.new(key(), s.encode("utf-8"), hashlib.sha256).hexdigest()
 FETCH = re.compile(r"\b(curl|wget|requests\.\w+\(|urlopen\(|urllib\.request|fetch\(|http\.get\()[^|;&]*?(https?://([A-Za-z0-9.\-]+)(?::\d+)?([^\s\"'\\|;&)]*))", re.I)
 
 
