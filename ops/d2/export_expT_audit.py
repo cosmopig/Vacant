@@ -60,8 +60,8 @@ def main(root: str, out: str) -> None:
                     lines.append({"set": sid, "rep": rep, "arm": arm, "claim_id": x["claim_id"],
                                   **{k: x[k] for k in ("before_status", "after_status", "before_etype", "after_etype", "digit_bucket",
                                                        "c0_flagged", "sent_back", "harm_c2w_or_d", "harm_b2w")},
-                                  "before_value_sha256": sha(x["before_value"]) if x["before_value"] is not None else None,
-                                  "after_value_sha256": sha(x["after_value"]) if x["after_value"] is not None else None})
+                                  # 2026-11-28：不再寫未加鹽的值 sha256（短的數字值可被暴力還原；B21 要求一律加鹽 HMAC，見 export_expT_hmac_supplement.py）
+                                  })
                 he = cd.get("haiku_escalation")
                 if he:
                     haiku.append({"set": sid, "rep": rep, "arm": arm, **{k: he.get(k) for k in (
