@@ -521,7 +521,7 @@ class ExpTRun:
             prompt,
         ]
         sandbox = self.plan.get("agent_sandbox")
-        if sandbox == "bwrap":
+        if sandbox in ("bwrap", "bwrap_netns"):
             # 2026-11-28：探索批次的 agent 會讀到工作區外（教材目錄、別的格、c0/flags.json），確認批次一律關進 bwrap。
             venv_dir = pathlib.Path(self.vacant_python()).parent.parent
             argv = [str(HERE / "bwrap_expT_agent.sh"), str(live), str(out), str(venv_dir), "--", *argv]
@@ -562,6 +562,39 @@ class ExpTRun:
         t0 = time.time()
         argv = self._agent_argv(live, prov, prompt, out)
         env = self.agent_env(live, prov, for_agent=True)
+        fwd = None
+        if self.plan.get("agent_sandbox") == "bwrap_netns" and not self.fake:
+            # 2026-11-28：沙箱沒有網路（--unshare-net），只把出口代理的埠經 unix socket 接進去；直連外網會失敗。
+            eport = int(env["http_proxy"].rsplit(":", 1)[1])
+            sock = live / "tmp" / "egress.sock"
+            (live / "tmp").mkdir(parents=True, exist_ok=True)
+            sock.unlink(missing_ok=True)
+            # 白名單：這一格自己的來源主機＋LM Studio 端點（cfg/models.json 的 baseUrl 主機:埠，執行時讀，不寫進 repo）
+            rel = out.relative_to(self.root / "cells").parts      # <組>/r<次>/<臂>/…
+            own_host = f"{rel[0]}-{rel[1]}.d2-sources.example:80"
+            model_eps = set()
+            try:
+                for m_ in re.finditer(r"https?://([^/\"':]+):?(\d+)?", (live / "cfg" / "models.json").read_text()):
+                    model_eps.add(f"{m_.group(1).lower()}:{m_.group(2) or 80}")
+            except OSError:
+                pass
+            fwd = subprocess.Popen([sys.executable, "-I", str(HERE / "sockfwd.py"), "unix2tcp", str(sock), f"127.0.0.1:{eport}",
+                                    "--allow", own_host, "--model", ",".join(sorted(model_eps)),
+                                    "--log", str(out / "net_blocked.jsonl")],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            for _ in range(50):
+                if sock.exists():
+                    break
+                time.sleep(0.1)
+            if not sock.exists():
+                self._kill(fwd)
+                raise InfraError(f"egress socket forwarder did not start for {live}")
+            env["EXPT_NETNS_PROXY_PORT"] = str(eport)
+            # 代理變數全設、清掉 NO_PROXY（沙箱裡沒有別條路；減少 agent 撞牆後用怪招）
+            for k_ in ("http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "all_proxy"):
+                env[k_] = f"http://127.0.0.1:{eport}"
+            for k_ in ("NO_PROXY", "no_proxy"):
+                env.pop(k_, None)
         rc: int | str | None = None
         with open(out / "agent.log", "w", encoding="utf-8") as lf:
             pr = subprocess.Popen(
@@ -583,6 +616,8 @@ class ExpTRun:
             finally:
                 with LOCK:
                     self.procs.discard(pr)
+                if fwd is not None:
+                    self._kill(fwd)
         wall_s = round(time.time() - t0, 3)
         if self.fake:
             u = {"calls": 1, "errors": 0, "input": len(prompt), "output": 100}

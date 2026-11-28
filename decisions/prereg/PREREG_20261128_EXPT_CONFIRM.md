@@ -73,7 +73,7 @@
     - 頭 7 份初稿（cc-s01 r1–r4、cc-s06 r1–r3）報告裡的空白行數，用來確認沙箱裡 agent 有把值填進去；
     - 兩台各自「上下文長度用完」的次數。
     兩者都不涉及答案或任何臂。
-  1. **整份空白的初稿**：定義為 `c0/report.md` 用 `score_d2.parse_report` 解析後，已填行數＝0。
+  1. ⚠ **本點的判讀已被附錄 B 的 B5 取代**（三段判讀；第一版分析腳本 b33043806 仍是二分，第二版起只輸出 B5）。**整份空白的初稿**：定義為 `c0/report.md` 用 `score_d2.parse_report` 解析後，已填行數＝0。
      - 主分析照原 prereg，用全部格。
      - **同時事前登記分層分析：「初稿非空白」的格**（該對的 c0 已填行數 ≥1），單獨算四個比較（T 對 TB、T 對 G、TB 對 G、G 對 A）。
      - 選擇器的分層：每組的候選只留非空白初稿；非空白初稿 <2 份的組排除；random 取非空白初稿的平均。
@@ -150,4 +150,133 @@
 - 選擇器對數空白的 3pp 門檻，約 0.27。
 
 「沒過」多半只能讀成「沒量到」。
+
+## 附錄 B 補充（B13 起；看結果前；依 vacant-hope 與 vacant-cloud 對沙箱與附錄 B 的追加審查）
+- **寫這段時看過什麼**：確認批次**沒有任何評分**、沒有任何分臂彙總。回饋四臂從沒發射過。作廢的初稿只看過：連外指令次數、空白行數、agent 紀錄結尾。
+
+### B13 沙箱的網路隔離（重寫）與重跑
+- **為什麼重寫**：01:14Z（晚於 01:02:48Z 的初稿發射）才測出這台主機能直連外網，而 agent 環境只設了 `http_proxy`、沒有 `https_proxy`，所以 https 請求會繞過出口代理。
+  - 探索批次的回饋輪確實因此直連過線上維基（196 次 en.wikipedia.org 等，回來的是真 HTML）。
+  - 確認初稿用正式掃描重算：**連外指令 0、越界 0**。我先前回報的「43/52」是 grep 到頁面 HTML 裡的連結，是錯的，已更正。
+- **處理**：01:23Z 停掉初稿。兩個 root 改名 `expTc_drafts_q9_1003_VOID_https_direct_0123`、`…_1004_VOID_https_direct_0123` 保留（c0 共 56 份），**不評分、不替補、不進任何分析**。為了設定一致，初稿在新沙箱裡從頭重跑。
+- **新沙箱**（計畫欄位 `agent_sandbox: bwrap_netns`；`ops/d2/bwrap_expT_agent.sh`、`ops/d2/sockfwd.py`、`run_expT.run_agent`）：
+  - `--unshare-net`：沙箱裡只有 loopback，沒有 DNS、沒有路由。
+  - 唯一的出口：runner 在外面把出口代理的埠接成 `<live>/tmp/egress.sock`，沙箱裡把 `127.0.0.1:<埠>` 接回去。
+  - 外面的轉送器用 HTTP/1.1 請求串流剖析器檢查**每一個請求**：連線的第一個、keep-alive／管線化的後續、CONNECT 通道裡的明文請求。只放行：
+    - 這一格自己的來源主機 `<組>-r<次>.d2-sources.example:80`；
+    - cfg/models.json 裡 LM Studio 端點的 `IP:埠`。這是唯一允許直接用 IP 的例外，執行時讀，不寫進 repo。模型端點上只放行 `/v1/chat/completions`、`/v1/completions`、`/v1/models`；`/v1/responses` 刻意不放，因為它可在 body 帶 remote MCP 工具。pi 用的是 openai-completions，即 `/v1/chat/completions`。
+  - 其他一律 403 或斷線，並記到每一輪輸出目錄的 `net_blocked.jsonl`。Transfer-Encoding 與 Content-Length 並存、重複標頭、格式不合，一律斷線（防請求走私）。
+  - 代理變數 `http_proxy`、`https_proxy`、`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY` 全設成轉送器，清掉 `NO_PROXY`。
+  - `/tmp` 是沙箱自己的 tmpfs；不掛主機的 `/tmp`、`/run`、`/var/run`；沙箱裡唯一的 socket 是轉送器那一個。
+  - 來源伺服器只能經轉送器到達（沙箱的 127.0.0.1 是它自己的）。伺服器只提供 revision 0 的凍結頁面；私有教材目錄不掛進沙箱。
+- **自我測試**（`ops/d2/netns_selftest.py`，報告 `ops/redo/audit/netns_selftest_20261128.json`）：先負控制、後正控制，在同一個沙箱設定裡逐項跑。**全部通過**；白名單記到 9 筆被擋（預期 9 筆）；經代理連維基的那一筆被擋並有紀錄；自己那一頁出現在出口紀錄。
+
+  | 項目 | 指令（模型端點 IP 遮成 <lms>） | 預期 | 結果 | 判定 |
+  |---|---|---|---|---|
+  | N01 curl --noproxy direct https wikipedia | `curl -sS -m 8 --noproxy '*' https://en.wikipedia.org/wiki/Main_Page -o /dev/null -w '%{http_code}'` | fail | rc=6；000curl: (6) Could not resolve host: en.wikipedia.org  | 過 |
+  | N02 python urllib direct (ignore proxy env) | `python: import urllib.request as u; u.build_opener(u.ProxyHandler({})).open('https://en.wikipedia.org/', timeo` | fail | rc=1；URLError: <urlopen error [Errno -3] Temporary failure in name resoluti | 過 |
+  | N03 node fetch (node ignores proxy env) | `node -e "fetch('https://en.wikipedia.org/').then(r=>{console.log(r.status);process.exit(0)}).catch(e=>{console` | fail | rc=1；TypeError: fetch failed  | 過 |
+  | N04 raw socket to an IP | `python: import socket; socket.create_connection(('1.1.1.1', 443), timeout=5)` | fail | rc=1；OSError: [Errno 101] Network is unreachable | 過 |
+  | N05 DNS lookup | `python: import socket; socket.getaddrinfo('en.wikipedia.org', 443)` | fail | rc=1；gaierror: [Errno -3] Temporary failure in name resolution | 過 |
+  | N06 host source server port directly (127.0.0.1 is the sandbox's own) | `python: import socket; socket.create_connection(('127.0.0.1', 57185), timeout=5)` | fail | rc=1；ConnectionRefusedError: [Errno 111] Connection refused | 過 |
+  | N07 host /run is not visible | `ls -A /run 2>&1 ／ head -5; test ! -e /run/user && test ! -e /run/dbus && test ! -e /var/run/docker.sock` | pass_cmd | rc=0；ls: cannot access '/run': No such file or directory  | 過 |
+  | N08 host /tmp is a private tmpfs (empty) | `test -z "$(ls -A /tmp)"` | pass_cmd | rc=0； | 過 |
+  | N09 only the forwarder socket exists | `find / -xdev -type s 2>/dev/null ／ grep -v '^/proc' ／ sed 's#.*/##' ／ sort ／ tr '\n' ' '; test "$(find / -xdev` | pass_cmd | rc=0； | 過 |
+  | N10 curl -x proxy https wikipedia (must be 403/blocked) | `curl -sS -m 10 -x http://127.0.0.1:35483 https://en.wikipedia.org/ -o /dev/null -w '%{http_code}'` | fail | rc=56；000curl: (56) CONNECT tunnel failed, response 403  | 過 |
+  | N11 other set's source host via proxy | `curl -sS -m 10 http://selftest-s02-r1.d2-sources.example/index.html -o /dev/null -w '%{http_code}' ／ grep -qx ` | fail | rc=1； | 過 |
+  | N12 LM Studio host on another port via proxy | `curl -sS -m 10 http://<lms>:22/ -o /dev/null -w '%{http_code}' ／ grep -qx 200` | fail | rc=1； | 過 |
+  | N13 LM Studio admin API via proxy (/api/v0/models) | `curl -sS -m 10 http://<lms>:1234/api/v0/models -o /dev/null -w '%{http_code}' ／ grep -qx 200` | fail | rc=1； | 過 |
+  | N14 LM Studio /v1/responses via proxy | `curl -sS -m 10 -X POST -H 'Content-Type: application/json' -d '{}' http://<lms>:1234/v1/responses -o /dev/null` | fail | rc=1； | 過 |
+  | N15 pipelined: allowed request + /api/v0/models in one send (2nd must be blocked) | `GET http://selftest-s01-r1.d2-sources.example/index.html HTTP/1.1` | blocked_logged | rc=0；HTTP/1.1 403 Forbidden | 過 |
+  | N16 CONNECT tunnel to LM Studio, then /api/v0/ inside the tunnel | `CONNECT <lms>:1234 HTTP/1.1 ／ GET /api/v0/models HTTP/1.1` | second_closed | rc=0；HTTP/1.0 200 Connection Established ／／ <closed> | 過 |
+  | N17 smuggling: Transfer-Encoding and Content-Length together | `POST http://selftest-s01-r1.d2-sources.example/index.html HTTP/1.1` | first_closed | rc=0；HTTP/1.1 403 Forbidden | 過 |
+  | N18 malformed request line | `GARBAGE` | first_closed | rc=0；HTTP/1.1 403 Forbidden | 過 |
+  | P01 own source host revision-0 page via env proxy | `curl -sS -m 10 http://selftest-s01-r1.d2-sources.example/index.html ／ grep -q SELFTEST_OK` | pass_cmd | rc=0； | 過 |
+  | P02 model endpoint /v1/models via proxy CONNECT tunnel (how pi connects) | `curl -sS -m 15 -p http://<lms>:1234/v1/models -o /dev/null -w '%{http_code}' ／ grep -qx 200` | pass_cmd | rc=0； | 過 |
+  | P03 keep-alive inside the LM Studio tunnel: two /v1/models requests | `CONNECT <lms>:1234 HTTP/1.1 ／ GET /v1/models HTTP/1.1 ／ GET /v1/models HTTP/1.1` | all_answered | rc=0；HTTP/1.0 200 Connection Established ／／ HTTP/1.1 200 OK ／／ HTTP/1.1 200 | 過 |
+
+- **正式路徑冒煙**（真 pi、真模型、sc-s01，探索用過的組，不進正式資料；root `expTc_smoke_netns`）：
+  - c0 填了 20/20 行、標記 7 行。
+  - 來源伺服器有 c0 8 筆、T 6 筆、G 6 筆，都是 200；T、G 各兩輪照常。
+  - 白名單 0 筆被擋，新掃描判越界 0。
+- **每次發射前必須先跑自我測試、全部通過才發射**；這次的結果在上表。
+
+### B14 附錄 A 第 1 點已被 B5 取代
+已在附錄 A 第 1 點加註。第二版分析腳本只輸出 B5 的三段判讀。
+
+### B15 檢定力表（原樣取自審查文件 4bb7df2d2）
+| 比較 | 組間 SD（pp） | MDE α=.05 | MDE α=.0125 | 在預註冊門檻或探索效果下的檢定力 |
+|---|---|---|---|---|
+| T−G 全部 | 27.7 | 14.2 | 16.9 | 效果 11.7：0.64／0.43；效果 10：0.51／0.30 |
+| T−G 非空白 | 28.7 | 14.9 | 17.7 | 效果 8.7（探索的非空白值）：0.38／0.20 |
+| T−TB 全部 | 19.5 | 10.0 | 11.9 | 門檻 5：0.29／0.14 |
+| T−TB 非空白 | 13.5 | 7.0 | 8.3 | 門檻 5：0.53／0.32 |
+| record−nonblank（選擇器） | 12.1 | 6.2 | 7.4 | 門檻 3：0.27 |
+| record−random（選擇器） | 23.5 | 12.0 | 14.3 | 門檻 5：0.21；效果 8：約 0.46 |
+
+### B16 越界與網路繞過的判定規則（第二版分析腳本 `scan_runs` 的定義；只用紀錄、不看分數）
+- **越界**，處理方式：初稿作廢重跑；回饋輪整對排除，並報全部與排除後兩版。以下任一項成立即算：
+  - (a) 參數含教材根目錄或 run root 的絕對路徑（agent 自己掛在沙箱裡的輸出目錄除外）。
+  - (b) 參數命中相對路徑、`~`、`$HOME`、萬用字元、`find`／`ls /`、`os.path.join`／`glob`／`pathlib` 等樣式，而且工具回傳（去掉 agent 自己的 live 與輸出目錄後）出現教材或別格的特徵；命中次數照報。
+  - (c) 繞過代理的參數：`--noproxy`、`-x`／`--proxy`、`--no-proxy`、`unset`／`env -u` 加任何 `*proxy`、`env -i`、把 `http(s)_proxy` 設空、Python `proxies={}`／`trust_env=False`、node 腳本。
+  - (d) curl／wget／requests／urlopen／fetch 指令直接指向 localhost／127.0.0.1 或別組的來源主機。
+  - (e) **正向對帳**：指令裡抓的每一個網址，在執行窗內都要對到一筆出口紀錄（`egress.jsonl` 的 GET／CONNECT），或一筆白名單擋下的紀錄；對不到就算繞過。另外，來源伺服器的 200 網址必須出現在這一臂的 `egress.jsonl`。
+  - 只出現在 grep 樣式、文字或頁面 HTML 裡的網址不算。
+- **LM Studio 例外**：主機名 `w1003`、`w1004`，以及 cfg 裡的端點，不算繞過。
+- **「與後續修訂相符」的行**：出現在有 (c)–(e) 的格裡，就算繞過，不適用 B3 的寬鬆讀法。
+- **探索批次的正控制**：同一支掃描在探索批次判出 **108 次執行有越界**（c0 1 次；TO 45、G 37、TB 14、T 11）。前面口頭說的 109，含一筆「agent 讀自己的輸出目錄」的誤判，已修。舊掃描（只看絕對路徑）是 45。名單會進稽核包。
+- **掃描的限制**：用程式拼接、間接讀檔，只能靠 (b) 的回傳特徵去抓。沙箱讓檔案越界讀不到東西；網路有白名單與正向對帳。
+
+### B17 凍結前的三個 root（B11 的補充）
+- **誰看的**：都是執行方（本 session）看的，vacant-hope、vacant-cloud 都沒有看過這些 root。
+- port_clash、nosandbox 兩個 root 沒有沙箱，共 26 份初稿碰過同一批教材。對它們的 agent 紀錄跑了寫入掃描（專查寫進教材目錄或 template.md）：
+  - port_clash 有 9 次呼叫碰到 realrev3 目錄，都是 `cat`／`ls` cc-s01 的 cycle_1 頁面（讀，不是寫；掃描初判的「寫」是 `2>/dev/null` 的重導向符號造成的誤判）；
+  - nosandbox 0 次。
+- **教材完整性比對**：
+  - 兩份 manifest.json 的 sha256 和計畫記的相同（`3a2a1d6d…`、`39e665bd…`），也和教材自帶的 manifest.sha256 相同；
+  - 550 個各修訂頁面的 sha256 全部和 manifest 的 `page_sha256` 相符；
+  - 30 份 template.md 都含全部行；
+  - 736 個教材檔沒有任何一個的修改時間晚於 00:36Z。
+  - **教材沒有被寫壞。**
+
+### B18 時間證明
+- **作廢的初稿**：RUN.json 記 runner sha `5559a148…`，和 0dd266544 的 run_expT.py 逐位元相同；head 0dd266544；啟動 01:02:48Z，提交後 4 秒（提交與推送在同一個指令裡）。
+- **重跑的初稿**：用本補充提交後的 runner（sha 見計畫的 `prereg.code_sha256`），RUN.json 會記 head、runner sha、啟動時間；稽核包附每個 root 的 RUN.json 與逐格時間戳。
+
+### B19 B4 的兩處補充定義（看結果前；只用紀錄判定）
+1. 來源伺服器回 404：
+   - 那一頁確實在這一格的凍結站裡 ⇒ 基礎設施（路由壞了，例如撞埠）；
+   - 頁面本來就不存在（模型亂猜網址）⇒ 模型行為，不作廢。
+   - 探索批次有 110 筆 404 都是後者，存在的頁面拿到 404 的是 0 筆。照 B4 字面會把它們全部作廢，所以補這條。
+2. 整次執行沒有抓任何頁面 ⇒ 模型行為，不作廢，照報次數。只有「agent 發了請求、伺服器在執行窗內卻沒有任何紀錄」才算伺服器沒在聽（基礎設施）。
+
+### B20 「標記可疑」分層（vacant-hope 定案，回饋臂發射前生效）
+1. **主訊號＝量具缺口，不碰答案鍵**：某份 c0 的缺口＝agent 指令裡字面出現的本格頁面網址數 − 出口紀錄到的本格 200 頁面數。缺口 >0 ⇒「標記可疑」。
+   - 若診斷找到具體 bug，主訊號改成「符合該 bug 觸發條件的格」，同樣不碰答案鍵。
+   - 第二個描述版本：「被標的有值行 ≥80%，且出口頁數 ≤4」（這是看探索資料定的）。
+2. **只用 c0 判、整對排除**：只用共用初稿 c0 的紀錄判定，排除單位是整對（A／G／T／TB 一起）。名單在回饋臂發射前算完，sha256 寫進本附錄。
+3. **比例上限**：
+   - 可疑對 >25% ⇒ 主比較結論加註「紀錄裝置在相當比例的格上不可靠，T 的退回內容可能帶假標記」，T 相關比較一律降為描述性。
+   - ≤25% ⇒ 另報排除版，只描述、不進 Holm。
+4. **方向**：可疑的格裡 T 會退回本來就對的行，對 T 不利。所以排除版若比主分析好看，**不得用來升級結論**，只准寫「若紀錄裝置正確，T 的表現可能較高」。
+5. **裝置精確度**（評分後算、只描述）：每臂每輪「被標的有值行裡真的錯的比例」，分可疑、不可疑兩層。
+- 執行方對原因的初步猜測（未驗證）：足球的「出場（進球）」在頁面上是兩個表格儲存格，報告寫成 `32 (1)`，純文字比對找不到，會把對的值標成「讀過的頁裡找不到」。
+
+### B21 值雜湊一律加鹽 HMAC
+從本補充起，所有進 repo 或稽核包的值雜湊一律用 HMAC-SHA256。鍵只放本機（`~/.config/vacant/audit_hmac.key`，權限 600，不進 git），等值比對仍然可做。已推上的舊雜湊檔不動，記進歷史清理待辦。
+
+### B22 分析碼第二版
+- `ops/d2/expTc_confirm_analysis.py` 第二版，sha256 見計畫的 `prereg.code_sha256`。在任何確認批次的初稿或回饋格被評分之前提交。
+- 實作了：
+  - B1：等價判定（90% 區間）。
+  - B2、B16：越界與網路對帳。
+  - B4、B19：基礎設施分類。
+  - B5：三段判讀。
+  - B6：拿掉前 2 組為判讀，並報前 2 對。
+  - B7：傷害率點估計 ≤0、整份清空與其敏感度。
+  - B8：k 一律相同、兩台合併一次檢定、「數空白贏」的寫法。
+  - B9：G 與 T 輪數對齊、條件化比較只描述、分臂的輪數／token／牆鐘、牆鐘差 >25% 標出。
+  - B12：組加權、Holm 只作用於 p。
+  - B20：標記可疑分層與裝置精確度。
+- 驗證：在 sc-s01 冒煙 root 上跑過；在探索批次上當正控制（越界 108 次）。
 

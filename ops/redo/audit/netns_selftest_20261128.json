@@ -1,0 +1,184 @@
+{
+ "lms": "<lms>:1234",
+ "tests": [
+  {
+   "name": "N01 curl --noproxy direct https wikipedia",
+   "cmd": "curl -sS -m 8 --noproxy '*' https://en.wikipedia.org/wiki/Main_Page -o /dev/null -w '%{http_code}'",
+   "expect": "fail",
+   "rc": 6,
+   "out": "000curl: (6) Could not resolve host: en.wikipedia.org\n",
+   "pass": true
+  },
+  {
+   "name": "N02 python urllib direct (ignore proxy env)",
+   "cmd": "python: import urllib.request as u; u.build_opener(u.ProxyHandler({})).open('https://en.wikipedia.org/', timeout=8)",
+   "expect": "fail",
+   "rc": 1,
+   "out": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+   "pass": true
+  },
+  {
+   "name": "N03 node fetch (node ignores proxy env)",
+   "cmd": "node -e \"fetch('https://en.wikipedia.org/').then(r=>{console.log(r.status);process.exit(0)}).catch(e=>{console.log(String(e));process.exit(1)})\"",
+   "expect": "fail",
+   "rc": 1,
+   "out": "TypeError: fetch failed\n",
+   "pass": true
+  },
+  {
+   "name": "N04 raw socket to an IP",
+   "cmd": "python: import socket; socket.create_connection(('1.1.1.1', 443), timeout=5)",
+   "expect": "fail",
+   "rc": 1,
+   "out": "OSError: [Errno 101] Network is unreachable",
+   "pass": true
+  },
+  {
+   "name": "N05 DNS lookup",
+   "cmd": "python: import socket; socket.getaddrinfo('en.wikipedia.org', 443)",
+   "expect": "fail",
+   "rc": 1,
+   "out": "gaierror: [Errno -3] Temporary failure in name resolution",
+   "pass": true
+  },
+  {
+   "name": "N06 host source server port directly (127.0.0.1 is the sandbox's own)",
+   "cmd": "python: import socket; socket.create_connection(('127.0.0.1', 57185), timeout=5)",
+   "expect": "fail",
+   "rc": 1,
+   "out": "ConnectionRefusedError: [Errno 111] Connection refused",
+   "pass": true
+  },
+  {
+   "name": "N07 host /run is not visible",
+   "cmd": "ls -A /run 2>&1 | head -5; test ! -e /run/user && test ! -e /run/dbus && test ! -e /var/run/docker.sock",
+   "expect": "pass_cmd",
+   "rc": 0,
+   "out": "ls: cannot access '/run': No such file or directory\n",
+   "pass": true
+  },
+  {
+   "name": "N08 host /tmp is a private tmpfs (empty)",
+   "cmd": "test -z \"$(ls -A /tmp)\"",
+   "expect": "pass_cmd",
+   "rc": 0,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N09 only the forwarder socket exists",
+   "cmd": "find / -xdev -type s 2>/dev/null | grep -v '^/proc' | sed 's#.*/##' | sort | tr '\\n' ' '; test \"$(find / -xdev -type s 2>/dev/null | grep -v '^/proc' | wc -l)\" -le 1",
+   "expect": "pass_cmd",
+   "rc": 0,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N10 curl -x proxy https wikipedia (must be 403/blocked)",
+   "cmd": "curl -sS -m 10 -x http://127.0.0.1:35483 https://en.wikipedia.org/ -o /dev/null -w '%{http_code}'",
+   "expect": "fail",
+   "rc": 56,
+   "out": "000curl: (56) CONNECT tunnel failed, response 403\n",
+   "pass": true
+  },
+  {
+   "name": "N11 other set's source host via proxy",
+   "cmd": "curl -sS -m 10 http://selftest-s02-r1.d2-sources.example/index.html -o /dev/null -w '%{http_code}' | grep -qx 200",
+   "expect": "fail",
+   "rc": 1,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N12 LM Studio host on another port via proxy",
+   "cmd": "curl -sS -m 10 http://<lms>:22/ -o /dev/null -w '%{http_code}' | grep -qx 200",
+   "expect": "fail",
+   "rc": 1,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N13 LM Studio admin API via proxy (/api/v0/models)",
+   "cmd": "curl -sS -m 10 http://<lms>:1234/api/v0/models -o /dev/null -w '%{http_code}' | grep -qx 200",
+   "expect": "fail",
+   "rc": 1,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N14 LM Studio /v1/responses via proxy",
+   "cmd": "curl -sS -m 10 -X POST -H 'Content-Type: application/json' -d '{}' http://<lms>:1234/v1/responses -o /dev/null -w '%{http_code}' | grep -qx 200",
+   "expect": "fail",
+   "rc": 1,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "N15 pipelined: allowed request + /api/v0/models in one send (2nd must be blocked)",
+   "cmd": "GET http://selftest-s01-r1.d2-sources.example/index.html HTTP/1.1",
+   "expect": "blocked_logged",
+   "rc": 0,
+   "out": "HTTP/1.1 403 Forbidden",
+   "pass": true
+  },
+  {
+   "name": "N16 CONNECT tunnel to LM Studio, then /api/v0/ inside the tunnel",
+   "cmd": "CONNECT <lms>:1234 HTTP/1.1 | GET /api/v0/models HTTP/1.1",
+   "expect": "second_closed",
+   "rc": 0,
+   "out": "HTTP/1.0 200 Connection Established || <closed>",
+   "pass": true
+  },
+  {
+   "name": "N17 smuggling: Transfer-Encoding and Content-Length together",
+   "cmd": "POST http://selftest-s01-r1.d2-sources.example/index.html HTTP/1.1",
+   "expect": "first_closed",
+   "rc": 0,
+   "out": "HTTP/1.1 403 Forbidden",
+   "pass": true
+  },
+  {
+   "name": "N18 malformed request line",
+   "cmd": "GARBAGE",
+   "expect": "first_closed",
+   "rc": 0,
+   "out": "HTTP/1.1 403 Forbidden",
+   "pass": true
+  },
+  {
+   "name": "P01 own source host revision-0 page via env proxy",
+   "cmd": "curl -sS -m 10 http://selftest-s01-r1.d2-sources.example/index.html | grep -q SELFTEST_OK",
+   "expect": "pass_cmd",
+   "rc": 0,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "P02 model endpoint /v1/models via proxy CONNECT tunnel (how pi connects)",
+   "cmd": "curl -sS -m 15 -p http://<lms>:1234/v1/models -o /dev/null -w '%{http_code}' | grep -qx 200",
+   "expect": "pass_cmd",
+   "rc": 0,
+   "out": "",
+   "pass": true
+  },
+  {
+   "name": "P03 keep-alive inside the LM Studio tunnel: two /v1/models requests",
+   "cmd": "CONNECT <lms>:1234 HTTP/1.1 | GET /v1/models HTTP/1.1 | GET /v1/models HTTP/1.1",
+   "expect": "all_answered",
+   "rc": 0,
+   "out": "HTTP/1.0 200 Connection Established || HTTP/1.1 200 OK || HTTP/1.1 200 OK",
+   "pass": true
+  }
+ ],
+ "net_blocked_count": 9,
+ "net_blocked_expected": 9,
+ "net_blocked_reasons": [
+  "host_not_allowed",
+  "malformed_request_line",
+  "model_path_not_allowed",
+  "te_and_cl_together"
+ ],
+ "wikipedia_attempt_logged_as_blocked": true,
+ "own_page_in_egress_record": true,
+ "all_pass": true
+}

@@ -28,12 +28,14 @@ def main() -> None:
     d2 = str(root.parent)
     pm = re.compile(re.escape(d2) + r"/(realrev\w*?)/sets/(s\d+)/(cycle_(\d)|manifest[\w.]*|SOURCES[\w.]*|template\.md)")
     pc = re.compile(re.escape(str(root)) + r"/cells/([\w-]+)/(r\d)/([\w]+)/?([\w.\-]*)")
-    recs = []
+    recs = []; runs_summary = []
     for log in sorted((root / "cells").glob("*/r*/*/**/agent.log")):
         rel = log.relative_to(root / "cells").parts
         sid, rep, arm = rel[0], int(rel[1][1:]), rel[2]
         rnd = rel[3] if rel[3].startswith("round_") else "c0"
+        n0 = len(recs); tools = collections.Counter()
         for tn, args, res in S.calls(log):
+            tools[tn] += 1
             err = ('"isError": true' in res) or ("No such file" in res)
             for m in pm.finditer(args):
                 g = m.group(3)
@@ -48,6 +50,13 @@ def main() -> None:
                 kind = ("pair_" if same else "other_") + ("other" if (same and what == "cell") else what)
                 recs.append({"set": sid, "rep": rep, "arm": arm, "round": rnd, "tool": tn, "kind": kind,
                              "detail": f"{tsid}/r{trep}/{tarm}/{sub}", "tool_error": err})
+        # 每次 agent 執行的摘要（給外部核對越界次數；不含任何路徑或內容）
+        mine = recs[n0:]
+        runs_summary.append({"set": sid, "rep": rep, "arm": arm, "round": rnd, "tool_calls": sum(tools.values()), "by_tool": dict(tools),
+                             "escape_calls": len(mine), "escape_kinds": dict(collections.Counter(r["kind"] for r in mine)),
+                             "flags_json_reads": sum(1 for r in mine if r["kind"] in ("pair_flags", "other_flags"))})
+    with open(out / "expT_agent_runs.jsonl", "w") as f:
+        for r in runs_summary: f.write(json.dumps(r, ensure_ascii=False) + "\n")
     with open(out / "expT_escape_calls.jsonl", "w") as f:
         for r in recs: f.write(json.dumps(r, ensure_ascii=False) + "\n")
     runs = collections.defaultdict(set)
