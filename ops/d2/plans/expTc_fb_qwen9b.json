@@ -158,7 +158,7 @@
    "ops/d2/expT_reflag.py": "c83935d4b27bc9248b602ee36401e7a29bbaf06b99177a1470e627dfe5de9972",
    "ops/d2/expT_metrics.py": "14948bac386c5668aba3c0237ae743c256698e7f1a9b9e03864661ad9cfa8fa0",
    "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
-   "ops/d2/expTc_confirm_analysis.py": "47a3c9663ad0c9e2726e0ea17e3aae0686eacabd5a299731c0e44246df75fc19",
+   "ops/d2/expTc_confirm_analysis.py": "67013bc50d3e9b52f05fb9691187715091fefd733a22554feadf36fc0eb72489",
    "ops/d2/expT_flagcheck.py": "5a390ddb0dee8024b895a24f4e575e8fe8eeed92811595846c64a313c61344b4",
    "ops/d2/expT_b25.py": "883c3522b64d4f212957fc961f22e45fe3d97601c67b4db7835a24ba1f594eb5",
    "ops/d2/expTc_prelaunch.py": "045b1895f1e6d80444f08f34725d462759ae62b7346384b960afca18f5fd4cd9",
@@ -170,7 +170,8 @@
    "vacant_network/trace/blame.py": "fb995b7c10d3809a58d0a9c0b9fe1b6d94a12ec8ef2853d14c67d24b271daae7",
    "vacant_network/trace/evidence.py": "1c5bee96529e492cc3e93a085f7dfc61b2f06ab2c4c6c52aad661d9342ec573c",
    "ops/d2/expT_digitadj.py": "3184680987709760b737524689d8270341c7fa800e17a10d7ffd2e84ee94afef",
-   "ops/d2/expT_b36_spec_test.py": "6a7e1567f711835fb161df6898b7e0be30747c587db9dc32d9a7ce6c531e8b8c"
+   "ops/d2/expT_b36_spec_test.py": "6a7e1567f711835fb161df6898b7e0be30747c587db9dc32d9a7ce6c531e8b8c",
+   "ops/d2/sandbox_negctl.py": "b09b5d1df153a267e7374d5ff96d4c232d0d5e6d0879bb373109ba360eda5962"
   },
   "sandbox_note": "bwrap_netns (Appendix B supplement B13): --unshare-net; only the egress proxy port is forwarded in via a unix socket with a per-request allowlist (own source host:80, LM Studio inference paths). Self-test ops/d2/netns_selftest.py must pass before launch.",
   "hook_no_gc_note": "VACANT_HOOK_NO_GC=1 for every agent run of the fb plan (hook_no_gc: true); drafts plan ran without it (gc-deleted page contents are restored offline from revision-0 frozen pages by sha256, B25)."

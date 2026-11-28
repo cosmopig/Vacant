@@ -1,0 +1,103 @@
+{
+ "label": "fb1003",
+ "test_cell": "~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790",
+ "other_cell_used": "00132f3eca00f375e9952e2d",
+ "wrapper_sha256": "b87019e76f726faed43737f048742d9e7b0be420e57a4284c2ea8a88b2a3a995",
+ "tests": [
+  {
+   "name": "N1_ls_live_root",
+   "pass": true,
+   "rc": 0,
+   "detail": "entries=['nst_negctl_fb1003_1795833790']"
+  },
+  {
+   "name": "N2_find_live_root",
+   "pass": true,
+   "rc": 0,
+   "detail": "lines=7 non_own=[]"
+  },
+  {
+   "name": "N3_read_other_abs",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ~/dev/ops/d2_private_live/00132f3eca00f375e9952e2d/ws/report.md: No such file or directory"
+  },
+  {
+   "name": "N4_read_other_dotdot",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ../../00132f3eca00f375e9952e2d/ws/report.md: No such file or directory"
+  },
+  {
+   "name": "N5_read_wildcard",
+   "pass": true,
+   "rc": 0,
+   "detail": "own report"
+  },
+  {
+   "name": "N6a_ls_d2_private",
+   "pass": true,
+   "rc": 2,
+   "detail": "ls: cannot access '${D2_PRIVATE}': No such file or directory"
+  },
+  {
+   "name": "N6b_ls_future_revision",
+   "pass": true,
+   "rc": 2,
+   "detail": "ls: cannot access '${D2_PRIVATE}/realrev3_football/sets/s01/cycle_1/site': No such file or directory"
+  },
+  {
+   "name": "N6c_cat_manifest",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ${D2_PRIVATE}/realrev3_companies/manifest.json: No such file or directory"
+  },
+  {
+   "name": "N7_mounts_match_allowlist",
+   "pass": true,
+   "rc": null,
+   "detail": "mounts=['/', '/dev', '/dev/full', '/dev/null', '/dev/pts', '/dev/random', '/dev/tty', '/dev/urandom', '/dev/zero', '/etc', '~', '~/.local/opt/node-v22.23.2-linux-x64', '~/.piinstall', '~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790', '~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790/out', '~/dev/ops/d2v52_venv', '/opt/expT/sockfwd.py', '/proc', '/tmp', '/usr'] bad=[] leaks=[]"
+  }
+ ],
+ "allowlist": {
+  "allowed_mount_prefixes": [
+   "/",
+   "/dev",
+   "/etc",
+   "~",
+   "~/.local/opt/node-v22.23.2-linux-x64",
+   "~/.piinstall",
+   "~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790",
+   "~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790/out",
+   "~/dev/ops/d2v52_venv",
+   "/opt/expT/sockfwd.py",
+   "/proc",
+   "/tmp",
+   "/usr"
+  ],
+  "observed_mounts": [
+   "/",
+   "/dev",
+   "/dev/full",
+   "/dev/null",
+   "/dev/pts",
+   "/dev/random",
+   "/dev/tty",
+   "/dev/urandom",
+   "/dev/zero",
+   "/etc",
+   "~",
+   "~/.local/opt/node-v22.23.2-linux-x64",
+   "~/.piinstall",
+   "~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790",
+   "~/dev/ops/d2_private_live/nst_negctl_fb1003_1795833790/out",
+   "~/dev/ops/d2v52_venv",
+   "/opt/expT/sockfwd.py",
+   "/proc",
+   "/tmp",
+   "/usr"
+  ]
+ },
+ "allowlist_sha256": "cc8eca553cebc6fda33b03b43235ddc2ee8035e3b0d0d050129517beb6ae42c0",
+ "all_pass": true
+}

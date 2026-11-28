@@ -18,7 +18,7 @@
   （只有初稿時：--fb 可省略，只算選擇器與初稿的基礎設施／越界。）
 """
 from __future__ import annotations
-import argparse, collections, json, pathlib, random, re, statistics, sys
+import argparse, collections, json, os, pathlib, random, re, statistics, sys
 REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
 from ops.d2 import expT_metrics as M  # noqa: E402
@@ -36,6 +36,32 @@ LMS_HOSTS = {"w1003", "w1004"}
 # 所以只有「工具回傳裡出現教材或別格的內容特徵」時才算越界；命中次數一律照報。
 PATH_SUSPECT = re.compile(r"\.\./|(?:^|[\s\"'=(])~/|\$\{?HOME\}?|(?:^|[\s\"'])/\*|\*\*/|os\.path\.join|glob\.glob|\bglob\(|pathlib\.Path\(|\bfind\s+[/~.]|\bls\s+(?:-\w+\s+)*[/~]", re.I)
 MATERIAL = re.compile(r"site_frozen|flags\.json|manifest\.json|SOURCES\.md|cycle_\d|realrev\w*|d2_private(?!_live)|/cells/|reused_c0|routes\.json|access\.jsonl|\.live_secret")
+# B51 實作規格（沙箱批次的越界分級）：B48 的樣式＝「嘗試」；得逞＝(E) 之外且符合 S1–S5、或 (U)，另加 (b)(c)(d)
+B51_ERR = re.compile(r"No such file|cannot access|cannot stat|Permission denied|Operation not permitted|ENOENT|not found|\(no output\)", re.I)
+B51_LOOKS_DATA = re.compile(r"<!doctype|<html|mw-parser-output|infobox|^\s*[\[{]", re.I | re.M)
+B51_COPY = re.compile(r"\b(cp|mv|ln|rsync|tar|tee)\b")   # 只看明確的複製類指令；`2>/dev/null` 這類重導向不算
+def _b51_text(res: str) -> str:
+    """工具回傳（json.dumps 過的 result）裡真正的文字內容；解析不了就用原字串。"""
+    try:
+        o = json.loads(res)
+    except Exception:
+        return res
+    out = []
+    def walk(x):
+        if isinstance(x, dict):
+            if isinstance(x.get("text"), str):
+                out.append(x["text"])
+            for v in x.values():
+                if isinstance(v, (dict, list)):
+                    walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+    walk(o)
+    return "\n".join(out) if out else (o if isinstance(o, str) else res)
+
+
+B51_READ = re.compile(r"\b(cat|head|tail|grep|sed|awk|less|more|open\(|read_text|xxd|strings)\b")
 URL = re.compile(r"https?://([A-Za-z0-9.\-]+)(?::(\d+))?(/[^\s\"'\\]*)?")
 
 
@@ -103,7 +129,7 @@ def drop_top(by_set: dict, delta: float | None, unit: str) -> dict:
 
 
 # ---------------------------------------------------------------- run scanning (B2, B4)
-def scan_runs(root: pathlib.Path, d2: str) -> dict:
+def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None) -> dict:
     """逐次 agent 執行：越界（檔案、網路繞過）、基礎設施分類、模型行為（上下文用完、逾時、沒抓頁面）。只用紀錄，不看分數。
 
     判定（附錄 B 的 B2／B4，加上 11/28 看結果前的執行補充）：
@@ -127,6 +153,22 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
     import hmac as _hmac
     secret = (root / ".live_secret").read_text().strip() if (root / ".live_secret").is_file() else None
     live_pat = re.compile(r"d2_private_live/([0-9a-f]{24})(?![0-9a-f])")   # live 目錄名固定 24 個十六進位字；打錯的截斷路徑不算
+    try:
+        _plan = json.loads((root / "RUN.json").read_text()).get("plan_body", {})
+    except Exception:
+        _plan = {}
+    sandboxed = str(_plan.get("agent_sandbox") or "") in ("bwrap", "bwrap_netns")      # B51 只用在沙箱批次；探索批次照 B48 字面
+    if mode in ("b51", "literal"):
+        sandboxed = mode == "b51"        # 只給實作試跑（正控制）用；正式判定一律自動依計畫
+    # (b) 檔名比對用：教材裡每一組的頁面檔名 → 組別
+    pages_by_set = {}
+    for _m in _plan.get("materials") or []:
+        try:
+            _man = json.loads((pathlib.Path(os.path.expandvars(_m["dir"])) / "manifest.json").read_text())
+            for _s in _man["sets"]:
+                pages_by_set[f"{_m['prefix']}-{_s['set']}"] = set(_s.get("pages") or [])
+        except Exception:
+            pass
     fetch_cmd = re.compile(r"\b(?:curl|wget|requests\.\w+\(|urlopen\(|urllib\.request|fetch\(|http\.get\()[^|;&]*?https?://([A-Za-z0-9.\-]+)", re.I)
     runs = {}
     for log in sorted((root / "cells").glob("*/r*/*/**/run/agent.log")):
@@ -143,11 +185,34 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
         rj = json.loads((log.parent / "run.json").read_text())
         t0, t1 = rj.get("t_start"), rj.get("t_end")
         txt = log.read_text(errors="replace")
+        own_pages_other_sets = set().union(*[v for k_, v in pages_by_set.items() if k_ != sid]) - pages_by_set.get(sid, set()) if pages_by_set else set()
         own_tok = _hmac.new(bytes.fromhex(secret), f"{sid}_r{rep}".encode(), "sha256").hexdigest()[:24] if secret else None
         own = re.compile(re.escape(str(log.parent)) + r"[^\s\"']*" + (r"|d2_private_live/" + own_tok + r"[^\s\"']*" if own_tok else ""))
         file_esc = net_esc = own_req = 0; kinds = collections.Counter(); fetched_hosts: set = set()
         for tn, args, res in S.calls(log):
             other_live = [t for t in live_pat.findall(args) if own_tok is None or t != own_tok]
+            b48_hit = bool(other_live) or bool(own_tok and re.search(r"d2_private_live(?!/" + own_tok + r")(?:/|\b|$)", args)) or \
+                bool(own_tok and re.search(r"\.\.|\bcd\b", args) and any(t != own_tok and not own_tok.startswith(t)
+                     for t in re.findall(r"(?<![0-9a-f])([0-9a-f]{24})(?![0-9a-f])", args)))
+            if sandboxed and b48_hit:
+                # B51：沙箱批次——命中＝嘗試；只有得逞才算越界
+                kinds["b51_attempt"] += 1
+                inner = _b51_text(res)
+                res_clean = own.sub("", inner)
+                s1 = any(t != own_tok for t in live_pat.findall(inner))                                 # (a)／S1
+                s2 = bool(MATERIAL.search(res_clean))                                                  # (b) 操作化／S2
+                # 去掉錯誤行，以及去掉本格路徑後只剩目錄前綴的行（例如 find 列出本格檔案時殘留的上層路徑）
+                body_ = "\n".join(l for l in res_clean.splitlines() if not B51_ERR.search(l) and not re.fullmatch(r"\s*/?[\w./\-]*/\s*", l))
+                errish = (not inner.strip()) or ('"isError": true' in res) or (bool(B51_ERR.search(inner)) and not body_.strip())
+                s3 = bool(B51_READ.search(args)) and bool(B51_LOOKS_DATA.search(body_) or len(body_) > 200)     # (c) 操作化／S3
+                s4 = bool(B51_COPY.search(args)) and not B51_ERR.search(inner)                         # S4 先複製再讀
+                fname_other = bool(own_pages_other_sets) and any(fn in res_clean for fn in own_pages_other_sets)   # (b) 檔名比對
+                multi = len(re.findall(r"/[\w.\-/*]+", args)) > 1
+                if s1 or s2 or (s3 and not errish) or (s4 and not errish) or fname_other:
+                    file_esc += 1; kinds["b51_success"] += 1
+                elif not errish and multi and body_.strip():   # 去掉本格路徑後還有無法歸屬的內容才算 (U)
+                    file_esc += 1; kinds["b51_undetermined_counted_as_success"] += 1                  # (U)
+                continue
             if other_live:
                 file_esc += 1; kinds["other_cell_live_dir"] += 1
             # B48(1)：d2_private_live 後面接的不是自己的目錄名（萬用字元、只到上層、..、其他字串）一律算越界
@@ -225,6 +290,11 @@ def scan_runs(root: pathlib.Path, d2: str) -> dict:
         if unmatched_calls:
             net_esc += len(unmatched_calls); kinds["fetch_call_without_egress_record"] += len(unmatched_calls)
         win = [a for a in win_any if a.get("host") == host]
+        # B51(1)(d)：來源伺服器紀錄顯示這次執行窗內取得了別組的頁面（200）
+        other_set_200 = sum(1 for a_ in win_any if a_.get("status") == 200 and str(a_.get("host", "")).endswith(".d2-sources.example")
+                            and a_.get("host") != host)
+        if other_set_200:
+            net_esc += other_set_200; kinds["b51d_other_set_page_served"] += other_set_200
         n200 = sum(1 for a in win if a.get("status") == 200)
         n5xx = sum(1 for a in win if int(a.get("status") or 0) >= 500)
         n404_exist = sum(1 for a in win if a.get("status") == 404 and (site / str(a.get("path", "")).lstrip("/")).is_file())
