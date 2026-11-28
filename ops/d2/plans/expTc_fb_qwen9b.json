@@ -28,7 +28,7 @@
   "mode": "per-worker proxy, OS-assigned port"
  },
  "server": {
-  "port": 18265
+  "port": 0
  },
  "providers": [
   {
@@ -150,7 +150,7 @@
  "prereg": {
   "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
   "code_sha256": {
-   "ops/d2/run_expT.py": "25a10424bb583d1443a98a37b5158624a69c9441023eb59c2806ccfe6fc446b9",
+   "ops/d2/run_expT.py": "5559a14839255fa1f9255fcc6411c6281bec0e8765aaf16945c1ceef2bb7a829",
    "ops/d2/bwrap_expT_agent.sh": "31676ca0720a5ee683b1176206f3974452106b2a2192d9f0c6d7c6f31633aaad",
    "ops/d2/expT_metrics.py": "a73b5df5d5bbbe00050095d8ace4ec66c61c2ac1e2a17bd9e06eaa14b0a2057a",
    "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
@@ -164,5 +164,6 @@
    1,
    2
   ]
- }
+ },
+ "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently."
 }

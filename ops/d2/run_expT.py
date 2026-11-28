@@ -1494,8 +1494,14 @@ class ExpTRun:
         )
         err_fh.close()
         for _ in range(50):
+            if srv.poll() is not None:
+                # 2026-11-28：埠被別的行程佔著時，自己的伺服器會綁定失敗退出，但連線檢查會連到別人的伺服器而誤判成功
+                # （確認批次第一次發射就這樣拿到 404）。自己的行程死了就直接拒跑。
+                raise SystemExit(f"source server exited (rc={srv.returncode}) — port {port} busy? see {self.root / 'server.err'}")
             try:
                 socket.create_connection(("127.0.0.1", port), timeout=0.2).close()
+                if srv.poll() is not None:
+                    raise SystemExit(f"source server exited (rc={srv.returncode}) — port {port} busy?")
                 return srv
             except OSError:
                 time.sleep(0.1)
