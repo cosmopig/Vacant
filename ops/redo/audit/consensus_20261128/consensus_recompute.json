@@ -412,7 +412,7 @@
    "flagged_share": 0.2707
   }
  },
- "not_recomputable": {
+ "not_recomputable_superseded_by_r1_r5_lines": {
   "reason": "逐行多數決、逐行 oracle、一致度旗標都要每組每行 5 份初稿的（canon_strict）值或 HMAC；git 裡只有 r1、r2 的逐行 HMAC（expT_lines_hmac.jsonl，且 before_matches_k 比的是教材修訂，不是初稿之間），r3–r5 只有每份的彙總（filled、filled_correct、evidence_score、旗標池計數）。初稿根目錄與 flags_v2.json 不在 git。",
   "items": [
    "majority",
@@ -422,5 +422,1025 @@
    "flag overlap",
    "tie/blank variants"
   ]
+ },
+ "r1_r5_lines": {
+  "denominator": {
+   "filled_lines_by_domain": {
+    "cc": 635,
+    "ff": 1112
+   },
+   "filled_but_unparsed_by_domain": {
+    "cc": 58,
+    "ff": 2
+   },
+   "per_draft_vs_lines_mismatch": [
+    {
+     "set": "cc-s10",
+     "rep": 1,
+     "per_draft_filled": 20,
+     "per_draft_blank_count": 1,
+     "n_claims": 20,
+     "lines_filled": 19
+    }
+   ],
+   "per_draft_filled_plus_blank_ne_n": [
+    "cc-s10/r1"
+   ]
+  },
+  "selectors_from_lines": {
+   "A": 0.466,
+   "record": 0.7412,
+   "nonblank": 0.73,
+   "oracle": 0.7962,
+   "line_oracle": 0.8123
+  },
+  "majority": {
+   "base（空白不算票；解析不出的值當空白；平手取最小 r）": {
+    "majority": 0.7457,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2797,
+     "ci95": [
+      0.21,
+      0.3588
+     ]
+    },
+    "vs_record": {
+     "mean": 0.0045,
+     "ci95": [
+      -0.0592,
+      0.0724
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0157,
+     "ci95": [
+      -0.0075,
+      0.044
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.0505,
+     "ci95": [
+      -0.0963,
+      -0.0159
+     ]
+    },
+    "by_domain": {
+     "companies": 0.765,
+     "football": 0.7361
+    }
+   },
+   "解析不出的值當一票（用 HMAC 比對）": {
+    "majority": 0.7307,
+    "tied_lines": 46,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2647,
+     "ci95": [
+      0.1949,
+      0.3437
+     ]
+    },
+    "vs_record": {
+     "mean": -0.0105,
+     "ci95": [
+      -0.0763,
+      0.06
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0007,
+     "ci95": [
+      -0.0283,
+      0.0338
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.0655,
+     "ci95": [
+      -0.1114,
+      -0.0288
+     ]
+    },
+    "by_domain": {
+     "companies": 0.72,
+     "football": 0.7361
+    }
+   },
+   "空白算一票（解析不出的值仍當空白）": {
+    "majority": 0.5245,
+    "tied_lines": 39,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.0585,
+     "ci95": [
+      -0.0149,
+      0.1307
+     ]
+    },
+    "vs_record": {
+     "mean": -0.2167,
+     "ci95": [
+      -0.3542,
+      -0.089
+     ]
+    },
+    "vs_nonblank": {
+     "mean": -0.2055,
+     "ci95": [
+      -0.3245,
+      -0.1023
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.2717,
+     "ci95": [
+      -0.3956,
+      -0.1576
+     ]
+    },
+    "by_domain": {
+     "companies": 0.49,
+     "football": 0.5418
+    }
+   },
+   "空白算一票＋解析不出的值當一票": {
+    "majority": 0.5362,
+    "tied_lines": 54,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.0702,
+     "ci95": [
+      -0.0063,
+      0.1455
+     ]
+    },
+    "vs_record": {
+     "mean": -0.205,
+     "ci95": [
+      -0.3459,
+      -0.0729
+     ]
+    },
+    "vs_nonblank": {
+     "mean": -0.1938,
+     "ci95": [
+      -0.3118,
+      -0.0887
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.26,
+     "ci95": [
+      -0.3819,
+      -0.1446
+     ]
+    },
+    "by_domain": {
+     "companies": 0.525,
+     "football": 0.5418
+    }
+   },
+   "空白算一票，但空白與值平手時值勝（空白須嚴格最多才勝）": {
+    "majority": 0.5331,
+    "tied_lines": 39,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.0671,
+     "ci95": [
+      -0.0085,
+      0.1392
+     ]
+    },
+    "vs_record": {
+     "mean": -0.2081,
+     "ci95": [
+      -0.3503,
+      -0.0804
+     ]
+    },
+    "vs_nonblank": {
+     "mean": -0.1969,
+     "ci95": [
+      -0.3192,
+      -0.0888
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.2631,
+     "ci95": [
+      -0.3924,
+      -0.1463
+     ]
+    },
+    "by_domain": {
+     "companies": 0.49,
+     "football": 0.5547
+    }
+   },
+   "平手取最大 r": {
+    "majority": 0.7632,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2972,
+     "ci95": [
+      0.2165,
+      0.3849
+     ]
+    },
+    "vs_record": {
+     "mean": 0.022,
+     "ci95": [
+      -0.0274,
+      0.0825
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0332,
+     "ci95": [
+      -0.0096,
+      0.0836
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.033,
+     "ci95": [
+      -0.0615,
+      -0.0096
+     ]
+    },
+    "by_domain": {
+     "companies": 0.78,
+     "football": 0.7548
+    }
+   },
+   "平手＝隨機（期望值）": {
+    "majority": 0.7534,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2873,
+     "ci95": [
+      0.2135,
+      0.3676
+     ]
+    },
+    "vs_record": {
+     "mean": 0.0121,
+     "ci95": [
+      -0.0397,
+      0.0747
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0234,
+     "ci95": [
+      -0.0061,
+      0.0581
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.0429,
+     "ci95": [
+      -0.0721,
+      -0.018
+     ]
+    },
+    "by_domain": {
+     "companies": 0.7717,
+     "football": 0.7442
+    }
+   },
+   "平手＝一律算錯（需要嚴格多數）": {
+    "majority": 0.7332,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2672,
+     "ci95": [
+      0.1959,
+      0.3466
+     ]
+    },
+    "vs_record": {
+     "mean": -0.008,
+     "ci95": [
+      -0.0751,
+      0.0608
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0032,
+     "ci95": [
+      -0.02,
+      0.0321
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.063,
+     "ci95": [
+      -0.1124,
+      -0.0255
+     ]
+    },
+    "by_domain": {
+     "companies": 0.76,
+     "football": 0.7198
+    }
+   },
+   "平手下界（平手裡的值全對才算對）": {
+    "majority": 0.7332,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.2672,
+     "ci95": [
+      0.1959,
+      0.3466
+     ]
+    },
+    "vs_record": {
+     "mean": -0.008,
+     "ci95": [
+      -0.0751,
+      0.0608
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0032,
+     "ci95": [
+      -0.02,
+      0.0321
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.063,
+     "ci95": [
+      -0.1124,
+      -0.0255
+     ]
+    },
+    "by_domain": {
+     "companies": 0.76,
+     "football": 0.7198
+    }
+   },
+   "平手上界（平手裡有一個對就算對）": {
+    "majority": 0.7757,
+    "tied_lines": 34,
+    "lines": 551,
+    "vs_A": {
+     "mean": 0.3097,
+     "ci95": [
+      0.2291,
+      0.3972
+     ]
+    },
+    "vs_record": {
+     "mean": 0.0345,
+     "ci95": [
+      -0.01,
+      0.0929
+     ]
+    },
+    "vs_nonblank": {
+     "mean": 0.0457,
+     "ci95": [
+      0.0044,
+      0.0956
+     ]
+    },
+    "vs_oracle": {
+     "mean": -0.0205,
+     "ci95": [
+      -0.0393,
+      -0.0038
+     ]
+    },
+    "by_domain": {
+     "companies": 0.785,
+     "football": 0.7711
+    }
+   }
+  },
+  "same_value_different_correctness_groups": 0,
+  "alignment": {
+   "rows": 1747,
+   "judge_rows": 1747,
+   "match_domain_wrong_record_by_position": 1747,
+   "record_flag_total_E_family(er_target)": 473,
+   "record_flag_total_judge_file": 473,
+   "note": "判別行檔沒有 set／rep／claim；以檔案順序對齊，三個屬性 1747 行全部相符才採用。flags_v2 與 E 家族『同一組 473 行』的核對只在這個對齊成立下成立"
+  },
+  "record_flag_E_vs_flags_v2": {
+   "same_set_of_lines": true,
+   "n": 473
+  },
+  "flags_unified_denominator": {
+   "football": {
+    "lines": 1112,
+    "error_rate": 0.2221,
+    "consensus（事後定義：≠多數值或同意份數≤1）": {
+     "flagged_share": 0.2464,
+     "err_in": 0.7956,
+     "err_out": 0.0346,
+     "recall": 0.8826,
+     "n_flagged": 274
+    },
+    "consensus 只用 同意份數≤1": {
+     "flagged_share": 0.2302,
+     "err_in": 0.8047,
+     "err_out": 0.0479,
+     "recall": 0.834,
+     "n_flagged": 256
+    },
+    "consensus 同意份數≤2": {
+     "flagged_share": 0.3759,
+     "err_in": 0.5407,
+     "err_out": 0.0303,
+     "recall": 0.915,
+     "n_flagged": 418
+    },
+    "record": {
+     "flagged_share": 0.1628,
+     "err_in": 0.7901,
+     "err_out": 0.1117,
+     "recall": 0.5789,
+     "n_flagged": 181
+    }
+   },
+   "companies": {
+    "lines": 635,
+    "error_rate": 0.3449,
+    "consensus（事後定義：≠多數值或同意份數≤1）": {
+     "flagged_share": 0.1795,
+     "err_in": 0.5789,
+     "err_out": 0.2937,
+     "recall": 0.3014,
+     "n_flagged": 114
+    },
+    "consensus 只用 同意份數≤1": {
+     "flagged_share": 0.1638,
+     "err_in": 0.5385,
+     "err_out": 0.307,
+     "recall": 0.2557,
+     "n_flagged": 104
+    },
+    "consensus 同意份數≤2": {
+     "flagged_share": 0.337,
+     "err_in": 0.4579,
+     "err_out": 0.2874,
+     "recall": 0.4475,
+     "n_flagged": 214
+    },
+    "record": {
+     "flagged_share": 0.4598,
+     "err_in": 0.2911,
+     "err_out": 0.3907,
+     "recall": 0.3881,
+     "n_flagged": 292
+    }
+   },
+   "all": {
+    "lines": 1747,
+    "error_rate": 0.2667,
+    "consensus（事後定義：≠多數值或同意份數≤1）": {
+     "flagged_share": 0.2221,
+     "err_in": 0.732,
+     "err_out": 0.1339,
+     "recall": 0.6094,
+     "n_flagged": 388
+    },
+    "consensus 只用 同意份數≤1": {
+     "flagged_share": 0.2061,
+     "err_in": 0.7278,
+     "err_out": 0.1471,
+     "recall": 0.5622,
+     "n_flagged": 360
+    },
+    "consensus 同意份數≤2": {
+     "flagged_share": 0.3618,
+     "err_in": 0.5127,
+     "err_out": 0.1274,
+     "recall": 0.6953,
+     "n_flagged": 632
+    },
+    "record": {
+     "flagged_share": 0.2707,
+     "err_in": 0.482,
+     "err_out": 0.1868,
+     "recall": 0.4893,
+     "n_flagged": 473
+    }
+   }
+  },
+  "judge": {
+   "football": {
+    "lines": 1112,
+    "auc": {
+     "judge_unsupported(1-p)": {
+      "auc": 0.9134,
+      "ci95": [
+       0.8614,
+       0.9647
+      ]
+     },
+     "consensus_support_score(1-support/5)": {
+      "auc": 0.9388,
+      "ci95": [
+       0.88,
+       0.9761
+      ]
+     },
+     "consensus_flag(binary,事後)": {
+      "auc": 0.9089,
+      "ci95": [
+       0.835,
+       0.9659
+      ]
+     },
+     "record_flag(binary)": {
+      "auc": 0.7675,
+      "ci95": [
+       0.6681,
+       0.8677
+      ]
+     },
+     "rank_average(judge, consensus_support_score)": {
+      "auc": 0.9771,
+      "ci95": [
+       0.9605,
+       0.9901
+      ]
+     }
+    },
+    "auc_note": "排序平均＝兩個分數各自在本領域全體上的（同分平均）名次比例，取平均；名次在全資料上算一次，bootstrap 只重抽組（名次不重算）",
+    "judge_thresholds": {
+     "p<0.1": {
+      "flagged_share": 0.0522,
+      "err_in": 0.9655,
+      "err_out": 0.1812,
+      "recall": 0.2267,
+      "n_flagged": 58
+     },
+     "p<0.3": {
+      "flagged_share": 0.0953,
+      "err_in": 0.9057,
+      "err_out": 0.1501,
+      "recall": 0.3887,
+      "n_flagged": 106
+     },
+     "p<0.5": {
+      "flagged_share": 0.1574,
+      "err_in": 0.84,
+      "err_out": 0.1067,
+      "recall": 0.5951,
+      "n_flagged": 175
+     },
+     "p<0.7": {
+      "flagged_share": 0.2653,
+      "err_in": 0.6373,
+      "err_out": 0.0722,
+      "recall": 0.7611,
+      "n_flagged": 295
+     },
+     "p<0.9": {
+      "flagged_share": 0.5387,
+      "err_in": 0.3973,
+      "err_out": 0.0175,
+      "recall": 0.9636,
+      "n_flagged": 599
+     }
+    },
+    "POST_HOC_combinations": {
+     "consensus OR judge p<0.5（事後：門檻與組合都看過資料才選）": {
+      "flagged_share": 0.2887,
+      "err_in": 0.7477,
+      "err_out": 0.0088,
+      "recall": 0.9717,
+      "n_flagged": 321
+     },
+     "record OR judge p<0.5（事後）": {
+      "flagged_share": 0.2131,
+      "err_in": 0.73,
+      "err_out": 0.0846,
+      "recall": 0.7004,
+      "n_flagged": 237
+     },
+     "consensus OR judge p<0.3（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.2617,
+      "err_in": 0.7766,
+      "err_out": 0.0256,
+      "recall": 0.915,
+      "n_flagged": 291
+     },
+     "consensus OR judge p<0.7（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.3579,
+      "err_in": 0.6181,
+      "err_out": 0.0014,
+      "recall": 0.996,
+      "n_flagged": 398
+     }
+    },
+    "p>=0.9": {
+     "n": 513,
+     "correct_rate": 0.9825
+    },
+    "p<0.1": {
+     "n": 58,
+     "correct_rate": 0.0345
+    },
+    "calibration": {
+     "0.0-0.1": {
+      "n": 58,
+      "mean_p": 0.05,
+      "correct_rate": 0.034
+     },
+     "0.1-0.2": {
+      "n": 26,
+      "mean_p": 0.143,
+      "correct_rate": 0.154
+     },
+     "0.2-0.3": {
+      "n": 22,
+      "mean_p": 0.255,
+      "correct_rate": 0.182
+     },
+     "0.3-0.4": {
+      "n": 28,
+      "mean_p": 0.361,
+      "correct_rate": 0.143
+     },
+     "0.4-0.5": {
+      "n": 41,
+      "mean_p": 0.452,
+      "correct_rate": 0.341
+     },
+     "0.5-0.6": {
+      "n": 53,
+      "mean_p": 0.552,
+      "correct_rate": 0.604
+     },
+     "0.6-0.7": {
+      "n": 67,
+      "mean_p": 0.652,
+      "correct_rate": 0.701
+     },
+     "0.7-0.8": {
+      "n": 90,
+      "mean_p": 0.76,
+      "correct_rate": 0.733
+     },
+     "0.8-0.9": {
+      "n": 214,
+      "mean_p": 0.858,
+      "correct_rate": 0.879
+     },
+     "0.9-1.0": {
+      "n": 513,
+      "mean_p": 0.942,
+      "correct_rate": 0.982
+     }
+    }
+   },
+   "companies": {
+    "lines": 635,
+    "auc": {
+     "judge_unsupported(1-p)": {
+      "auc": 0.4018,
+      "ci95": [
+       0.3403,
+       0.4613
+      ]
+     },
+     "consensus_support_score(1-support/5)": {
+      "auc": 0.6021,
+      "ci95": [
+       0.5089,
+       0.6823
+      ]
+     },
+     "consensus_flag(binary,事後)": {
+      "auc": 0.593,
+      "ci95": [
+       0.5089,
+       0.6519
+      ]
+     },
+     "record_flag(binary)": {
+      "auc": 0.4453,
+      "ci95": [
+       0.3805,
+       0.5082
+      ]
+     },
+     "rank_average(judge, consensus_support_score)": {
+      "auc": 0.4919,
+      "ci95": [
+       0.407,
+       0.5615
+      ]
+     }
+    },
+    "auc_note": "排序平均＝兩個分數各自在本領域全體上的（同分平均）名次比例，取平均；名次在全資料上算一次，bootstrap 只重抽組（名次不重算）",
+    "judge_thresholds": {
+     "p<0.1": {
+      "flagged_share": 0.0142,
+      "err_in": 1.0,
+      "err_out": 0.3355,
+      "recall": 0.0411,
+      "n_flagged": 9
+     },
+     "p<0.3": {
+      "flagged_share": 0.0205,
+      "err_in": 0.9231,
+      "err_out": 0.3328,
+      "recall": 0.0548,
+      "n_flagged": 13
+     },
+     "p<0.5": {
+      "flagged_share": 0.0236,
+      "err_in": 0.8,
+      "err_out": 0.3339,
+      "recall": 0.0548,
+      "n_flagged": 15
+     },
+     "p<0.7": {
+      "flagged_share": 0.0488,
+      "err_in": 0.4839,
+      "err_out": 0.3377,
+      "recall": 0.0685,
+      "n_flagged": 31
+     },
+     "p<0.9": {
+      "flagged_share": 0.1701,
+      "err_in": 0.213,
+      "err_out": 0.3719,
+      "recall": 0.105,
+      "n_flagged": 108
+     }
+    },
+    "POST_HOC_combinations": {
+     "consensus OR judge p<0.5（事後：門檻與組合都看過資料才選）": {
+      "flagged_share": 0.1827,
+      "err_in": 0.569,
+      "err_out": 0.2948,
+      "recall": 0.3014,
+      "n_flagged": 116
+     },
+     "record OR judge p<0.5（事後）": {
+      "flagged_share": 0.4646,
+      "err_in": 0.2915,
+      "err_out": 0.3912,
+      "recall": 0.3927,
+      "n_flagged": 295
+     },
+     "consensus OR judge p<0.3（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.1795,
+      "err_in": 0.5789,
+      "err_out": 0.2937,
+      "recall": 0.3014,
+      "n_flagged": 114
+     },
+     "consensus OR judge p<0.7（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.2031,
+      "err_in": 0.5116,
+      "err_out": 0.3024,
+      "recall": 0.3014,
+      "n_flagged": 129
+     }
+    },
+    "p>=0.9": {
+     "n": 527,
+     "correct_rate": 0.6281
+    },
+    "p<0.1": {
+     "n": 9,
+     "correct_rate": 0.0
+    },
+    "calibration": {
+     "0.0-0.1": {
+      "n": 9,
+      "mean_p": 0.059,
+      "correct_rate": 0.0
+     },
+     "0.1-0.2": {
+      "n": 1,
+      "mean_p": 0.155,
+      "correct_rate": 0.0
+     },
+     "0.2-0.3": {
+      "n": 3,
+      "mean_p": 0.217,
+      "correct_rate": 0.333
+     },
+     "0.3-0.4": {
+      "n": 2,
+      "mean_p": 0.397,
+      "correct_rate": 1.0
+     },
+     "0.5-0.6": {
+      "n": 5,
+      "mean_p": 0.561,
+      "correct_rate": 0.8
+     },
+     "0.6-0.7": {
+      "n": 11,
+      "mean_p": 0.646,
+      "correct_rate": 0.818
+     },
+     "0.7-0.8": {
+      "n": 12,
+      "mean_p": 0.748,
+      "correct_rate": 1.0
+     },
+     "0.8-0.9": {
+      "n": 65,
+      "mean_p": 0.859,
+      "correct_rate": 0.877
+     },
+     "0.9-1.0": {
+      "n": 527,
+      "mean_p": 0.957,
+      "correct_rate": 0.628
+     }
+    }
+   },
+   "all": {
+    "lines": 1747,
+    "auc": {
+     "judge_unsupported(1-p)": {
+      "auc": 0.6238,
+      "ci95": [
+       0.5116,
+       0.7609
+      ]
+     },
+     "consensus_support_score(1-support/5)": {
+      "auc": 0.8058,
+      "ci95": [
+       0.7083,
+       0.8964
+      ]
+     },
+     "consensus_flag(binary,事後)": {
+      "auc": 0.7641,
+      "ci95": [
+       0.6832,
+       0.8452
+      ]
+     },
+     "record_flag(binary)": {
+      "auc": 0.649,
+      "ci95": [
+       0.5715,
+       0.7373
+      ]
+     },
+     "rank_average(judge, consensus_support_score)": {
+      "auc": 0.7323,
+      "ci95": [
+       0.6226,
+       0.8563
+      ]
+     }
+    },
+    "auc_note": "排序平均＝兩個分數各自在本領域全體上的（同分平均）名次比例，取平均；名次在全資料上算一次，bootstrap 只重抽組（名次不重算）",
+    "judge_thresholds": {
+     "p<0.1": {
+      "flagged_share": 0.0384,
+      "err_in": 0.9701,
+      "err_out": 0.2387,
+      "recall": 0.1395,
+      "n_flagged": 67
+     },
+     "p<0.3": {
+      "flagged_share": 0.0681,
+      "err_in": 0.9076,
+      "err_out": 0.2199,
+      "recall": 0.2318,
+      "n_flagged": 119
+     },
+     "p<0.5": {
+      "flagged_share": 0.1088,
+      "err_in": 0.8368,
+      "err_out": 0.1972,
+      "recall": 0.3412,
+      "n_flagged": 190
+     },
+     "p<0.7": {
+      "flagged_share": 0.1866,
+      "err_in": 0.6227,
+      "err_out": 0.1851,
+      "recall": 0.4356,
+      "n_flagged": 326
+     },
+     "p<0.9": {
+      "flagged_share": 0.4047,
+      "err_in": 0.3692,
+      "err_out": 0.1971,
+      "recall": 0.5601,
+      "n_flagged": 707
+     }
+    },
+    "POST_HOC_combinations": {
+     "consensus OR judge p<0.5（事後：門檻與組合都看過資料才選）": {
+      "flagged_share": 0.2501,
+      "err_in": 0.7002,
+      "err_out": 0.1221,
+      "recall": 0.6567,
+      "n_flagged": 437
+     },
+     "record OR judge p<0.5（事後）": {
+      "flagged_share": 0.3045,
+      "err_in": 0.4868,
+      "err_out": 0.1704,
+      "recall": 0.5558,
+      "n_flagged": 532
+     },
+     "consensus OR judge p<0.3（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.2318,
+      "err_in": 0.721,
+      "err_out": 0.1297,
+      "recall": 0.6266,
+      "n_flagged": 405
+     },
+     "consensus OR judge p<0.7（事後，只為看門檻敏感度）": {
+      "flagged_share": 0.3017,
+      "err_in": 0.592,
+      "err_out": 0.1262,
+      "recall": 0.6695,
+      "n_flagged": 527
+     }
+    },
+    "p>=0.9": {
+     "n": 1040,
+     "correct_rate": 0.8029
+    },
+    "p<0.1": {
+     "n": 67,
+     "correct_rate": 0.0299
+    },
+    "calibration": {
+     "0.0-0.1": {
+      "n": 67,
+      "mean_p": 0.052,
+      "correct_rate": 0.03
+     },
+     "0.1-0.2": {
+      "n": 27,
+      "mean_p": 0.144,
+      "correct_rate": 0.148
+     },
+     "0.2-0.3": {
+      "n": 25,
+      "mean_p": 0.25,
+      "correct_rate": 0.2
+     },
+     "0.3-0.4": {
+      "n": 30,
+      "mean_p": 0.364,
+      "correct_rate": 0.2
+     },
+     "0.4-0.5": {
+      "n": 41,
+      "mean_p": 0.452,
+      "correct_rate": 0.341
+     },
+     "0.5-0.6": {
+      "n": 58,
+      "mean_p": 0.553,
+      "correct_rate": 0.621
+     },
+     "0.6-0.7": {
+      "n": 78,
+      "mean_p": 0.651,
+      "correct_rate": 0.718
+     },
+     "0.7-0.8": {
+      "n": 102,
+      "mean_p": 0.758,
+      "correct_rate": 0.765
+     },
+     "0.8-0.9": {
+      "n": 279,
+      "mean_p": 0.859,
+      "correct_rate": 0.878
+     },
+     "0.9-1.0": {
+      "n": 1040,
+      "mean_p": 0.949,
+      "correct_rate": 0.803
+     }
+    }
+   }
+  },
+  "judge_vs_reported": {
+   "items": 128,
+   "mismatch": []
+  }
  }
 }

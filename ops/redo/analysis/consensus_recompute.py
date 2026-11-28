@@ -9,6 +9,9 @@
  (3) 對「逐行多數決、逐行 oracle、一致度旗標」只能做內部一致性檢查——
      這三項需要每組每行 5 份初稿的值（或同一把鍵的 HMAC），提交的資料裡**沒有**
      （expT_lines*.jsonl 只有 r1、r2；r3–r5 逐行資料不在 git）。腳本把這點明寫進輸出，不假裝重算。
+第二部分（r1_r5_lines）：用 drafts_r1_r5_lines_hmac.jsonl（r1–r5 逐行 HMAC）真的重算逐行多數決、oracle、一致度旗標、
+空白／平手敏感度，並用 judge_lines_all.jsonl 重算判別模型先導（AUC、門檻、校準、組合）。判別行檔沒有 set／rep／claim，
+只有 HMAC 行鍵（鍵不在 git）⇒ 以檔案順序對齊，並驗證 1747 行的 領域、對錯、紀錄旗標逐行全部相符（見輸出 alignment）。
 用法：consensus_recompute.py <repo_or_worktree_root> --out DIR
 """
 from __future__ import annotations
@@ -72,6 +75,284 @@ def int_solutions(N, er, fs, ei, eo, rc):
     return sol
 
 
+def midrank_auc(pairs):
+    """pairs: [(score, y)]；y=1 為正類（這裡＝錯行）。Mann-Whitney，同分取平均名次。"""
+    pairs = sorted(pairs, key=lambda t: t[0]); n = len(pairs)
+    npos = sum(y for _, y in pairs); nneg = n - npos
+    if not npos or not nneg:
+        return None
+    rp = 0.0; i = 0
+    while i < n:
+        j = i
+        while j < n and pairs[j][0] == pairs[i][0]:
+            j += 1
+        rp += (i + j + 1) / 2 * sum(y for _, y in pairs[i:j]); i = j
+    return (rp - npos * (npos + 1) / 2) / (npos * nneg)
+
+
+def auc_boot(by_set, score_of):
+    """by_set: {set: [row]}；組群集 bootstrap（重抽組）。回傳 (點估計, [2.5%, 97.5%])。"""
+    sets = sorted(by_set)
+    pt = midrank_auc([(score_of(r), int(r["wrong"])) for s in sets for r in by_set[s]])
+    rng = random.Random(SEED); vs = []
+    pre = {s: [(score_of(r), int(r["wrong"])) for r in by_set[s]] for s in sets}
+    for _ in range(NB):
+        smp = []
+        for _ in sets:
+            smp += pre[sets[rng.randrange(len(sets))]]
+        v = midrank_auc(smp)
+        if v is not None:
+            vs.append(v)
+    vs.sort()
+    return round(pt, 4), [round(vs[int(0.025 * len(vs))], 4), round(vs[int(0.975 * len(vs)) - 1], 4)]
+
+
+def load_lines(root):
+    D = [json.loads(l) for l in (root / AUD / "consensus_20261128/drafts_r1_r5_lines_hmac.jsonl").read_text().splitlines()]
+    J = [json.loads(l) for l in (root / AUD / "judge_gemini_decision_20261128/judge_lines_all.jsonl").read_text().splitlines()]
+    JA = json.loads((root / AUD / "judge_gemini_decision_20261128/judge_analysis.json").read_text())
+    return D, J, JA
+
+
+def vote_val(r, unparsed_vote):
+    if not r["filled"]:
+        return None
+    if r["canon_parsed"] or unparsed_vote:
+        return r["value_hmac"]
+    return None
+
+
+def line_score(cells, tie, blank_vote, unparsed_vote):
+    """cells: [(rep, row)]（rep 小到大）。回傳這一行的多數決正確度（0/1，'expect' 時為期望值）與是否平手。"""
+    cnt = collections.Counter(); first = {}; corr = {}
+    for rp, r in cells:
+        v = vote_val(r, unparsed_vote)
+        if v is None:
+            if not blank_vote:
+                continue
+            v = "∅"
+        cnt[v] += 1
+        if v not in first:
+            first[v] = rp; corr[v] = (r["correct"] and v != "∅")
+    if not cnt:
+        return 0.0, False
+    top = max(cnt.values()); cand = [v for v in cnt if cnt[v] == top]; tied = len(cand) > 1
+    if not tied:
+        return float(corr[cand[0]]), False
+    if tie == "blank_loses" :
+        nb = [v for v in cand if v != "∅"]
+        return float(corr[min(nb, key=lambda v: first[v])]) if nb else 0.0, True
+    if tie == "minr":
+        return float(corr[min(cand, key=lambda v: first[v])]), True
+    if tie == "maxr":
+        return float(corr[max(cand, key=lambda v: first[v])]), True
+    if tie == "expect":
+        return sum(corr[v] for v in cand) / len(cand), True
+    if tie == "lower":
+        return float(all(corr[v] for v in cand)), True
+    if tie == "upper":
+        return float(any(corr[v] for v in cand)), True
+    if tie == "wrong":
+        return 0.0, True
+    raise ValueError(tie)
+
+
+def consensus_flags(cells_by_claim, thr_mode="base"):
+    """回傳 {(rep,claim): (flag, support)}，只含有填行（值非空；解析不出的值用 HMAC 比對＝事後選定）。"""
+    out = {}
+    for cid, cells in cells_by_claim.items():
+        vs = [(rp, r["value_hmac"]) for rp, r in cells if r["filled"]]
+        if not vs:
+            continue
+        cnt = collections.Counter(v for _, v in vs); top = max(cnt.values()); first = {}
+        for rp, v in vs:
+            first.setdefault(v, rp)
+        maj = min([v for v in cnt if cnt[v] == top], key=lambda v: first[v])
+        for rp, v in vs:
+            out[(rp, cid)] = (((v != maj) or cnt[v] <= 1) if thr_mode == "base" else cnt[v] <= thr_mode, cnt[v])
+    return out
+
+
+def flag_stats(rows, f):
+    ff = [r for r in rows if f(r)]; nf = [r for r in rows if not f(r)]; w = sum(r["wrong"] for r in rows)
+    q = lambda a, b: round(a / b, 4) if b else None
+    return {"flagged_share": q(len(ff), len(rows)), "err_in": q(sum(r["wrong"] for r in ff), len(ff)),
+            "err_out": q(sum(r["wrong"] for r in nf), len(nf)), "recall": q(sum(r["wrong"] for r in ff), w), "n_flagged": len(ff)}
+
+
+def part2(root, per_draft, rep):
+    D, J, JA = load_lines(root)
+    sets = sorted({r["set"] for r in D}); out = {}
+    cell = collections.defaultdict(lambda: collections.defaultdict(list))   # set -> claim -> [(rep,row)]
+    for r in D:
+        cell[r["set"]][r["claim"]].append((r["rep"], r))
+    for s in cell:
+        for c in cell[s]:
+            cell[s][c].sort(key=lambda t: t[0])
+    ncl = {s: len(cell[s]) for s in cell}
+    # --- 分母與差 1 行
+    fil = collections.Counter(("cc" if r["set"].startswith("cc") else "ff") for r in D if r["filled"])
+    nonparsed = collections.Counter(("cc" if r["set"].startswith("cc") else "ff") for r in D if r["filled"] and not r["canon_parsed"])
+    h = collections.defaultdict(lambda: [0, 0])
+    for r in D:
+        h[(r["set"], r["rep"])][0] += r["filled"]; h[(r["set"], r["rep"])][1] += (r["filled"] and r["correct"])
+    mism = [{"set": p["set"], "rep": p["rep"], "per_draft_filled": p["filled"], "per_draft_blank_count": p["blank_count"],
+             "n_claims": p["n_claims"], "lines_filled": h[(p["set"], p["rep"])][0]} for p in per_draft
+            if p["filled"] != h[(p["set"], p["rep"])][0] or p["filled_correct"] != h[(p["set"], p["rep"])][1]]
+    out["denominator"] = {"filled_lines_by_domain": dict(fil), "filled_but_unparsed_by_domain": dict(nonparsed), "per_draft_vs_lines_mismatch": mism,
+                          "per_draft_filled_plus_blank_ne_n": [p["set"] + "/r" + str(p["rep"]) for p in per_draft if p["filled"] + p["blank_count"] != p["n_claims"]]}
+    # --- 選擇器（用 per_draft 的挑法，對錯用逐行資料）
+    def prop(s, rp):
+        return sum(1 for c in cell[s] for r_, r in cell[s][c] if r_ == rp and r["correct"]) / ncl[s]
+    byset = collections.defaultdict(list)
+    for p in per_draft:
+        byset[p["set"]].append(p)
+    base = {}
+    for s in sets:
+        ds = sorted(byset[s], key=lambda d: d["rep"])
+        rec = max(ds, key=lambda d: (int(d["evidence_score"]), -int(d["blank_count"]), -int(d["rep"])))
+        nb = max(ds, key=lambda d: (int(d["n_claims"]) - int(d["blank_count"]), -int(d["rep"])))
+        props = {d["rep"]: prop(s, d["rep"]) for d in ds}
+        lo = sum(any(r["correct"] for _, r in cell[s][c]) for c in cell[s]) / ncl[s]
+        base[s] = {"A": statistics.mean(props.values()), "record": props[rec["rep"]], "nonblank": props[nb["rep"]], "oracle": max(props.values()), "line_oracle": lo}
+    mean = lambda m: round(statistics.mean(v[m] for v in base.values()), 4)
+    out["selectors_from_lines"] = {m: mean(m) for m in ("A", "record", "nonblank", "oracle", "line_oracle")}
+    # --- 多數決與敏感度
+    variants = {
+        "base（空白不算票；解析不出的值當空白；平手取最小 r）": dict(tie="minr", blank_vote=False, unparsed_vote=False),
+        "解析不出的值當一票（用 HMAC 比對）": dict(tie="minr", blank_vote=False, unparsed_vote=True),
+        "空白算一票（解析不出的值仍當空白）": dict(tie="minr", blank_vote=True, unparsed_vote=False),
+        "空白算一票＋解析不出的值當一票": dict(tie="minr", blank_vote=True, unparsed_vote=True),
+        "空白算一票，但空白與值平手時值勝（空白須嚴格最多才勝）": dict(tie="blank_loses", blank_vote=True, unparsed_vote=False),
+        "平手取最大 r": dict(tie="maxr", blank_vote=False, unparsed_vote=False),
+        "平手＝隨機（期望值）": dict(tie="expect", blank_vote=False, unparsed_vote=False),
+        "平手＝一律算錯（需要嚴格多數）": dict(tie="wrong", blank_vote=False, unparsed_vote=False),
+        "平手下界（平手裡的值全對才算對）": dict(tie="lower", blank_vote=False, unparsed_vote=False),
+        "平手上界（平手裡有一個對就算對）": dict(tie="upper", blank_vote=False, unparsed_vote=False),
+    }
+    out["majority"] = {}
+    for name, kw in variants.items():
+        per = {}; ntie = 0; nlines = 0
+        for s in sets:
+            tot = 0.0
+            for c in cell[s]:
+                sc, t = line_score(cell[s][c], **kw); tot += sc; ntie += t; nlines += 1
+            per[s] = tot / ncl[s]
+        ent = {"majority": round(statistics.mean(per.values()), 4), "tied_lines": ntie, "lines": nlines}
+        for b in ("A", "record", "nonblank", "oracle"):
+            vals = [per[s] - base[s][b] for s in sets]
+            ent[f"vs_{b}"] = {"mean": round(sum(vals) / len(vals), 4), "ci95": boot(vals)}
+        dom = {}
+        for d, pf in (("companies", "cc"), ("football", "ff")):
+            dom[d] = round(statistics.mean(per[s] for s in sets if s.startswith(pf)), 4)
+        ent["by_domain"] = dom
+        out["majority"][name] = ent
+    # 有票值的對錯是否一致（同一個 HMAC 值在不同份的 correct 是否相同）
+    inc = 0
+    for s in sets:
+        for c in cell[s]:
+            d_ = {}
+            for _, r in cell[s][c]:
+                if r["filled"]:
+                    d_.setdefault(r["value_hmac"], set()).add(r["correct"])
+            inc += sum(len(v) > 1 for v in d_.values())
+    out["same_value_different_correctness_groups"] = inc
+    # --- 一致度旗標（統一分母）
+    cf = {}
+    for s in sets:
+        for (rp, c), v in consensus_flags(cell[s]).items():
+            cf[(s, rp, c)] = v
+    rows = []   # 與 D 中有填行同序
+    for r in D:
+        if r["filled"]:
+            fl, sup = cf[(r["set"], r["rep"], r["claim"])]
+            rows.append({"set": r["set"], "rep": r["rep"], "claim": r["claim"], "dom": "companies" if r["set"].startswith("cc") else "football",
+                         "wrong": not r["correct"], "cons": fl, "support": sup, "rec": r["er_target"]})
+    # --- 對齊判別行
+    ok = sum(1 for a, b in zip(rows, J) if a["dom"] == b["domain"] and a["wrong"] == b["wrong"] and a["rec"] == b["record_flag"])
+    out["alignment"] = {"rows": len(rows), "judge_rows": len(J), "match_domain_wrong_record_by_position": ok,
+                        "record_flag_total_E_family(er_target)": sum(r["rec"] for r in rows), "record_flag_total_judge_file": sum(j["record_flag"] for j in J),
+                        "note": "判別行檔沒有 set／rep／claim；以檔案順序對齊，三個屬性 1747 行全部相符才採用。flags_v2 與 E 家族『同一組 473 行』的核對只在這個對齊成立下成立"}
+    if ok != len(rows):
+        out["alignment"]["WARNING"] = "未全部對上，判別相關結果不可用"
+        return out
+    for a, b in zip(rows, J):
+        a["p"] = b["p_supported"]; a["rec_v2"] = b["record_flag"]
+    out["record_flag_E_vs_flags_v2"] = {"same_set_of_lines": all(r["rec"] == r["rec_v2"] for r in rows), "n": sum(r["rec"] for r in rows)}
+    flags = {}
+    for dom in ("football", "companies", "all"):
+        rr = [r for r in rows if dom == "all" or r["dom"] == dom]
+        e = {"lines": len(rr), "error_rate": round(sum(r["wrong"] for r in rr) / len(rr), 4),
+             "consensus（事後定義：≠多數值或同意份數≤1）": flag_stats(rr, lambda r: r["cons"]),
+             "consensus 只用 同意份數≤1": flag_stats(rr, lambda r: r["support"] <= 1),
+             "consensus 同意份數≤2": flag_stats(rr, lambda r: r["support"] <= 2),
+             "record": flag_stats(rr, lambda r: r["rec"])}
+        flags[dom] = e
+    out["flags_unified_denominator"] = flags
+    # --- 判別模型
+    jd = {}
+    for dom in ("football", "companies", "all"):
+        rr = [r for r in rows if dom == "all" or r["dom"] == dom]
+        bys = collections.defaultdict(list)
+        for r in rr:
+            bys[r["set"]].append(r)
+        e = {"lines": len(rr)}
+        # AUC（正類＝錯行）；cscore＝1−同意份數/5（連續的一致度分數）
+        sc = {"judge_unsupported(1-p)": lambda r: 1 - r["p"], "consensus_support_score(1-support/5)": lambda r: 1 - r["support"] / 5,
+              "consensus_flag(binary,事後)": lambda r: float(r["cons"]), "record_flag(binary)": lambda r: float(r["rec"])}
+        e["auc"] = {k: dict(zip(("auc", "ci95"), auc_boot(bys, f))) for k, f in sc.items()}
+        # 排序平均：各分數在該領域全體上的中位名次（同分平均）正規化到 0–1 後平均；名次只算一次，bootstrap 重抽組
+        def rank_map(f):
+            vs = sorted(f(r) for r in rr); rk = {}; i = 0; n = len(vs)
+            while i < n:
+                j = i
+                while j < n and vs[j] == vs[i]:
+                    j += 1
+                rk[vs[i]] = ((i + j + 1) / 2) / n; i = j
+            return rk
+        rj = rank_map(sc["judge_unsupported(1-p)"]); rc = rank_map(sc["consensus_support_score(1-support/5)"])
+        comb = lambda r: (rj[1 - r["p"]] + rc[1 - r["support"] / 5]) / 2
+        e["auc"]["rank_average(judge, consensus_support_score)"] = dict(zip(("auc", "ci95"), auc_boot(bys, comb)))
+        e["auc_note"] = "排序平均＝兩個分數各自在本領域全體上的（同分平均）名次比例，取平均；名次在全資料上算一次，bootstrap 只重抽組（名次不重算）"
+        th = {}
+        for t in (0.1, 0.3, 0.5, 0.7, 0.9):
+            th[f"p<{t}"] = flag_stats(rr, lambda r, t=t: r["p"] < t)
+        e["judge_thresholds"] = th
+        e["POST_HOC_combinations"] = {
+            "consensus OR judge p<0.5（事後：門檻與組合都看過資料才選）": flag_stats(rr, lambda r: r["cons"] or r["p"] < 0.5),
+            "record OR judge p<0.5（事後）": flag_stats(rr, lambda r: r["rec"] or r["p"] < 0.5),
+            "consensus OR judge p<0.3（事後，只為看門檻敏感度）": flag_stats(rr, lambda r: r["cons"] or r["p"] < 0.3),
+            "consensus OR judge p<0.7（事後，只為看門檻敏感度）": flag_stats(rr, lambda r: r["cons"] or r["p"] < 0.7),
+        }
+        hi = [r for r in rr if r["p"] >= 0.9]; lo = [r for r in rr if r["p"] < 0.1]
+        e["p>=0.9"] = {"n": len(hi), "correct_rate": round(sum(not r["wrong"] for r in hi) / len(hi), 4) if hi else None}
+        e["p<0.1"] = {"n": len(lo), "correct_rate": round(sum(not r["wrong"] for r in lo) / len(lo), 4) if lo else None}
+        bins = collections.defaultdict(lambda: [0, 0, 0.0])
+        for r in rr:
+            b = min(9, int(r["p"] * 10)); bins[b][0] += 1; bins[b][1] += (not r["wrong"]); bins[b][2] += r["p"]
+        e["calibration"] = {f"{b/10:.1f}-{(b+1)/10:.1f}": {"n": v[0], "mean_p": round(v[2] / v[0], 3), "correct_rate": round(v[1] / v[0], 3)} for b, v in sorted(bins.items())}
+        jd[dom] = e
+    out["judge"] = jd
+    # --- 與執行方 judge_analysis.json 逐項比對
+    cmpx = []
+    def cmp_(name, mine, theirs):
+        cmpx.append({"item": name, "recomputed": mine, "reported": theirs, "match": mine == theirs})
+    for dom in ("football", "companies", "all"):
+        R = JA["by_domain"][dom]; m = jd[dom]
+        cmp_(f"{dom} auc_judge", m["auc"]["judge_unsupported(1-p)"]["auc"], R["auc_judge_unsupported"])
+        for t in th:
+            for k in ("flagged_share", "err_in", "err_out", "recall"):
+                cmp_(f"{dom} judge {t} {k}", m["judge_thresholds"][t][k], R["judge"][t][k])
+        for k in ("flagged_share", "err_in", "err_out", "recall"):
+            cmp_(f"{dom} record {k}", flags[dom]["record"][k], R["record_flag"][k])
+            cmp_(f"{dom} consensus {k}", flags[dom]["consensus（事後定義：≠多數值或同意份數≤1）"][k], R["consensus_flag"][k])
+            cmp_(f"{dom} OR {k}", m["POST_HOC_combinations"]["consensus OR judge p<0.5（事後：門檻與組合都看過資料才選）"][k], R["consensus_OR_judge_p<0.5"][k])
+        for b, v in R["calibration_p_supported_vs_correct"].items():
+            cmp_(f"{dom} calib {b}", m["calibration"][b], v)
+    out["judge_vs_reported"] = {"items": len(cmpx), "mismatch": [c for c in cmpx if not c["match"]]}
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--out", required=True); a = ap.parse_args()
     per_draft, pools, rep = load(a.root)
@@ -122,10 +403,11 @@ def main():
         ef[d] = {"filled": F + U, "err_in": round(FW / F, 4), "err_out": round(UW / U, 4), "recall": round(FW / (FW + UW), 4),
                  "flagged_share": round(F / (F + U), 4)}
     res["efamily_record_flag_crosscheck"] = ef
-    res["not_recomputable"] = {
+    res["not_recomputable_superseded_by_r1_r5_lines"] = {
         "reason": "逐行多數決、逐行 oracle、一致度旗標都要每組每行 5 份初稿的（canon_strict）值或 HMAC；git 裡只有 r1、r2 的逐行 HMAC（expT_lines_hmac.jsonl，且 before_matches_k 比的是教材修訂，不是初稿之間），"
                   "r3–r5 只有每份的彙總（filled、filled_correct、evidence_score、旗標池計數）。初稿根目錄與 flags_v2.json 不在 git。",
         "items": ["majority", "line_oracle", "majority_vs_*", "consensus flag err_in/err_out/recall", "flag overlap", "tie/blank variants"]}
+    res["r1_r5_lines"] = part2(pathlib.Path(a.root), per_draft, rep)
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / "consensus_recompute.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
     bad = [r for r in res["vs_reported"] if not r["match"]]
