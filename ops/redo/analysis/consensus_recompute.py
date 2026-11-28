@@ -474,6 +474,224 @@ def part3(root, rows):
     return out
 
 
+# ---------- 第四部分：重評敏感度（regrade）重算 ----------
+def boot_q(vals, n=2000, seed=20261127):
+    """與 ops/d2/expTc_confirm_analysis.boot 同一演算法（種子 20261127、百分位索引規則）；重寫、未 import。"""
+    rng = random.Random(seed); k = len(vals); ms = []
+    for _ in range(n):
+        ms.append(sum(vals[rng.randrange(k)] for _ in range(k)) / k)
+    ms.sort()
+    q = lambda p: round(ms[min(n - 1, max(0, int(p * n) - (1 if p > 0.5 else 0)))], 4)
+    return [q(0.025), q(0.975)]
+
+
+def perm_q(vals, n=10000, seed=20261130):
+    rng = random.Random(seed); obs = abs(sum(vals) / len(vals)); hit = 0
+    for _ in range(n):
+        if abs(sum(v if rng.random() < 0.5 else -v for v in vals) / len(vals)) >= obs - 1e-12:
+            hit += 1
+    return round((hit + 1) / (n + 1), 5)
+
+
+def holm_q(ps):
+    items = sorted((p, k) for k, p in ps.items() if p is not None); m = len(items); out = {}; run = 0.0
+    for i, (p, k) in enumerate(items):
+        run = max(run, min(1.0, (m - i) * p)); out[k] = round(run, 5)
+    return out
+
+
+def summ4(by):
+    vals = [sum(by[s]) / len(by[s]) for s in sorted(by)]
+    return {"diff": round(sum(vals) / len(vals), 4), "ci95": boot_q(vals), "perm_p": perm_q(vals), "sets": len(vals)}
+
+
+def hyper_upper(N, n, alpha=0.05):
+    """抽 n 個（不放回）全部合格時，母體 N 中不合格數 M 的 95% 上界：最大的 M 使 P(0 不合格)≥alpha。"""
+    best = 0
+    for M in range(N + 1):
+        pr = 1.0
+        for i in range(n):
+            pr *= max(0, (N - M - i)) / (N - i)
+        if pr >= alpha:
+            best = M
+    return best
+
+
+def part4(root, rows):
+    d = root / AUD / "judge_v2v3_20261128"; o_dir = root / AUD / "expTc_20261128"
+    ld = lambda p: json.loads(p.read_text())
+    ver = {"original": (ld(o_dir / "expTc_confirm_analysis_20261128_v4_b61.json"), o_dir / "efamily", ld(o_dir / "expTc_escalation_analysis_20261128.json")),
+           "regraded": (ld(d / "regrade/expTc_confirm_analysis_regrade_b61.json"), d / "regrade/efamily_regrade", ld(d / "regrade/expTc_escalation_regrade.json"))}
+    RS = ld(d / "regrade_sensitivity.json")
+    out = {"note": "重評＝strict_status 換寬鬆版（原判對照舊；原判錯但合第二正規化器者改判對），其餘參數不變。這裡用各 json 內的逐格資料與 efamily 逐份資料獨立重算（演算法同 ops/d2 的 boot／perm／holm，種子 20261127／20261130）。"}
+    res = {}; cmpl = []
+    def cmp_(name, mine, theirs):
+        cmpl.append({"item": name, "recomputed": mine, "reported": theirs, "match": mine == theirs})
+    for vn, (c, ef, e) in ver.items():
+        cells = c["per_pair_arm_cells"]
+        def fb(a, b, pre=""):
+            by = collections.defaultdict(list)
+            for k, x in cells.items():
+                s, r, arm = k.split("/")
+                if arm != a or not s.startswith(pre) or x.get("infra_void"):
+                    continue
+                y = cells.get(f"{s}/{r}/{b}")
+                if y is None or y.get("infra_void"):
+                    continue
+                by[s].append(x["correct_prop_after"] - y["correct_prop_after"])
+            return summ4(by)
+        rows_ = [json.loads(l) for l in (ef / "efamily_per_draft_arm.jsonl").read_text().splitlines()]
+        dd = {(r["set"], r["rep"], r["arm"]): r["correct"] / r["n_claims"] for r in rows_}
+        has_f = {(r["set"], r["rep"]): r.get("sent_filled", 0) > 0 for r in rows_ if r["arm"] == "ER"}
+        def ee(a, b, pre="", need_filled=False):
+            by = collections.defaultdict(list)
+            for (s, rp, arm), v in dd.items():
+                if arm == a and s.startswith(pre) and (s, rp, b) in dd and (not need_filled or has_f[(s, rp)]):
+                    by[s].append(v - dd[(s, rp, b)])
+            return summ4(by)
+        pd_ = c["selector"]["all"]["per_draft"]; byset = collections.defaultdict(list)
+        for p_ in pd_:
+            byset[p_["set"]].append(p_)
+        rr = {"record_random": {}, "record_nonblank": {}}
+        for s_, ds in byset.items():
+            prop = lambda x: x["correct_prop"]
+            rec = max(ds, key=lambda x: (int(x["evidence_score"]), -int(x["blank_count"]), -int(x["rep"])))
+            nb = max(ds, key=lambda x: (int(x["n_claims"]) - int(x["blank_count"]), -int(x["rep"])))
+            rr["record_random"][s_] = [prop(rec) - statistics.mean(prop(x) for x in ds)]
+            rr["record_nonblank"][s_] = [prop(rec) - prop(nb)]
+        r_ = {"feedback": {f"{a}_vs_{b}": fb(a, b) for a, b in (("T", "TB"), ("T", "G"), ("TB", "G"), ("G", "A"), ("T", "A"), ("TB", "A"))},
+              "selector": {"record_vs_random": summ4(rr["record_random"]), "record_vs_nonblank": summ4(rr["record_nonblank"])},
+              "E": {"ER_vs_A": ee("ER", "A"), "ER_vs_EN": ee("ER", "EN", need_filled=True), "ER_vs_EB": ee("ER", "EB")},
+              "companies": {"T_vs_TB": fb("T", "TB", "cc"), "T_vs_G": fb("T", "G", "cc"), "ER_vs_A": ee("ER", "A", "cc"),
+                            "ER_vs_EN": ee("ER", "EN", "cc", True), "ER_vs_EB": ee("ER", "EB", "cc")}}
+        r_["holm_confirm"] = holm_q({"record_vs_random": r_["selector"]["record_vs_random"]["perm_p"], "record_vs_nonblank": r_["selector"]["record_vs_nonblank"]["perm_p"],
+                                     "T_vs_TB": r_["feedback"]["T_vs_TB"]["perm_p"], "T_vs_G": r_["feedback"]["T_vs_G"]["perm_p"]})
+        r_["holm_E"] = holm_q({k: v["perm_p"] for k, v in r_["E"].items()})
+        # 各臂正確率（組加權）
+        am = {}
+        for arm in ("A", "G", "T", "TB"):
+            by = collections.defaultdict(list)
+            for k, x in cells.items():
+                s, r, a = k.split("/")
+                if a == arm and not x.get("infra_void"):
+                    by[s].append(x["correct_prop_after"])
+            am[f"feedback_{arm}"] = round(statistics.mean(statistics.mean(v) for v in by.values()), 4)
+        for arm, nm in (("A", "drafts_c0"), ("EB", "E_EB"), ("ER", "E_ER"), ("EN", "E_EN")):
+            by = collections.defaultdict(list)
+            for (s, rp, a), v in dd.items():
+                if a == arm:
+                    by[s].append(v)
+            am[nm] = round(statistics.mean(statistics.mean(v) for v in by.values()), 4)
+        hp = [json.loads(l) for l in (ef / "efamily_hp_per_set.jsonl").read_text().splitlines()]
+        am["E_HP"] = round(statistics.mean(h["correct"] / h["n_claims"] for h in hp), 4)
+        r_["arm_correct_setweighted_all"] = am
+        res[vn] = r_
+        # 與 json 內報告值比對（原樣與重評各比自己那份）
+        for k_, v_ in r_["feedback"].items():
+            if k_ in c["feedback"]["all"]:
+                for f_ in ("diff", "ci95", "perm_p"):
+                    cmp_(f"{vn} feedback {k_} {f_}", v_[f_], c["feedback"]["all"][k_][f_])
+        for k_ in ("record_vs_random", "record_vs_nonblank"):
+            for f_ in ("diff", "ci95", "perm_p"):
+                cmp_(f"{vn} selector {k_} {f_}", r_["selector"][k_][f_], c["selector"]["all"][k_][f_])
+        for k_ in r_["E"]:
+            for f_ in ("diff", "ci95", "perm_p"):
+                cmp_(f"{vn} E {k_} {f_}", r_["E"][k_][f_], e["main"][k_][f_])
+        for k_ in ("T_vs_TB", "T_vs_G"):
+            for f_ in ("diff", "ci95", "perm_p"):
+                cmp_(f"{vn} companies {k_} {f_}", r_["companies"][k_][f_], c["b35_feedback_by_domain"]["companies"]["all"][k_][f_])
+        for k_ in ("ER_vs_A", "ER_vs_EN", "ER_vs_EB"):
+            for f_ in ("diff", "ci95", "perm_p"):
+                cmp_(f"{vn} E companies {k_} {f_}", r_["companies"][k_][f_], e["strata_B35"]["company"][k_][f_])
+        for k_, v_ in r_["holm_confirm"].items():
+            cmp_(f"{vn} holm confirm {k_}", v_, c["holm"][k_])
+        for k_, v_ in r_["holm_E"].items():
+            cmp_(f"{vn} holm E {k_}", v_, e["holm_family2"][k_])
+    out["recomputed"] = res
+    arm_rep = {}
+    for k_, v_ in res["original"]["arm_correct_setweighted_all"].items():
+        key = {"feedback_A": "feedback_A|all", "feedback_G": "feedback_G|all", "feedback_T": "feedback_T|all", "feedback_TB": "feedback_TB|all", "drafts_c0": "drafts_c0|all",
+               "E_EB": "E_EB|all", "E_ER": "E_ER|all", "E_EN": "E_EN|all", "E_HP": "E_HP|all"}[k_]
+        for vn, rv in (("original", "original"), ("regraded", "regraded")):
+            cmp_(f"arm {k_} {vn}", res[vn]["arm_correct_setweighted_all"][k_], RS["arm_correct_prop_setweighted"][rv][key])
+    # 重評前後的差：逐份 filled_correct 變化（公司／足球）與步驟 0 的等值行（以 (set,rep) 對）比對 ⇒ 寬鬆版 vs 看欄名版
+    po = {(p["set"], p["rep"]): p for p in ver["original"][0]["selector"]["all"]["per_draft"]}
+    pr = {(p["set"], p["rep"]): p for p in ver["regraded"][0]["selector"]["all"]["per_draft"]}
+    E_ = [json.loads(l) for l in (d / "err_taxonomy_lines.jsonl").read_text().splitlines()]
+    byk = {r["key"]: r for r in rows}
+    lab = collections.Counter((byk[e["key"]]["set"], byk[e["key"]]["rep"]) for e in E_ if e["class"] in EQUIV)
+    delta = {k: pr[k]["filled_correct"] - po[k]["filled_correct"] for k in po}
+    diffs = [k for k in po if delta[k] != lab.get(k, 0)]
+    other = [k for k in po if (pr[k]["n_claims"], pr[k]["blank_count"], pr[k]["evidence_score"]) != (po[k]["n_claims"], po[k]["blank_count"], po[k]["evidence_score"])]
+    ef_o = {(r["set"], r["rep"]): r["correct"] for r in (json.loads(l) for l in (ver["original"][1] / "efamily_per_draft_arm.jsonl").read_text().splitlines()) if r["arm"] == "A"}
+    ef_r = {(r["set"], r["rep"]): r["correct"] for r in (json.loads(l) for l in (ver["regraded"][1] / "efamily_per_draft_arm.jsonl").read_text().splitlines()) if r["arm"] == "A"}
+    out["lenient_vs_label_version"] = {
+        "total_flipped_by_regrade_in_150_drafts": sum(delta.values()), "total_label_version_equiv_lines": sum(lab.values()),
+        "by_domain_regrade": {dm: sum(v for (s, _), v in delta.items() if s.startswith(p)) for dm, p in (("companies", "cc"), ("football", "ff"))},
+        "drafts_where_counts_differ": len(diffs), "drafts": 150,
+        "evidence_score_blank_count_n_claims_changed_drafts": len(other),
+        "efamily_A_arm_flip_equals_selector_flip": all(ef_r[k] - ef_o[k] == delta[(k[0], int(k[1][1:]))] for k in ef_o),
+        "note": "只能在『每份草稿翻轉行數』層級比對（逐行比對要答案鍵）；150 份全部相同、總數相同，但不排除同一份內一行對調"}
+    # 有無被改判卻判決變動的欄位：T_harm_not_more_than_G 等非 verdict 欄位
+    o0, r0 = ver["original"][0], ver["regraded"][0]
+    out["non_verdict_field_changes"] = {"T_harm_not_more_than_G": [o0["T_harm_not_more_than_G"], r0["T_harm_not_more_than_G"]],
+                                        "verdict_equal": o0["verdict"] == r0["verdict"] and ver["original"][2]["verdict"] == ver["regraded"][2]["verdict"],
+                                        "qualifiers_equal": o0["qualifiers"] == r0["qualifiers"]}
+    ident = {k: o0[k] == r0[k] for k in ("schema", "infra_rule", "fb_plan_sha256", "pairs_total", "pairs_valid", "void_pairs_infra", "start_check_failed",
+                                          "misaligned_G_T", "blank_draft_pairs", "heuristic_success_pairs_descriptive", "suspicious_flag_pairs")}
+    ident["drafts_runs"] = o0["drafts_runs"] == r0["drafts_runs"]
+    ident["per_arm_cells_count_tokens_wall_equal"] = all(o0["per_arm"][a][f] == r0["per_arm"][a][f] for a in o0["per_arm"] for f in ("cells", "rounds_mean", "tokens_mean", "wall_mean", "future_truth_lines"))
+    out["identity_fields_equal"] = ident
+    # 答案鍵附帶文字（其他批次）
+    B = ld(d / "answer_key_artifacts_other_batches.json")["batches"]
+    tot = {k: sum(g["lines"] for g in v.get("affected_by_group", {}).values()) for k, v in B.items()}
+    cA = collections.Counter(); 
+    for k in ("exp1_cA_1003", "exp1_cA_1004"):
+        for g in B[k]["affected_by_group"].values():
+            for f, n in g["fields"].items():
+                cA[f] += n
+    sc = collections.Counter(B["exploratory_expT"]["affected_by_group"]["sc"]["fields"])
+    out["answer_key_artifacts"] = {"affected_lines_by_batch": tot, "lines_total_cA": sum(sum(g.values()) if False else 0 for g in []) or sum(v for k in ("exp1_cA_1003", "exp1_cA_1004") for v in B[k]["lines_by_group"].values()),
+                                   "sc_lines": B["exploratory_expT"]["lines_by_group"]["sc"], "sc_affected": tot["exploratory_expT"],
+                                   "cA_fields_equal_sc_fields": dict(cA) == dict(sc), "cA_affected": tot["exp1_cA_1003"] + tot["exp1_cA_1004"],
+                                   "cB_affected": tot["exp1_cB_1003"] + tot["exp1_cB_1004"], "d2prime_r5real_affected": tot["d2prime_r5real_1003"] + tot["d2prime_r5real_1004"]}
+    # 抽查：樣本是否照種子重現、組成、上界
+    A_ = ld(d / "equiv_audit.json"); cl = {e["key"]: e["class"] for e in E_}
+    rng = random.Random(SEED); reproduced = {}
+    for cls in sorted({e["class"] for e in E_}):
+        grp = [e for e in E_ if e["class"] == cls]; rng.shuffle(grp)
+        if cls in EQUIV:
+            reproduced[cls] = [e["key"] for e in grp[:20]] == A_["equiv_audit_sample"][cls]["keys"]
+    n_k, n_u = sum(1 for e in E_ if e["class"] == "K-等值"), sum(1 for e in E_ if e["class"] == "U-等值")
+    out["equiv_audit"] = {"sample_reproduced_by_seed_20261128": reproduced,
+                          "sample_keys_in_class": {c: all(cl.get(k) == c for k in A_["equiv_audit_sample"][c]["keys"]) for c in EQUIV},
+                          "checked_agree": {c: [A_["equiv_audit_sample"][c]["n_checked"], A_["equiv_audit_sample"][c]["agree"]] for c in EQUIV},
+                          "population": {"K-等值": n_k, "U-等值": n_u},
+                          "upper_bound_95_disagreeing_lines_hypergeometric": {"K-等值": hyper_upper(n_k, 20), "U-等值": hyper_upper(n_u, 20), "both(40 of 184)": hyper_upper(n_k + n_u, 40)},
+                          "U_not_equivalent_lines": [{"class_in_taxonomy": cl.get(x["key"]), "field": x["field"], "reason": x["reason"]} for x in A_["U_not_equivalent_companies"]],
+                          "note": "『一致』的判準（語意相同）沒有寫在 git；月名不同、只寫一個上市地各有幾行：資料裡沒有值，無法直接數，只能給抽樣上界。5 條真不合格都在 U（不在等值集合）"}
+    out["vs_reported"] = {"items": len(cmpl), "mismatch": [c for c in cmpl if not c["match"]]}
+    # 公司組旗標（重評）：比對 flags_regrade.json
+    FR = ld(d / "flags_regrade.json")["by_domain"]
+    fm = []
+    rc = [dict(r) for r in rows if r["dom"] == "companies"]
+    for r in rc:
+        r["wrong2"] = r["wrong"] and cl.get(r["key"]) not in EQUIV
+    q4 = lambda x: None if x is None else round(x, 4)
+    def st2(f):
+        ff = [r for r in rc if f(r)]; nf = [r for r in rc if not f(r)]; w = sum(r["wrong2"] for r in rc)
+        return {"flagged_share": q4(len(ff) / len(rc)), "err_in": q4(sum(r["wrong2"] for r in ff) / len(ff)), "err_out": q4(sum(r["wrong2"] for r in nf) / len(nf)),
+                "recall": q4(sum(r["wrong2"] for r in ff) / w), "n_flagged": len(ff)}
+    mine = {"record_flag": st2(lambda r: r["rec"]), "consensus_flag": st2(lambda r: r["cons"]), "judge_v1_p<0.5": st2(lambda r: r["p"] < 0.5)}
+    for k_, v_ in mine.items():
+        fm.append({"item": k_, "recomputed": v_, "reported": FR["companies|regraded"][k_], "match": v_ == FR["companies|regraded"][k_]})
+    for k_, f_, rk in (("auc_judge_v1", lambda r: 1 - r["p"], "judge"), ("auc_record_flag", lambda r: float(r["rec"]), "rec"), ("auc_consensus_flag", lambda r: float(r["cons"]), "cons")):
+        v_ = round(midrank_auc([(f_(r), int(r["wrong2"])) for r in rc]), 4)
+        fm.append({"item": k_, "recomputed": v_, "reported": FR["companies|regraded"][k_], "match": v_ == FR["companies|regraded"][k_]})
+    out["company_flags_regraded_vs_reported"] = fm
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--out", required=True); a = ap.parse_args()
     per_draft, pools, rep = load(a.root)
@@ -531,6 +749,7 @@ def main():
     ctx = {}
     res["r1_r5_lines"] = part2(pathlib.Path(a.root), per_draft, rep, ctx)
     res["judge_v2v3_taxonomy"] = part3(pathlib.Path(a.root), ctx.get("rows"))
+    res["regrade_sensitivity"] = part4(pathlib.Path(a.root), ctx.get("rows"))
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / "consensus_recompute.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
     bad = [r for r in res["vs_reported"] if not r["match"]]

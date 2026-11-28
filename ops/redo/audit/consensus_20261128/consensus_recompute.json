@@ -2122,5 +2122,552 @@
     }
    }
   }
+ },
+ "regrade_sensitivity": {
+  "note": "重評＝strict_status 換寬鬆版（原判對照舊；原判錯但合第二正規化器者改判對），其餘參數不變。這裡用各 json 內的逐格資料與 efamily 逐份資料獨立重算（演算法同 ops/d2 的 boot／perm／holm，種子 20261127／20261130）。",
+  "recomputed": {
+   "original": {
+    "feedback": {
+     "T_vs_TB": {
+      "diff": 0.0559,
+      "ci95": [
+       -0.011,
+       0.1364
+      ],
+      "perm_p": 0.17798,
+      "sets": 30
+     },
+     "T_vs_G": {
+      "diff": 0.0881,
+      "ci95": [
+       0.0172,
+       0.1762
+      ],
+      "perm_p": 0.0236,
+      "sets": 30
+     },
+     "TB_vs_G": {
+      "diff": 0.0322,
+      "ci95": [
+       -0.0254,
+       0.0987
+      ],
+      "perm_p": 0.35396,
+      "sets": 30
+     },
+     "G_vs_A": {
+      "diff": 0.0007,
+      "ci95": [
+       -0.0655,
+       0.057
+      ],
+      "perm_p": 0.982,
+      "sets": 30
+     },
+     "T_vs_A": {
+      "diff": 0.0888,
+      "ci95": [
+       0.019,
+       0.1696
+      ],
+      "perm_p": 0.0214,
+      "sets": 30
+     },
+     "TB_vs_A": {
+      "diff": 0.0329,
+      "ci95": [
+       0.0021,
+       0.0754
+      ],
+      "perm_p": 0.12589,
+      "sets": 30
+     }
+    },
+    "selector": {
+     "record_vs_random": {
+      "diff": 0.2752,
+      "ci95": [
+       0.1806,
+       0.3714
+      ],
+      "perm_p": 0.0001,
+      "sets": 30
+     },
+     "record_vs_nonblank": {
+      "diff": 0.0112,
+      "ci95": [
+       -0.0694,
+       0.0834
+      ],
+      "perm_p": 0.78482,
+      "sets": 30
+     }
+    },
+    "E": {
+     "ER_vs_A": {
+      "diff": 0.282,
+      "ci95": [
+       0.1949,
+       0.3769
+      ],
+      "perm_p": 0.0001,
+      "sets": 30
+     },
+     "ER_vs_EN": {
+      "diff": 0.1314,
+      "ci95": [
+       0.058,
+       0.2137
+      ],
+      "perm_p": 0.0012,
+      "sets": 23
+     },
+     "ER_vs_EB": {
+      "diff": 0.041,
+      "ci95": [
+       0.0227,
+       0.0611
+      ],
+      "perm_p": 0.0002,
+      "sets": 30
+     }
+    },
+    "companies": {
+     "T_vs_TB": {
+      "diff": -0.06,
+      "ci95": [
+       -0.15,
+       0.015
+      ],
+      "perm_p": 0.23048,
+      "sets": 10
+     },
+     "T_vs_G": {
+      "diff": 0.0675,
+      "ci95": [
+       -0.0,
+       0.14
+      ],
+      "perm_p": 0.13469,
+      "sets": 10
+     },
+     "ER_vs_A": {
+      "diff": 0.184,
+      "ci95": [
+       0.122,
+       0.242
+      ],
+      "perm_p": 0.0045,
+      "sets": 10
+     },
+     "ER_vs_EN": {
+      "diff": 0.0013,
+      "ci95": [
+       -0.0262,
+       0.0304
+      ],
+      "perm_p": 0.9693,
+      "sets": 10
+     },
+     "ER_vs_EB": {
+      "diff": 0.016,
+      "ci95": [
+       0.001,
+       0.032
+      ],
+      "perm_p": 0.12249,
+      "sets": 10
+     }
+    },
+    "holm_confirm": {
+     "record_vs_random": 0.0004,
+     "T_vs_G": 0.0708,
+     "T_vs_TB": 0.35596,
+     "record_vs_nonblank": 0.78482
+    },
+    "holm_E": {
+     "ER_vs_A": 0.0003,
+     "ER_vs_EB": 0.0004,
+     "ER_vs_EN": 0.0012
+    },
+    "arm_correct_setweighted_all": {
+     "feedback_A": 0.4897,
+     "feedback_G": 0.4904,
+     "feedback_T": 0.5785,
+     "feedback_TB": 0.5226,
+     "drafts_c0": 0.466,
+     "E_EB": 0.707,
+     "E_ER": 0.748,
+     "E_EN": 0.7145,
+     "E_HP": 0.8544
+    }
+   },
+   "regraded": {
+    "feedback": {
+     "T_vs_TB": {
+      "diff": 0.0609,
+      "ci95": [
+       -0.0157,
+       0.1468
+      ],
+      "perm_p": 0.17098,
+      "sets": 30
+     },
+     "T_vs_G": {
+      "diff": 0.0939,
+      "ci95": [
+       0.0183,
+       0.1873
+      ],
+      "perm_p": 0.0257,
+      "sets": 30
+     },
+     "TB_vs_G": {
+      "diff": 0.0331,
+      "ci95": [
+       -0.0307,
+       0.1065
+      ],
+      "perm_p": 0.37796,
+      "sets": 30
+     },
+     "G_vs_A": {
+      "diff": 0.004,
+      "ci95": [
+       -0.0708,
+       0.0711
+      ],
+      "perm_p": 0.91921,
+      "sets": 30
+     },
+     "T_vs_A": {
+      "diff": 0.0979,
+      "ci95": [
+       0.0155,
+       0.1861
+      ],
+      "perm_p": 0.0321,
+      "sets": 30
+     },
+     "TB_vs_A": {
+      "diff": 0.0371,
+      "ci95": [
+       0.0021,
+       0.0858
+      ],
+      "perm_p": 0.12589,
+      "sets": 30
+     }
+    },
+    "selector": {
+     "record_vs_random": {
+      "diff": 0.3072,
+      "ci95": [
+       0.2214,
+       0.3966
+      ],
+      "perm_p": 0.0001,
+      "sets": 30
+     },
+     "record_vs_nonblank": {
+      "diff": 0.0429,
+      "ci95": [
+       -0.0071,
+       0.1003
+      ],
+      "perm_p": 0.15748,
+      "sets": 30
+     }
+    },
+    "E": {
+     "ER_vs_A": {
+      "diff": 0.3233,
+      "ci95": [
+       0.2352,
+       0.4185
+      ],
+      "perm_p": 0.0001,
+      "sets": 30
+     },
+     "ER_vs_EN": {
+      "diff": 0.1294,
+      "ci95": [
+       0.0557,
+       0.2123
+      ],
+      "perm_p": 0.0022,
+      "sets": 23
+     },
+     "ER_vs_EB": {
+      "diff": 0.039,
+      "ci95": [
+       0.021,
+       0.0595
+      ],
+      "perm_p": 0.0001,
+      "sets": 30
+     }
+    },
+    "companies": {
+     "T_vs_TB": {
+      "diff": -0.045,
+      "ci95": [
+       -0.175,
+       0.065
+      ],
+      "perm_p": 0.54165,
+      "sets": 10
+     },
+     "T_vs_G": {
+      "diff": 0.085,
+      "ci95": [
+       -0.0125,
+       0.195
+      ],
+      "perm_p": 0.19718,
+      "sets": 10
+     },
+     "ER_vs_A": {
+      "diff": 0.308,
+      "ci95": [
+       0.208,
+       0.402
+      ],
+      "perm_p": 0.0045,
+      "sets": 10
+     },
+     "ER_vs_EN": {
+      "diff": -0.0033,
+      "ci95": [
+       -0.0325,
+       0.0275
+      ],
+      "perm_p": 0.94001,
+      "sets": 10
+     },
+     "ER_vs_EB": {
+      "diff": 0.01,
+      "ci95": [
+       -0.001,
+       0.023
+      ],
+      "perm_p": 0.20978,
+      "sets": 10
+     }
+    },
+    "holm_confirm": {
+     "record_vs_random": 0.0004,
+     "T_vs_G": 0.0771,
+     "record_vs_nonblank": 0.31496,
+     "T_vs_TB": 0.31496
+    },
+    "holm_E": {
+     "ER_vs_A": 0.0003,
+     "ER_vs_EB": 0.0003,
+     "ER_vs_EN": 0.0022
+    },
+    "arm_correct_setweighted_all": {
+     "feedback_A": 0.553,
+     "feedback_G": 0.5571,
+     "feedback_T": 0.651,
+     "feedback_TB": 0.5901,
+     "drafts_c0": 0.5273,
+     "E_EB": 0.8117,
+     "E_ER": 0.8506,
+     "E_EN": 0.8182,
+     "E_HP": 0.9911
+    }
+   }
+  },
+  "lenient_vs_label_version": {
+   "total_flipped_by_regrade_in_150_drafts": 184,
+   "total_label_version_equiv_lines": 184,
+   "by_domain_regrade": {
+    "companies": 184,
+    "football": 0
+   },
+   "drafts_where_counts_differ": 0,
+   "drafts": 150,
+   "evidence_score_blank_count_n_claims_changed_drafts": 0,
+   "efamily_A_arm_flip_equals_selector_flip": true,
+   "note": "只能在『每份草稿翻轉行數』層級比對（逐行比對要答案鍵）；150 份全部相同、總數相同，但不排除同一份內一行對調"
+  },
+  "non_verdict_field_changes": {
+   "T_harm_not_more_than_G": [
+    false,
+    true
+   ],
+   "verdict_equal": true,
+   "qualifiers_equal": true
+  },
+  "identity_fields_equal": {
+   "schema": true,
+   "infra_rule": true,
+   "fb_plan_sha256": true,
+   "pairs_total": true,
+   "pairs_valid": true,
+   "void_pairs_infra": true,
+   "start_check_failed": true,
+   "misaligned_G_T": true,
+   "blank_draft_pairs": true,
+   "heuristic_success_pairs_descriptive": true,
+   "suspicious_flag_pairs": true,
+   "drafts_runs": true,
+   "per_arm_cells_count_tokens_wall_equal": true
+  },
+  "answer_key_artifacts": {
+   "affected_lines_by_batch": {
+    "confirm_expTc": 89,
+    "exploratory_expT": 123,
+    "exp1_cA_1003": 58,
+    "exp1_cA_1004": 65,
+    "exp1_cB_1003": 0,
+    "exp1_cB_1004": 0,
+    "d2prime_r5real_1003": 0,
+    "d2prime_r5real_1004": 0
+   },
+   "lines_total_cA": 340,
+   "sc_lines": 340,
+   "sc_affected": 123,
+   "cA_fields_equal_sc_fields": true,
+   "cA_affected": 123,
+   "cB_affected": 0,
+   "d2prime_r5real_affected": 0
+  },
+  "equiv_audit": {
+   "sample_reproduced_by_seed_20261128": {
+    "K-等值": true,
+    "U-等值": true
+   },
+   "sample_keys_in_class": {
+    "U-等值": true,
+    "K-等值": true
+   },
+   "checked_agree": {
+    "U-等值": [
+     20,
+     20
+    ],
+    "K-等值": [
+     20,
+     20
+    ]
+   },
+   "population": {
+    "K-等值": 131,
+    "U-等值": 53
+   },
+   "upper_bound_95_disagreeing_lines_hypergeometric": {
+    "K-等值": 16,
+    "U-等值": 5,
+    "both(40 of 184)": 11
+   },
+   "U_not_equivalent_lines": [
+    {
+     "class_in_taxonomy": "U",
+     "field": "Formerly",
+     "reason": "只寫一個舊名、答案有兩個並附年份"
+    },
+    {
+     "class_in_taxonomy": "U",
+     "field": "Traded as",
+     "reason": "只寫代號、缺交易所"
+    },
+    {
+     "class_in_taxonomy": "U",
+     "field": "Headquarters",
+     "reason": "只寫城市、缺街道"
+    },
+    {
+     "class_in_taxonomy": "U",
+     "field": "Headquarters",
+     "reason": "只寫城市、缺街道"
+    },
+    {
+     "class_in_taxonomy": "U",
+     "field": "Services",
+     "reason": "寫業務類別、非答案的子公司／品牌清單"
+    }
+   ],
+   "note": "『一致』的判準（語意相同）沒有寫在 git；月名不同、只寫一個上市地各有幾行：資料裡沒有值，無法直接數，只能給抽樣上界。5 條真不合格都在 U（不在等值集合）"
+  },
+  "vs_reported": {
+   "items": 128,
+   "mismatch": []
+  },
+  "company_flags_regraded_vs_reported": [
+   {
+    "item": "record_flag",
+    "recomputed": {
+     "flagged_share": 0.4598,
+     "err_in": 0.0616,
+     "err_out": 0.0496,
+     "recall": 0.5143,
+     "n_flagged": 292
+    },
+    "reported": {
+     "flagged_share": 0.4598,
+     "err_in": 0.0616,
+     "err_out": 0.0496,
+     "recall": 0.5143,
+     "n_flagged": 292
+    },
+    "match": true
+   },
+   {
+    "item": "consensus_flag",
+    "recomputed": {
+     "flagged_share": 0.1795,
+     "err_in": 0.2807,
+     "err_out": 0.0058,
+     "recall": 0.9143,
+     "n_flagged": 114
+    },
+    "reported": {
+     "flagged_share": 0.1795,
+     "err_in": 0.2807,
+     "err_out": 0.0058,
+     "recall": 0.9143,
+     "n_flagged": 114
+    },
+    "match": true
+   },
+   {
+    "item": "judge_v1_p<0.5",
+    "recomputed": {
+     "flagged_share": 0.0236,
+     "err_in": 0.8,
+     "err_out": 0.0371,
+     "recall": 0.3429,
+     "n_flagged": 15
+    },
+    "reported": {
+     "flagged_share": 0.0236,
+     "err_in": 0.8,
+     "err_out": 0.0371,
+     "recall": 0.3429,
+     "n_flagged": 15
+    },
+    "match": true
+   },
+   {
+    "item": "auc_judge_v1",
+    "recomputed": 0.7052,
+    "reported": 0.7052,
+    "match": true
+   },
+   {
+    "item": "auc_record_flag",
+    "recomputed": 0.5288,
+    "reported": 0.5288,
+    "match": true
+   },
+   {
+    "item": "auc_consensus_flag",
+    "recomputed": 0.8888,
+    "reported": 0.8888,
+    "match": true
+   }
+  ]
  }
 }
