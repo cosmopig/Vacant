@@ -843,9 +843,12 @@ Part of the specification, not a disclaimer. Quote them with the numbers.
    directly. A machine-wide single exit requires containers, ACLs, or egress policy.*
    Nothing on this page may be read as more optimistic than that sentence.
    Stated precisely: of Saltzer & Schroeder's (1975) three reference-monitor conditions,
-   Vacant satisfies **tamper-proof** and **small enough to be verified**, and does **not**
-   satisfy **complete mediation**. That is not a bug; it is the unavoidable consequence of
-   something being optional. Calling it a mandatory layer would be a lie.
+   Vacant satisfies only **small enough to be verified**. It is **not tamper-proof**: the
+   record is **tamper-evident**, but the signing key is a file readable by the same OS user
+   (see the ⚠ at the top), so a program holding it, including the agent, can rewrite the
+   whole chain. It does **not** satisfy complete mediation either. That is not a bug; it is
+   the unavoidable consequence of something being optional. Calling it a mandatory layer
+   would be a lie.
 3. **We said something wrong; this is the correction, with the result of the sweep that
    followed it.** We wrote that R532 was "V/GT 43/43 CLEAN". **That statement is false.**
    `ops/gain/harness_vgt_audit.py:746` reads `if arm not in VARIANTS: continue`, and
@@ -1155,10 +1158,12 @@ Vacant the single exit on a machine takes containers, ACLs or egress policy, whi
 deployment layer's job. Same pattern as in-toto / SLSA / Sigstore in supply-chain security.
 
 Precisely: of Saltzer & Schroeder's (1975) three reference-monitor conditions, Vacant
-satisfies **tamper-proof** and **small enough to be verified** and does **not** satisfy
-**complete mediation** — the unavoidable consequence of being optional, not a defect. With
-the library or MCP shapes the honest description is "the agent's verified work is
-accountable", not "the agent is constrained".
+satisfies only **small enough to be verified**. It is **not tamper-proof**: the record is
+**tamper-evident**, but the signing key is a file readable by the same OS user (see the ⚠
+at the top), so a program holding it, including the agent, can rewrite the whole chain. It
+does **not** satisfy complete mediation either — the unavoidable consequence of being
+optional, not a defect. With the library or MCP shapes the honest description is "the
+agent's verified work is accountable", not "the agent is constrained".
 
 ## B. Where to intercept
 

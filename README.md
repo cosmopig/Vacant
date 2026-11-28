@@ -758,7 +758,9 @@ needle——**跳過 ≠ 檢查過**。
    啟動的子行程；無法阻止同一 OS 使用者繞過本命令直接執行 agent。需要強制全機唯一出口時，
    仍須容器、ACL 或 egress policy」。本頁任何一句都不得讀成比這句樂觀。
    用正式名詞講更精準：Saltzer & Schroeder 1975 的 reference monitor 三條件裡，
-   Vacant 滿足**防竄改**與**小到可被驗證**，**不滿足 complete mediation（完全中介）**。
+   Vacant 只滿足**小到可被驗證**；**防竄改不成立**：紀錄是**竄改可察覺**（tamper-evident），
+   但簽章金鑰是同一 OS 使用者讀得到的檔（見本頁開頭的 ⚠），持有金鑰的程式（包括 agent）
+   可以整條重寫。**complete mediation（完全中介）也不滿足**。
    這不是 bug，是「可選的東西不可能完全中介」的必然後果。把它寫成強制層就是在說謊。
 3. **我們對外講錯過一句，這裡更正，並附上補掃完成後的結果。** 我們寫過 R532「V/GT 紅線
    43/43 CLEAN」。**那句話是錯的。** `ops/gain/harness_vgt_audit.py:746` 是
@@ -1003,15 +1005,18 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 | **harness 自己擁有 loop** | 例如 `ops/gain/r530/openwork_arms.py:642-696` | **有——harness 就是那個 loop**，agent 沒有繞過閘門的路徑。 |
 
 **正確的定位是「收件口」不是「強制層」**：強制點在**驗收期**——沒有可驗證收據的交付不被
-接受，而**要越過那一關得持有簽章金鑰**（`vacant_network/receipt.py` ＋ `controller.verify_delivery` 重算五個
-sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能消費一次）。強制點**不在
+接受，而**要越過那一關得持有簽章金鑰**（前提是金鑰保管：`vacant_network/receipt.py` 的誠實邊界寫明
+「key custody 假設下」；同一 OS 使用者讀得到金鑰時，這一關擋不住同機的程式，部署層要另外用沙箱或
+ACL 把金鑰和 agent 分開）。`vacant_network/receipt.py` ＋ `controller.verify_delivery` 重算五個
+sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能消費一次。強制點**不在
 執行期**：要讓 Vacant 成為全機唯一出口需要容器／ACL／egress policy，那是部署層的事。
 這與供應鏈安全的 in-toto／SLSA／Sigstore 是同一個模式。
 
-用正式名詞說清楚：Saltzer & Schroeder 1975 的 reference monitor 三條件裡，Vacant 滿足
-**防竄改**與**小到可被驗證**，**不滿足 complete mediation**。這是「可選的東西不可能完全
-中介」的必然後果，不是缺陷。用 library 或 MCP 形態時，誠實的講法是「agent 已驗證的產出
-是可究責的」，不是「agent 被約束住了」。
+用正式名詞說清楚：Saltzer & Schroeder 1975 的 reference monitor 三條件裡，Vacant 只滿足
+**小到可被驗證**；**防竄改不成立**：紀錄是**竄改可察覺**（tamper-evident），但簽章金鑰是
+同一 OS 使用者讀得到的檔（見本頁開頭的 ⚠），持有金鑰的程式（包括 agent）可以整條重寫。
+**complete mediation 也不滿足**。這是「可選的東西不可能完全中介」的必然後果，不是缺陷。
+用 library 或 MCP 形態時，誠實的講法是「agent 已驗證的產出是可究責的」，不是「agent 被約束住了」。
 
 ## B. 攔在哪一層
 
@@ -1097,7 +1102,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 | 把驗得過的鏈當成「沒有東西被刪掉」 | 公示鏈頭或會簽 | H-3：integrity ≠ completeness。 |
 | 用 `seq`／筆數當截斷防護 | 外生的長度承諾（別人手上，或時間上早於截斷） | `seq` 就是筆數；截斷後的前綴每一筆仍自洽。 |
 | 把 `verify_run_receipts.py` 的對帳當成獨立稽核 | 當成同源自檢 | 兩端同一個行程寫的：抓得到 bug，抓不到 malice。 |
-| 說 Vacant 是「強制層」 | 「收件口」：沒有可驗證收據的交付不被接受 | 不滿足 complete mediation；全機唯一出口是部署層的事。 |
+| 說 Vacant 是「強制層」 | 「收件口」：沒有可驗證收據的交付不被接受（收據只證明簽的人持有那把金鑰、之後沒被改） | 不滿足 complete mediation；全機唯一出口是部署層的事。 |
 | `pip install vacant` | `pip install vacant-network` | PyPI 上的 `vacant` 是別人的 DNS 工具。**import 名仍是 `vacant`**。 |
 | 從輪子呼叫 `Executor.new(id).attest(...)` 然後接 `ImportError` | 注入 probe：`Executor.new(id, probe=...)` | H-5，例外是 `OpsRunnerUnavailable`。 |
 | 預算用完就把最後一份交出去 | 拒交，並且把拒交算成失敗 | 那等於把閘門唯一在做的事刪掉。 |
@@ -1225,6 +1230,9 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 展件：[`examples/receipt_viewer_multiparty.html`](https://github.com/cosmopig/Vacant/blob/main/examples/receipt_viewer_multiparty.html)——
 內嵌三條完整簽章鏈（5,579 筆），瀏覽器內從創世驗到鏈頭、逐格重算裁決／指名／出貨，
 零外部資源、`file://` 直開。
+「這把金鑰說的」的前提是金鑰沒有被別人拿到。三台執行器都會執行受測的程式；在 r454，
+受測程式和簽章程式在同一台機器、同一個帳號下跑（K2、K3 還共用一台機器），沙箱只限時間、
+CPU 與工作目錄，不是安全邊界，所以這個前提沒有被保證，這一頁驗不出來。
 
 ---
 
