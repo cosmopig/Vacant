@@ -273,7 +273,7 @@ class ExpTRun:
             if a not in FB.EXPT_ARMS:
                 raise SystemExit(f"unsupported Experiment T arm: {a!r} (valid: {FB.EXPT_ARMS})")
 
-        # 2026-11-28 量具修正（附錄 B 補充）：flag_matching＝"n2db" 時用修正後的比對與凍結頁補回；預設 literal＝舊行為
+        # 2026-11-28 量具修正（附錄 B 補充）：flag_matching＝"b24" 時用修正後的比對與凍結頁補回（"n2db" 是已棄用的寬規則）；預設 literal＝舊行為
         FB.set_flag_matching(str(self.plan.get("flag_matching") or "literal"))
         need_oracle = "TO" in self.arms
         self.sets_meta, self.manifest_shas, self._oracle_truth = load_materials_specs(
@@ -742,7 +742,7 @@ class ExpTRun:
 
         # 0) Pin revision-0 frozen page snapshot once for all arms & rounds
         frozen_site, site_shas = self._prepare_frozen_site(c0_dir, set_id)
-        if FB.FLAG_MATCHING == "n2db":
+        if FB.FLAG_MATCHING in ("n2db", "b24"):
             FB.add_frozen_fallback(c0_dir / "site_frozen", c0_dir / "site_snapshot_sha256.json")
 
         # 1) Shared cycle-0 draft (all arms branch from this identical draft)
