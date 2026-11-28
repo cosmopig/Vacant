@@ -1,0 +1,9 @@
+{
+  "frozen_at_utc": "2026-11-28T13:32:00Z",
+  "tasks_bank_sha256": "29116c8954a571057e9dac592a99b9595a52ab0518371b03af7d2b4faea3180a",
+  "scorer_sha256": "5156920f1146f22e2f7133797fca699c70d108851165d67ab7eb1f335aa404c4",
+  "PREREG_md_sha256": "70716319943aebbcc472646edab32aa2a073feb6f47598584b5cfb5bab707a9d",
+  "baseline_arm_frozen_from_pilot_v2": "BLIND",
+  "confirmatory_arms": ["BLIND", "EVR"],
+  "confirmatory_split": "confirm_ids"
+}

@@ -1,0 +1,124 @@
+{
+  "task_id": "org_18",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "1995",
+    "hq_city": "Basel",
+    "revenue_fy2020": "780000000",
+    "rnd_ratio": "0.195",
+    "employees": "28900"
+  },
+  "final": {
+    "founded_year": "1995",
+    "hq_city": "Basel",
+    "revenue_fy2020": "780000000",
+    "rnd_ratio": "0.195",
+    "employees": "28900"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1995",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Basel",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "780000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "rnd_ratio",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "0.195",
+        "detail": "value_digits_not_in_source"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "28900",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1995",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Basel",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "780000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "rnd_ratio",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "0.195",
+        "detail": "value_digits_not_in_source"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "28900",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": 1995,\n  \"hq_city\": \"Basel\",\n  \"revenue_fy2020\": 780000000,\n  \"rnd_ratio\": 0.195,\n  \"employees\": 28900\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\"founded_year\": \"1995\", \"hq_city\": \"Basel\", \"revenue_fy2020\": \"780000000\", \"rnd_ratio\": \"0.195\", \"employees\": \"28900\"}",
+      "prompt_tokens": 194,
+      "completion_tokens": 62,
+      "latency_s": 1.8065496869999151
+    }
+  ],
+  "prompt_tokens": 194,
+  "completion_tokens": 62,
+  "latency_s": 1.8071607819999826
+}

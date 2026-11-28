@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "111",
+    "scale": "in millions",
+    "in billions": "0.111",
+    "page": 4,
+    "span": "Total risk management"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"111\",\"scale\":\"in millions\",\"in billions\":\"0.111\",\"page\":4,\"span\":\"Total risk management\"}",
+      "prompt_tokens": 165,
+      "completion_tokens": 35,
+      "latency_s": 1.0810153170000376,
+      "mean_logprob": null
+    }
+  ]
+}

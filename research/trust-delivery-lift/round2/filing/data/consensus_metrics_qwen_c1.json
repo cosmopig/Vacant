@@ -1,0 +1,59 @@
+{
+  "label": "qwen3.5-9b C1 \u2014 consensus vs primary (checker validity)",
+  "n_rows": 1000,
+  "delivery_decision_agreement_primary_vs_consensus": 0.479,
+  "opcode_decomposition_pooled": {
+    "multi_column_escalate": {
+      "in_1": 0,
+      "in_2": 1000,
+      "in_3": 0,
+      "param_split": 0
+    },
+    "provenance_span_substr": {
+      "in_1": 0,
+      "in_2": 0,
+      "in_3": 1000,
+      "param_split": 0
+    },
+    "scale_header_consistency": {
+      "in_1": 0,
+      "in_2": 1000,
+      "in_3": 0,
+      "param_split": 0
+    },
+    "status_found_fields": {
+      "in_1": 0,
+      "in_2": 1000,
+      "in_3": 0,
+      "param_split": 1000
+    },
+    "unit_if_declared": {
+      "in_1": 0,
+      "in_2": 1000,
+      "in_3": 0,
+      "param_split": 125
+    },
+    "value_in_span_numbers": {
+      "in_1": 0,
+      "in_2": 0,
+      "in_3": 1000,
+      "param_split": 0
+    }
+  },
+  "disagree_reasons_top": [
+    [
+      "consensus_escalate_vs_primary_pass",
+      521
+    ]
+  ],
+  "quote_pass_wrong_n": 101,
+  "catch_rate_primary": 0.7425742574257426,
+  "catch_rate_consensus": 1.0,
+  "catch_delta_pp": 25.742574257425744,
+  "false_reject_primary": 36,
+  "false_reject_consensus": 524,
+  "false_release_rate_primary": 0.036414565826330535,
+  "false_release_rate_consensus": 0.0,
+  "falsifier_triggered": false,
+  "falsifier_rule": "consensus catch < primary-10pp OR consensus false_release > primary+2pp"
+}

@@ -1,0 +1,27 @@
+{
+  "label": "qwen3.5-9b C1",
+  "n_tasks": 1000,
+  "coverage_uncontested": 0.461,
+  "coverage_auto_pass_eligible": 0.2,
+  "n_uncontested_unanimous_pass": 200,
+  "false_release_uncontested_auto_pass": {
+    "n_shipped": 200,
+    "n_wrong": 0,
+    "n_right": 200,
+    "rate": 0.0
+  },
+  "contested_share": 0.539,
+  "contested_aggregate_patterns_top10": [
+    [
+      "PASS|ESCALATE|ESCALATE",
+      521
+    ],
+    [
+      "FAIL|FAIL|ESCALATE",
+      18
+    ]
+  ],
+  "uncontested_quote_pass_wrong_n": 74,
+  "uncontested_catch_rate_on_wrong": 1.0,
+  "interpretation": "High contested share + low auto_pass_eligible = honest coverage, not refuse-everything unless uncontested false-release is also low."
+}

@@ -1,0 +1,124 @@
+{
+  "task_id": "org_19",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1968",
+    "hq_city": "Pittsburgh, Pennsylvania",
+    "revenue_fy2014": "USD 3.3 billion",
+    "op_margin": "7.1%",
+    "employees": "14800"
+  },
+  "final": {
+    "founded_year": "1968",
+    "hq_city": "Pittsburgh, Pennsylvania",
+    "revenue_fy2014": "USD 3.3 billion",
+    "op_margin": "7.1%",
+    "employees": "14800"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1968",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Pittsburgh, Pennsylvania",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2014",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 3.3 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "7.1%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "14800",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1968",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Pittsburgh, Pennsylvania",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2014",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 3.3 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "7.1%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "14800",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1968\",\n  \"hq_city\": \"Pittsburgh, Pennsylvania\",\n  \"revenue_fy2014\": \"USD 3.3 billion\",\n  \"op_margin\": \"7.1%\",\n  \"employees\": 14800\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1968\",\n  \"hq_city\": \"Pittsburgh, Pennsylvania\",\n  \"revenue_fy2014\": \"USD 3.3 billion\",\n  \"op_margin\": \"7.1%\",\n  \"employees\": \"14800\"\n}",
+      "prompt_tokens": 262,
+      "completion_tokens": 67,
+      "latency_s": 1.9956117589999849
+    }
+  ],
+  "prompt_tokens": 262,
+  "completion_tokens": 67,
+  "latency_s": 1.9962045340000714
+}

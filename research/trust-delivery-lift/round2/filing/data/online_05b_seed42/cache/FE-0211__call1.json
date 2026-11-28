@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,079",
+    "scale": "in millions",
+    "in billions": "0.002079",
+    "page": 4,
+    "span": "2026-09-30 Accounts payable, accrued expenses, and other liabilities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,079\",\"scale\":\"in millions\",\"in billions\":\"0.002079\",\"page\":4,\"span\":\"2026-09-30 Accounts payable, accrued expenses, and other liabilities\"}",
+      "prompt_tokens": 159,
+      "completion_tokens": 56,
+      "latency_s": 1.6815882770001735,
+      "mean_logprob": null
+    }
+  ]
+}

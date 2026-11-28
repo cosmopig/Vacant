@@ -1,0 +1,33 @@
+{
+  "task_id": "dev_005",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "STITCH",
+  "draft": {
+    "vendor": "Wide World Importers",
+    "invoice_date": "2024-01-27",
+    "due_date": "2024-02-11",
+    "currency": "USD",
+    "subtotal": "2340.76",
+    "tax": "117.04",
+    "total": "2457.8",
+    "order_id": "PO-190131"
+  },
+  "final": {
+    "vendor": "Wide World Importers",
+    "invoice_date": "2024-01-27",
+    "due_date": "2024-02-11",
+    "currency": "USD",
+    "subtotal": "2340.76",
+    "tax": "117.04",
+    "total": "2457.8",
+    "order_id": "PO-190131"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 531,
+  "completion_tokens": 326,
+  "cpu_seconds": 11.903534415999957,
+  "n_calls": 3
+}

@@ -1,0 +1,127 @@
+{
+  "label_primary": "primary_confirmatory_untouched_tail",
+  "n_tasks_primary": 54,
+  "primary": {
+    "BLIND": {
+      "n": 54,
+      "oracle_success": 40,
+      "oracle_rate": 0.7407407407407407,
+      "ci95": [
+        0.610688551197827,
+        0.838814920352061
+      ],
+      "visible_pass_rate": 1.0,
+      "confusion_visible_x_oracle": {
+        "V+_O-": 14,
+        "V+_O+": 40
+      },
+      "mean_cpu_s": 6.985302136555522,
+      "mean_tokens": 567.2592592592592
+    },
+    "LPB3": {
+      "n": 54,
+      "oracle_success": 40,
+      "oracle_rate": 0.7407407407407407,
+      "ci95": [
+        0.610688551197827,
+        0.838814920352061
+      ],
+      "visible_pass_rate": 1.0,
+      "confusion_visible_x_oracle": {
+        "V+_O-": 14,
+        "V+_O+": 40
+      },
+      "mean_cpu_s": 11.668735123944519,
+      "mean_tokens": 855.9074074074074
+    },
+    "MAJ3": {
+      "n": 54,
+      "oracle_success": 39,
+      "oracle_rate": 0.7222222222222222,
+      "ci95": [
+        0.5910930359127778,
+        0.823833245517888
+      ],
+      "visible_pass_rate": 0.9814814814814815,
+      "confusion_visible_x_oracle": {
+        "V+_O-": 14,
+        "V+_O+": 39,
+        "V-_O-": 1
+      },
+      "mean_cpu_s": 11.747616467148402,
+      "mean_tokens": 861.2407407407408
+    },
+    "VACANT": {
+      "n": 54,
+      "oracle_success": 40,
+      "oracle_rate": 0.7407407407407407,
+      "ci95": [
+        0.610688551197827,
+        0.838814920352061
+      ],
+      "visible_pass_rate": 1.0,
+      "confusion_visible_x_oracle": {
+        "V+_O-": 14,
+        "V+_O+": 40
+      },
+      "mean_cpu_s": 3.0947835433888504,
+      "mean_tokens": 281.55555555555554
+    }
+  },
+  "mcnemar_primary_vacant_vs_maj3": {
+    "arm_a": "VACANT",
+    "arm_b": "MAJ3",
+    "b_a_fail_b_ok": 0,
+    "c_a_ok_b_fail": 1,
+    "mcnemar_p": 1.0
+  },
+  "label_secondary": "secondary_sensitivity_contaminated",
+  "secondary_mcnemar_vacant_vs_maj3": {
+    "arm_a": "VACANT",
+    "arm_b": "MAJ3",
+    "b_a_fail_b_ok": 0,
+    "c_a_ok_b_fail": 1,
+    "mcnemar_p": 1.0
+  },
+  "secondary_mcnemar_vacant_vs_blind": {
+    "arm_a": "VACANT",
+    "arm_b": "BLIND",
+    "b_a_fail_b_ok": 0,
+    "c_a_ok_b_fail": 1,
+    "mcnemar_p": 1.0
+  },
+  "mechanism_honesty_vacant": {
+    "primary_tail": {
+      "n": 54,
+      "repair_trigger_rate": 0.0,
+      "n_calls_histogram": {
+        "1": 54
+      },
+      "mean_cpu_s": 3.0947835433888504,
+      "draft_oracle_rate": 0.7407407407407407,
+      "conditional_repair_gain": {
+        "n_repair_fired": 0,
+        "mean_oracle_delta_final_minus_draft": null,
+        "net_tasks_improved": 0
+      },
+      "note": "Greedy draft often passes visible \u2192 n_calls=1 \u2192 compares 1-shot vs Maj3\u00d73, not repair loop."
+    },
+    "secondary_all": {
+      "n": 128,
+      "repair_trigger_rate": 0.0,
+      "n_calls_histogram": {
+        "1": 128
+      },
+      "mean_cpu_s": 3.0927348407812474,
+      "draft_oracle_rate": 0.75,
+      "conditional_repair_gain": {
+        "n_repair_fired": 0,
+        "mean_oracle_delta_final_minus_draft": null,
+        "net_tasks_improved": 0
+      },
+      "note": "Greedy draft often passes visible \u2192 n_calls=1 \u2192 compares 1-shot vs Maj3\u00d73, not repair loop."
+    }
+  },
+  "cpu_taint_warning": "confirmatory rows may reflect dual-harness CPU contention through hold_K",
+  "manifest_sha256_file": "FENCE_ADDENDUM_SHA256.json"
+}

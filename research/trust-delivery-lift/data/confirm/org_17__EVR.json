@@ -1,0 +1,124 @@
+{
+  "task_id": "org_17",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "2007",
+    "hq_city": "Dublin",
+    "revenue_fy2023": "890",
+    "take_rate": "1.9",
+    "employees": "3400"
+  },
+  "final": {
+    "founded_year": "2007",
+    "hq_city": "Dublin",
+    "revenue_fy2023": "890",
+    "take_rate": "1.9",
+    "employees": "3400"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2007",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Dublin",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "890",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "take_rate",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "1.9",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "3400",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2007",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Dublin",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "890",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "take_rate",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "1.9",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "3400",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 2007,\n  \"hq_city\": \"Dublin\",\n  \"revenue_fy2023\": 890,\n  \"take_rate\": 1.9,\n  \"employees\": 3400\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"2007\",\n  \"hq_city\": \"Dublin\",\n  \"revenue_fy2023\": \"890\",\n  \"take_rate\": \"1.9\",\n  \"employees\": \"3400\"\n}",
+      "prompt_tokens": 271,
+      "completion_tokens": 60,
+      "latency_s": 1.7965832010000895
+    }
+  ],
+  "prompt_tokens": 271,
+  "completion_tokens": 60,
+  "latency_s": 1.7971866770000133
+}

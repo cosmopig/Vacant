@@ -1,0 +1,124 @@
+{
+  "task_id": "org_06",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "2001",
+    "hq_city": "Seattle, Washington",
+    "revenue_fy2020": "680000000",
+    "ssg_fy2020": "",
+    "employees": "98000"
+  },
+  "final": {
+    "founded_year": "2001",
+    "hq_city": "Seattle, Washington",
+    "revenue_fy2020": "680000000",
+    "ssg_fy2020": "",
+    "employees": "98000"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2001",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Seattle, Washington",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "680000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "ssg_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "",
+        "detail": "missing_or_empty"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "98000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2001",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Seattle, Washington",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "680000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "ssg_fy2020",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "",
+        "detail": "missing_or_empty"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "98000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 2001,\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": 680000000,\n  \"ssg_fy2020\": null,\n  \"employees\": 98000\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"2001\",\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": \"680000000\",\n  \"ssg_fy2020\": \"\"\n}",
+      "prompt_tokens": 416,
+      "completion_tokens": 59,
+      "latency_s": 1.8266707129999986
+    }
+  ],
+  "prompt_tokens": 416,
+  "completion_tokens": 59,
+  "latency_s": 1.827293716999975
+}

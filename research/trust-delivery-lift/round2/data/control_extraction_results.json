@@ -1,0 +1,126 @@
+{
+  "passed": true,
+  "n": 15,
+  "cases": [
+    {
+      "cat": "must_equal",
+      "field_kind": "money",
+      "a": "USD 3 million",
+      "b": "US$3m",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_equal",
+      "field_kind": "money",
+      "a": "EUR 1.2 million",
+      "b": "\u20ac1,200,000.00",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_equal",
+      "field_kind": "date",
+      "a": "2024-06-30",
+      "b": "2024-06-30",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_equal",
+      "field_kind": "currency",
+      "a": "USD",
+      "b": "usd",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_equal",
+      "field_kind": "percent",
+      "a": "10%",
+      "b": "10 percent",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_equal",
+      "field_kind": "int",
+      "a": "1,250",
+      "b": "1250",
+      "equal": true,
+      "differ": false
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "money",
+      "a": "USD 3 million",
+      "b": "USD 3 billion",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "money",
+      "a": "USD 5 bn",
+      "b": "USD 5 m",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "int",
+      "a": "-3",
+      "b": "3",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "percent",
+      "a": "10%",
+      "b": "10",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "money",
+      "a": "USD 10",
+      "b": "JPY 10",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "money",
+      "a": "USD 120 million",
+      "b": "USD 120 thousand",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "date",
+      "a": "2024-06-30",
+      "b": "2023-06-30",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "set",
+      "a": "AAPL, MSFT",
+      "b": "AAPL",
+      "equal": false,
+      "differ": true
+    },
+    {
+      "cat": "must_differ",
+      "field_kind": "currency",
+      "a": "USD",
+      "b": "EUR",
+      "equal": false,
+      "differ": true
+    }
+  ]
+}

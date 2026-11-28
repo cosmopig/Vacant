@@ -1,0 +1,124 @@
+{
+  "task_id": "org_21",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1985",
+    "hq_city": "Bergen, Norway",
+    "revenue_fy2021": "NOK 18.6 billion",
+    "utilization": "91%",
+    "employees": "4,600"
+  },
+  "final": {
+    "founded_year": "1985",
+    "hq_city": "Bergen, Norway",
+    "revenue_fy2021": "NOK 18.6 billion",
+    "utilization": "91%",
+    "employees": "4,600"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1985",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Bergen, Norway",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2021",
+        "visible_ok": false,
+        "hidden_ok": true,
+        "got": "NOK 18.6 billion",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "utilization",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "91%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "4,600",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1985",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Bergen, Norway",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2021",
+        "visible_ok": false,
+        "hidden_ok": true,
+        "got": "NOK 18.6 billion",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "utilization",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "91%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "4,600",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1985\",\n  \"hq_city\": \"Bergen, Norway\",\n  \"revenue_fy2021\": \"NOK 18.6 billion\",\n  \"utilization\": \"91%\",\n  \"employees\": \"4,600\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1985\",\n  \"hq_city\": \"Bergen, Norway\",\n  \"revenue_fy2021\": \"NOK 18.6 billion\",\n  \"utilization\": \"91%\",\n  \"employees\": \"4,600\"\n}",
+      "prompt_tokens": 347,
+      "completion_tokens": 68,
+      "latency_s": 2.108703836000018
+    }
+  ],
+  "prompt_tokens": 347,
+  "completion_tokens": 68,
+  "latency_s": 2.10935753199999
+}

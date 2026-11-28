@@ -1,0 +1,7 @@
+{
+  "fence_addendum": "PREREG_HOLDOUT_FENCE_ADDENDUM_20261129.md",
+  "fence_addendum_sha256": "8b616c7c87b1f9884723663ca46ca7161a0b2dab6a3eddbe26b449cf885c82c7",
+  "fence_manifest_sha256": "0c585e6111666784f22bc35e6451b657d51b0948eb3ad2b6311cde626b6b611e",
+  "K": 95,
+  "n_primary_confirmatory": 54
+}

@@ -1,0 +1,123 @@
+{
+  "task_id": "org_03",
+  "arm": "BLANKS",
+  "draft": {
+    "founded_year": "2012",
+    "hq_city": "Toronto, Canada",
+    "revenue_fy2022": "CAD 95 million",
+    "net_result_fy2022": "-",
+    "employees": "620"
+  },
+  "final": {
+    "founded_year": "2012",
+    "hq_city": "Toronto, Canada",
+    "revenue_fy2022": "CAD 95 million",
+    "net_result_fy2022": "-",
+    "employees": "620"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2012",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Toronto, Canada",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "CAD 95 million",
+        "detail": "ok"
+      },
+      {
+        "id": "net_result_fy2022",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "-",
+        "detail": "bad_money_format"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "620",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2012",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Toronto, Canada",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "CAD 95 million",
+        "detail": "ok"
+      },
+      {
+        "id": "net_result_fy2022",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "-",
+        "detail": "bad_money_format"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "620",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLANKS",
+      "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+      "prompt_tokens": 148,
+      "completion_tokens": 65,
+      "latency_s": 2.0208760280000035
+    },
+    {
+      "phase": "call2",
+      "arm": "BLANKS",
+      "text": "{}",
+      "prompt_tokens": 189,
+      "completion_tokens": 2,
+      "latency_s": 0.12431113699997809
+    }
+  ],
+  "prompt_tokens": 337,
+  "completion_tokens": 67,
+  "latency_s": 2.1458717510000156
+}

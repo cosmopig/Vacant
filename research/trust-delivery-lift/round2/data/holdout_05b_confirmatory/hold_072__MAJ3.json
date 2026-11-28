@@ -1,0 +1,39 @@
+{
+  "task_id": "hold_072",
+  "template_id": "T3",
+  "answerable": true,
+  "arm": "MAJ3",
+  "draft": {
+    "vendor": "Fabrikam Inc.",
+    "invoice_date": "2024-07-18",
+    "due_date": "2024-08-02",
+    "currency": "USD",
+    "subtotal": "8494.08",
+    "tax": "679.53",
+    "total": "9173.61",
+    "order_id": "PO-850582"
+  },
+  "final": {
+    "vendor": "Fabrikam Inc.",
+    "invoice_date": "2024-07-18",
+    "due_date": "2024-08-02",
+    "currency": "USD",
+    "subtotal": "8494.08",
+    "tax": "679.53",
+    "total": "9173.61",
+    "order_id": "PO-850582"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": false,
+  "visible_x_oracle": "V+_O-",
+  "prompt_tokens": 531,
+  "completion_tokens": 354,
+  "cpu_seconds": 12.306983946999935,
+  "n_calls": 3,
+  "draft_visible_pass": true,
+  "draft_oracle_success": false,
+  "draft_prompt_tokens": 177,
+  "draft_completion_tokens": 110,
+  "draft_cpu_seconds": 3.8167686910001066,
+  "gated_ship_exploratory": false
+}

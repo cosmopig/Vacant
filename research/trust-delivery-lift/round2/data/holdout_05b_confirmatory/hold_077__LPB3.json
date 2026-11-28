@@ -1,0 +1,39 @@
+{
+  "task_id": "hold_077",
+  "template_id": "T3",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Wide World Importers",
+    "invoice_date": "2024-11-08",
+    "due_date": "2024-12-08",
+    "currency": "GBP",
+    "subtotal": "6985.17",
+    "tax": "558.81",
+    "total": "7543.98",
+    "order_id": "PO-979605"
+  },
+  "final": {
+    "vendor": "Wide World Importers",
+    "invoice_date": "2024-11-08",
+    "due_date": "2024-12-08",
+    "currency": "GBP",
+    "subtotal": "6985.17",
+    "tax": "558.81",
+    "total": "7543.98",
+    "order_id": "PO-979605"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 531,
+  "completion_tokens": 326,
+  "cpu_seconds": 11.545805196998117,
+  "n_calls": 3,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 177,
+  "draft_completion_tokens": 106,
+  "draft_cpu_seconds": 3.754510675998972,
+  "gated_ship_exploratory": true
+}

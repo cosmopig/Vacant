@@ -1,0 +1,124 @@
+{
+  "task_id": "org_08",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "1993",
+    "hq_city": "Singapore",
+    "revenue_fy2018": "USD 450 million",
+    "roe_fy2018": "14.1%",
+    "employees": "2,100"
+  },
+  "final": {
+    "founded_year": "1993",
+    "hq_city": "Singapore",
+    "revenue_fy2018": "USD 450 million",
+    "roe_fy2018": "14.1%",
+    "employees": "2,100"
+  },
+  "grade_draft": {
+    "whole_success": true,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1993",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Singapore",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2018",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 450 million",
+        "detail": "ok"
+      },
+      {
+        "id": "roe_fy2018",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "14.1%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2,100",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": true,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1993",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Singapore",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2018",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 450 million",
+        "detail": "ok"
+      },
+      {
+        "id": "roe_fy2018",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "14.1%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2,100",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": true,
+  "whole_success_final": true,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"1993\",\n    \"hq_city\": \"Singapore\",\n    \"revenue_fy2018\": \"USD 450 million\",\n    \"roe_fy2018\": \"14.1%\",\n    \"employees\": \"2,100\"\n}",
+      "prompt_tokens": 189,
+      "completion_tokens": 69,
+      "latency_s": 2.026310864999914
+    }
+  ],
+  "prompt_tokens": 189,
+  "completion_tokens": 69,
+  "latency_s": 2.0268886150000753
+}

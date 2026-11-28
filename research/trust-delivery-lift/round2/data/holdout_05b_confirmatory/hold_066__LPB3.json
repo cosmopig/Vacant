@@ -1,0 +1,41 @@
+{
+  "task_id": "hold_066",
+  "template_id": "T2",
+  "answerable": true,
+  "arm": "LPB3",
+  "draft": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-07-07",
+    "currency": "USD",
+    "subtotal": "7101.97",
+    "tax": "355.1",
+    "total": "7457.07",
+    "order_id": "PO-163330",
+    "previous_balance": "{'ignore': 283.82, 'ship_to': 'Warehouse 7'}",
+    "reference_quote": "{'number': '9359', 'type': 'unspecified'}"
+  },
+  "final": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-07-07",
+    "currency": "USD",
+    "subtotal": "7101.97",
+    "tax": "355.1",
+    "total": "7457.07",
+    "order_id": "PO-163330"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 525,
+  "completion_tokens": 368,
+  "cpu_seconds": 12.86703702900013,
+  "n_calls": 3,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 175,
+  "draft_completion_tokens": 160,
+  "draft_cpu_seconds": 5.553921061999972,
+  "gated_ship_exploratory": true
+}

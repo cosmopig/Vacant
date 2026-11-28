@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,749",
+    "scale": "in millions",
+    "in billions": "0.33",
+    "page": 8,
+    "span": "2026-02-01 Finance lease liabilities Long-term debt, excluding current installments"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,749\",\"scale\":\"in millions\",\"in billions\":\"0.33\",\"page\":8,\"span\":\"2026-02-01 Finance lease liabilities Long-term debt, excluding current installments\"}",
+      "prompt_tokens": 165,
+      "completion_tokens": 54,
+      "latency_s": 1.5708429690002959,
+      "mean_logprob": null
+    }
+  ]
+}

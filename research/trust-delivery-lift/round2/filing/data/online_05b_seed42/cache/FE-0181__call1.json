@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "1,168",
+    "scale": "in millions",
+    "in billions": "0.01168",
+    "page": 3,
+    "span": "Repayments of long-term debt"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"1,168\",\"scale\":\"in millions\",\"in billions\":\"0.01168\",\"page\":3,\"span\":\"Repayments of long-term debt\"}",
+      "prompt_tokens": 156,
+      "completion_tokens": 42,
+      "latency_s": 1.2779805170002874,
+      "mean_logprob": null
+    }
+  ]
+}

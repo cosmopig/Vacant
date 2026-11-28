@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "68,527",
+    "scale": "in millions",
+    "in billions": "0.10",
+    "page": 1,
+    "span": "2026-09-30 Cash and Cash Equivalents, including Amounts Restricted at End of Period"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"68,527\",\"scale\":\"in millions\",\"in billions\":\"0.10\",\"page\":1,\"span\":\"2026-09-30 Cash and Cash Equivalents, including Amounts Restricted at End of Period\"}",
+      "prompt_tokens": 177,
+      "completion_tokens": 59,
+      "latency_s": 1.8604056320000382,
+      "mean_logprob": null
+    }
+  ]
+}

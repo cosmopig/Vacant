@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "349",
+    "scale": "in millions",
+    "in billions": "0.0349",
+    "page": 8,
+    "span": "Translation adjustment (other comprehensive income (loss), net of tax)"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"349\",\"scale\":\"in millions\",\"in billions\":\"0.0349\",\"page\":8,\"span\":\"Translation adjustment (other comprehensive income (loss), net of tax)\"}",
+      "prompt_tokens": 158,
+      "completion_tokens": 46,
+      "latency_s": 1.3597613439997076,
+      "mean_logprob": null
+    }
+  ]
+}

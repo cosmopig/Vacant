@@ -1,0 +1,124 @@
+{
+  "task_id": "org_15",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1971",
+    "hq_city": "Perth, Australia",
+    "revenue_fy2015": "2.1",
+    "ebitda_margin": "31.0",
+    "employees": "7200"
+  },
+  "final": {
+    "founded_year": "1971",
+    "hq_city": "Perth, Australia",
+    "revenue_fy2015": "2.1",
+    "ebitda_margin": "31.0",
+    "employees": "7200"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1971",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Perth, Australia",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2015",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "2.1",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "ebitda_margin",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "31.0",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "7200",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1971",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Perth, Australia",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2015",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "2.1",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "ebitda_margin",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "31.0",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "7200",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 1971,\n  \"hq_city\": \"Perth, Australia\",\n  \"revenue_fy2015\": 2.1,\n  \"ebitda_margin\": 31.0,\n  \"employees\": 7200\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1971\",\n  \"hq_city\": \"Perth, Australia\",\n  \"revenue_fy2015\": \"2.1\",\n  \"ebitda_margin\": \"31.0\",\n  \"employees\": \"7200\"\n}",
+      "prompt_tokens": 375,
+      "completion_tokens": 65,
+      "latency_s": 1.997043815999973
+    }
+  ],
+  "prompt_tokens": 375,
+  "completion_tokens": 65,
+  "latency_s": 1.9977791219999972
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "hold_082",
+  "template_id": "T3",
+  "answerable": true,
+  "arm": "BLIND",
+  "draft": {
+    "vendor": "Tailspin Toys",
+    "invoice_date": "2024-07-16",
+    "due_date": "2024-08-15",
+    "currency": "GBP",
+    "subtotal": "3629.25",
+    "tax": "181.46",
+    "total": "3810.71",
+    "order_id": "PO-580278"
+  },
+  "final": {
+    "vendor": "Tailspin Toys",
+    "invoice_date": "2024-07-16",
+    "due_date": "2024-08-15",
+    "currency": "GBP",
+    "subtotal": "3629.25",
+    "tax": "181.46",
+    "total": "3810.71",
+    "order_id": "PO-580278"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 350,
+  "completion_tokens": 210,
+  "cpu_seconds": 6.881638593000389,
+  "n_calls": 2,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 175,
+  "draft_completion_tokens": 105,
+  "draft_cpu_seconds": 3.1545537949987192,
+  "gated_ship_exploratory": true
+}

@@ -1,0 +1,9 @@
+{
+  "primary_seal": "PREREG_HOLDOUT_PRIMARY_SEAL_20261129.md",
+  "primary_seal_sha256": "5abe9bd646a4a65f582649425fd7de7ad847c333633bb9408ce8a7d028801111",
+  "amendment_sha256": "7885d327bf31741963df8ceb459f76429172f15fd810d473e18ed10a41635971",
+  "checks_py_sha256": "dbbf886bd4d8f44adaa612f37542b8115d8c3a0f6b614d4940e4a17121b304a9",
+  "pilot_excluded": "data/holdout_05b/pilot_excluded_tasks.json",
+  "primary_endpoint": "oracle_whole_success answerable only; McNemar VACANT vs MAJ3 two-sided alpha=0.05",
+  "gating_lpb3_status": "quarantined_invalid_tau"
+}

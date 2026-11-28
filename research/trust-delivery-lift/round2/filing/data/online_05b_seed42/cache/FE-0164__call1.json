@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,845",
+    "scale": "in millions",
+    "in billions": "0.02845",
+    "page": 3,
+    "span": "Deferred income taxes 2,845"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,845\",\"scale\":\"in millions\",\"in billions\":\"0.02845\",\"page\":3,\"span\":\"Deferred income taxes 2,845\"}",
+      "prompt_tokens": 149,
+      "completion_tokens": 45,
+      "latency_s": 1.313021155000115,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,985",
+    "scale": "in millions",
+    "in billions": "0.6985",
+    "page": 1,
+    "span": "Total consolidated operating profit"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,985\",\"scale\":\"in millions\",\"in billions\":\"0.6985\",\"page\":1,\"span\":\"Total consolidated operating profit\"}",
+      "prompt_tokens": 168,
+      "completion_tokens": 39,
+      "latency_s": 1.1583681880001677,
+      "mean_logprob": null
+    }
+  ]
+}

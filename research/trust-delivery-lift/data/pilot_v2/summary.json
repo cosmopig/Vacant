@@ -1,0 +1,69 @@
+{
+  "arms": {
+    "BLANKS": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 2376,
+      "completion_tokens_total": 86,
+      "mean_latency_s": 0.26452578683334593
+    },
+    "BLIND": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 2275,
+      "completion_tokens_total": 767,
+      "mean_latency_s": 1.9015273846666645
+    },
+    "EVR": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 3896,
+      "completion_tokens_total": 769,
+      "mean_latency_s": 1.9483400345833484
+    },
+    "KEEP": {
+      "n_tasks": 12,
+      "whole_success_final": 0,
+      "whole_success_rate": 0.0,
+      "ci95_whole_success": [
+        0.0,
+        0.2425007574992425
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": -8.333333333333334,
+      "wrong_to_right": 0,
+      "right_to_wrong": 1,
+      "prompt_tokens_total": 2347,
+      "completion_tokens_total": 718,
+      "mean_latency_s": 1.7848880966666723
+    }
+  },
+  "n_rows": 48
+}

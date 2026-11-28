@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$4.46",
+    "scale": "in thousands",
+    "in billions": "0.0446",
+    "page": 1,
+    "span": "Basic: Earnings per common share ($ in thousands)"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$4.46\",\"scale\":\"in thousands\",\"in billions\":\"0.0446\",\"page\":1,\"span\":\"Basic: Earnings per common share ($ in thousands)\"}",
+      "prompt_tokens": 174,
+      "completion_tokens": 46,
+      "latency_s": 1.3830348259998573,
+      "mean_logprob": null
+    }
+  ]
+}

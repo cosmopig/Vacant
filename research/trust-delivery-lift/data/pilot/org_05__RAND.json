@@ -1,0 +1,123 @@
+{
+  "task_id": "org_05",
+  "arm": "RAND",
+  "draft": {
+    "founded_year": "1976",
+    "hq_city": "Tokyo, Japan",
+    "revenue_fy2019": "JPY 580 billion",
+    "net_income_fy2019": "JPY 42 billion",
+    "employees": "31500"
+  },
+  "final": {
+    "founded_year": "1976",
+    "hq_city": "Tokyo, Japan",
+    "revenue_fy2019": "JPY 580 billion",
+    "net_income_fy2019": "JPY 42 billion",
+    "employees": "31500"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1976",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Tokyo, Japan",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2019",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "JPY 580 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "net_income_fy2019",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "JPY 42 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "31500",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1976",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Tokyo, Japan",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2019",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "JPY 580 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "net_income_fy2019",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "JPY 42 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "31500",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "RAND",
+      "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": 31500\n}",
+      "prompt_tokens": 158,
+      "completion_tokens": 76,
+      "latency_s": 2.2082351990000006
+    },
+    {
+      "phase": "call2",
+      "arm": "RAND",
+      "text": "{\"founded_year\": \"1976\", \"hq_city\": \"Tokyo, Japan\", \"revenue_fy2019\": \"JPY 580 billion\", \"net_income_fy2019\": \"JPY 42 billion\"}",
+      "prompt_tokens": 212,
+      "completion_tokens": 59,
+      "latency_s": 1.7381512449999832
+    }
+  ],
+  "prompt_tokens": 370,
+  "completion_tokens": 135,
+  "latency_s": 3.9471328800000265
+}

@@ -1,0 +1,44 @@
+{
+  "v": 1,
+  "task_id": "FE-0524",
+  "requester": "benchmark_operator",
+  "owner_escalate": "contract_owner@requester",
+  "field_type": "money",
+  "declared_unit": "USD",
+  "declared_scale_exponent": 6,
+  "declared_period_instant": "2025-09-30",
+  "frozen_at": "2026-11-28T13:37:00Z",
+  "profile": "primary",
+  "clauses": [
+    {
+      "id": "C1_status",
+      "op": "status_found_fields",
+      "required_fields": [
+        "value",
+        "span",
+        "scale"
+      ],
+      "allow_not_found": false
+    },
+    {
+      "id": "C2_provenance",
+      "op": "provenance_span_substr"
+    },
+    {
+      "id": "C3_value_in_span",
+      "op": "value_in_span_numbers",
+      "tolerance_relative": 0.001,
+      "tolerance_floor": 0.5
+    },
+    {
+      "id": "C4_scale_header",
+      "op": "scale_header_consistency"
+    },
+    {
+      "id": "C5_unit",
+      "op": "unit_if_declared",
+      "unit": "USD"
+    }
+  ],
+  "sha256": "017b175ea62c21f6008a3f3fa1a2f873a274e5f8928e2e3eb57f543befcf777d"
+}

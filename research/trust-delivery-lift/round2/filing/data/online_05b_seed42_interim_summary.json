@@ -1,0 +1,104 @@
+{
+  "BLIND": {
+    "n_questions": 71,
+    "n_delivered_answers": 67,
+    "n_wrong_delivered": 56,
+    "filings_with_any_delivery": 6,
+    "filings_zero_wrong": 0,
+    "filing_zero_wrong_rate": {
+      "point": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "mean_cpu_s_per_question": 6.532953982633831,
+    "mean_tokens_per_question": 430.83098591549293,
+    "mean_calls_per_question": 2.0
+  },
+  "PLAIN": {
+    "n_questions": 72,
+    "n_delivered_answers": 70,
+    "n_wrong_delivered": 58,
+    "filings_with_any_delivery": 6,
+    "filings_zero_wrong": 0,
+    "filing_zero_wrong_rate": {
+      "point": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "mean_cpu_s_per_question": 3.2328635562361083,
+    "mean_tokens_per_question": 215.375,
+    "mean_calls_per_question": 1.0
+  },
+  "QUOTE_RETRY": {
+    "n_questions": 72,
+    "n_delivered_answers": 72,
+    "n_wrong_delivered": 64,
+    "filings_with_any_delivery": 6,
+    "filings_zero_wrong": 0,
+    "filing_zero_wrong_rate": {
+      "point": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "mean_cpu_s_per_question": 5.648471008694461,
+    "mean_tokens_per_question": 315.0,
+    "mean_calls_per_question": 1.375
+  },
+  "RULE": {
+    "n_questions": 71,
+    "n_delivered_answers": 70,
+    "n_wrong_delivered": 49,
+    "filings_with_any_delivery": 6,
+    "filings_zero_wrong": 0,
+    "filing_zero_wrong_rate": {
+      "point": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "mean_cpu_s_per_question": 0.0,
+    "mean_tokens_per_question": 0.0,
+    "mean_calls_per_question": 0.0
+  },
+  "TYPED_REASK": {
+    "n_questions": 71,
+    "n_delivered_answers": 11,
+    "n_wrong_delivered": 6,
+    "filings_with_any_delivery": 5,
+    "filings_zero_wrong": 2,
+    "filing_zero_wrong_rate": {
+      "point": 0.4,
+      "ci95": [
+        0.0,
+        0.8
+      ]
+    },
+    "mean_cpu_s_per_question": 6.061563120647845,
+    "mean_tokens_per_question": 462.1830985915493,
+    "mean_calls_per_question": 1.943661971830986
+  },
+  "TYPED_REFUSE": {
+    "n_questions": 71,
+    "n_delivered_answers": 4,
+    "n_wrong_delivered": 2,
+    "filings_with_any_delivery": 4,
+    "filings_zero_wrong": 2,
+    "filing_zero_wrong_rate": {
+      "point": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "mean_cpu_s_per_question": 3.2631712779154896,
+    "mean_tokens_per_question": 215.59154929577466,
+    "mean_calls_per_question": 1.0
+  }
+}

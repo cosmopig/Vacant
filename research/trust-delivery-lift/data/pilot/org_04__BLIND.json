@@ -1,0 +1,123 @@
+{
+  "task_id": "org_04",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "1988",
+    "hq_city": "Casablanca, Morocco",
+    "revenue_fy2021": "USD 1.1 billion",
+    "ebitda_margin": "9.0%",
+    "employees": "22000"
+  },
+  "final": {
+    "founded_year": "1988",
+    "hq_city": "Casablanca, Morocco",
+    "revenue_fy2021": "USD 1.1 billion",
+    "ebitda_margin": "9.0%",
+    "employees": "22000"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1988",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Casablanca, Morocco",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2021",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 1.1 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "ebitda_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "9.0%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "22000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1988",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Casablanca, Morocco",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2021",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 1.1 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "ebitda_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "9.0%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "22000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": 22000\n}",
+      "prompt_tokens": 157,
+      "completion_tokens": 70,
+      "latency_s": 1.9927375769999855
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"1988\",\n    \"hq_city\": \"Casablanca, Morocco\",\n    \"revenue_fy2021\": \"USD 1.1 billion\",\n    \"ebitda_margin\": \"9.0%\",\n    \"employees\": \"22000\"\n}",
+      "prompt_tokens": 200,
+      "completion_tokens": 70,
+      "latency_s": 2.009107524000001
+    }
+  ],
+  "prompt_tokens": 357,
+  "completion_tokens": 140,
+  "latency_s": 4.002568198999995
+}

@@ -1,0 +1,124 @@
+{
+  "task_id": "org_12",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "1990",
+    "hq_city": "Zurich",
+    "premiums_fy2021": "5.5",
+    "combined_ratio": "96.2",
+    "employees": "9800"
+  },
+  "final": {
+    "founded_year": "1990",
+    "hq_city": "Zurich",
+    "gross_written_premiums_in_2021": "CHF 5.5 billion",
+    "combined_ratio": "96.2%",
+    "employees": "9800"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1990",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Zurich",
+        "detail": "ok"
+      },
+      {
+        "id": "premiums_fy2021",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "5.5",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "combined_ratio",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "96.2",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "9800",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1990",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Zurich",
+        "detail": "ok"
+      },
+      {
+        "id": "premiums_fy2021",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": null,
+        "detail": "missing_or_empty"
+      },
+      {
+        "id": "combined_ratio",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "96.2%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "9800",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": 1990,\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": 5.5,\n  \"combined_ratio\": 96.2,\n  \"employees\": 9800\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\"founded_year\": \"1990\", \"hq_city\": \"Zurich\", \"gross_written_premiums_in_2021\": \"CHF 5.5 billion\", \"combined_ratio\": \"96.2%\", \"employees\": \"9800\"}",
+      "prompt_tokens": 184,
+      "completion_tokens": 62,
+      "latency_s": 1.8272497619999513
+    }
+  ],
+  "prompt_tokens": 184,
+  "completion_tokens": 62,
+  "latency_s": 1.8278014889999668
+}

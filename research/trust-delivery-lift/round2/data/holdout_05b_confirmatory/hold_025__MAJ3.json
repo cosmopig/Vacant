@@ -1,0 +1,41 @@
+{
+  "task_id": "hold_025",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "MAJ3",
+  "draft": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-11-22",
+    "due_date": "2024-12-22",
+    "currency": "GBP",
+    "subtotal": "8561.82",
+    "tax": "684.95",
+    "total": "9246.77",
+    "order_id": "PO-423614",
+    "previous_balance": "{'ignore': 475.79, 'ship_to': 'Warehouse 7, not billing address'}",
+    "reference_quote_number": "5267"
+  },
+  "final": {
+    "vendor": "Lucerne Publishing",
+    "invoice_date": "2024-11-22",
+    "due_date": "2024-12-22",
+    "currency": "GBP",
+    "subtotal": "8561.82",
+    "tax": "684.95",
+    "total": "9246.77",
+    "order_id": "PO-423614"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 528,
+  "completion_tokens": 365,
+  "cpu_seconds": 13.203621998999552,
+  "n_calls": 3,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 176,
+  "draft_completion_tokens": 155,
+  "draft_cpu_seconds": 5.9486770019993855,
+  "gated_ship_exploratory": false
+}

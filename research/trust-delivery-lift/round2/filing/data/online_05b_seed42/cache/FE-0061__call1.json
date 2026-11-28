@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,985",
+    "scale": "in millions",
+    "in billions": "0.02985",
+    "page": 4,
+    "span": "2026-09-30 Investments in affiliates"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,985\",\"scale\":\"in millions\",\"in billions\":\"0.02985\",\"page\":4,\"span\":\"2026-09-30 Investments in affiliates\"}",
+      "prompt_tokens": 151,
+      "completion_tokens": 49,
+      "latency_s": 1.4445406270001513,
+      "mean_logprob": null
+    }
+  ]
+}

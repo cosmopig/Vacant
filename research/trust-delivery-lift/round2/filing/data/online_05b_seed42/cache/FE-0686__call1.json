@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$15 million",
+    "scale": "in millions",
+    "in billions": "0.015",
+    "page": 4,
+    "span": "A small number of these arrangements also contain credit-contingent provisions that include a threshold below which collateral does not need to be posted."
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$15 million\",\"scale\":\"in millions\",\"in billions\":\"0.015\",\"page\":4,\"span\":\"The Company's collateral arrangements for its OTC-bilateral derivatives generally require the counterparty in a net liability position, after considering the effect of netting agreements, to pledge collateral when the collateral amount owed by that counterparty reaches a minimum transfer amount.\",\"page\":4,\"span\":\"A small number of these arrangements also contain credit-contingent provisions that include a threshold below which collateral does not need to be posted.\"}",
+      "prompt_tokens": 302,
+      "completion_tokens": 116,
+      "latency_s": 3.415986010999859,
+      "mean_logprob": null
+    }
+  ]
+}

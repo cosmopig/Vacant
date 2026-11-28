@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "489",
+    "scale": "in millions",
+    "in billions": "0.0489",
+    "page": 7,
+    "span": "Total net gains (losses) recognized during the period on equity securities"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"489\",\"scale\":\"in millions\",\"in billions\":\"0.0489\",\"page\":7,\"span\":\"Total net gains (losses) recognized during the period on equity securities\"}",
+      "prompt_tokens": 177,
+      "completion_tokens": 47,
+      "latency_s": 1.4160726330001125,
+      "mean_logprob": null
+    }
+  ]
+}

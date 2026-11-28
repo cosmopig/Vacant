@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "272 413 1,242",
+    "scale": "in millions",
+    "in billions": "0.02724131242",
+    "page": 5,
+    "span": "Other comprehensive income/(loss), before tax"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"272 413 1,242\",\"scale\":\"in millions\",\"in billions\":\"0.02724131242\",\"page\":5,\"span\":\"Other comprehensive income/(loss), before tax\"}",
+      "prompt_tokens": 165,
+      "completion_tokens": 58,
+      "latency_s": 1.713494012999945,
+      "mean_logprob": null
+    }
+  ]
+}

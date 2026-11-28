@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "9,204",
+    "scale": "in millions",
+    "in billions": "0.0092",
+    "page": 3,
+    "span": "operating lease right-of-use assets"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"9,204\",\"scale\":\"in millions\",\"in billions\":\"0.0092\",\"page\":3,\"span\":\"operating lease right-of-use assets\"}",
+      "prompt_tokens": 155,
+      "completion_tokens": 42,
+      "latency_s": 1.246152746000007,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$127,744",
+    "scale": "in millions",
+    "in billions": "0.127744",
+    "page": 8,
+    "span": "Total Liabilities and Shareholders' Equity"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$127,744\",\"scale\":\"in millions\",\"in billions\":\"0.127744\",\"page\":8,\"span\":\"Total Liabilities and Shareholders' Equity\"}",
+      "prompt_tokens": 166,
+      "completion_tokens": 48,
+      "latency_s": 1.4973837759998787,
+      "mean_logprob": null
+    }
+  ]
+}

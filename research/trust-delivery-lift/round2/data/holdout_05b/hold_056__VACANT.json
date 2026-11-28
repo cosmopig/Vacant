@@ -1,0 +1,52 @@
+{
+  "task_id": "hold_056",
+  "template_id": "T2",
+  "answerable": true,
+  "arm": "VACANT",
+  "draft": {
+    "vendor": "Humongous Insurance",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-08-06",
+    "currency": "USD",
+    "subtotal": "7891.55",
+    "tax": "789.16",
+    "total": "8680.71",
+    "order_id": "PO-217197"
+  },
+  "final": {
+    "vendor": "Humongous Insurance",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-08-06",
+    "currency": "USD",
+    "subtotal": "7891.55",
+    "tax": "789.16",
+    "total": "8680.71",
+    "order_id": "PO-217197"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V-_O+",
+  "prompt_tokens": 364,
+  "completion_tokens": 110,
+  "cpu_seconds": 3.3284732140000415,
+  "n_calls": 2,
+  "locked_fields": [
+    "currency",
+    "due_date",
+    "invoice_date",
+    "order_id",
+    "subtotal",
+    "tax",
+    "total"
+  ],
+  "visible_detail": {
+    "vendor": "unknown_field",
+    "invoice_date": "ok",
+    "due_date": "ok",
+    "currency": "ok",
+    "subtotal": "ok",
+    "tax": "ok",
+    "total": "ok",
+    "order_id": "ok"
+  }
+}

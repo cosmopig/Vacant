@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "2,335",
+    "scale": "in millions",
+    "in billions": "0.2335",
+    "page": 4,
+    "span": "Total Selling, general, & administrative expenses"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"2,335\",\"scale\":\"in millions\",\"in billions\":\"0.2335\",\"page\":4,\"span\":\"Total Selling, general, & administrative expenses\"}",
+      "prompt_tokens": 172,
+      "completion_tokens": 43,
+      "latency_s": 1.288721988999896,
+      "mean_logprob": null
+    }
+  ]
+}

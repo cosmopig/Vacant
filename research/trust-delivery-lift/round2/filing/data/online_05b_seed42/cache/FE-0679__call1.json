@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "61.6",
+    "scale": "in millions",
+    "in billions": "0.31",
+    "page": 4,
+    "span": "Backlog (i.e., unfulfilled or remaining performance obligations) represents the sales we expect to recognize for our products and services for which control has not yet transferred to the customer."
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"61.6\",\"scale\":\"in millions\",\"in billions\":\"0.31\",\"page\":4,\"span\":\"Backlog (i.e., unfulfilled or remaining performance obligations) represents the sales we expect to recognize for our products and services for which control has not yet transferred to the customer.\"}",
+      "prompt_tokens": 361,
+      "completion_tokens": 69,
+      "latency_s": 2.0713064600004145,
+      "mean_logprob": null
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "task_id": "hold_005",
+  "template_id": "T1",
+  "answerable": true,
+  "arm": "VACANT",
+  "draft": {
+    "vendor": "Fabrikam Inc.",
+    "invoice_date": "2024-05-22",
+    "due_date": "2024-06-06",
+    "currency": "EUR",
+    "subtotal": "7547.38",
+    "tax": "1509.48",
+    "total": "9056.86",
+    "order_id": "PO-213501"
+  },
+  "final": {
+    "vendor": "Fabrikam Inc.",
+    "invoice_date": "2024-05-22",
+    "due_date": "2024-06-06",
+    "currency": "EUR",
+    "subtotal": "7547.38",
+    "tax": "1509.48",
+    "total": "9056.86",
+    "order_id": "PO-213501"
+  },
+  "visible_all_pass": false,
+  "oracle_whole_success": false,
+  "visible_x_oracle": "V-_O-",
+  "prompt_tokens": 366,
+  "completion_tokens": 112,
+  "cpu_seconds": 3.3533795099997405,
+  "n_calls": 2,
+  "locked_fields": [
+    "currency",
+    "due_date",
+    "invoice_date",
+    "order_id",
+    "subtotal",
+    "tax",
+    "total"
+  ],
+  "visible_detail": {
+    "vendor": "unknown_field",
+    "invoice_date": "ok",
+    "due_date": "ok",
+    "currency": "ok",
+    "subtotal": "ok",
+    "tax": "ok",
+    "total": "ok",
+    "order_id": "ok"
+  }
+}

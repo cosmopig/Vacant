@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$11.13",
+    "scale": "in thousands",
+    "in billions": "0.01113",
+    "page": 7,
+    "span": "Basic net earnings per share from continuing operations"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$11.13\",\"scale\":\"in thousands\",\"in billions\":\"0.01113\",\"page\":7,\"span\":\"Basic net earnings per share from continuing operations\"}",
+      "prompt_tokens": 164,
+      "completion_tokens": 45,
+      "latency_s": 1.316217757999766,
+      "mean_logprob": null
+    }
+  ]
+}

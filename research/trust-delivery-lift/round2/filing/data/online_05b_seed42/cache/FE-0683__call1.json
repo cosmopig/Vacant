@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "470",
+    "scale": "in millions",
+    "in billions": "0.0047",
+    "page": 3,
+    "span": "Defined Contribution Savings Plans"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"470\",\"scale\":\"in millions\",\"in billions\":\"0.0047\",\"page\":3,\"span\":\"Defined Contribution Savings Plans\"}",
+      "prompt_tokens": 252,
+      "completion_tokens": 37,
+      "latency_s": 1.1392327100002149,
+      "mean_logprob": null
+    }
+  ]
+}

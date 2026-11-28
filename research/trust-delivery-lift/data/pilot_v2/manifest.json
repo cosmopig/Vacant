@@ -1,0 +1,5966 @@
+{
+  "schema": "vacant.trust_delivery_lift.run/1",
+  "generated_at": "2026-11-28T13:21:52.024927+00:00",
+  "seed": 42,
+  "n_tasks": 12,
+  "arms": [
+    "KEEP",
+    "BLIND",
+    "BLANKS",
+    "EVR"
+  ],
+  "rows": [
+    {
+      "task_id": "org_01",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "final": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 1998,\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": 240,\n  \"net_income_fy2024\": 18,\n  \"employees\": 1250\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1998\", \"hq_city\": \"Boston, Massachusetts\", \"revenue_fy2024\": \"240\", \"net_income_fy2024\": \"18\", \"employees\": \"1250\"}",
+          "prompt_tokens": 198,
+          "completion_tokens": 59,
+          "latency_s": 1.7632970209999712
+        }
+      ],
+      "prompt_tokens": 198,
+      "completion_tokens": 59,
+      "latency_s": 1.770723892000035
+    },
+    {
+      "task_id": "org_01",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "final": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue": "240",
+        "net_income": "18",
+        "employees": "1250"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": null,
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": null,
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 1998,\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": 240,\n  \"net_income_fy2024\": 18,\n  \"employees\": 1250\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\"founded_year\": \"1998\", \"hq_city\": \"Boston, Massachusetts\", \"revenue\": \"240\", \"net_income\": \"18\", \"employees\": \"1250\"}",
+          "prompt_tokens": 192,
+          "completion_tokens": 47,
+          "latency_s": 1.6404181709999648
+        }
+      ],
+      "prompt_tokens": 192,
+      "completion_tokens": 47,
+      "latency_s": 1.6409602500000346
+    },
+    {
+      "task_id": "org_01",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "final": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 1998,\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": 240,\n  \"net_income_fy2024\": 18,\n  \"employees\": 1250\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 200,
+          "completion_tokens": 2,
+          "latency_s": 0.1226816380000173
+        }
+      ],
+      "prompt_tokens": 200,
+      "completion_tokens": 2,
+      "latency_s": 0.1231886099999997
+    },
+    {
+      "task_id": "org_01",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "final": {
+        "founded_year": "1998",
+        "hq_city": "Boston, Massachusetts",
+        "revenue_fy2024": "240",
+        "net_income_fy2024": "18",
+        "employees": "1250"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1998",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Boston, Massachusetts",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "240",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "net_income_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "18",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1250",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 1998,\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": 240,\n  \"net_income_fy2024\": 18,\n  \"employees\": 1250\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1998\",\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": \"240\",\n  \"net_income_fy2024\": \"18\"\n}",
+          "prompt_tokens": 454,
+          "completion_tokens": 56,
+          "latency_s": 1.9013686600000028
+        }
+      ],
+      "prompt_tokens": 454,
+      "completion_tokens": 56,
+      "latency_s": 1.902322611000045
+    },
+    {
+      "task_id": "org_02",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "final": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 2005,\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": 320000000,\n  \"operating_margin\": 12.5,\n  \"employees\": 8400\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"2005\", \"hq_city\": \"Oslo, Norway\", \"revenue_fy2023\": \"320000000\", \"operating_margin\": \"12.5\", \"employees\": \"8400\"}",
+          "prompt_tokens": 203,
+          "completion_tokens": 63,
+          "latency_s": 1.85639549199999
+        }
+      ],
+      "prompt_tokens": 203,
+      "completion_tokens": 63,
+      "latency_s": 1.8569679599999631
+    },
+    {
+      "task_id": "org_02",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "final": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 2005,\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": 320000000,\n  \"operating_margin\": 12.5,\n  \"employees\": 8400\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\"founded_year\": \"2005\", \"hq_city\": \"Oslo, Norway\", \"revenue_fy2023\": \"320000000\", \"operating_margin\": \"12.5\", \"employees\": \"8400\"}",
+          "prompt_tokens": 197,
+          "completion_tokens": 63,
+          "latency_s": 1.8722577230000184
+        }
+      ],
+      "prompt_tokens": 197,
+      "completion_tokens": 63,
+      "latency_s": 1.8728038229999697
+    },
+    {
+      "task_id": "org_02",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "final": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 2005,\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": 320000000,\n  \"operating_margin\": 12.5,\n  \"employees\": 8400\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 205,
+          "completion_tokens": 2,
+          "latency_s": 0.12298573800001122
+        }
+      ],
+      "prompt_tokens": 205,
+      "completion_tokens": 2,
+      "latency_s": 0.1235123180000528
+    },
+    {
+      "task_id": "org_02",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5",
+        "employees": "8400"
+      },
+      "final": {
+        "founded_year": "2005",
+        "hq_city": "Oslo, Norway",
+        "revenue_fy2023": "320000000",
+        "operating_margin": "12.5%",
+        "employees": "8400"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "12.5",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2005",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Oslo, Norway",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "320000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "operating_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "8400",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 2005,\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": 320000000,\n  \"operating_margin\": 12.5,\n  \"employees\": 8400\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2005\",\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": \"320000000\",\n  \"operating_margin\": \"12.5%\",\n  \"employees\": \"8400\"\n}",
+          "prompt_tokens": 388,
+          "completion_tokens": 70,
+          "latency_s": 2.138037456999996
+        }
+      ],
+      "prompt_tokens": 388,
+      "completion_tokens": 70,
+      "latency_s": 2.1386593070000117
+    },
+    {
+      "task_id": "org_03",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "final": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"2012\", \"hq_city\": \"Toronto, Canada\", \"revenue_fy2022\": \"CAD 95 million\", \"net_result_fy2022\": \"-\", \"employees\": \"620\"}",
+          "prompt_tokens": 187,
+          "completion_tokens": 58,
+          "latency_s": 1.810464685999932
+        }
+      ],
+      "prompt_tokens": 187,
+      "completion_tokens": 58,
+      "latency_s": 1.8110168440000507
+    },
+    {
+      "task_id": "org_03",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "final": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 181,
+          "completion_tokens": 65,
+          "latency_s": 1.9219478590000563
+        }
+      ],
+      "prompt_tokens": 181,
+      "completion_tokens": 65,
+      "latency_s": 1.9225605960000394
+    },
+    {
+      "task_id": "org_03",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "final": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 189,
+          "completion_tokens": 2,
+          "latency_s": 0.12554653600000165
+        }
+      ],
+      "prompt_tokens": 189,
+      "completion_tokens": 2,
+      "latency_s": 0.12606081299998095
+    },
+    {
+      "task_id": "org_03",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "final": {
+        "founded_year": "2012",
+        "hq_city": "Toronto, Canada",
+        "revenue_fy2022": "CAD 95 million",
+        "net_result_fy2022": "-",
+        "employees": "620"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2012",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Toronto, Canada",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "CAD 95 million",
+            "detail": "ok"
+          },
+          {
+            "id": "net_result_fy2022",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "-",
+            "detail": "bad_money_format"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "620",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2012\",\n  \"hq_city\": \"Toronto, Canada\",\n  \"revenue_fy2022\": \"CAD 95 million\",\n  \"net_result_fy2022\": \"-\",\n  \"employees\": \"620\"\n}",
+          "prompt_tokens": 322,
+          "completion_tokens": 65,
+          "latency_s": 2.008581421000031
+        }
+      ],
+      "prompt_tokens": 322,
+      "completion_tokens": 65,
+      "latency_s": 2.0092385930000773
+    },
+    {
+      "task_id": "org_04",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "final": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1.1 billion",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": 22000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1988\", \"hq_city\": \"Casablanca, Morocco\", \"revenue_fy2021\": \"1.1 billion\", \"ebitda_margin\": \"9.0%\", \"employees\": \"22000\"}",
+          "prompt_tokens": 206,
+          "completion_tokens": 61,
+          "latency_s": 1.8259918690000632
+        }
+      ],
+      "prompt_tokens": 206,
+      "completion_tokens": 61,
+      "latency_s": 1.8265942790000054
+    },
+    {
+      "task_id": "org_04",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "final": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": 22000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"1988\",\n    \"hq_city\": \"Casablanca, Morocco\",\n    \"revenue_fy2021\": \"USD 1.1 billion\",\n    \"ebitda_margin\": \"9.0%\",\n    \"employees\": \"22000\"\n}",
+          "prompt_tokens": 200,
+          "completion_tokens": 70,
+          "latency_s": 2.068200984999976
+        }
+      ],
+      "prompt_tokens": 200,
+      "completion_tokens": 70,
+      "latency_s": 2.0688199139999597
+    },
+    {
+      "task_id": "org_04",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "final": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": 22000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 208,
+          "completion_tokens": 2,
+          "latency_s": 0.11885908700003256
+        }
+      ],
+      "prompt_tokens": 208,
+      "completion_tokens": 2,
+      "latency_s": 0.11942464800006292
+    },
+    {
+      "task_id": "org_04",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "final": {
+        "founded_year": "1988",
+        "hq_city": "Casablanca, Morocco",
+        "revenue_fy2021": "USD 1.1 billion",
+        "ebitda_margin": "9.0%",
+        "employees": "22000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1988",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Casablanca, Morocco",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2021",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 1.1 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "ebitda_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9.0%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "22000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": 22000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1988\",\n  \"hq_city\": \"Casablanca, Morocco\",\n  \"revenue_fy2021\": \"USD 1.1 billion\",\n  \"ebitda_margin\": \"9.0%\",\n  \"employees\": \"22000\"\n}",
+          "prompt_tokens": 316,
+          "completion_tokens": 70,
+          "latency_s": 2.097884287999932
+        }
+      ],
+      "prompt_tokens": 316,
+      "completion_tokens": 70,
+      "latency_s": 2.0985230210000054
+    },
+    {
+      "task_id": "org_05",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "final": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": 31500\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1976\", \"hq_city\": \"Tokyo, Japan\", \"revenue_fy2019\": \"JPY 580 billion\", \"net_income_fy2019\": \"JPY 42 billion\", \"employees\": \"31500\"}",
+          "prompt_tokens": 209,
+          "completion_tokens": 69,
+          "latency_s": 2.0385924820000128
+        }
+      ],
+      "prompt_tokens": 209,
+      "completion_tokens": 69,
+      "latency_s": 2.0392136489999757
+    },
+    {
+      "task_id": "org_05",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "final": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": 31500\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\"founded_year\": \"1976\", \"hq_city\": \"Tokyo, Japan\", \"revenue_fy2019\": \"JPY 580 billion\", \"net_income_fy2019\": \"JPY 42 billion\", \"employees\": \"31500\"}",
+          "prompt_tokens": 203,
+          "completion_tokens": 69,
+          "latency_s": 2.018892863000019
+        }
+      ],
+      "prompt_tokens": 203,
+      "completion_tokens": 69,
+      "latency_s": 2.0195015969999304
+    },
+    {
+      "task_id": "org_05",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "final": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": 31500\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 211,
+          "completion_tokens": 2,
+          "latency_s": 0.1251757219999945
+        }
+      ],
+      "prompt_tokens": 211,
+      "completion_tokens": 2,
+      "latency_s": 0.12573863900001925
+    },
+    {
+      "task_id": "org_05",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "final": {
+        "founded_year": "1976",
+        "hq_city": "Tokyo, Japan",
+        "revenue_fy2019": "JPY 580 billion",
+        "net_income_fy2019": "JPY 42 billion",
+        "employees": "31500"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1976",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Tokyo, Japan",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 580 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "net_income_fy2019",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "JPY 42 billion",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "31500",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": 31500\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1976\",\n  \"hq_city\": \"Tokyo, Japan\",\n  \"revenue_fy2019\": \"JPY 580 billion\",\n  \"net_income_fy2019\": \"JPY 42 billion\",\n  \"employees\": \"31500\"\n}",
+          "prompt_tokens": 313,
+          "completion_tokens": 76,
+          "latency_s": 2.257043340999985
+        }
+      ],
+      "prompt_tokens": 313,
+      "completion_tokens": 76,
+      "latency_s": 2.2576814719999447
+    },
+    {
+      "task_id": "org_06",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "final": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 2001,\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": 680000000,\n  \"ssg_fy2020\": null,\n  \"employees\": 98000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"2001\", \"hq_city\": \"Seattle, Washington\", \"revenue_fy2020\": \"680000000\", \"ssg_fy2020\": \"\", \"employees\": \"98000\"}",
+          "prompt_tokens": 200,
+          "completion_tokens": 63,
+          "latency_s": 1.8677682210000057
+        }
+      ],
+      "prompt_tokens": 200,
+      "completion_tokens": 63,
+      "latency_s": 1.8682810750000272
+    },
+    {
+      "task_id": "org_06",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "final": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 2001,\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": 680000000,\n  \"ssg_fy2020\": null,\n  \"employees\": 98000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"2001\",\n    \"hq_city\": \"Seattle, Washington\",\n    \"revenue_fy2020\": \"680000000\",\n    \"ssg_fy2020\": \"\",\n    \"employees\": \"98000\"\n}",
+          "prompt_tokens": 194,
+          "completion_tokens": 70,
+          "latency_s": 2.0377156050000167
+        }
+      ],
+      "prompt_tokens": 194,
+      "completion_tokens": 70,
+      "latency_s": 2.0382223130000057
+    },
+    {
+      "task_id": "org_06",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "final": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 2001,\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": 680000000,\n  \"ssg_fy2020\": null,\n  \"employees\": 98000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{\"founded_year\": \"2001\", \"hq_city\": \"Seattle, Washington\", \"revenue_fy2020\": \"680000000\", \"employees\": \"98000\", \"ssg_fy2020\": \"\"}",
+          "prompt_tokens": 207,
+          "completion_tokens": 64,
+          "latency_s": 1.876638865000018
+        }
+      ],
+      "prompt_tokens": 207,
+      "completion_tokens": 64,
+      "latency_s": 1.8771690369999305
+    },
+    {
+      "task_id": "org_06",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "final": {
+        "founded_year": "2001",
+        "hq_city": "Seattle, Washington",
+        "revenue_fy2020": "680000000",
+        "ssg_fy2020": "",
+        "employees": "98000"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2001",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Seattle, Washington",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "680000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "ssg_fy2020",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "",
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "98000",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 2001,\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": 680000000,\n  \"ssg_fy2020\": null,\n  \"employees\": 98000\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2001\",\n  \"hq_city\": \"Seattle, Washington\",\n  \"revenue_fy2020\": \"680000000\",\n  \"ssg_fy2020\": \"\"\n}",
+          "prompt_tokens": 416,
+          "completion_tokens": 59,
+          "latency_s": 1.8266707129999986
+        }
+      ],
+      "prompt_tokens": 416,
+      "completion_tokens": 59,
+      "latency_s": 1.827293716999975
+    },
+    {
+      "task_id": "org_07",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "final": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\n    \"founded_year\": \"2015\",\n    \"hq_city\": \"Berlin, Germany\",\n    \"arr_fy2024\": \"2024\",\n    \"gross_margin\": \"72%\",\n    \"employees\": \"890\"\n}",
+          "prompt_tokens": 182,
+          "completion_tokens": 59,
+          "latency_s": 1.7387186749999728
+        }
+      ],
+      "prompt_tokens": 182,
+      "completion_tokens": 59,
+      "latency_s": 1.7392559349999601
+    },
+    {
+      "task_id": "org_07",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "final": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "annual_recurring_income": "EUR 120 million",
+        "gross_margin": "72%",
+        "staff": "890"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": null,
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": null,
+            "detail": "missing_or_empty"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"2015\",\n    \"hq_city\": \"Berlin, Germany\",\n    \"annual_recurring_income\": \"EUR 120 million\",\n    \"gross_margin\": \"72%\",\n    \"staff\": \"890\"\n}",
+          "prompt_tokens": 176,
+          "completion_tokens": 58,
+          "latency_s": 1.716991875000076
+        }
+      ],
+      "prompt_tokens": 176,
+      "completion_tokens": 58,
+      "latency_s": 1.7175401619999775
+    },
+    {
+      "task_id": "org_07",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "final": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 184,
+          "completion_tokens": 2,
+          "latency_s": 0.12464280799997596
+        }
+      ],
+      "prompt_tokens": 184,
+      "completion_tokens": 2,
+      "latency_s": 0.12513983600001666
+    },
+    {
+      "task_id": "org_07",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "final": {
+        "founded_year": "2015",
+        "hq_city": "Berlin, Germany",
+        "arr_fy2024": "2024",
+        "gross_margin": "72%",
+        "employees": "890"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2015",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Berlin, Germany",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "arr_fy2024",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2024",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "gross_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "72%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "890",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": \"890\"\n}",
+          "prompt_tokens": 318,
+          "completion_tokens": 59,
+          "latency_s": 1.7815337969999518
+        }
+      ],
+      "prompt_tokens": 318,
+      "completion_tokens": 59,
+      "latency_s": 1.7821575490000896
+    },
+    {
+      "task_id": "org_08",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "final": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "450",
+        "roe_fy2018": "14.1",
+        "employees": "2100"
+      },
+      "grade_draft": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "450",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "14.1",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": true,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1993\", \"hq_city\": \"Singapore\", \"revenue_fy2018\": \"450\", \"roe_fy2018\": \"14.1\", \"employees\": \"2100\"}",
+          "prompt_tokens": 195,
+          "completion_tokens": 58,
+          "latency_s": 1.6960495350000429
+        }
+      ],
+      "prompt_tokens": 195,
+      "completion_tokens": 58,
+      "latency_s": 1.6966660889999048
+    },
+    {
+      "task_id": "org_08",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "final": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "grade_draft": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": true,
+      "whole_success_final": true,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"1993\",\n    \"hq_city\": \"Singapore\",\n    \"revenue_fy2018\": \"USD 450 million\",\n    \"roe_fy2018\": \"14.1%\",\n    \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 189,
+          "completion_tokens": 69,
+          "latency_s": 2.026310864999914
+        }
+      ],
+      "prompt_tokens": 189,
+      "completion_tokens": 69,
+      "latency_s": 2.0268886150000753
+    },
+    {
+      "task_id": "org_08",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "final": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "grade_draft": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": true,
+      "whole_success_final": true,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 197,
+          "completion_tokens": 2,
+          "latency_s": 0.1075156629999583
+        }
+      ],
+      "prompt_tokens": 197,
+      "completion_tokens": 2,
+      "latency_s": 0.10805841599994892
+    },
+    {
+      "task_id": "org_08",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "final": {
+        "founded_year": "1993",
+        "hq_city": "Singapore",
+        "revenue_fy2018": "USD 450 million",
+        "roe_fy2018": "14.1%",
+        "employees": "2,100"
+      },
+      "grade_draft": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": true,
+        "all_required_present": true,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1993",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Singapore",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 450 million",
+            "detail": "ok"
+          },
+          {
+            "id": "roe_fy2018",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "14.1%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2,100",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": true,
+      "whole_success_final": true,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1993\",\n  \"hq_city\": \"Singapore\",\n  \"revenue_fy2018\": \"USD 450 million\",\n  \"roe_fy2018\": \"14.1%\",\n  \"employees\": \"2,100\"\n}",
+          "prompt_tokens": 200,
+          "completion_tokens": 69,
+          "latency_s": 2.013880709000091
+        }
+      ],
+      "prompt_tokens": 200,
+      "completion_tokens": 69,
+      "latency_s": 2.0144771039999796
+    },
+    {
+      "task_id": "org_09",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "final": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"2008\", \"hq_city\": \"Austin, Texas\", \"revenue_fy2023\": \"USD 88 million\", \"op_margin\": \"6.5%\", \"employees\": \"410\"}",
+          "prompt_tokens": 185,
+          "completion_tokens": 55,
+          "latency_s": 1.642231307999964
+        }
+      ],
+      "prompt_tokens": 185,
+      "completion_tokens": 55,
+      "latency_s": 1.642811628000004
+    },
+    {
+      "task_id": "org_09",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "final": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"2008\",\n    \"hq_city\": \"Austin, Texas\",\n    \"revenue_fy2023\": \"USD 88 million\",\n    \"op_margin\": \"6.5%\",\n    \"employees\": \"410\"\n}",
+          "prompt_tokens": 179,
+          "completion_tokens": 62,
+          "latency_s": 1.8190708060000134
+        }
+      ],
+      "prompt_tokens": 179,
+      "completion_tokens": 62,
+      "latency_s": 1.819647332000045
+    },
+    {
+      "task_id": "org_09",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "final": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 187,
+          "completion_tokens": 2,
+          "latency_s": 0.10767209000005096
+        }
+      ],
+      "prompt_tokens": 187,
+      "completion_tokens": 2,
+      "latency_s": 0.10821501800000988
+    },
+    {
+      "task_id": "org_09",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "final": {
+        "founded_year": "2008",
+        "hq_city": "Austin, Texas",
+        "revenue_fy2023": "USD 88 million",
+        "op_margin": "6.5%",
+        "employees": "410"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2008",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Austin, Texas",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2023",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "USD 88 million",
+            "detail": "ok"
+          },
+          {
+            "id": "op_margin",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "6.5%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "410",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+          "prompt_tokens": 281,
+          "completion_tokens": 62,
+          "latency_s": 1.8511772780000229
+        }
+      ],
+      "prompt_tokens": 281,
+      "completion_tokens": 62,
+      "latency_s": 1.851785049
+    },
+    {
+      "task_id": "org_10",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "final": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 1965,\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": 2.4,\n  \"dividend_yield\": 2.8,\n  \"employees\": 17600\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1965\", \"hq_city\": \"Chicago, Illinois\", \"revenue_fy2017\": \"2.4\", \"dividend_yield\": \"2.8\", \"employees\": \"17600\"}",
+          "prompt_tokens": 193,
+          "completion_tokens": 56,
+          "latency_s": 1.6362685530000363
+        }
+      ],
+      "prompt_tokens": 193,
+      "completion_tokens": 56,
+      "latency_s": 1.6368051900000182
+    },
+    {
+      "task_id": "org_10",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "final": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 1965,\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": 2.4,\n  \"dividend_yield\": 2.8,\n  \"employees\": 17600\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"1965\",\n    \"hq_city\": \"Chicago, Illinois\",\n    \"revenue_fy2017\": \"2.4\",\n    \"dividend_yield\": \"2.8\",\n    \"employees\": \"17600\"\n}",
+          "prompt_tokens": 187,
+          "completion_tokens": 63,
+          "latency_s": 1.83299868600011
+        }
+      ],
+      "prompt_tokens": 187,
+      "completion_tokens": 63,
+      "latency_s": 1.8335283600000594
+    },
+    {
+      "task_id": "org_10",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "final": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 1965,\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": 2.4,\n  \"dividend_yield\": 2.8,\n  \"employees\": 17600\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 195,
+          "completion_tokens": 2,
+          "latency_s": 0.1090346309999859
+        }
+      ],
+      "prompt_tokens": 195,
+      "completion_tokens": 2,
+      "latency_s": 0.10954381600004126
+    },
+    {
+      "task_id": "org_10",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "final": {
+        "founded_year": "1965",
+        "hq_city": "Chicago, Illinois",
+        "revenue_fy2017": "2.4",
+        "dividend_yield": "2.8",
+        "employees": "17600"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1965",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "Chicago, Illinois",
+            "detail": "hq_city_must_be_city_only"
+          },
+          {
+            "id": "revenue_fy2017",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "2.4",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "dividend_yield",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "2.8",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "17600",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 1965,\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": 2.4,\n  \"dividend_yield\": 2.8,\n  \"employees\": 17600\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1965\",\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": \"2.4\",\n  \"dividend_yield\": \"2.8\"\n}",
+          "prompt_tokens": 339,
+          "completion_tokens": 52,
+          "latency_s": 1.5909983970000212
+        }
+      ],
+      "prompt_tokens": 339,
+      "completion_tokens": 52,
+      "latency_s": 1.5915732020000632
+    },
+    {
+      "task_id": "org_11",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "final": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 2010,\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": 1600000000,\n  \"rnd_intensity\": 11.0,\n  \"employees\": 12300\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"2010\", \"hq_city\": \"Shenzhen\", \"revenue_fy2022\": \"1600000000\", \"rnd_intensity\": \"11.0\", \"employees\": \"12300\"}",
+          "prompt_tokens": 199,
+          "completion_tokens": 62,
+          "latency_s": 1.9015014889999975
+        }
+      ],
+      "prompt_tokens": 199,
+      "completion_tokens": 62,
+      "latency_s": 1.902039291000051
+    },
+    {
+      "task_id": "org_11",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "final": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 2010,\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": 1600000000,\n  \"rnd_intensity\": 11.0,\n  \"employees\": 12300\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\n    \"founded_year\": \"2010\",\n    \"hq_city\": \"Shenzhen\",\n    \"revenue_fy2022\": \"1600000000\",\n    \"rnd_intensity\": \"11.0\",\n    \"employees\": \"12300\"\n}",
+          "prompt_tokens": 193,
+          "completion_tokens": 69,
+          "latency_s": 2.0294674479999912
+        }
+      ],
+      "prompt_tokens": 193,
+      "completion_tokens": 69,
+      "latency_s": 2.0300541649999104
+    },
+    {
+      "task_id": "org_11",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "final": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 2010,\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": 1600000000,\n  \"rnd_intensity\": 11.0,\n  \"employees\": 12300\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 201,
+          "completion_tokens": 2,
+          "latency_s": 0.12239366100004645
+        }
+      ],
+      "prompt_tokens": 201,
+      "completion_tokens": 2,
+      "latency_s": 0.12290715500000715
+    },
+    {
+      "task_id": "org_11",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "final": {
+        "founded_year": "2010",
+        "hq_city": "Shenzhen",
+        "revenue_fy2022": "1600000000",
+        "rnd_intensity": "11.0",
+        "employees": "12300"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "2010",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Shenzhen",
+            "detail": "ok"
+          },
+          {
+            "id": "revenue_fy2022",
+            "visible_ok": false,
+            "hidden_ok": true,
+            "got": "1600000000",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "rnd_intensity",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "11.0",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "12300",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 2010,\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": 1600000000,\n  \"rnd_intensity\": 11.0,\n  \"employees\": 12300\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"2010\",\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": \"1600000000\",\n  \"rnd_intensity\": \"11.0\",\n  \"employees\": \"12300\"\n}",
+          "prompt_tokens": 288,
+          "completion_tokens": 69,
+          "latency_s": 2.0584050109999907
+        }
+      ],
+      "prompt_tokens": 288,
+      "completion_tokens": 69,
+      "latency_s": 2.0589855399999806
+    },
+    {
+      "task_id": "org_12",
+      "arm": "KEEP",
+      "draft": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "final": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "KEEP",
+          "text": "{\n  \"founded_year\": 1990,\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": 5.5,\n  \"combined_ratio\": 96.2,\n  \"employees\": 9800\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "KEEP",
+          "text": "{\"founded_year\": \"1990\", \"hq_city\": \"Zurich\", \"premiums_fy2021\": \"5.5\", \"combined_ratio\": \"96.2\", \"employees\": \"9800\"}",
+          "prompt_tokens": 190,
+          "completion_tokens": 55,
+          "latency_s": 1.6277129990000958
+        }
+      ],
+      "prompt_tokens": 190,
+      "completion_tokens": 55,
+      "latency_s": 1.628281328000071
+    },
+    {
+      "task_id": "org_12",
+      "arm": "BLIND",
+      "draft": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "final": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "gross_written_premiums_in_2021": "CHF 5.5 billion",
+        "combined_ratio": "96.2%",
+        "employees": "9800"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": null,
+            "detail": "missing_or_empty"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "96.2%",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLIND",
+          "text": "{\n  \"founded_year\": 1990,\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": 5.5,\n  \"combined_ratio\": 96.2,\n  \"employees\": 9800\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLIND",
+          "text": "{\"founded_year\": \"1990\", \"hq_city\": \"Zurich\", \"gross_written_premiums_in_2021\": \"CHF 5.5 billion\", \"combined_ratio\": \"96.2%\", \"employees\": \"9800\"}",
+          "prompt_tokens": 184,
+          "completion_tokens": 62,
+          "latency_s": 1.8272497619999513
+        }
+      ],
+      "prompt_tokens": 184,
+      "completion_tokens": 62,
+      "latency_s": 1.8278014889999668
+    },
+    {
+      "task_id": "org_12",
+      "arm": "BLANKS",
+      "draft": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "final": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "BLANKS",
+          "text": "{\n  \"founded_year\": 1990,\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": 5.5,\n  \"combined_ratio\": 96.2,\n  \"employees\": 9800\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "BLANKS",
+          "text": "{}",
+          "prompt_tokens": 192,
+          "completion_tokens": 2,
+          "latency_s": 0.10483259499994801
+        }
+      ],
+      "prompt_tokens": 192,
+      "completion_tokens": 2,
+      "latency_s": 0.10535113600008117
+    },
+    {
+      "task_id": "org_12",
+      "arm": "EVR",
+      "draft": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "final": {
+        "founded_year": "1990",
+        "hq_city": "Zurich",
+        "premiums_fy2021": "5.5",
+        "combined_ratio": "96.2",
+        "employees": "9800"
+      },
+      "grade_draft": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "grade_final": {
+        "whole_success": false,
+        "all_required_present": false,
+        "fields": [
+          {
+            "id": "founded_year",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "1990",
+            "detail": "ok"
+          },
+          {
+            "id": "hq_city",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "Zurich",
+            "detail": "ok"
+          },
+          {
+            "id": "premiums_fy2021",
+            "visible_ok": false,
+            "hidden_ok": false,
+            "got": "5.5",
+            "detail": "money_missing_currency"
+          },
+          {
+            "id": "combined_ratio",
+            "visible_ok": true,
+            "hidden_ok": false,
+            "got": "96.2",
+            "detail": "ok"
+          },
+          {
+            "id": "employees",
+            "visible_ok": true,
+            "hidden_ok": true,
+            "got": "9800",
+            "detail": "ok"
+          }
+        ]
+      },
+      "whole_success_draft": false,
+      "whole_success_final": false,
+      "calls": [
+        {
+          "phase": "call1",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": 1990,\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": 5.5,\n  \"combined_ratio\": 96.2,\n  \"employees\": 9800\n}",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "latency_s": 0.0,
+          "frozen": true
+        },
+        {
+          "phase": "call2",
+          "arm": "EVR",
+          "text": "{\n  \"founded_year\": \"1990\",\n  \"hq_city\": \"Zurich\",\n  \"premiums_fy2021\": \"5.5\",\n  \"combined_ratio\": \"96.2\",\n  \"employees\": \"9800\"\n}",
+          "prompt_tokens": 261,
+          "completion_tokens": 62,
+          "latency_s": 1.8467526819999875
+        }
+      ],
+      "prompt_tokens": 261,
+      "completion_tokens": 62,
+      "latency_s": 1.8473832500000071
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "$14,967",
+    "scale": "in millions",
+    "in billions": "0.014967",
+    "page": 1,
+    "span": "Goodwill at December 28, 2025"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"$14,967\",\"scale\":\"in millions\",\"in billions\":\"0.014967\",\"page\":1,\"span\":\"Goodwill at December 28, 2025\"}",
+      "prompt_tokens": 169,
+      "completion_tokens": 52,
+      "latency_s": 1.505537541999729,
+      "mean_logprob": null
+    }
+  ]
+}

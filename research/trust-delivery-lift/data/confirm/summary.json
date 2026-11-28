@@ -1,0 +1,37 @@
+{
+  "arms": {
+    "BLIND": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 2255,
+      "completion_tokens_total": 801,
+      "mean_latency_s": 1.973967546666671
+    },
+    "EVR": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 3490,
+      "completion_tokens_total": 781,
+      "mean_latency_s": 1.971177588166654
+    }
+  },
+  "n_rows": 24
+}

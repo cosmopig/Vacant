@@ -1,0 +1,124 @@
+{
+  "task_id": "org_13",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1982",
+    "hq_city": "London, United Kingdom",
+    "revenue_fy2016": "GBP 12.3 billion",
+    "op_margin": "8.4%",
+    "employees": "65,000"
+  },
+  "final": {
+    "founded_year": "1982",
+    "hq_city": "London, United Kingdom",
+    "revenue_fy2016": "GBP 12.3 billion",
+    "op_margin": "8.4%",
+    "employees": "65,000"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1982",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "London, United Kingdom",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2016",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "GBP 12.3 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "8.4%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "65,000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1982",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "London, United Kingdom",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2016",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "GBP 12.3 billion",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "8.4%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "65,000",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1982\",\n  \"hq_city\": \"London, United Kingdom\",\n  \"revenue_fy2016\": \"GBP 12.3 billion\",\n  \"op_margin\": \"8.4%\",\n  \"employees\": \"65,000\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1982\",\n  \"hq_city\": \"London, United Kingdom\",\n  \"revenue_fy2016\": \"GBP 12.3 billion\",\n  \"op_margin\": \"8.4%\",\n  \"employees\": \"65,000\"\n}",
+      "prompt_tokens": 276,
+      "completion_tokens": 68,
+      "latency_s": 2.0043539060000057
+    }
+  ],
+  "prompt_tokens": 276,
+  "completion_tokens": 68,
+  "latency_s": 2.005295366999917
+}

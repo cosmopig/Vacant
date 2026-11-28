@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "7,637",
+    "scale": "in millions",
+    "in billions": "7.637",
+    "page": 1,
+    "span": "2026-09-30 Video distribution programming $"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"7,637\",\"scale\":\"in millions\",\"in billions\":\"7.637\",\"page\":1,\"span\":\"2026-09-30 Video distribution programming $\"}",
+      "prompt_tokens": 169,
+      "completion_tokens": 48,
+      "latency_s": 1.430098222000197,
+      "mean_logprob": null
+    }
+  ]
+}

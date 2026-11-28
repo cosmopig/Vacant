@@ -1,0 +1,3974 @@
+{
+  "schema": "vacant.trust_delivery_lift.round2/1",
+  "seed": 20261128,
+  "split": {
+    "dev_ids": [
+      "dev_000",
+      "dev_001",
+      "dev_002",
+      "dev_003",
+      "dev_004",
+      "dev_005",
+      "dev_006",
+      "dev_007",
+      "dev_008",
+      "dev_009",
+      "dev_010",
+      "dev_011",
+      "dev_012",
+      "dev_013",
+      "dev_014",
+      "dev_015",
+      "dev_016",
+      "dev_017",
+      "dev_018",
+      "dev_019"
+    ],
+    "holdout_answerable_ids": [
+      "hold_000",
+      "hold_001",
+      "hold_002",
+      "hold_003",
+      "hold_004",
+      "hold_005",
+      "hold_006",
+      "hold_007",
+      "hold_008",
+      "hold_009",
+      "hold_010",
+      "hold_011",
+      "hold_012",
+      "hold_013",
+      "hold_014",
+      "hold_015",
+      "hold_016",
+      "hold_017",
+      "hold_018",
+      "hold_019",
+      "hold_020",
+      "hold_021",
+      "hold_022",
+      "hold_023",
+      "hold_024",
+      "hold_025",
+      "hold_026",
+      "hold_027",
+      "hold_028",
+      "hold_029",
+      "hold_030",
+      "hold_031",
+      "hold_032",
+      "hold_033",
+      "hold_034",
+      "hold_035",
+      "hold_036",
+      "hold_037",
+      "hold_038",
+      "hold_039",
+      "hold_040",
+      "hold_041",
+      "hold_042",
+      "hold_043",
+      "hold_044",
+      "hold_045",
+      "hold_046",
+      "hold_047",
+      "hold_048",
+      "hold_049",
+      "hold_050",
+      "hold_051",
+      "hold_052",
+      "hold_053",
+      "hold_054",
+      "hold_055",
+      "hold_056",
+      "hold_057",
+      "hold_058",
+      "hold_059",
+      "hold_060",
+      "hold_061",
+      "hold_062",
+      "hold_063",
+      "hold_064",
+      "hold_065",
+      "hold_066",
+      "hold_067",
+      "hold_068",
+      "hold_069",
+      "hold_070",
+      "hold_071",
+      "hold_072",
+      "hold_073",
+      "hold_074",
+      "hold_075",
+      "hold_076",
+      "hold_077",
+      "hold_078",
+      "hold_079",
+      "hold_080",
+      "hold_081",
+      "hold_082",
+      "hold_083",
+      "hold_084",
+      "hold_085",
+      "hold_086",
+      "hold_087",
+      "hold_088",
+      "hold_089",
+      "hold_090",
+      "hold_091",
+      "hold_092",
+      "hold_093",
+      "hold_094",
+      "hold_095",
+      "hold_096",
+      "hold_097",
+      "hold_098",
+      "hold_099",
+      "hold_100",
+      "hold_101",
+      "hold_102",
+      "hold_103",
+      "hold_104",
+      "hold_105",
+      "hold_106",
+      "hold_107",
+      "hold_108",
+      "hold_109",
+      "hold_110",
+      "hold_111",
+      "hold_112",
+      "hold_113",
+      "hold_114",
+      "hold_115",
+      "hold_116",
+      "hold_117",
+      "hold_118",
+      "hold_119",
+      "hold_120",
+      "hold_121",
+      "hold_122",
+      "hold_123",
+      "hold_124",
+      "hold_125",
+      "hold_126",
+      "hold_127",
+      "hold_128",
+      "hold_129",
+      "hold_130",
+      "hold_131",
+      "hold_132",
+      "hold_133",
+      "hold_134",
+      "hold_135",
+      "hold_136",
+      "hold_137",
+      "hold_138",
+      "hold_139",
+      "hold_140",
+      "hold_141",
+      "hold_142",
+      "hold_143",
+      "hold_144",
+      "hold_145",
+      "hold_146",
+      "hold_147",
+      "hold_148",
+      "hold_149"
+    ],
+    "holdout_unanswerable_ids": [
+      "hold_u_000",
+      "hold_u_001",
+      "hold_u_002",
+      "hold_u_003",
+      "hold_u_004",
+      "hold_u_005",
+      "hold_u_006",
+      "hold_u_007",
+      "hold_u_008",
+      "hold_u_009",
+      "hold_u_010",
+      "hold_u_011",
+      "hold_u_012",
+      "hold_u_013",
+      "hold_u_014",
+      "hold_u_015",
+      "hold_u_016",
+      "hold_u_017",
+      "hold_u_018",
+      "hold_u_019",
+      "hold_u_020",
+      "hold_u_021",
+      "hold_u_022",
+      "hold_u_023",
+      "hold_u_024",
+      "hold_u_025",
+      "hold_u_026",
+      "hold_u_027",
+      "hold_u_028",
+      "hold_u_029",
+      "hold_u_030",
+      "hold_u_031",
+      "hold_u_032",
+      "hold_u_033",
+      "hold_u_034",
+      "hold_u_035",
+      "hold_u_036",
+      "hold_u_037",
+      "hold_u_038",
+      "hold_u_039",
+      "hold_u_040",
+      "hold_u_041",
+      "hold_u_042",
+      "hold_u_043",
+      "hold_u_044",
+      "hold_u_045",
+      "hold_u_046",
+      "hold_u_047",
+      "hold_u_048",
+      "hold_u_049"
+    ]
+  },
+  "fields": [
+    "vendor",
+    "invoice_date",
+    "due_date",
+    "currency",
+    "subtotal",
+    "tax",
+    "total",
+    "order_id"
+  ],
+  "tasks": [
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-12-25; payment due 2025-01-09.\nAll amounts in USD.\nPurchase order PO-509238.\nSubtotal: 9684.90\nTax: 1936.98\nTotal: 11621.88\nPrevious balance (ignore): USD 186.35\nShip-to: Warehouse 7, not billing address\nReference quote #9985 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-12-25",
+        "due_date": "2025-01-09",
+        "currency": "USD",
+        "subtotal": "9684.90",
+        "tax": "1936.98",
+        "total": "11621.88",
+        "order_id": "PO-509238"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "dev_000"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-12-12; payment due 2024-12-27.\nAll amounts in USD.\nPurchase order PO-299142.\nSubtotal: 6354.40\nTax: 1270.88\nTotal: 7625.28\nPrevious balance (ignore): USD 246.40\nShip-to: Warehouse 7, not billing address\nReference quote #6902 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-12-12",
+        "due_date": "2024-12-27",
+        "currency": "USD",
+        "subtotal": "6354.40",
+        "tax": "1270.88",
+        "total": "7625.28",
+        "order_id": "PO-299142"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "dev_001"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-02-08; payment due 2024-03-24.\nAll amounts in GBP.\nPurchase order PO-743573.\nSubtotal: 4100.42\nTax: 820.08\nTotal: 4920.50\nPrevious balance (ignore): GBP 176.28\nShip-to: Warehouse 7, not billing address\nReference quote #2414 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-02-08",
+        "due_date": "2024-03-24",
+        "currency": "GBP",
+        "subtotal": "4100.42",
+        "tax": "820.08",
+        "total": "4920.50",
+        "order_id": "PO-743573"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "dev_002"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-04-07; payment due 2024-05-07.\nAll amounts in GBP.\nPurchase order PO-494570.\nSubtotal: 406.64\nTax: 32.53\nTotal: 439.17\nPrevious balance (ignore): GBP 492.85\nShip-to: Warehouse 7, not billing address\nReference quote #7188 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-04-07",
+        "due_date": "2024-05-07",
+        "currency": "GBP",
+        "subtotal": "406.64",
+        "tax": "32.53",
+        "total": "439.17",
+        "order_id": "PO-494570"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "dev_003"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-11-28; payment due 2024-12-13.\nAll amounts in EUR.\nPurchase order PO-992151.\nSubtotal: 6917.46\nTax: 691.75\nTotal: 7609.21\nPrevious balance (ignore): EUR 483.84\nShip-to: Warehouse 7, not billing address\nReference quote #8738 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-11-28",
+        "due_date": "2024-12-13",
+        "currency": "EUR",
+        "subtotal": "6917.46",
+        "tax": "691.75",
+        "total": "7609.21",
+        "order_id": "PO-992151"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "dev_004"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-01-27; payment due 2024-02-11.\nAll amounts in USD.\nPurchase order PO-190131.\nSubtotal: 2340.76\nTax: 117.04\nTotal: 2457.80\nPrevious balance (ignore): USD 387.63\nShip-to: Warehouse 7, not billing address\nReference quote #6950 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-01-27",
+        "due_date": "2024-02-11",
+        "currency": "USD",
+        "subtotal": "2340.76",
+        "tax": "117.04",
+        "total": "2457.80",
+        "order_id": "PO-190131"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "dev_005"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-01-13; payment due 2024-01-28.\nAll amounts in GBP.\nPurchase order PO-735679.\nSubtotal: 8725.62\nTax: 1745.12\nTotal: 10470.74\nPrevious balance (ignore): GBP 282.84\nShip-to: Warehouse 7, not billing address\nReference quote #7058 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-01-13",
+        "due_date": "2024-01-28",
+        "currency": "GBP",
+        "subtotal": "8725.62",
+        "tax": "1745.12",
+        "total": "10470.74",
+        "order_id": "PO-735679"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "dev_006"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-01-28; payment due 2024-03-13.\nAll amounts in USD.\nPurchase order PO-671617.\nSubtotal: 2250.89\nTax: 112.54\nTotal: 2363.43\nPrevious balance (ignore): USD 112.24\nShip-to: Warehouse 7, not billing address\nReference quote #4579 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-01-28",
+        "due_date": "2024-03-13",
+        "currency": "USD",
+        "subtotal": "2250.89",
+        "tax": "112.54",
+        "total": "2363.43",
+        "order_id": "PO-671617"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "dev_007"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-10-14; payment due 2024-11-28.\nAll amounts in GBP.\nPurchase order PO-487903.\nSubtotal: 3978.38\nTax: 198.92\nTotal: 4177.30\nPrevious balance (ignore): GBP 168.46\nShip-to: Warehouse 7, not billing address\nReference quote #1779 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-10-14",
+        "due_date": "2024-11-28",
+        "currency": "GBP",
+        "subtotal": "3978.38",
+        "tax": "198.92",
+        "total": "4177.30",
+        "order_id": "PO-487903"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "dev_008"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-08-02; payment due 2024-09-16.\nAll amounts in EUR.\nPurchase order PO-593074.\nSubtotal: 464.50\nTax: 92.90\nTotal: 557.40\nPrevious balance (ignore): EUR 100.85\nShip-to: Warehouse 7, not billing address\nReference quote #7585 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-08-02",
+        "due_date": "2024-09-16",
+        "currency": "EUR",
+        "subtotal": "464.50",
+        "tax": "92.90",
+        "total": "557.40",
+        "order_id": "PO-593074"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "dev_009"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-01-10; payment due 2024-02-24.\nAll amounts in GBP.\nPurchase order PO-534083.\nSubtotal: 5923.93\nTax: 592.39\nTotal: 6516.32\nPrevious balance (ignore): GBP 386.73\nShip-to: Warehouse 7, not billing address\nReference quote #6322 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-01-10",
+        "due_date": "2024-02-24",
+        "currency": "GBP",
+        "subtotal": "5923.93",
+        "tax": "592.39",
+        "total": "6516.32",
+        "order_id": "PO-534083"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "dev_010"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-01-20; payment due 2024-02-04.\nAll amounts in GBP.\nPurchase order PO-660828.\nSubtotal: 8131.24\nTax: 650.50\nTotal: 8781.74\nPrevious balance (ignore): GBP 223.26\nShip-to: Warehouse 7, not billing address\nReference quote #1494 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-01-20",
+        "due_date": "2024-02-04",
+        "currency": "GBP",
+        "subtotal": "8131.24",
+        "tax": "650.50",
+        "total": "8781.74",
+        "order_id": "PO-660828"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "dev_011"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-05-12; payment due 2024-06-11.\nAll amounts in USD.\nPurchase order PO-851264.\nSubtotal: 3477.93\nTax: 278.23\nTotal: 3756.16\nPrevious balance (ignore): USD 461.87\nShip-to: Warehouse 7, not billing address\nReference quote #6833 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-05-12",
+        "due_date": "2024-06-11",
+        "currency": "USD",
+        "subtotal": "3477.93",
+        "tax": "278.23",
+        "total": "3756.16",
+        "order_id": "PO-851264"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "dev_012"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-04-15; payment due 2024-05-30.\nAll amounts in GBP.\nPurchase order PO-696816.\nSubtotal: 5917.27\nTax: 1183.45\nTotal: 7100.72\nPrevious balance (ignore): GBP 15.31\nShip-to: Warehouse 7, not billing address\nReference quote #9617 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-04-15",
+        "due_date": "2024-05-30",
+        "currency": "GBP",
+        "subtotal": "5917.27",
+        "tax": "1183.45",
+        "total": "7100.72",
+        "order_id": "PO-696816"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "dev_013"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-08-03; payment due 2024-09-17.\nAll amounts in USD.\nPurchase order PO-287155.\nSubtotal: 3355.42\nTax: 167.77\nTotal: 3523.19\nPrevious balance (ignore): USD 44.34\nShip-to: Warehouse 7, not billing address\nReference quote #9598 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-08-03",
+        "due_date": "2024-09-17",
+        "currency": "USD",
+        "subtotal": "3355.42",
+        "tax": "167.77",
+        "total": "3523.19",
+        "order_id": "PO-287155"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "dev_014"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-08-17; payment due 2024-09-16.\nAll amounts in EUR.\nPurchase order PO-617371.\nSubtotal: 5959.33\nTax: 1191.87\nTotal: 7151.20\nPrevious balance (ignore): EUR 426.77\nShip-to: Warehouse 7, not billing address\nReference quote #7189 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-08-17",
+        "due_date": "2024-09-16",
+        "currency": "EUR",
+        "subtotal": "5959.33",
+        "tax": "1191.87",
+        "total": "7151.20",
+        "order_id": "PO-617371"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "dev_015"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-03-26; payment due 2024-04-10.\nAll amounts in USD.\nPurchase order PO-564597.\nSubtotal: 5929.60\nTax: 474.37\nTotal: 6403.97\nPrevious balance (ignore): USD 318.86\nShip-to: Warehouse 7, not billing address\nReference quote #3088 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-03-26",
+        "due_date": "2024-04-10",
+        "currency": "USD",
+        "subtotal": "5929.60",
+        "tax": "474.37",
+        "total": "6403.97",
+        "order_id": "PO-564597"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "dev_016"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-12-20; payment due 2025-02-03.\nAll amounts in EUR.\nPurchase order PO-714675.\nSubtotal: 8384.14\nTax: 670.73\nTotal: 9054.87\nPrevious balance (ignore): EUR 143.46\nShip-to: Warehouse 7, not billing address\nReference quote #2175 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-12-20",
+        "due_date": "2025-02-03",
+        "currency": "EUR",
+        "subtotal": "8384.14",
+        "tax": "670.73",
+        "total": "9054.87",
+        "order_id": "PO-714675"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "dev_017"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-07-15; payment due 2024-07-30.\nAll amounts in GBP.\nPurchase order PO-693642.\nSubtotal: 9207.20\nTax: 920.72\nTotal: 10127.92\nPrevious balance (ignore): GBP 299.98\nShip-to: Warehouse 7, not billing address\nReference quote #7710 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-07-15",
+        "due_date": "2024-07-30",
+        "currency": "GBP",
+        "subtotal": "9207.20",
+        "tax": "920.72",
+        "total": "10127.92",
+        "order_id": "PO-693642"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "dev_018"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-10-18; payment due 2024-12-02.\nAll amounts in USD.\nPurchase order PO-820110.\nSubtotal: 2625.91\nTax: 262.59\nTotal: 2888.50\nPrevious balance (ignore): USD 62.66\nShip-to: Warehouse 7, not billing address\nReference quote #7751 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-10-18",
+        "due_date": "2024-12-02",
+        "currency": "USD",
+        "subtotal": "2625.91",
+        "tax": "262.59",
+        "total": "2888.50",
+        "order_id": "PO-820110"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "dev_019"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-10; payment due 2024-03-25.\nAll amounts in GBP.\nPurchase order PO-666882.\nSubtotal: 7924.80\nTax: 792.48\nTotal: 8717.28\nPrevious balance (ignore): GBP 57.86\nShip-to: Warehouse 7, not billing address\nReference quote #5508 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-10",
+        "due_date": "2024-03-25",
+        "currency": "GBP",
+        "subtotal": "7924.80",
+        "tax": "792.48",
+        "total": "8717.28",
+        "order_id": "PO-666882"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_000"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-08-22; payment due 2024-09-06.\nAll amounts in GBP.\nPurchase order PO-592222.\nSubtotal: 1644.08\nTax: 82.20\nTotal: 1726.28\nPrevious balance (ignore): GBP 382.30\nShip-to: Warehouse 7, not billing address\nReference quote #5421 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-08-22",
+        "due_date": "2024-09-06",
+        "currency": "GBP",
+        "subtotal": "1644.08",
+        "tax": "82.20",
+        "total": "1726.28",
+        "order_id": "PO-592222"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_001"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-03-11; payment due 2024-03-26.\nAll amounts in USD.\nPurchase order PO-399653.\nSubtotal: 2715.73\nTax: 271.57\nTotal: 2987.30\nPrevious balance (ignore): USD 328.62\nShip-to: Warehouse 7, not billing address\nReference quote #4325 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-03-11",
+        "due_date": "2024-03-26",
+        "currency": "USD",
+        "subtotal": "2715.73",
+        "tax": "271.57",
+        "total": "2987.30",
+        "order_id": "PO-399653"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_002"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-08-14; payment due 2024-09-28.\nAll amounts in GBP.\nPurchase order PO-472332.\nSubtotal: 9529.87\nTax: 762.39\nTotal: 10292.26\nPrevious balance (ignore): GBP 249.77\nShip-to: Warehouse 7, not billing address\nReference quote #3581 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-08-14",
+        "due_date": "2024-09-28",
+        "currency": "GBP",
+        "subtotal": "9529.87",
+        "tax": "762.39",
+        "total": "10292.26",
+        "order_id": "PO-472332"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_003"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-01-01; payment due 2024-01-31.\nAll amounts in USD.\nPurchase order PO-376359.\nSubtotal: 407.91\nTax: 32.63\nTotal: 440.54\nPrevious balance (ignore): USD 166.33\nShip-to: Warehouse 7, not billing address\nReference quote #7435 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-01-01",
+        "due_date": "2024-01-31",
+        "currency": "USD",
+        "subtotal": "407.91",
+        "tax": "32.63",
+        "total": "440.54",
+        "order_id": "PO-376359"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_004"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-05-22; payment due 2024-06-06.\nAll amounts in EUR.\nPurchase order PO-213501.\nSubtotal: 7547.38\nTax: 1509.48\nTotal: 9056.86\nPrevious balance (ignore): EUR 298.64\nShip-to: Warehouse 7, not billing address\nReference quote #1903 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-05-22",
+        "due_date": "2024-06-06",
+        "currency": "EUR",
+        "subtotal": "7547.38",
+        "tax": "1509.48",
+        "total": "9056.86",
+        "order_id": "PO-213501"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_005"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-02-17; payment due 2024-03-03.\nAll amounts in EUR.\nPurchase order PO-391477.\nSubtotal: 7902.78\nTax: 395.14\nTotal: 8297.92\nPrevious balance (ignore): EUR 86.53\nShip-to: Warehouse 7, not billing address\nReference quote #4140 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-02-17",
+        "due_date": "2024-03-03",
+        "currency": "EUR",
+        "subtotal": "7902.78",
+        "tax": "395.14",
+        "total": "8297.92",
+        "order_id": "PO-391477"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_006"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-07-12; payment due 2024-08-11.\nAll amounts in EUR.\nPurchase order PO-100980.\nSubtotal: 5685.10\nTax: 568.51\nTotal: 6253.61\nPrevious balance (ignore): EUR 200.07\nShip-to: Warehouse 7, not billing address\nReference quote #3444 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-07-12",
+        "due_date": "2024-08-11",
+        "currency": "EUR",
+        "subtotal": "5685.10",
+        "tax": "568.51",
+        "total": "6253.61",
+        "order_id": "PO-100980"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_007"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-09-12; payment due 2024-09-27.\nAll amounts in EUR.\nPurchase order PO-107072.\nSubtotal: 2012.67\nTax: 100.63\nTotal: 2113.30\nPrevious balance (ignore): EUR 123.16\nShip-to: Warehouse 7, not billing address\nReference quote #7763 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-09-12",
+        "due_date": "2024-09-27",
+        "currency": "EUR",
+        "subtotal": "2012.67",
+        "tax": "100.63",
+        "total": "2113.30",
+        "order_id": "PO-107072"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_008"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-03-19; payment due 2024-04-03.\nAll amounts in USD.\nPurchase order PO-341743.\nSubtotal: 8692.40\nTax: 869.24\nTotal: 9561.64\nPrevious balance (ignore): USD 62.50\nShip-to: Warehouse 7, not billing address\nReference quote #5640 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-03-19",
+        "due_date": "2024-04-03",
+        "currency": "USD",
+        "subtotal": "8692.40",
+        "tax": "869.24",
+        "total": "9561.64",
+        "order_id": "PO-341743"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_009"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-27; payment due 2024-09-26.\nAll amounts in EUR.\nPurchase order PO-198788.\nSubtotal: 7033.98\nTax: 1406.80\nTotal: 8440.78\nPrevious balance (ignore): EUR 38.31\nShip-to: Warehouse 7, not billing address\nReference quote #4337 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-27",
+        "due_date": "2024-09-26",
+        "currency": "EUR",
+        "subtotal": "7033.98",
+        "tax": "1406.80",
+        "total": "8440.78",
+        "order_id": "PO-198788"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_010"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-07-07; payment due 2024-08-06.\nAll amounts in EUR.\nPurchase order PO-595758.\nSubtotal: 3244.23\nTax: 648.85\nTotal: 3893.08\nPrevious balance (ignore): EUR 394.58\nShip-to: Warehouse 7, not billing address\nReference quote #4853 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-07-07",
+        "due_date": "2024-08-06",
+        "currency": "EUR",
+        "subtotal": "3244.23",
+        "tax": "648.85",
+        "total": "3893.08",
+        "order_id": "PO-595758"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_011"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-05-15; payment due 2024-06-14.\nAll amounts in EUR.\nPurchase order PO-240756.\nSubtotal: 6518.44\nTax: 1303.69\nTotal: 7822.13\nPrevious balance (ignore): EUR 495.51\nShip-to: Warehouse 7, not billing address\nReference quote #1323 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-05-15",
+        "due_date": "2024-06-14",
+        "currency": "EUR",
+        "subtotal": "6518.44",
+        "tax": "1303.69",
+        "total": "7822.13",
+        "order_id": "PO-240756"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_012"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-18; payment due 2024-05-02.\nAll amounts in GBP.\nPurchase order PO-783457.\nSubtotal: 5518.33\nTax: 441.47\nTotal: 5959.80\nPrevious balance (ignore): GBP 335.53\nShip-to: Warehouse 7, not billing address\nReference quote #9301 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-18",
+        "due_date": "2024-05-02",
+        "currency": "GBP",
+        "subtotal": "5518.33",
+        "tax": "441.47",
+        "total": "5959.80",
+        "order_id": "PO-783457"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_013"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-10-17; payment due 2024-12-01.\nAll amounts in EUR.\nPurchase order PO-337255.\nSubtotal: 6384.44\nTax: 319.22\nTotal: 6703.66\nPrevious balance (ignore): EUR 254.69\nShip-to: Warehouse 7, not billing address\nReference quote #6640 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-10-17",
+        "due_date": "2024-12-01",
+        "currency": "EUR",
+        "subtotal": "6384.44",
+        "tax": "319.22",
+        "total": "6703.66",
+        "order_id": "PO-337255"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_014"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-11-16; payment due 2024-12-01.\nAll amounts in EUR.\nPurchase order PO-347431.\nSubtotal: 6215.50\nTax: 310.78\nTotal: 6526.28\nPrevious balance (ignore): EUR 27.60\nShip-to: Warehouse 7, not billing address\nReference quote #2525 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-11-16",
+        "due_date": "2024-12-01",
+        "currency": "EUR",
+        "subtotal": "6215.50",
+        "tax": "310.78",
+        "total": "6526.28",
+        "order_id": "PO-347431"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_015"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-09-28; payment due 2024-10-13.\nAll amounts in EUR.\nPurchase order PO-907240.\nSubtotal: 3853.11\nTax: 770.62\nTotal: 4623.73\nPrevious balance (ignore): EUR 30.04\nShip-to: Warehouse 7, not billing address\nReference quote #2137 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-09-28",
+        "due_date": "2024-10-13",
+        "currency": "EUR",
+        "subtotal": "3853.11",
+        "tax": "770.62",
+        "total": "4623.73",
+        "order_id": "PO-907240"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_016"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-07-05; payment due 2024-08-19.\nAll amounts in USD.\nPurchase order PO-459307.\nSubtotal: 1711.36\nTax: 85.57\nTotal: 1796.93\nPrevious balance (ignore): USD 175.91\nShip-to: Warehouse 7, not billing address\nReference quote #6270 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-07-05",
+        "due_date": "2024-08-19",
+        "currency": "USD",
+        "subtotal": "1711.36",
+        "tax": "85.57",
+        "total": "1796.93",
+        "order_id": "PO-459307"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_017"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-08-19; payment due 2024-10-03.\nAll amounts in EUR.\nPurchase order PO-153350.\nSubtotal: 2754.75\nTax: 275.48\nTotal: 3030.23\nPrevious balance (ignore): EUR 155.57\nShip-to: Warehouse 7, not billing address\nReference quote #4939 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-08-19",
+        "due_date": "2024-10-03",
+        "currency": "EUR",
+        "subtotal": "2754.75",
+        "tax": "275.48",
+        "total": "3030.23",
+        "order_id": "PO-153350"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_018"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-02-10; payment due 2024-03-11.\nAll amounts in EUR.\nPurchase order PO-970144.\nSubtotal: 2935.98\nTax: 146.80\nTotal: 3082.78\nPrevious balance (ignore): EUR 375.89\nShip-to: Warehouse 7, not billing address\nReference quote #7362 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-02-10",
+        "due_date": "2024-03-11",
+        "currency": "EUR",
+        "subtotal": "2935.98",
+        "tax": "146.80",
+        "total": "3082.78",
+        "order_id": "PO-970144"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_019"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-06-26; payment due 2024-07-11.\nAll amounts in USD.\nPurchase order PO-304378.\nSubtotal: 6812.97\nTax: 340.65\nTotal: 7153.62\nPrevious balance (ignore): USD 495.69\nShip-to: Warehouse 7, not billing address\nReference quote #2685 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-06-26",
+        "due_date": "2024-07-11",
+        "currency": "USD",
+        "subtotal": "6812.97",
+        "tax": "340.65",
+        "total": "7153.62",
+        "order_id": "PO-304378"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_020"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-04-03; payment due 2024-05-18.\nAll amounts in USD.\nPurchase order PO-151152.\nSubtotal: 3107.14\nTax: 310.71\nTotal: 3417.85\nPrevious balance (ignore): USD 195.53\nShip-to: Warehouse 7, not billing address\nReference quote #3949 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-04-03",
+        "due_date": "2024-05-18",
+        "currency": "USD",
+        "subtotal": "3107.14",
+        "tax": "310.71",
+        "total": "3417.85",
+        "order_id": "PO-151152"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_021"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-10-26; payment due 2024-11-10.\nAll amounts in USD.\nPurchase order PO-434689.\nSubtotal: 6431.27\nTax: 321.56\nTotal: 6752.83\nPrevious balance (ignore): USD 316.15\nShip-to: Warehouse 7, not billing address\nReference quote #2885 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-10-26",
+        "due_date": "2024-11-10",
+        "currency": "USD",
+        "subtotal": "6431.27",
+        "tax": "321.56",
+        "total": "6752.83",
+        "order_id": "PO-434689"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_022"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-06-03; payment due 2024-07-18.\nAll amounts in USD.\nPurchase order PO-317611.\nSubtotal: 5250.64\nTax: 525.06\nTotal: 5775.70\nPrevious balance (ignore): USD 223.64\nShip-to: Warehouse 7, not billing address\nReference quote #3728 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-06-03",
+        "due_date": "2024-07-18",
+        "currency": "USD",
+        "subtotal": "5250.64",
+        "tax": "525.06",
+        "total": "5775.70",
+        "order_id": "PO-317611"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_023"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-03; payment due 2024-09-17.\nAll amounts in EUR.\nPurchase order PO-272618.\nSubtotal: 1872.53\nTax: 374.51\nTotal: 2247.04\nPrevious balance (ignore): EUR 241.94\nShip-to: Warehouse 7, not billing address\nReference quote #2010 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-03",
+        "due_date": "2024-09-17",
+        "currency": "EUR",
+        "subtotal": "1872.53",
+        "tax": "374.51",
+        "total": "2247.04",
+        "order_id": "PO-272618"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_024"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-11-22; payment due 2024-12-22.\nAll amounts in GBP.\nPurchase order PO-423614.\nSubtotal: 8561.82\nTax: 684.95\nTotal: 9246.77\nPrevious balance (ignore): GBP 475.79\nShip-to: Warehouse 7, not billing address\nReference quote #5267 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-11-22",
+        "due_date": "2024-12-22",
+        "currency": "GBP",
+        "subtotal": "8561.82",
+        "tax": "684.95",
+        "total": "9246.77",
+        "order_id": "PO-423614"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_025"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-05-13; payment due 2024-06-12.\nAll amounts in USD.\nPurchase order PO-952009.\nSubtotal: 6336.64\nTax: 633.66\nTotal: 6970.30\nPrevious balance (ignore): USD 197.49\nShip-to: Warehouse 7, not billing address\nReference quote #7648 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-05-13",
+        "due_date": "2024-06-12",
+        "currency": "USD",
+        "subtotal": "6336.64",
+        "tax": "633.66",
+        "total": "6970.30",
+        "order_id": "PO-952009"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_026"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-07-13; payment due 2024-08-27.\nAll amounts in GBP.\nPurchase order PO-999317.\nSubtotal: 4788.68\nTax: 383.09\nTotal: 5171.77\nPrevious balance (ignore): GBP 220.05\nShip-to: Warehouse 7, not billing address\nReference quote #7691 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-07-13",
+        "due_date": "2024-08-27",
+        "currency": "GBP",
+        "subtotal": "4788.68",
+        "tax": "383.09",
+        "total": "5171.77",
+        "order_id": "PO-999317"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_027"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-28; payment due 2024-05-12.\nAll amounts in GBP.\nPurchase order PO-360344.\nSubtotal: 7802.77\nTax: 624.22\nTotal: 8426.99\nPrevious balance (ignore): GBP 236.34\nShip-to: Warehouse 7, not billing address\nReference quote #9087 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-28",
+        "due_date": "2024-05-12",
+        "currency": "GBP",
+        "subtotal": "7802.77",
+        "tax": "624.22",
+        "total": "8426.99",
+        "order_id": "PO-360344"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_028"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-06-15; payment due 2024-07-30.\nAll amounts in EUR.\nPurchase order PO-265700.\nSubtotal: 1336.06\nTax: 133.61\nTotal: 1469.67\nPrevious balance (ignore): EUR 454.44\nShip-to: Warehouse 7, not billing address\nReference quote #7594 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-06-15",
+        "due_date": "2024-07-30",
+        "currency": "EUR",
+        "subtotal": "1336.06",
+        "tax": "133.61",
+        "total": "1469.67",
+        "order_id": "PO-265700"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_029"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-09-14; payment due 2024-09-29.\nAll amounts in EUR.\nPurchase order PO-787801.\nSubtotal: 2433.00\nTax: 194.64\nTotal: 2627.64\nPrevious balance (ignore): EUR 206.42\nShip-to: Warehouse 7, not billing address\nReference quote #1387 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-09-14",
+        "due_date": "2024-09-29",
+        "currency": "EUR",
+        "subtotal": "2433.00",
+        "tax": "194.64",
+        "total": "2627.64",
+        "order_id": "PO-787801"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_030"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-11-03; payment due 2024-12-03.\nAll amounts in EUR.\nPurchase order PO-586592.\nSubtotal: 8602.84\nTax: 1720.57\nTotal: 10323.41\nPrevious balance (ignore): EUR 144.56\nShip-to: Warehouse 7, not billing address\nReference quote #3348 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-11-03",
+        "due_date": "2024-12-03",
+        "currency": "EUR",
+        "subtotal": "8602.84",
+        "tax": "1720.57",
+        "total": "10323.41",
+        "order_id": "PO-586592"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_031"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-06-15; payment due 2024-07-30.\nAll amounts in USD.\nPurchase order PO-994012.\nSubtotal: 188.46\nTax: 37.69\nTotal: 226.15\nPrevious balance (ignore): USD 487.97\nShip-to: Warehouse 7, not billing address\nReference quote #4419 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-06-15",
+        "due_date": "2024-07-30",
+        "currency": "USD",
+        "subtotal": "188.46",
+        "tax": "37.69",
+        "total": "226.15",
+        "order_id": "PO-994012"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_032"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-09-26; payment due 2024-10-26.\nAll amounts in USD.\nPurchase order PO-644715.\nSubtotal: 8027.70\nTax: 401.38\nTotal: 8429.08\nPrevious balance (ignore): USD 333.00\nShip-to: Warehouse 7, not billing address\nReference quote #7433 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-09-26",
+        "due_date": "2024-10-26",
+        "currency": "USD",
+        "subtotal": "8027.70",
+        "tax": "401.38",
+        "total": "8429.08",
+        "order_id": "PO-644715"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_033"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-12-28; payment due 2025-01-27.\nAll amounts in USD.\nPurchase order PO-603207.\nSubtotal: 8201.27\nTax: 656.10\nTotal: 8857.37\nPrevious balance (ignore): USD 248.23\nShip-to: Warehouse 7, not billing address\nReference quote #9578 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-12-28",
+        "due_date": "2025-01-27",
+        "currency": "USD",
+        "subtotal": "8201.27",
+        "tax": "656.10",
+        "total": "8857.37",
+        "order_id": "PO-603207"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_034"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-12-05; payment due 2025-01-04.\nAll amounts in EUR.\nPurchase order PO-258123.\nSubtotal: 3073.65\nTax: 614.73\nTotal: 3688.38\nPrevious balance (ignore): EUR 220.79\nShip-to: Warehouse 7, not billing address\nReference quote #1818 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-12-05",
+        "due_date": "2025-01-04",
+        "currency": "EUR",
+        "subtotal": "3073.65",
+        "tax": "614.73",
+        "total": "3688.38",
+        "order_id": "PO-258123"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_035"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-07-05; payment due 2024-08-19.\nAll amounts in USD.\nPurchase order PO-184097.\nSubtotal: 3876.65\nTax: 775.33\nTotal: 4651.98\nPrevious balance (ignore): USD 202.29\nShip-to: Warehouse 7, not billing address\nReference quote #7423 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-07-05",
+        "due_date": "2024-08-19",
+        "currency": "USD",
+        "subtotal": "3876.65",
+        "tax": "775.33",
+        "total": "4651.98",
+        "order_id": "PO-184097"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_036"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-03-12; payment due 2024-04-26.\nAll amounts in EUR.\nPurchase order PO-463571.\nSubtotal: 499.45\nTax: 99.89\nTotal: 599.34\nPrevious balance (ignore): EUR 198.58\nShip-to: Warehouse 7, not billing address\nReference quote #3174 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-03-12",
+        "due_date": "2024-04-26",
+        "currency": "EUR",
+        "subtotal": "499.45",
+        "tax": "99.89",
+        "total": "599.34",
+        "order_id": "PO-463571"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_037"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-12-28; payment due 2025-01-12.\nAll amounts in GBP.\nPurchase order PO-389498.\nSubtotal: 6635.36\nTax: 331.77\nTotal: 6967.13\nPrevious balance (ignore): GBP 29.35\nShip-to: Warehouse 7, not billing address\nReference quote #8773 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-12-28",
+        "due_date": "2025-01-12",
+        "currency": "GBP",
+        "subtotal": "6635.36",
+        "tax": "331.77",
+        "total": "6967.13",
+        "order_id": "PO-389498"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_038"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-08-16; payment due 2024-09-15.\nAll amounts in GBP.\nPurchase order PO-394484.\nSubtotal: 4177.52\nTax: 334.20\nTotal: 4511.72\nPrevious balance (ignore): GBP 75.30\nShip-to: Warehouse 7, not billing address\nReference quote #8801 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-08-16",
+        "due_date": "2024-09-15",
+        "currency": "GBP",
+        "subtotal": "4177.52",
+        "tax": "334.20",
+        "total": "4511.72",
+        "order_id": "PO-394484"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_039"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-07-14; payment due 2024-08-28.\nAll amounts in GBP.\nPurchase order PO-348883.\nSubtotal: 8768.57\nTax: 438.43\nTotal: 9207.00\nPrevious balance (ignore): GBP 387.38\nShip-to: Warehouse 7, not billing address\nReference quote #4619 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-07-14",
+        "due_date": "2024-08-28",
+        "currency": "GBP",
+        "subtotal": "8768.57",
+        "tax": "438.43",
+        "total": "9207.00",
+        "order_id": "PO-348883"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_040"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-03-01; payment due 2024-03-31.\nAll amounts in GBP.\nPurchase order PO-413107.\nSubtotal: 4202.16\nTax: 336.17\nTotal: 4538.33\nPrevious balance (ignore): GBP 492.94\nShip-to: Warehouse 7, not billing address\nReference quote #7506 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-03-01",
+        "due_date": "2024-03-31",
+        "currency": "GBP",
+        "subtotal": "4202.16",
+        "tax": "336.17",
+        "total": "4538.33",
+        "order_id": "PO-413107"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_041"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-08-10; payment due 2024-09-09.\nAll amounts in GBP.\nPurchase order PO-622010.\nSubtotal: 6584.99\nTax: 526.80\nTotal: 7111.79\nPrevious balance (ignore): GBP 88.63\nShip-to: Warehouse 7, not billing address\nReference quote #8147 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-08-10",
+        "due_date": "2024-09-09",
+        "currency": "GBP",
+        "subtotal": "6584.99",
+        "tax": "526.80",
+        "total": "7111.79",
+        "order_id": "PO-622010"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_042"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-12-19; payment due 2025-02-02.\nAll amounts in EUR.\nPurchase order PO-643400.\nSubtotal: 9261.25\nTax: 463.06\nTotal: 9724.31\nPrevious balance (ignore): EUR 126.93\nShip-to: Warehouse 7, not billing address\nReference quote #6448 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-12-19",
+        "due_date": "2025-02-02",
+        "currency": "EUR",
+        "subtotal": "9261.25",
+        "tax": "463.06",
+        "total": "9724.31",
+        "order_id": "PO-643400"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_043"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-05-04; payment due 2024-06-18.\nAll amounts in GBP.\nPurchase order PO-951311.\nSubtotal: 472.68\nTax: 94.54\nTotal: 567.22\nPrevious balance (ignore): GBP 489.67\nShip-to: Warehouse 7, not billing address\nReference quote #8317 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-05-04",
+        "due_date": "2024-06-18",
+        "currency": "GBP",
+        "subtotal": "472.68",
+        "tax": "94.54",
+        "total": "567.22",
+        "order_id": "PO-951311"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_044"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-08-02; payment due 2024-09-01.\nAll amounts in USD.\nPurchase order PO-381526.\nSubtotal: 1635.90\nTax: 327.18\nTotal: 1963.08\nPrevious balance (ignore): USD 14.85\nShip-to: Warehouse 7, not billing address\nReference quote #7032 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-08-02",
+        "due_date": "2024-09-01",
+        "currency": "USD",
+        "subtotal": "1635.90",
+        "tax": "327.18",
+        "total": "1963.08",
+        "order_id": "PO-381526"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_045"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-01-20; payment due 2024-02-19.\nAll amounts in GBP.\nPurchase order PO-348571.\nSubtotal: 4270.79\nTax: 213.54\nTotal: 4484.33\nPrevious balance (ignore): GBP 328.18\nShip-to: Warehouse 7, not billing address\nReference quote #9402 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-01-20",
+        "due_date": "2024-02-19",
+        "currency": "GBP",
+        "subtotal": "4270.79",
+        "tax": "213.54",
+        "total": "4484.33",
+        "order_id": "PO-348571"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_046"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-06-12; payment due 2024-07-27.\nAll amounts in USD.\nPurchase order PO-337978.\nSubtotal: 5551.68\nTax: 277.58\nTotal: 5829.26\nPrevious balance (ignore): USD 309.52\nShip-to: Warehouse 7, not billing address\nReference quote #9059 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-06-12",
+        "due_date": "2024-07-27",
+        "currency": "USD",
+        "subtotal": "5551.68",
+        "tax": "277.58",
+        "total": "5829.26",
+        "order_id": "PO-337978"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_047"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-04-05; payment due 2024-05-05.\nAll amounts in GBP.\nPurchase order PO-934317.\nSubtotal: 9068.00\nTax: 906.80\nTotal: 9974.80\nPrevious balance (ignore): GBP 110.84\nShip-to: Warehouse 7, not billing address\nReference quote #4932 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-04-05",
+        "due_date": "2024-05-05",
+        "currency": "GBP",
+        "subtotal": "9068.00",
+        "tax": "906.80",
+        "total": "9974.80",
+        "order_id": "PO-934317"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_048"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-05; payment due 2024-03-20.\nAll amounts in GBP.\nPurchase order PO-833501.\nSubtotal: 3217.51\nTax: 643.50\nTotal: 3861.01\nPrevious balance (ignore): GBP 87.02\nShip-to: Warehouse 7, not billing address\nReference quote #9947 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-05",
+        "due_date": "2024-03-20",
+        "currency": "GBP",
+        "subtotal": "3217.51",
+        "tax": "643.50",
+        "total": "3861.01",
+        "order_id": "PO-833501"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_049"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-04-18; payment due 2024-06-02.\nAll amounts in GBP.\nPurchase order PO-597065.\nSubtotal: 5227.70\nTax: 261.38\nTotal: 5489.08\nPrevious balance (ignore): GBP 139.47\nShip-to: Warehouse 7, not billing address\nReference quote #5617 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-04-18",
+        "due_date": "2024-06-02",
+        "currency": "GBP",
+        "subtotal": "5227.70",
+        "tax": "261.38",
+        "total": "5489.08",
+        "order_id": "PO-597065"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_050"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-01-08; payment due 2024-02-07.\nAll amounts in USD.\nPurchase order PO-780880.\nSubtotal: 8685.44\nTax: 868.54\nTotal: 9553.98\nPrevious balance (ignore): USD 275.23\nShip-to: Warehouse 7, not billing address\nReference quote #6128 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-01-08",
+        "due_date": "2024-02-07",
+        "currency": "USD",
+        "subtotal": "8685.44",
+        "tax": "868.54",
+        "total": "9553.98",
+        "order_id": "PO-780880"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_051"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-05-11; payment due 2024-05-26.\nAll amounts in GBP.\nPurchase order PO-745403.\nSubtotal: 7374.41\nTax: 368.72\nTotal: 7743.13\nPrevious balance (ignore): GBP 62.64\nShip-to: Warehouse 7, not billing address\nReference quote #7924 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-05-11",
+        "due_date": "2024-05-26",
+        "currency": "GBP",
+        "subtotal": "7374.41",
+        "tax": "368.72",
+        "total": "7743.13",
+        "order_id": "PO-745403"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_052"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-05-02; payment due 2024-05-17.\nAll amounts in USD.\nPurchase order PO-796225.\nSubtotal: 8109.58\nTax: 1621.92\nTotal: 9731.50\nPrevious balance (ignore): USD 191.10\nShip-to: Warehouse 7, not billing address\nReference quote #4034 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-05-02",
+        "due_date": "2024-05-17",
+        "currency": "USD",
+        "subtotal": "8109.58",
+        "tax": "1621.92",
+        "total": "9731.50",
+        "order_id": "PO-796225"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_053"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-12-17; payment due 2025-01-16.\nAll amounts in EUR.\nPurchase order PO-230058.\nSubtotal: 9623.41\nTax: 962.34\nTotal: 10585.75\nPrevious balance (ignore): EUR 331.70\nShip-to: Warehouse 7, not billing address\nReference quote #6033 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-12-17",
+        "due_date": "2025-01-16",
+        "currency": "EUR",
+        "subtotal": "9623.41",
+        "tax": "962.34",
+        "total": "10585.75",
+        "order_id": "PO-230058"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_054"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-14; payment due 2024-04-28.\nAll amounts in USD.\nPurchase order PO-657786.\nSubtotal: 8316.54\nTax: 831.65\nTotal: 9148.19\nPrevious balance (ignore): USD 396.37\nShip-to: Warehouse 7, not billing address\nReference quote #8489 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-14",
+        "due_date": "2024-04-28",
+        "currency": "USD",
+        "subtotal": "8316.54",
+        "tax": "831.65",
+        "total": "9148.19",
+        "order_id": "PO-657786"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_055"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-06-22; payment due 2024-08-06.\nAll amounts in USD.\nPurchase order PO-217197.\nSubtotal: 7891.55\nTax: 789.16\nTotal: 8680.71\nPrevious balance (ignore): USD 332.52\nShip-to: Warehouse 7, not billing address\nReference quote #9146 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-06-22",
+        "due_date": "2024-08-06",
+        "currency": "USD",
+        "subtotal": "7891.55",
+        "tax": "789.16",
+        "total": "8680.71",
+        "order_id": "PO-217197"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_056"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-07-15; payment due 2024-07-30.\nAll amounts in EUR.\nPurchase order PO-374518.\nSubtotal: 307.67\nTax: 61.53\nTotal: 369.20\nPrevious balance (ignore): EUR 12.86\nShip-to: Warehouse 7, not billing address\nReference quote #5241 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-07-15",
+        "due_date": "2024-07-30",
+        "currency": "EUR",
+        "subtotal": "307.67",
+        "tax": "61.53",
+        "total": "369.20",
+        "order_id": "PO-374518"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_057"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-09-08; payment due 2024-10-08.\nAll amounts in USD.\nPurchase order PO-432843.\nSubtotal: 6701.73\nTax: 1340.35\nTotal: 8042.08\nPrevious balance (ignore): USD 275.87\nShip-to: Warehouse 7, not billing address\nReference quote #4737 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-09-08",
+        "due_date": "2024-10-08",
+        "currency": "USD",
+        "subtotal": "6701.73",
+        "tax": "1340.35",
+        "total": "8042.08",
+        "order_id": "PO-432843"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_058"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-04-25; payment due 2024-05-10.\nAll amounts in GBP.\nPurchase order PO-996280.\nSubtotal: 2697.10\nTax: 215.77\nTotal: 2912.87\nPrevious balance (ignore): GBP 499.55\nShip-to: Warehouse 7, not billing address\nReference quote #5799 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-04-25",
+        "due_date": "2024-05-10",
+        "currency": "GBP",
+        "subtotal": "2697.10",
+        "tax": "215.77",
+        "total": "2912.87",
+        "order_id": "PO-996280"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_059"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-12-10; payment due 2025-01-09.\nAll amounts in EUR.\nPurchase order PO-887137.\nSubtotal: 8826.03\nTax: 441.30\nTotal: 9267.33\nPrevious balance (ignore): EUR 259.96\nShip-to: Warehouse 7, not billing address\nReference quote #9555 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-12-10",
+        "due_date": "2025-01-09",
+        "currency": "EUR",
+        "subtotal": "8826.03",
+        "tax": "441.30",
+        "total": "9267.33",
+        "order_id": "PO-887137"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_060"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-05-26; payment due 2024-06-25.\nAll amounts in GBP.\nPurchase order PO-245922.\nSubtotal: 5524.47\nTax: 552.45\nTotal: 6076.92\nPrevious balance (ignore): GBP 240.17\nShip-to: Warehouse 7, not billing address\nReference quote #9706 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-05-26",
+        "due_date": "2024-06-25",
+        "currency": "GBP",
+        "subtotal": "5524.47",
+        "tax": "552.45",
+        "total": "6076.92",
+        "order_id": "PO-245922"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_061"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-03-21; payment due 2024-04-20.\nAll amounts in EUR.\nPurchase order PO-408448.\nSubtotal: 9304.34\nTax: 930.43\nTotal: 10234.77\nPrevious balance (ignore): EUR 171.89\nShip-to: Warehouse 7, not billing address\nReference quote #7198 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-03-21",
+        "due_date": "2024-04-20",
+        "currency": "EUR",
+        "subtotal": "9304.34",
+        "tax": "930.43",
+        "total": "10234.77",
+        "order_id": "PO-408448"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_062"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-02-02; payment due 2024-02-17.\nAll amounts in GBP.\nPurchase order PO-110697.\nSubtotal: 1710.53\nTax: 85.53\nTotal: 1796.06\nPrevious balance (ignore): GBP 199.72\nShip-to: Warehouse 7, not billing address\nReference quote #9732 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-02-02",
+        "due_date": "2024-02-17",
+        "currency": "GBP",
+        "subtotal": "1710.53",
+        "tax": "85.53",
+        "total": "1796.06",
+        "order_id": "PO-110697"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_063"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-12; payment due 2024-09-11.\nAll amounts in EUR.\nPurchase order PO-177234.\nSubtotal: 1334.27\nTax: 133.43\nTotal: 1467.70\nPrevious balance (ignore): EUR 428.56\nShip-to: Warehouse 7, not billing address\nReference quote #1126 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-12",
+        "due_date": "2024-09-11",
+        "currency": "EUR",
+        "subtotal": "1334.27",
+        "tax": "133.43",
+        "total": "1467.70",
+        "order_id": "PO-177234"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_064"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-12-20; payment due 2025-01-04.\nAll amounts in EUR.\nPurchase order PO-939288.\nSubtotal: 8974.47\nTax: 897.45\nTotal: 9871.92\nPrevious balance (ignore): EUR 217.62\nShip-to: Warehouse 7, not billing address\nReference quote #6902 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-12-20",
+        "due_date": "2025-01-04",
+        "currency": "EUR",
+        "subtotal": "8974.47",
+        "tax": "897.45",
+        "total": "9871.92",
+        "order_id": "PO-939288"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_065"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-06-22; payment due 2024-07-07.\nAll amounts in USD.\nPurchase order PO-163330.\nSubtotal: 7101.97\nTax: 355.10\nTotal: 7457.07\nPrevious balance (ignore): USD 283.82\nShip-to: Warehouse 7, not billing address\nReference quote #9359 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-06-22",
+        "due_date": "2024-07-07",
+        "currency": "USD",
+        "subtotal": "7101.97",
+        "tax": "355.10",
+        "total": "7457.07",
+        "order_id": "PO-163330"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_066"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-03-23; payment due 2024-04-07.\nAll amounts in GBP.\nPurchase order PO-125022.\nSubtotal: 3418.38\nTax: 170.92\nTotal: 3589.30\nPrevious balance (ignore): GBP 73.99\nShip-to: Warehouse 7, not billing address\nReference quote #8222 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-03-23",
+        "due_date": "2024-04-07",
+        "currency": "GBP",
+        "subtotal": "3418.38",
+        "tax": "170.92",
+        "total": "3589.30",
+        "order_id": "PO-125022"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_067"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-01-04; payment due 2024-02-18.\nAll amounts in USD.\nPurchase order PO-208328.\nSubtotal: 6818.43\nTax: 340.92\nTotal: 7159.35\nPrevious balance (ignore): USD 152.76\nShip-to: Warehouse 7, not billing address\nReference quote #6273 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-01-04",
+        "due_date": "2024-02-18",
+        "currency": "USD",
+        "subtotal": "6818.43",
+        "tax": "340.92",
+        "total": "7159.35",
+        "order_id": "PO-208328"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_068"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-04-22; payment due 2024-05-07.\nAll amounts in USD.\nPurchase order PO-425288.\nSubtotal: 9092.32\nTax: 1818.46\nTotal: 10910.78\nPrevious balance (ignore): USD 491.04\nShip-to: Warehouse 7, not billing address\nReference quote #4594 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-04-22",
+        "due_date": "2024-05-07",
+        "currency": "USD",
+        "subtotal": "9092.32",
+        "tax": "1818.46",
+        "total": "10910.78",
+        "order_id": "PO-425288"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_069"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-03-02; payment due 2024-04-01.\nAll amounts in USD.\nPurchase order PO-418299.\nSubtotal: 5336.14\nTax: 266.81\nTotal: 5602.95\nPrevious balance (ignore): USD 304.80\nShip-to: Warehouse 7, not billing address\nReference quote #7449 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-03-02",
+        "due_date": "2024-04-01",
+        "currency": "USD",
+        "subtotal": "5336.14",
+        "tax": "266.81",
+        "total": "5602.95",
+        "order_id": "PO-418299"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_070"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-06-24; payment due 2024-07-24.\nAll amounts in EUR.\nPurchase order PO-953336.\nSubtotal: 9758.06\nTax: 780.64\nTotal: 10538.70\nPrevious balance (ignore): EUR 375.83\nShip-to: Warehouse 7, not billing address\nReference quote #4886 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-06-24",
+        "due_date": "2024-07-24",
+        "currency": "EUR",
+        "subtotal": "9758.06",
+        "tax": "780.64",
+        "total": "10538.70",
+        "order_id": "PO-953336"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_071"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-07-18; payment due 2024-08-02.\nAll amounts in USD.\nPurchase order PO-850582.\nSubtotal: 8494.08\nTax: 679.53\nTotal: 9173.61\nPrevious balance (ignore): USD 483.41\nShip-to: Warehouse 7, not billing address\nReference quote #5308 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-07-18",
+        "due_date": "2024-08-02",
+        "currency": "USD",
+        "subtotal": "8494.08",
+        "tax": "679.53",
+        "total": "9173.61",
+        "order_id": "PO-850582"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_072"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-07-21; payment due 2024-08-20.\nAll amounts in EUR.\nPurchase order PO-765444.\nSubtotal: 9670.74\nTax: 773.66\nTotal: 10444.40\nPrevious balance (ignore): EUR 18.71\nShip-to: Warehouse 7, not billing address\nReference quote #3452 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-07-21",
+        "due_date": "2024-08-20",
+        "currency": "EUR",
+        "subtotal": "9670.74",
+        "tax": "773.66",
+        "total": "10444.40",
+        "order_id": "PO-765444"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_073"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-02-08; payment due 2024-03-09.\nAll amounts in USD.\nPurchase order PO-552053.\nSubtotal: 4571.62\nTax: 228.58\nTotal: 4800.20\nPrevious balance (ignore): USD 76.11\nShip-to: Warehouse 7, not billing address\nReference quote #4190 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-02-08",
+        "due_date": "2024-03-09",
+        "currency": "USD",
+        "subtotal": "4571.62",
+        "tax": "228.58",
+        "total": "4800.20",
+        "order_id": "PO-552053"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_074"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-10-12; payment due 2024-10-27.\nAll amounts in EUR.\nPurchase order PO-261262.\nSubtotal: 5872.87\nTax: 1174.57\nTotal: 7047.44\nPrevious balance (ignore): EUR 195.06\nShip-to: Warehouse 7, not billing address\nReference quote #5291 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-10-12",
+        "due_date": "2024-10-27",
+        "currency": "EUR",
+        "subtotal": "5872.87",
+        "tax": "1174.57",
+        "total": "7047.44",
+        "order_id": "PO-261262"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_075"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-11-22; payment due 2024-12-22.\nAll amounts in USD.\nPurchase order PO-397314.\nSubtotal: 8829.05\nTax: 441.45\nTotal: 9270.50\nPrevious balance (ignore): USD 146.91\nShip-to: Warehouse 7, not billing address\nReference quote #4589 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-11-22",
+        "due_date": "2024-12-22",
+        "currency": "USD",
+        "subtotal": "8829.05",
+        "tax": "441.45",
+        "total": "9270.50",
+        "order_id": "PO-397314"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_076"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-11-08; payment due 2024-12-08.\nAll amounts in GBP.\nPurchase order PO-979605.\nSubtotal: 6985.17\nTax: 558.81\nTotal: 7543.98\nPrevious balance (ignore): GBP 299.37\nShip-to: Warehouse 7, not billing address\nReference quote #5053 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-11-08",
+        "due_date": "2024-12-08",
+        "currency": "GBP",
+        "subtotal": "6985.17",
+        "tax": "558.81",
+        "total": "7543.98",
+        "order_id": "PO-979605"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_077"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-01-09; payment due 2024-02-08.\nAll amounts in USD.\nPurchase order PO-442025.\nSubtotal: 2548.39\nTax: 127.42\nTotal: 2675.81\nPrevious balance (ignore): USD 79.72\nShip-to: Warehouse 7, not billing address\nReference quote #7646 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-01-09",
+        "due_date": "2024-02-08",
+        "currency": "USD",
+        "subtotal": "2548.39",
+        "tax": "127.42",
+        "total": "2675.81",
+        "order_id": "PO-442025"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_078"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-04-02; payment due 2024-05-02.\nAll amounts in USD.\nPurchase order PO-140790.\nSubtotal: 5319.28\nTax: 531.93\nTotal: 5851.21\nPrevious balance (ignore): USD 335.42\nShip-to: Warehouse 7, not billing address\nReference quote #1491 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-04-02",
+        "due_date": "2024-05-02",
+        "currency": "USD",
+        "subtotal": "5319.28",
+        "tax": "531.93",
+        "total": "5851.21",
+        "order_id": "PO-140790"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_079"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-10-28; payment due 2024-12-12.\nAll amounts in USD.\nPurchase order PO-473573.\nSubtotal: 9120.47\nTax: 729.64\nTotal: 9850.11\nPrevious balance (ignore): USD 395.65\nShip-to: Warehouse 7, not billing address\nReference quote #3005 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-10-28",
+        "due_date": "2024-12-12",
+        "currency": "USD",
+        "subtotal": "9120.47",
+        "tax": "729.64",
+        "total": "9850.11",
+        "order_id": "PO-473573"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_080"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-07-27; payment due 2024-08-26.\nAll amounts in GBP.\nPurchase order PO-727631.\nSubtotal: 5410.89\nTax: 541.09\nTotal: 5951.98\nPrevious balance (ignore): GBP 339.90\nShip-to: Warehouse 7, not billing address\nReference quote #6861 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-07-27",
+        "due_date": "2024-08-26",
+        "currency": "GBP",
+        "subtotal": "5410.89",
+        "tax": "541.09",
+        "total": "5951.98",
+        "order_id": "PO-727631"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_081"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-07-16; payment due 2024-08-15.\nAll amounts in GBP.\nPurchase order PO-580278.\nSubtotal: 3629.25\nTax: 181.46\nTotal: 3810.71\nPrevious balance (ignore): GBP 40.44\nShip-to: Warehouse 7, not billing address\nReference quote #8265 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-07-16",
+        "due_date": "2024-08-15",
+        "currency": "GBP",
+        "subtotal": "3629.25",
+        "tax": "181.46",
+        "total": "3810.71",
+        "order_id": "PO-580278"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_082"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-04-17; payment due 2024-05-17.\nAll amounts in EUR.\nPurchase order PO-979289.\nSubtotal: 7444.63\nTax: 372.23\nTotal: 7816.86\nPrevious balance (ignore): EUR 312.48\nShip-to: Warehouse 7, not billing address\nReference quote #9194 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-04-17",
+        "due_date": "2024-05-17",
+        "currency": "EUR",
+        "subtotal": "7444.63",
+        "tax": "372.23",
+        "total": "7816.86",
+        "order_id": "PO-979289"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_083"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-05-12; payment due 2024-06-26.\nAll amounts in EUR.\nPurchase order PO-721303.\nSubtotal: 2049.21\nTax: 204.92\nTotal: 2254.13\nPrevious balance (ignore): EUR 208.52\nShip-to: Warehouse 7, not billing address\nReference quote #8771 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-05-12",
+        "due_date": "2024-06-26",
+        "currency": "EUR",
+        "subtotal": "2049.21",
+        "tax": "204.92",
+        "total": "2254.13",
+        "order_id": "PO-721303"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_084"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-10-02; payment due 2024-11-01.\nAll amounts in USD.\nPurchase order PO-964132.\nSubtotal: 253.01\nTax: 25.30\nTotal: 278.31\nPrevious balance (ignore): USD 342.91\nShip-to: Warehouse 7, not billing address\nReference quote #5055 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-10-02",
+        "due_date": "2024-11-01",
+        "currency": "USD",
+        "subtotal": "253.01",
+        "tax": "25.30",
+        "total": "278.31",
+        "order_id": "PO-964132"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_085"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-02-23; payment due 2024-04-08.\nAll amounts in EUR.\nPurchase order PO-700185.\nSubtotal: 6662.54\nTax: 666.25\nTotal: 7328.79\nPrevious balance (ignore): EUR 261.91\nShip-to: Warehouse 7, not billing address\nReference quote #1223 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-02-23",
+        "due_date": "2024-04-08",
+        "currency": "EUR",
+        "subtotal": "6662.54",
+        "tax": "666.25",
+        "total": "7328.79",
+        "order_id": "PO-700185"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_086"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-10-18; payment due 2024-12-02.\nAll amounts in EUR.\nPurchase order PO-412198.\nSubtotal: 3299.04\nTax: 329.90\nTotal: 3628.94\nPrevious balance (ignore): EUR 438.98\nShip-to: Warehouse 7, not billing address\nReference quote #8337 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-10-18",
+        "due_date": "2024-12-02",
+        "currency": "EUR",
+        "subtotal": "3299.04",
+        "tax": "329.90",
+        "total": "3628.94",
+        "order_id": "PO-412198"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_087"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-09-06; payment due 2024-10-06.\nAll amounts in GBP.\nPurchase order PO-553397.\nSubtotal: 7025.79\nTax: 351.29\nTotal: 7377.08\nPrevious balance (ignore): GBP 425.68\nShip-to: Warehouse 7, not billing address\nReference quote #8981 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-09-06",
+        "due_date": "2024-10-06",
+        "currency": "GBP",
+        "subtotal": "7025.79",
+        "tax": "351.29",
+        "total": "7377.08",
+        "order_id": "PO-553397"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_088"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-10-14; payment due 2024-10-29.\nAll amounts in EUR.\nPurchase order PO-214292.\nSubtotal: 5329.49\nTax: 532.95\nTotal: 5862.44\nPrevious balance (ignore): EUR 381.80\nShip-to: Warehouse 7, not billing address\nReference quote #2326 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-10-14",
+        "due_date": "2024-10-29",
+        "currency": "EUR",
+        "subtotal": "5329.49",
+        "tax": "532.95",
+        "total": "5862.44",
+        "order_id": "PO-214292"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_089"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-05-01; payment due 2024-06-15.\nAll amounts in EUR.\nPurchase order PO-808379.\nSubtotal: 2424.36\nTax: 242.44\nTotal: 2666.80\nPrevious balance (ignore): EUR 465.92\nShip-to: Warehouse 7, not billing address\nReference quote #8775 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-05-01",
+        "due_date": "2024-06-15",
+        "currency": "EUR",
+        "subtotal": "2424.36",
+        "tax": "242.44",
+        "total": "2666.80",
+        "order_id": "PO-808379"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_090"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-04-14; payment due 2024-05-29.\nAll amounts in EUR.\nPurchase order PO-513011.\nSubtotal: 3459.22\nTax: 345.92\nTotal: 3805.14\nPrevious balance (ignore): EUR 266.27\nShip-to: Warehouse 7, not billing address\nReference quote #8224 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-04-14",
+        "due_date": "2024-05-29",
+        "currency": "EUR",
+        "subtotal": "3459.22",
+        "tax": "345.92",
+        "total": "3805.14",
+        "order_id": "PO-513011"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_091"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-05-06; payment due 2024-06-05.\nAll amounts in EUR.\nPurchase order PO-657203.\nSubtotal: 1194.56\nTax: 59.73\nTotal: 1254.29\nPrevious balance (ignore): EUR 30.78\nShip-to: Warehouse 7, not billing address\nReference quote #9903 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-05-06",
+        "due_date": "2024-06-05",
+        "currency": "EUR",
+        "subtotal": "1194.56",
+        "tax": "59.73",
+        "total": "1254.29",
+        "order_id": "PO-657203"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_092"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-03-10; payment due 2024-04-09.\nAll amounts in USD.\nPurchase order PO-873054.\nSubtotal: 8123.20\nTax: 649.86\nTotal: 8773.06\nPrevious balance (ignore): USD 295.57\nShip-to: Warehouse 7, not billing address\nReference quote #6957 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-03-10",
+        "due_date": "2024-04-09",
+        "currency": "USD",
+        "subtotal": "8123.20",
+        "tax": "649.86",
+        "total": "8773.06",
+        "order_id": "PO-873054"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_093"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-10-16; payment due 2024-11-15.\nAll amounts in GBP.\nPurchase order PO-174820.\nSubtotal: 638.84\nTax: 127.77\nTotal: 766.61\nPrevious balance (ignore): GBP 180.29\nShip-to: Warehouse 7, not billing address\nReference quote #4252 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-10-16",
+        "due_date": "2024-11-15",
+        "currency": "GBP",
+        "subtotal": "638.84",
+        "tax": "127.77",
+        "total": "766.61",
+        "order_id": "PO-174820"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_094"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-02-14; payment due 2024-03-30.\nAll amounts in EUR.\nPurchase order PO-661040.\nSubtotal: 7807.71\nTax: 780.77\nTotal: 8588.48\nPrevious balance (ignore): EUR 158.45\nShip-to: Warehouse 7, not billing address\nReference quote #6515 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-02-14",
+        "due_date": "2024-03-30",
+        "currency": "EUR",
+        "subtotal": "7807.71",
+        "tax": "780.77",
+        "total": "8588.48",
+        "order_id": "PO-661040"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_095"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-06-08; payment due 2024-07-08.\nAll amounts in USD.\nPurchase order PO-129118.\nSubtotal: 5540.86\nTax: 1108.17\nTotal: 6649.03\nPrevious balance (ignore): USD 315.17\nShip-to: Warehouse 7, not billing address\nReference quote #1472 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-06-08",
+        "due_date": "2024-07-08",
+        "currency": "USD",
+        "subtotal": "5540.86",
+        "tax": "1108.17",
+        "total": "6649.03",
+        "order_id": "PO-129118"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_096"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-09-27; payment due 2024-10-12.\nAll amounts in EUR.\nPurchase order PO-296597.\nSubtotal: 1530.93\nTax: 306.19\nTotal: 1837.12\nPrevious balance (ignore): EUR 493.32\nShip-to: Warehouse 7, not billing address\nReference quote #3086 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-09-27",
+        "due_date": "2024-10-12",
+        "currency": "EUR",
+        "subtotal": "1530.93",
+        "tax": "306.19",
+        "total": "1837.12",
+        "order_id": "PO-296597"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_097"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-07-21; payment due 2024-09-04.\nAll amounts in GBP.\nPurchase order PO-313073.\nSubtotal: 6661.18\nTax: 1332.24\nTotal: 7993.42\nPrevious balance (ignore): GBP 34.96\nShip-to: Warehouse 7, not billing address\nReference quote #8038 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-07-21",
+        "due_date": "2024-09-04",
+        "currency": "GBP",
+        "subtotal": "6661.18",
+        "tax": "1332.24",
+        "total": "7993.42",
+        "order_id": "PO-313073"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_098"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-07-02; payment due 2024-07-17.\nAll amounts in USD.\nPurchase order PO-807231.\nSubtotal: 4007.59\nTax: 400.76\nTotal: 4408.35\nPrevious balance (ignore): USD 68.99\nShip-to: Warehouse 7, not billing address\nReference quote #6392 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-07-02",
+        "due_date": "2024-07-17",
+        "currency": "USD",
+        "subtotal": "4007.59",
+        "tax": "400.76",
+        "total": "4408.35",
+        "order_id": "PO-807231"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_099"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-03-04; payment due 2024-04-03.\nAll amounts in USD.\nPurchase order PO-289558.\nSubtotal: 3595.91\nTax: 719.18\nTotal: 4315.09\nPrevious balance (ignore): USD 82.96\nShip-to: Warehouse 7, not billing address\nReference quote #5392 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-03-04",
+        "due_date": "2024-04-03",
+        "currency": "USD",
+        "subtotal": "3595.91",
+        "tax": "719.18",
+        "total": "4315.09",
+        "order_id": "PO-289558"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_100"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-05-04; payment due 2024-06-18.\nAll amounts in GBP.\nPurchase order PO-223486.\nSubtotal: 9510.08\nTax: 1902.02\nTotal: 11412.10\nPrevious balance (ignore): GBP 91.67\nShip-to: Warehouse 7, not billing address\nReference quote #1037 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-05-04",
+        "due_date": "2024-06-18",
+        "currency": "GBP",
+        "subtotal": "9510.08",
+        "tax": "1902.02",
+        "total": "11412.10",
+        "order_id": "PO-223486"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_101"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-12-12; payment due 2025-01-11.\nAll amounts in GBP.\nPurchase order PO-718631.\nSubtotal: 4041.85\nTax: 202.09\nTotal: 4243.94\nPrevious balance (ignore): GBP 34.43\nShip-to: Warehouse 7, not billing address\nReference quote #3679 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-12-12",
+        "due_date": "2025-01-11",
+        "currency": "GBP",
+        "subtotal": "4041.85",
+        "tax": "202.09",
+        "total": "4243.94",
+        "order_id": "PO-718631"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_102"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-12-20; payment due 2025-01-04.\nAll amounts in GBP.\nPurchase order PO-569824.\nSubtotal: 7865.27\nTax: 786.53\nTotal: 8651.80\nPrevious balance (ignore): GBP 325.05\nShip-to: Warehouse 7, not billing address\nReference quote #6247 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-12-20",
+        "due_date": "2025-01-04",
+        "currency": "GBP",
+        "subtotal": "7865.27",
+        "tax": "786.53",
+        "total": "8651.80",
+        "order_id": "PO-569824"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_103"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-06-16; payment due 2024-07-01.\nAll amounts in USD.\nPurchase order PO-975964.\nSubtotal: 1490.98\nTax: 119.28\nTotal: 1610.26\nPrevious balance (ignore): USD 15.26\nShip-to: Warehouse 7, not billing address\nReference quote #3873 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-06-16",
+        "due_date": "2024-07-01",
+        "currency": "USD",
+        "subtotal": "1490.98",
+        "tax": "119.28",
+        "total": "1610.26",
+        "order_id": "PO-975964"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_104"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-12-12; payment due 2025-01-26.\nAll amounts in USD.\nPurchase order PO-123810.\nSubtotal: 2992.47\nTax: 239.40\nTotal: 3231.87\nPrevious balance (ignore): USD 428.05\nShip-to: Warehouse 7, not billing address\nReference quote #2931 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-12-12",
+        "due_date": "2025-01-26",
+        "currency": "USD",
+        "subtotal": "2992.47",
+        "tax": "239.40",
+        "total": "3231.87",
+        "order_id": "PO-123810"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_105"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-09-05; payment due 2024-10-05.\nAll amounts in USD.\nPurchase order PO-287805.\nSubtotal: 6050.62\nTax: 605.06\nTotal: 6655.68\nPrevious balance (ignore): USD 130.60\nShip-to: Warehouse 7, not billing address\nReference quote #5879 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-09-05",
+        "due_date": "2024-10-05",
+        "currency": "USD",
+        "subtotal": "6050.62",
+        "tax": "605.06",
+        "total": "6655.68",
+        "order_id": "PO-287805"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_106"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-10-03; payment due 2024-11-17.\nAll amounts in GBP.\nPurchase order PO-292564.\nSubtotal: 4319.33\nTax: 215.97\nTotal: 4535.30\nPrevious balance (ignore): GBP 55.11\nShip-to: Warehouse 7, not billing address\nReference quote #4899 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-10-03",
+        "due_date": "2024-11-17",
+        "currency": "GBP",
+        "subtotal": "4319.33",
+        "tax": "215.97",
+        "total": "4535.30",
+        "order_id": "PO-292564"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_107"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-09-11; payment due 2024-10-11.\nAll amounts in EUR.\nPurchase order PO-588316.\nSubtotal: 8944.82\nTax: 1788.96\nTotal: 10733.78\nPrevious balance (ignore): EUR 145.91\nShip-to: Warehouse 7, not billing address\nReference quote #8941 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-09-11",
+        "due_date": "2024-10-11",
+        "currency": "EUR",
+        "subtotal": "8944.82",
+        "tax": "1788.96",
+        "total": "10733.78",
+        "order_id": "PO-588316"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_108"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-05-09; payment due 2024-05-24.\nAll amounts in USD.\nPurchase order PO-511951.\nSubtotal: 7937.63\nTax: 635.01\nTotal: 8572.64\nPrevious balance (ignore): USD 191.57\nShip-to: Warehouse 7, not billing address\nReference quote #2025 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-05-09",
+        "due_date": "2024-05-24",
+        "currency": "USD",
+        "subtotal": "7937.63",
+        "tax": "635.01",
+        "total": "8572.64",
+        "order_id": "PO-511951"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_109"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-11-06; payment due 2024-11-21.\nAll amounts in GBP.\nPurchase order PO-174341.\nSubtotal: 442.07\nTax: 44.21\nTotal: 486.28\nPrevious balance (ignore): GBP 342.65\nShip-to: Warehouse 7, not billing address\nReference quote #5382 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-11-06",
+        "due_date": "2024-11-21",
+        "currency": "GBP",
+        "subtotal": "442.07",
+        "tax": "44.21",
+        "total": "486.28",
+        "order_id": "PO-174341"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_110"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-05-01; payment due 2024-05-16.\nAll amounts in USD.\nPurchase order PO-730741.\nSubtotal: 4403.22\nTax: 352.26\nTotal: 4755.48\nPrevious balance (ignore): USD 290.37\nShip-to: Warehouse 7, not billing address\nReference quote #1457 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-05-01",
+        "due_date": "2024-05-16",
+        "currency": "USD",
+        "subtotal": "4403.22",
+        "tax": "352.26",
+        "total": "4755.48",
+        "order_id": "PO-730741"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_111"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-10-12; payment due 2024-10-27.\nAll amounts in GBP.\nPurchase order PO-604594.\nSubtotal: 2323.37\nTax: 232.34\nTotal: 2555.71\nPrevious balance (ignore): GBP 88.24\nShip-to: Warehouse 7, not billing address\nReference quote #7893 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-10-12",
+        "due_date": "2024-10-27",
+        "currency": "GBP",
+        "subtotal": "2323.37",
+        "tax": "232.34",
+        "total": "2555.71",
+        "order_id": "PO-604594"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_112"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-09-03; payment due 2024-10-03.\nAll amounts in EUR.\nPurchase order PO-342396.\nSubtotal: 7573.40\nTax: 1514.68\nTotal: 9088.08\nPrevious balance (ignore): EUR 266.07\nShip-to: Warehouse 7, not billing address\nReference quote #9049 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-09-03",
+        "due_date": "2024-10-03",
+        "currency": "EUR",
+        "subtotal": "7573.40",
+        "tax": "1514.68",
+        "total": "9088.08",
+        "order_id": "PO-342396"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_113"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-10-12; payment due 2024-10-27.\nAll amounts in USD.\nPurchase order PO-963939.\nSubtotal: 9089.70\nTax: 727.18\nTotal: 9816.88\nPrevious balance (ignore): USD 12.34\nShip-to: Warehouse 7, not billing address\nReference quote #1172 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-10-12",
+        "due_date": "2024-10-27",
+        "currency": "USD",
+        "subtotal": "9089.70",
+        "tax": "727.18",
+        "total": "9816.88",
+        "order_id": "PO-963939"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_114"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-09-20; payment due 2024-10-05.\nAll amounts in EUR.\nPurchase order PO-331642.\nSubtotal: 4819.60\nTax: 481.96\nTotal: 5301.56\nPrevious balance (ignore): EUR 483.12\nShip-to: Warehouse 7, not billing address\nReference quote #5719 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-09-20",
+        "due_date": "2024-10-05",
+        "currency": "EUR",
+        "subtotal": "4819.60",
+        "tax": "481.96",
+        "total": "5301.56",
+        "order_id": "PO-331642"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_115"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-11-12; payment due 2024-11-27.\nAll amounts in EUR.\nPurchase order PO-246685.\nSubtotal: 8351.35\nTax: 835.14\nTotal: 9186.49\nPrevious balance (ignore): EUR 348.89\nShip-to: Warehouse 7, not billing address\nReference quote #3005 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-11-12",
+        "due_date": "2024-11-27",
+        "currency": "EUR",
+        "subtotal": "8351.35",
+        "tax": "835.14",
+        "total": "9186.49",
+        "order_id": "PO-246685"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_116"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-09-02; payment due 2024-10-02.\nAll amounts in GBP.\nPurchase order PO-347243.\nSubtotal: 9755.02\nTax: 1951.00\nTotal: 11706.02\nPrevious balance (ignore): GBP 425.17\nShip-to: Warehouse 7, not billing address\nReference quote #3018 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-09-02",
+        "due_date": "2024-10-02",
+        "currency": "GBP",
+        "subtotal": "9755.02",
+        "tax": "1951.00",
+        "total": "11706.02",
+        "order_id": "PO-347243"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_117"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-11-10; payment due 2024-12-10.\nAll amounts in USD.\nPurchase order PO-467082.\nSubtotal: 1775.14\nTax: 177.51\nTotal: 1952.65\nPrevious balance (ignore): USD 13.43\nShip-to: Warehouse 7, not billing address\nReference quote #1646 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-11-10",
+        "due_date": "2024-12-10",
+        "currency": "USD",
+        "subtotal": "1775.14",
+        "tax": "177.51",
+        "total": "1952.65",
+        "order_id": "PO-467082"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_118"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-05-24; payment due 2024-07-08.\nAll amounts in GBP.\nPurchase order PO-591222.\nSubtotal: 6224.73\nTax: 497.98\nTotal: 6722.71\nPrevious balance (ignore): GBP 335.56\nShip-to: Warehouse 7, not billing address\nReference quote #9738 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-05-24",
+        "due_date": "2024-07-08",
+        "currency": "GBP",
+        "subtotal": "6224.73",
+        "tax": "497.98",
+        "total": "6722.71",
+        "order_id": "PO-591222"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_119"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-24; payment due 2024-05-08.\nAll amounts in GBP.\nPurchase order PO-535048.\nSubtotal: 6954.32\nTax: 556.35\nTotal: 7510.67\nPrevious balance (ignore): GBP 43.68\nShip-to: Warehouse 7, not billing address\nReference quote #8576 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-24",
+        "due_date": "2024-05-08",
+        "currency": "GBP",
+        "subtotal": "6954.32",
+        "tax": "556.35",
+        "total": "7510.67",
+        "order_id": "PO-535048"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_120"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-04-26; payment due 2024-06-10.\nAll amounts in GBP.\nPurchase order PO-643889.\nSubtotal: 3410.34\nTax: 682.07\nTotal: 4092.41\nPrevious balance (ignore): GBP 479.02\nShip-to: Warehouse 7, not billing address\nReference quote #6341 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-04-26",
+        "due_date": "2024-06-10",
+        "currency": "GBP",
+        "subtotal": "3410.34",
+        "tax": "682.07",
+        "total": "4092.41",
+        "order_id": "PO-643889"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_121"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-07-17; payment due 2024-08-01.\nAll amounts in GBP.\nPurchase order PO-497052.\nSubtotal: 6760.60\nTax: 1352.12\nTotal: 8112.72\nPrevious balance (ignore): GBP 253.23\nShip-to: Warehouse 7, not billing address\nReference quote #9684 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-07-17",
+        "due_date": "2024-08-01",
+        "currency": "GBP",
+        "subtotal": "6760.60",
+        "tax": "1352.12",
+        "total": "8112.72",
+        "order_id": "PO-497052"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_122"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-12-26; payment due 2025-02-09.\nAll amounts in EUR.\nPurchase order PO-457507.\nSubtotal: 3829.29\nTax: 382.93\nTotal: 4212.22\nPrevious balance (ignore): EUR 241.32\nShip-to: Warehouse 7, not billing address\nReference quote #5718 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-12-26",
+        "due_date": "2025-02-09",
+        "currency": "EUR",
+        "subtotal": "3829.29",
+        "tax": "382.93",
+        "total": "4212.22",
+        "order_id": "PO-457507"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_123"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-05-23; payment due 2024-07-07.\nAll amounts in USD.\nPurchase order PO-948509.\nSubtotal: 1836.66\nTax: 183.67\nTotal: 2020.33\nPrevious balance (ignore): USD 20.50\nShip-to: Warehouse 7, not billing address\nReference quote #9185 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-05-23",
+        "due_date": "2024-07-07",
+        "currency": "USD",
+        "subtotal": "1836.66",
+        "tax": "183.67",
+        "total": "2020.33",
+        "order_id": "PO-948509"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_124"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-02-15; payment due 2024-03-16.\nAll amounts in USD.\nPurchase order PO-844699.\nSubtotal: 9272.21\nTax: 741.78\nTotal: 10013.99\nPrevious balance (ignore): USD 177.24\nShip-to: Warehouse 7, not billing address\nReference quote #7743 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-02-15",
+        "due_date": "2024-03-16",
+        "currency": "USD",
+        "subtotal": "9272.21",
+        "tax": "741.78",
+        "total": "10013.99",
+        "order_id": "PO-844699"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_125"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-04-01; payment due 2024-05-16.\nAll amounts in USD.\nPurchase order PO-940992.\nSubtotal: 8881.05\nTax: 888.11\nTotal: 9769.16\nPrevious balance (ignore): USD 134.15\nShip-to: Warehouse 7, not billing address\nReference quote #9643 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-04-01",
+        "due_date": "2024-05-16",
+        "currency": "USD",
+        "subtotal": "8881.05",
+        "tax": "888.11",
+        "total": "9769.16",
+        "order_id": "PO-940992"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_126"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-01; payment due 2024-09-15.\nAll amounts in EUR.\nPurchase order PO-227143.\nSubtotal: 4385.46\nTax: 877.09\nTotal: 5262.55\nPrevious balance (ignore): EUR 392.63\nShip-to: Warehouse 7, not billing address\nReference quote #4249 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-01",
+        "due_date": "2024-09-15",
+        "currency": "EUR",
+        "subtotal": "4385.46",
+        "tax": "877.09",
+        "total": "5262.55",
+        "order_id": "PO-227143"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_127"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-09-24; payment due 2024-10-24.\nAll amounts in USD.\nPurchase order PO-553452.\nSubtotal: 4609.20\nTax: 230.46\nTotal: 4839.66\nPrevious balance (ignore): USD 353.34\nShip-to: Warehouse 7, not billing address\nReference quote #1667 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-09-24",
+        "due_date": "2024-10-24",
+        "currency": "USD",
+        "subtotal": "4609.20",
+        "tax": "230.46",
+        "total": "4839.66",
+        "order_id": "PO-553452"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_128"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-03-07; payment due 2024-04-21.\nAll amounts in USD.\nPurchase order PO-718532.\nSubtotal: 4824.79\nTax: 482.48\nTotal: 5307.27\nPrevious balance (ignore): USD 450.61\nShip-to: Warehouse 7, not billing address\nReference quote #1432 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-03-07",
+        "due_date": "2024-04-21",
+        "currency": "USD",
+        "subtotal": "4824.79",
+        "tax": "482.48",
+        "total": "5307.27",
+        "order_id": "PO-718532"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_129"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-01-17; payment due 2024-02-01.\nAll amounts in USD.\nPurchase order PO-171206.\nSubtotal: 936.72\nTax: 46.84\nTotal: 983.56\nPrevious balance (ignore): USD 458.12\nShip-to: Warehouse 7, not billing address\nReference quote #4156 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-01-17",
+        "due_date": "2024-02-01",
+        "currency": "USD",
+        "subtotal": "936.72",
+        "tax": "46.84",
+        "total": "983.56",
+        "order_id": "PO-171206"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_130"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-18; payment due 2024-09-17.\nAll amounts in GBP.\nPurchase order PO-621469.\nSubtotal: 4089.55\nTax: 327.16\nTotal: 4416.71\nPrevious balance (ignore): GBP 77.96\nShip-to: Warehouse 7, not billing address\nReference quote #7328 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-18",
+        "due_date": "2024-09-17",
+        "currency": "GBP",
+        "subtotal": "4089.55",
+        "tax": "327.16",
+        "total": "4416.71",
+        "order_id": "PO-621469"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_131"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-09-27; payment due 2024-10-12.\nAll amounts in GBP.\nPurchase order PO-841522.\nSubtotal: 6868.03\nTax: 686.80\nTotal: 7554.83\nPrevious balance (ignore): GBP 298.35\nShip-to: Warehouse 7, not billing address\nReference quote #6920 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-09-27",
+        "due_date": "2024-10-12",
+        "currency": "GBP",
+        "subtotal": "6868.03",
+        "tax": "686.80",
+        "total": "7554.83",
+        "order_id": "PO-841522"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_132"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Humongous Insurance.\nInvoice date 2024-04-10; payment due 2024-05-25.\nAll amounts in GBP.\nPurchase order PO-704939.\nSubtotal: 4571.20\nTax: 228.56\nTotal: 4799.76\nPrevious balance (ignore): GBP 277.82\nShip-to: Warehouse 7, not billing address\nReference quote #9646 (unsigned)",
+      "gold": {
+        "vendor": "Humongous Insurance",
+        "invoice_date": "2024-04-10",
+        "due_date": "2024-05-25",
+        "currency": "GBP",
+        "subtotal": "4571.20",
+        "tax": "228.56",
+        "total": "4799.76",
+        "order_id": "PO-704939"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_133"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-08-25; payment due 2024-10-09.\nAll amounts in GBP.\nPurchase order PO-852792.\nSubtotal: 7169.06\nTax: 716.91\nTotal: 7885.97\nPrevious balance (ignore): GBP 12.75\nShip-to: Warehouse 7, not billing address\nReference quote #5783 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-08-25",
+        "due_date": "2024-10-09",
+        "currency": "GBP",
+        "subtotal": "7169.06",
+        "tax": "716.91",
+        "total": "7885.97",
+        "order_id": "PO-852792"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_134"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-10-19; payment due 2024-12-03.\nAll amounts in EUR.\nPurchase order PO-565257.\nSubtotal: 4243.15\nTax: 848.63\nTotal: 5091.78\nPrevious balance (ignore): EUR 23.54\nShip-to: Warehouse 7, not billing address\nReference quote #8524 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-10-19",
+        "due_date": "2024-12-03",
+        "currency": "EUR",
+        "subtotal": "4243.15",
+        "tax": "848.63",
+        "total": "5091.78",
+        "order_id": "PO-565257"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_135"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Tailspin Toys.\nInvoice date 2024-01-03; payment due 2024-02-02.\nAll amounts in EUR.\nPurchase order PO-851006.\nSubtotal: 5411.25\nTax: 270.56\nTotal: 5681.81\nPrevious balance (ignore): EUR 368.76\nShip-to: Warehouse 7, not billing address\nReference quote #4741 (unsigned)",
+      "gold": {
+        "vendor": "Tailspin Toys",
+        "invoice_date": "2024-01-03",
+        "due_date": "2024-02-02",
+        "currency": "EUR",
+        "subtotal": "5411.25",
+        "tax": "270.56",
+        "total": "5681.81",
+        "order_id": "PO-851006"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_136"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-09-15; payment due 2024-10-15.\nAll amounts in GBP.\nPurchase order PO-417778.\nSubtotal: 8971.71\nTax: 448.59\nTotal: 9420.30\nPrevious balance (ignore): GBP 358.73\nShip-to: Warehouse 7, not billing address\nReference quote #8444 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-09-15",
+        "due_date": "2024-10-15",
+        "currency": "GBP",
+        "subtotal": "8971.71",
+        "tax": "448.59",
+        "total": "9420.30",
+        "order_id": "PO-417778"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_137"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-10-09; payment due 2024-11-08.\nAll amounts in USD.\nPurchase order PO-986881.\nSubtotal: 6048.73\nTax: 1209.75\nTotal: 7258.48\nPrevious balance (ignore): USD 168.73\nShip-to: Warehouse 7, not billing address\nReference quote #5326 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-10-09",
+        "due_date": "2024-11-08",
+        "currency": "USD",
+        "subtotal": "6048.73",
+        "tax": "1209.75",
+        "total": "7258.48",
+        "order_id": "PO-986881"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_138"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Lucerne Publishing.\nInvoice date 2024-05-06; payment due 2024-05-21.\nAll amounts in EUR.\nPurchase order PO-984672.\nSubtotal: 8686.66\nTax: 434.33\nTotal: 9120.99\nPrevious balance (ignore): EUR 165.84\nShip-to: Warehouse 7, not billing address\nReference quote #1711 (unsigned)",
+      "gold": {
+        "vendor": "Lucerne Publishing",
+        "invoice_date": "2024-05-06",
+        "due_date": "2024-05-21",
+        "currency": "EUR",
+        "subtotal": "8686.66",
+        "tax": "434.33",
+        "total": "9120.99",
+        "order_id": "PO-984672"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_139"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-11-08; payment due 2024-12-08.\nAll amounts in GBP.\nPurchase order PO-612475.\nSubtotal: 7101.38\nTax: 710.14\nTotal: 7811.52\nPrevious balance (ignore): GBP 324.42\nShip-to: Warehouse 7, not billing address\nReference quote #1407 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-11-08",
+        "due_date": "2024-12-08",
+        "currency": "GBP",
+        "subtotal": "7101.38",
+        "tax": "710.14",
+        "total": "7811.52",
+        "order_id": "PO-612475"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_140"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-12-10; payment due 2025-01-09.\nAll amounts in EUR.\nPurchase order PO-351262.\nSubtotal: 2739.56\nTax: 547.91\nTotal: 3287.47\nPrevious balance (ignore): EUR 261.62\nShip-to: Warehouse 7, not billing address\nReference quote #4579 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-12-10",
+        "due_date": "2025-01-09",
+        "currency": "EUR",
+        "subtotal": "2739.56",
+        "tax": "547.91",
+        "total": "3287.47",
+        "order_id": "PO-351262"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_141"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Northwind Traders.\nInvoice date 2024-11-05; payment due 2024-12-05.\nAll amounts in EUR.\nPurchase order PO-974654.\nSubtotal: 7748.27\nTax: 387.41\nTotal: 8135.68\nPrevious balance (ignore): EUR 340.63\nShip-to: Warehouse 7, not billing address\nReference quote #4135 (unsigned)",
+      "gold": {
+        "vendor": "Northwind Traders",
+        "invoice_date": "2024-11-05",
+        "due_date": "2024-12-05",
+        "currency": "EUR",
+        "subtotal": "7748.27",
+        "tax": "387.41",
+        "total": "8135.68",
+        "order_id": "PO-974654"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_142"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-04-20; payment due 2024-06-04.\nAll amounts in USD.\nPurchase order PO-578824.\nSubtotal: 8339.77\nTax: 1667.95\nTotal: 10007.72\nPrevious balance (ignore): USD 272.59\nShip-to: Warehouse 7, not billing address\nReference quote #7980 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-04-20",
+        "due_date": "2024-06-04",
+        "currency": "USD",
+        "subtotal": "8339.77",
+        "tax": "1667.95",
+        "total": "10007.72",
+        "order_id": "PO-578824"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_143"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Adventure Works.\nInvoice date 2024-03-24; payment due 2024-05-08.\nAll amounts in GBP.\nPurchase order PO-831568.\nSubtotal: 9386.58\nTax: 750.93\nTotal: 10137.51\nPrevious balance (ignore): GBP 317.07\nShip-to: Warehouse 7, not billing address\nReference quote #8202 (unsigned)",
+      "gold": {
+        "vendor": "Adventure Works",
+        "invoice_date": "2024-03-24",
+        "due_date": "2024-05-08",
+        "currency": "GBP",
+        "subtotal": "9386.58",
+        "tax": "750.93",
+        "total": "10137.51",
+        "order_id": "PO-831568"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_144"
+    },
+    {
+      "source_text": "--- T1 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-11-02; payment due 2024-12-02.\nAll amounts in GBP.\nPurchase order PO-291008.\nSubtotal: 5073.77\nTax: 405.90\nTotal: 5479.67\nPrevious balance (ignore): GBP 75.10\nShip-to: Warehouse 7, not billing address\nReference quote #3560 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-11-02",
+        "due_date": "2024-12-02",
+        "currency": "GBP",
+        "subtotal": "5073.77",
+        "tax": "405.90",
+        "total": "5479.67",
+        "order_id": "PO-291008"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T1",
+      "task_id": "hold_145"
+    },
+    {
+      "source_text": "--- T2 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-07-25; payment due 2024-09-08.\nAll amounts in GBP.\nPurchase order PO-396773.\nSubtotal: 1246.06\nTax: 249.21\nTotal: 1495.27\nPrevious balance (ignore): GBP 242.38\nShip-to: Warehouse 7, not billing address\nReference quote #1311 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-07-25",
+        "due_date": "2024-09-08",
+        "currency": "GBP",
+        "subtotal": "1246.06",
+        "tax": "249.21",
+        "total": "1495.27",
+        "order_id": "PO-396773"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T2",
+      "task_id": "hold_146"
+    },
+    {
+      "source_text": "--- T3 document ---\nPlease remit payment to Contoso Ltd.\nInvoice date 2024-06-07; payment due 2024-07-07.\nAll amounts in GBP.\nPurchase order PO-203302.\nSubtotal: 2971.26\nTax: 148.56\nTotal: 3119.82\nPrevious balance (ignore): GBP 252.32\nShip-to: Warehouse 7, not billing address\nReference quote #4662 (unsigned)",
+      "gold": {
+        "vendor": "Contoso Ltd",
+        "invoice_date": "2024-06-07",
+        "due_date": "2024-07-07",
+        "currency": "GBP",
+        "subtotal": "2971.26",
+        "tax": "148.56",
+        "total": "3119.82",
+        "order_id": "PO-203302"
+      },
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": true,
+      "template_id": "T3",
+      "task_id": "hold_147"
+    },
+    {
+      "source_text": "--- T4 document ---\nPlease remit payment to Wide World Importers.\nInvoice date 2024-06-03; payment due 2024-07-18.\nAll amounts in EUR.\nPurchase order PO-102464.\nSubtotal: 8489.69\nTax: 679.18\nTotal: 9168.87\nPrevious balance (ignore): EUR 230.37\nShip-to: Warehouse 7, not billing address\nReference quote #5532 (unsigned)",
+      "gold": {
+        "vendor": "Wide World Importers",
+        "invoice_date": "2024-06-03",
+        "due_date": "2024-07-18",
+        "currency": "EUR",
+        "subtotal": "8489.69",
+        "tax": "679.18",
+        "total": "9168.87",
+        "order_id": "PO-102464"
+      },
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": true,
+      "template_id": "T4",
+      "task_id": "hold_148"
+    },
+    {
+      "source_text": "--- T5 document ---\nPlease remit payment to Fabrikam Inc.\nInvoice date 2024-02-13; payment due 2024-03-29.\nAll amounts in USD.\nPurchase order PO-527625.\nSubtotal: 5449.31\nTax: 272.47\nTotal: 5721.78\nPrevious balance (ignore): USD 451.85\nShip-to: Warehouse 7, not billing address\nReference quote #2400 (unsigned)",
+      "gold": {
+        "vendor": "Fabrikam Inc",
+        "invoice_date": "2024-02-13",
+        "due_date": "2024-03-29",
+        "currency": "USD",
+        "subtotal": "5449.31",
+        "tax": "272.47",
+        "total": "5721.78",
+        "order_id": "PO-527625"
+      },
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": true,
+      "template_id": "T5",
+      "task_id": "hold_149"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-12-05\nDue: 2024-12-20\nCurrency: GBP\nOrder ID: PO-507803\nSubtotal: GBP 1,778.56\nTax: GBP 355.71\n** Total due (typo): GBP 2,233.27 **\nCorrected line \u2014 subtotal 1778.56, tax 355.71, total should be 2184.27 (pending audit)\nPrevious balance (ignore): GBP 226.01\nShip-to: Warehouse 7, not billing address\nReference quote #8125 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_000"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-06-25\nDue: 2024-07-10\nCurrency: GBP\nOrder ID: PO-831415\nSubtotal: GBP 5,566.25\nTax: GBP 556.62\n** Total due (typo): GBP 6,221.87 **\nCorrected line \u2014 subtotal 5566.25, tax 556.62, total should be 6172.87 (pending audit)\nPrevious balance (ignore): GBP 272.07\nShip-to: Warehouse 7, not billing address\nReference quote #2242 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_001"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Adventure Works\nInvoice date: 2024-05-16\nDue: 2024-05-31\nCurrency: GBP\nOrder ID: PO-389032\nSubtotal: GBP 222.01\nTax: GBP 11.10\n** Total due (typo): GBP 332.11 **\nCorrected line \u2014 subtotal 222.01, tax 11.10, total should be 283.11 (pending audit)\nPrevious balance (ignore): GBP 480.60\nShip-to: Warehouse 7, not billing address\nReference quote #1908 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_002"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-09-27\nDue: 2024-10-27\nCurrency: EUR\nOrder ID: PO-715377\nSubtotal: EUR 2,025.24\nTax: EUR 405.05\n** Total due (typo): EUR 2,529.29 **\nCorrected line \u2014 subtotal 2025.24, tax 405.05, total should be 2480.29 (pending audit)\nPrevious balance (ignore): EUR 109.61\nShip-to: Warehouse 7, not billing address\nReference quote #2916 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_003"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-09-22\nDue: 2024-11-06\nCurrency: GBP\nOrder ID: PO-719508\nSubtotal: GBP 8,574.73\nTax: GBP 857.47\n** Total due (typo): GBP 9,531.20 **\nCorrected line \u2014 subtotal 8574.73, tax 857.47, total should be 9482.20 (pending audit)\nPrevious balance (ignore): GBP 315.92\nShip-to: Warehouse 7, not billing address\nReference quote #1821 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_004"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-06-09\nDue: 2024-06-24\nCurrency: EUR\nOrder ID: PO-697998\nSubtotal: EUR 4,288.79\nTax: EUR 343.10\n** Total due (typo): EUR 4,730.89 **\nCorrected line \u2014 subtotal 4288.79, tax 343.10, total should be 4681.89 (pending audit)\nPrevious balance (ignore): EUR 298.97\nShip-to: Warehouse 7, not billing address\nReference quote #1113 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_005"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-10-24\nDue: 2024-12-08\nCurrency: GBP\nOrder ID: PO-185195\nSubtotal: GBP 160.66\nTax: GBP 32.13\n** Total due (typo): GBP 291.79 **\nCorrected line \u2014 subtotal 160.66, tax 32.13, total should be 242.79 (pending audit)\nPrevious balance (ignore): GBP 235.30\nShip-to: Warehouse 7, not billing address\nReference quote #3606 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_006"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-07-02\nDue: 2024-08-01\nCurrency: GBP\nOrder ID: PO-972681\nSubtotal: GBP 1,254.40\nTax: GBP 125.44\n** Total due (typo): GBP 1,478.84 **\nCorrected line \u2014 subtotal 1254.40, tax 125.44, total should be 1429.84 (pending audit)\nPrevious balance (ignore): GBP 132.76\nShip-to: Warehouse 7, not billing address\nReference quote #9446 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_007"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-03-28\nDue: 2024-05-12\nCurrency: GBP\nOrder ID: PO-845473\nSubtotal: GBP 1,301.05\nTax: GBP 104.08\n** Total due (typo): GBP 1,504.13 **\nCorrected line \u2014 subtotal 1301.05, tax 104.08, total should be 1455.13 (pending audit)\nPrevious balance (ignore): GBP 324.26\nShip-to: Warehouse 7, not billing address\nReference quote #4638 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_008"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-02-07\nDue: 2024-03-08\nCurrency: EUR\nOrder ID: PO-117121\nSubtotal: EUR 9,202.23\nTax: EUR 1,840.45\n** Total due (typo): EUR 11,141.68 **\nCorrected line \u2014 subtotal 9202.23, tax 1840.45, total should be 11092.68 (pending audit)\nPrevious balance (ignore): EUR 327.93\nShip-to: Warehouse 7, not billing address\nReference quote #5516 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_009"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-01-18\nDue: 2024-03-03\nCurrency: USD\nOrder ID: PO-185657\nSubtotal: USD 4,321.28\nTax: USD 345.70\n** Total due (typo): USD 4,765.98 **\nCorrected line \u2014 subtotal 4321.28, tax 345.70, total should be 4716.98 (pending audit)\nPrevious balance (ignore): USD 156.34\nShip-to: Warehouse 7, not billing address\nReference quote #5929 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_010"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-08-17\nDue: 2024-10-01\nCurrency: USD\nOrder ID: PO-454709\nSubtotal: USD 1,705.12\nTax: USD 136.41\n** Total due (typo): USD 1,940.53 **\nCorrected line \u2014 subtotal 1705.12, tax 136.41, total should be 1891.53 (pending audit)\nPrevious balance (ignore): USD 214.32\nShip-to: Warehouse 7, not billing address\nReference quote #2271 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_011"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-10-20\nDue: 2024-11-04\nCurrency: USD\nOrder ID: PO-437895\nSubtotal: USD 780.29\nTax: USD 62.42\n** Total due (typo): USD 941.71 **\nCorrected line \u2014 subtotal 780.29, tax 62.42, total should be 892.71 (pending audit)\nPrevious balance (ignore): USD 461.30\nShip-to: Warehouse 7, not billing address\nReference quote #8551 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_012"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-09-09\nDue: 2024-10-24\nCurrency: EUR\nOrder ID: PO-744169\nSubtotal: EUR 1,499.74\nTax: EUR 74.99\n** Total due (typo): EUR 1,673.73 **\nCorrected line \u2014 subtotal 1499.74, tax 74.99, total should be 1624.73 (pending audit)\nPrevious balance (ignore): EUR 272.10\nShip-to: Warehouse 7, not billing address\nReference quote #7335 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_013"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-12-13\nDue: 2024-12-28\nCurrency: EUR\nOrder ID: PO-722361\nSubtotal: EUR 8,248.53\nTax: EUR 659.88\n** Total due (typo): EUR 9,007.41 **\nCorrected line \u2014 subtotal 8248.53, tax 659.88, total should be 8958.41 (pending audit)\nPrevious balance (ignore): EUR 189.08\nShip-to: Warehouse 7, not billing address\nReference quote #1954 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_014"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Adventure Works\nInvoice date: 2024-11-03\nDue: 2024-12-03\nCurrency: USD\nOrder ID: PO-427597\nSubtotal: USD 2,981.07\nTax: USD 238.49\n** Total due (typo): USD 3,318.56 **\nCorrected line \u2014 subtotal 2981.07, tax 238.49, total should be 3269.56 (pending audit)\nPrevious balance (ignore): USD 252.86\nShip-to: Warehouse 7, not billing address\nReference quote #8293 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_015"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-01-03\nDue: 2024-01-18\nCurrency: USD\nOrder ID: PO-113215\nSubtotal: USD 2,437.92\nTax: USD 243.79\n** Total due (typo): USD 2,780.71 **\nCorrected line \u2014 subtotal 2437.92, tax 243.79, total should be 2731.71 (pending audit)\nPrevious balance (ignore): USD 282.14\nShip-to: Warehouse 7, not billing address\nReference quote #5886 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_016"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Lucerne Publishing\nInvoice date: 2024-05-06\nDue: 2024-06-05\nCurrency: GBP\nOrder ID: PO-289089\nSubtotal: GBP 3,294.48\nTax: GBP 164.72\n** Total due (typo): GBP 3,558.20 **\nCorrected line \u2014 subtotal 3294.48, tax 164.72, total should be 3509.20 (pending audit)\nPrevious balance (ignore): GBP 153.49\nShip-to: Warehouse 7, not billing address\nReference quote #3862 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_017"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-10-07\nDue: 2024-10-22\nCurrency: GBP\nOrder ID: PO-459131\nSubtotal: GBP 6,923.01\nTax: GBP 553.84\n** Total due (typo): GBP 7,575.85 **\nCorrected line \u2014 subtotal 6923.01, tax 553.84, total should be 7526.85 (pending audit)\nPrevious balance (ignore): GBP 161.90\nShip-to: Warehouse 7, not billing address\nReference quote #6990 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_018"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Lucerne Publishing\nInvoice date: 2024-03-20\nDue: 2024-05-04\nCurrency: GBP\nOrder ID: PO-103888\nSubtotal: GBP 2,141.03\nTax: GBP 107.05\n** Total due (typo): GBP 2,347.08 **\nCorrected line \u2014 subtotal 2141.03, tax 107.05, total should be 2298.08 (pending audit)\nPrevious balance (ignore): GBP 135.39\nShip-to: Warehouse 7, not billing address\nReference quote #7096 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_019"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-04-18\nDue: 2024-06-02\nCurrency: USD\nOrder ID: PO-498477\nSubtotal: USD 7,123.04\nTax: USD 356.15\n** Total due (typo): USD 7,578.19 **\nCorrected line \u2014 subtotal 7123.04, tax 356.15, total should be 7529.19 (pending audit)\nPrevious balance (ignore): USD 423.96\nShip-to: Warehouse 7, not billing address\nReference quote #8526 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_020"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-09-16\nDue: 2024-10-01\nCurrency: GBP\nOrder ID: PO-338437\nSubtotal: GBP 7,666.34\nTax: GBP 766.63\n** Total due (typo): GBP 8,531.97 **\nCorrected line \u2014 subtotal 7666.34, tax 766.63, total should be 8482.97 (pending audit)\nPrevious balance (ignore): GBP 263.38\nShip-to: Warehouse 7, not billing address\nReference quote #1261 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_021"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Adventure Works\nInvoice date: 2024-02-27\nDue: 2024-03-13\nCurrency: EUR\nOrder ID: PO-314533\nSubtotal: EUR 9,725.91\nTax: EUR 1,945.18\n** Total due (typo): EUR 11,770.09 **\nCorrected line \u2014 subtotal 9725.91, tax 1945.18, total should be 11721.09 (pending audit)\nPrevious balance (ignore): EUR 248.78\nShip-to: Warehouse 7, not billing address\nReference quote #1857 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_022"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-11-08\nDue: 2024-11-23\nCurrency: GBP\nOrder ID: PO-940633\nSubtotal: GBP 2,075.71\nTax: GBP 103.79\n** Total due (typo): GBP 2,278.50 **\nCorrected line \u2014 subtotal 2075.71, tax 103.79, total should be 2229.50 (pending audit)\nPrevious balance (ignore): GBP 68.29\nShip-to: Warehouse 7, not billing address\nReference quote #7243 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_023"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-02-23\nDue: 2024-03-24\nCurrency: USD\nOrder ID: PO-594584\nSubtotal: USD 4,337.83\nTax: USD 347.03\n** Total due (typo): USD 4,783.86 **\nCorrected line \u2014 subtotal 4337.83, tax 347.03, total should be 4734.86 (pending audit)\nPrevious balance (ignore): USD 246.67\nShip-to: Warehouse 7, not billing address\nReference quote #6876 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_024"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-09-25\nDue: 2024-10-10\nCurrency: EUR\nOrder ID: PO-156849\nSubtotal: EUR 2,165.84\nTax: EUR 173.27\n** Total due (typo): EUR 2,438.11 **\nCorrected line \u2014 subtotal 2165.84, tax 173.27, total should be 2389.11 (pending audit)\nPrevious balance (ignore): EUR 140.96\nShip-to: Warehouse 7, not billing address\nReference quote #5626 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_025"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-09-27\nDue: 2024-10-12\nCurrency: GBP\nOrder ID: PO-723521\nSubtotal: GBP 6,084.99\nTax: GBP 608.50\n** Total due (typo): GBP 6,792.49 **\nCorrected line \u2014 subtotal 6084.99, tax 608.50, total should be 6743.49 (pending audit)\nPrevious balance (ignore): GBP 250.13\nShip-to: Warehouse 7, not billing address\nReference quote #5386 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_026"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-01-10\nDue: 2024-02-24\nCurrency: EUR\nOrder ID: PO-589179\nSubtotal: EUR 6,592.65\nTax: EUR 659.26\n** Total due (typo): EUR 7,350.91 **\nCorrected line \u2014 subtotal 6592.65, tax 659.26, total should be 7301.91 (pending audit)\nPrevious balance (ignore): EUR 96.58\nShip-to: Warehouse 7, not billing address\nReference quote #5029 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_027"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-10-26\nDue: 2024-12-10\nCurrency: GBP\nOrder ID: PO-896454\nSubtotal: GBP 7,700.43\nTax: GBP 616.03\n** Total due (typo): GBP 8,415.46 **\nCorrected line \u2014 subtotal 7700.43, tax 616.03, total should be 8366.46 (pending audit)\nPrevious balance (ignore): GBP 115.39\nShip-to: Warehouse 7, not billing address\nReference quote #4141 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_028"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Adventure Works\nInvoice date: 2024-05-24\nDue: 2024-06-23\nCurrency: USD\nOrder ID: PO-295448\nSubtotal: USD 7,896.50\nTax: USD 789.65\n** Total due (typo): USD 8,785.15 **\nCorrected line \u2014 subtotal 7896.50, tax 789.65, total should be 8736.15 (pending audit)\nPrevious balance (ignore): USD 474.23\nShip-to: Warehouse 7, not billing address\nReference quote #2597 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_029"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-04-15\nDue: 2024-05-30\nCurrency: USD\nOrder ID: PO-999756\nSubtotal: USD 868.01\nTax: USD 69.44\n** Total due (typo): USD 1,036.45 **\nCorrected line \u2014 subtotal 868.01, tax 69.44, total should be 987.45 (pending audit)\nPrevious balance (ignore): USD 465.51\nShip-to: Warehouse 7, not billing address\nReference quote #1063 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_030"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Lucerne Publishing\nInvoice date: 2024-05-11\nDue: 2024-06-25\nCurrency: GBP\nOrder ID: PO-958612\nSubtotal: GBP 9,574.17\nTax: GBP 1,914.83\n** Total due (typo): GBP 11,588.00 **\nCorrected line \u2014 subtotal 9574.17, tax 1914.83, total should be 11539.00 (pending audit)\nPrevious balance (ignore): GBP 487.28\nShip-to: Warehouse 7, not billing address\nReference quote #7496 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_031"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Lucerne Publishing\nInvoice date: 2024-08-02\nDue: 2024-08-17\nCurrency: GBP\nOrder ID: PO-510629\nSubtotal: GBP 5,344.17\nTax: GBP 427.53\n** Total due (typo): GBP 5,870.70 **\nCorrected line \u2014 subtotal 5344.17, tax 427.53, total should be 5821.70 (pending audit)\nPrevious balance (ignore): GBP 395.86\nShip-to: Warehouse 7, not billing address\nReference quote #4012 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_032"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-02-16\nDue: 2024-04-01\nCurrency: GBP\nOrder ID: PO-346990\nSubtotal: GBP 2,291.27\nTax: GBP 229.13\n** Total due (typo): GBP 2,619.40 **\nCorrected line \u2014 subtotal 2291.27, tax 229.13, total should be 2570.40 (pending audit)\nPrevious balance (ignore): GBP 481.69\nShip-to: Warehouse 7, not billing address\nReference quote #7020 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_033"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-04-17\nDue: 2024-05-17\nCurrency: USD\nOrder ID: PO-283378\nSubtotal: USD 4,741.21\nTax: USD 237.06\n** Total due (typo): USD 5,077.27 **\nCorrected line \u2014 subtotal 4741.21, tax 237.06, total should be 5028.27 (pending audit)\nPrevious balance (ignore): USD 212.72\nShip-to: Warehouse 7, not billing address\nReference quote #2173 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_034"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-01-28\nDue: 2024-02-27\nCurrency: EUR\nOrder ID: PO-615286\nSubtotal: EUR 7,937.49\nTax: EUR 793.75\n** Total due (typo): EUR 8,830.24 **\nCorrected line \u2014 subtotal 7937.49, tax 793.75, total should be 8781.24 (pending audit)\nPrevious balance (ignore): EUR 219.21\nShip-to: Warehouse 7, not billing address\nReference quote #7557 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_035"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-11-09\nDue: 2024-12-09\nCurrency: EUR\nOrder ID: PO-548689\nSubtotal: EUR 8,008.08\nTax: EUR 1,601.62\n** Total due (typo): EUR 9,708.70 **\nCorrected line \u2014 subtotal 8008.08, tax 1601.62, total should be 9659.70 (pending audit)\nPrevious balance (ignore): EUR 336.17\nShip-to: Warehouse 7, not billing address\nReference quote #5056 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "EUR"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_036"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-02-12\nDue: 2024-03-28\nCurrency: USD\nOrder ID: PO-695263\nSubtotal: USD 1,160.02\nTax: USD 92.80\n** Total due (typo): USD 1,351.82 **\nCorrected line \u2014 subtotal 1160.02, tax 92.80, total should be 1302.82 (pending audit)\nPrevious balance (ignore): USD 130.77\nShip-to: Warehouse 7, not billing address\nReference quote #6268 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_037"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-04-06\nDue: 2024-05-21\nCurrency: GBP\nOrder ID: PO-558897\nSubtotal: GBP 6,288.00\nTax: GBP 314.40\n** Total due (typo): GBP 6,701.40 **\nCorrected line \u2014 subtotal 6288.00, tax 314.40, total should be 6652.40 (pending audit)\nPrevious balance (ignore): GBP 25.47\nShip-to: Warehouse 7, not billing address\nReference quote #8931 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_038"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-07-01\nDue: 2024-07-31\nCurrency: USD\nOrder ID: PO-288003\nSubtotal: USD 2,062.25\nTax: USD 164.98\n** Total due (typo): USD 2,326.23 **\nCorrected line \u2014 subtotal 2062.25, tax 164.98, total should be 2277.23 (pending audit)\nPrevious balance (ignore): USD 293.66\nShip-to: Warehouse 7, not billing address\nReference quote #9240 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_039"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Humongous Insurance\nInvoice date: 2024-07-22\nDue: 2024-08-21\nCurrency: GBP\nOrder ID: PO-158698\nSubtotal: GBP 4,586.03\nTax: GBP 917.21\n** Total due (typo): GBP 5,602.24 **\nCorrected line \u2014 subtotal 4586.03, tax 917.21, total should be 5553.24 (pending audit)\nPrevious balance (ignore): GBP 110.92\nShip-to: Warehouse 7, not billing address\nReference quote #4721 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_040"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Lucerne Publishing\nInvoice date: 2024-04-18\nDue: 2024-05-03\nCurrency: USD\nOrder ID: PO-622827\nSubtotal: USD 5,271.50\nTax: USD 1,054.30\n** Total due (typo): USD 6,424.80 **\nCorrected line \u2014 subtotal 5271.50, tax 1054.30, total should be 6375.80 (pending audit)\nPrevious balance (ignore): USD 16.54\nShip-to: Warehouse 7, not billing address\nReference quote #5580 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_041"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-10-04\nDue: 2024-11-03\nCurrency: USD\nOrder ID: PO-881474\nSubtotal: USD 4,212.02\nTax: USD 842.40\n** Total due (typo): USD 5,153.42 **\nCorrected line \u2014 subtotal 4212.02, tax 842.40, total should be 5104.42 (pending audit)\nPrevious balance (ignore): USD 203.71\nShip-to: Warehouse 7, not billing address\nReference quote #9074 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_042"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Wide World Importers\nInvoice date: 2024-06-15\nDue: 2024-06-30\nCurrency: GBP\nOrder ID: PO-740459\nSubtotal: GBP 9,312.52\nTax: GBP 745.00\n** Total due (typo): GBP 10,156.52 **\nCorrected line \u2014 subtotal 9312.52, tax 745.00, total should be 10107.52 (pending audit)\nPrevious balance (ignore): GBP 394.08\nShip-to: Warehouse 7, not billing address\nReference quote #8761 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_043"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-01-02\nDue: 2024-01-17\nCurrency: USD\nOrder ID: PO-968214\nSubtotal: USD 4,987.31\nTax: USD 249.37\n** Total due (typo): USD 5,335.68 **\nCorrected line \u2014 subtotal 4987.31, tax 249.37, total should be 5286.68 (pending audit)\nPrevious balance (ignore): USD 21.17\nShip-to: Warehouse 7, not billing address\nReference quote #9661 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_044"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Tailspin Toys\nInvoice date: 2024-10-23\nDue: 2024-12-07\nCurrency: GBP\nOrder ID: PO-227366\nSubtotal: GBP 9,245.48\nTax: GBP 924.55\n** Total due (typo): GBP 10,269.03 **\nCorrected line \u2014 subtotal 9245.48, tax 924.55, total should be 10220.03 (pending audit)\nPrevious balance (ignore): GBP 459.62\nShip-to: Warehouse 7, not billing address\nReference quote #5602 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T1",
+      "task_id": "hold_u_045"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Fabrikam Inc\nInvoice date: 2024-06-07\nDue: 2024-06-22\nCurrency: USD\nOrder ID: PO-680407\nSubtotal: USD 2,687.08\nTax: USD 214.97\n** Total due (typo): USD 3,001.05 **\nCorrected line \u2014 subtotal 2687.08, tax 214.97, total should be 2952.05 (pending audit)\nPrevious balance (ignore): USD 136.82\nShip-to: Warehouse 7, not billing address\nReference quote #1895 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T2",
+      "task_id": "hold_u_046"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Contoso Ltd\nInvoice date: 2024-08-06\nDue: 2024-09-20\nCurrency: USD\nOrder ID: PO-560436\nSubtotal: USD 4,960.70\nTax: USD 992.14\n** Total due (typo): USD 6,051.84 **\nCorrected line \u2014 subtotal 4960.70, tax 992.14, total should be 6002.84 (pending audit)\nPrevious balance (ignore): USD 441.84\nShip-to: Warehouse 7, not billing address\nReference quote #1872 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "USD"
+      ],
+      "answerable": false,
+      "template_id": "T3",
+      "task_id": "hold_u_047"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Northwind Traders\nInvoice date: 2024-08-07\nDue: 2024-08-22\nCurrency: GBP\nOrder ID: PO-926745\nSubtotal: GBP 2,743.09\nTax: GBP 548.62\n** Total due (typo): GBP 3,390.71 **\nCorrected line \u2014 subtotal 2743.09, tax 548.62, total should be 3341.71 (pending audit)\nPrevious balance (ignore): GBP 360.47\nShip-to: Warehouse 7, not billing address\nReference quote #1226 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T4",
+      "task_id": "hold_u_048"
+    },
+    {
+      "source_text": "INVOICE\nVendor: Humongous Insurance\nInvoice date: 2024-11-02\nDue: 2024-12-17\nCurrency: GBP\nOrder ID: PO-264404\nSubtotal: GBP 2,920.67\nTax: GBP 233.65\n** Total due (typo): GBP 3,253.32 **\nCorrected line \u2014 subtotal 2920.67, tax 233.65, total should be 3204.32 (pending audit)\nPrevious balance (ignore): GBP 251.00\nShip-to: Warehouse 7, not billing address\nReference quote #6632 (unsigned)",
+      "gold": null,
+      "allowed_currencies": [
+        "GBP"
+      ],
+      "answerable": false,
+      "template_id": "T5",
+      "task_id": "hold_u_049"
+    }
+  ]
+}

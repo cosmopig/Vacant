@@ -1,0 +1,39 @@
+{
+  "task_id": "hold_066",
+  "template_id": "T2",
+  "answerable": true,
+  "arm": "BLIND",
+  "draft": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-07-07",
+    "currency": "USD",
+    "subtotal": "7101.97",
+    "tax": "355.1",
+    "total": "7457.07",
+    "order_id": "PO-163330"
+  },
+  "final": {
+    "vendor": "Adventure Works",
+    "invoice_date": "2024-06-22",
+    "due_date": "2024-07-07",
+    "currency": "USD",
+    "subtotal": "7101.97",
+    "tax": "355.1",
+    "total": "7457.07",
+    "order_id": "PO-163330"
+  },
+  "visible_all_pass": true,
+  "oracle_whole_success": true,
+  "visible_x_oracle": "V+_O+",
+  "prompt_tokens": 350,
+  "completion_tokens": 208,
+  "cpu_seconds": 6.662072113000249,
+  "n_calls": 2,
+  "draft_visible_pass": true,
+  "draft_oracle_success": true,
+  "draft_prompt_tokens": 175,
+  "draft_completion_tokens": 104,
+  "draft_cpu_seconds": 3.0207846820003397,
+  "gated_ship_exploratory": true
+}

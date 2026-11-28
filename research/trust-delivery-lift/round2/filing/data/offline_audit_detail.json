@@ -1,0 +1,188 @@
+{
+  "label": "Checker validity on qwen3.5-9b C1 answers (not small-model delivery)",
+  "n_pass_correct": 724,
+  "n_false_reject": 35,
+  "false_reject_rate_bootstrap": {
+    "point": 0.04834254143646409,
+    "ci95": [
+      0.03314917127071823,
+      0.0649171270718232
+    ],
+    "wilson_ci95": [
+      0.034962430693603795,
+      0.06649041289214346
+    ]
+  },
+  "n_pass_wrong": 101,
+  "n_missed_catch": 26,
+  "miss_rate_bootstrap": {
+    "point": 0.25742574257425743,
+    "ci95": [
+      0.1782178217821782,
+      0.3465346534653465
+    ],
+    "wilson_ci95": [
+      0.18215123164243846,
+      0.3504770380520339
+    ]
+  },
+  "catch_rate_bootstrap": {
+    "point": 0.7425742574257426,
+    "ci95": [
+      0.6534653465346535,
+      0.8217821782178217
+    ],
+    "wilson_ci95": [
+      0.649522961947966,
+      0.8178487683575615
+    ]
+  },
+  "false_reject_by_category": {
+    "span_missing_from_evidence_page": 19,
+    "checker_scale_heuristic": 16
+  },
+  "missed_by_category": {
+    "wrong_column_or_value_in_span": 26
+  },
+  "interpretation_notes": [
+    "Categories starting with checker_ attribute failure to visible typed rules, not HF gold.",
+    "value_not_in_cited_span_model_err: span cites line but numeric answer is wrong column (gold agrees with HF).",
+    "gold is HF release field value_matches_gold; disagree only if our oracle helper differs."
+  ],
+  "examples_false_reject": [
+    {
+      "id": "FE-0267",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0321",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0393",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0515",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0518",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0517",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0516",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0528",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0580",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0577",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0581",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    },
+    {
+      "id": "FE-0595",
+      "reason": "provenance_fail",
+      "category": "span_missing_from_evidence_page",
+      "outcome": "correct"
+    }
+  ],
+  "examples_missed": [
+    {
+      "id": "FE-0140",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0183",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0245",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0387",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0395",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0495",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0511",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0530",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0531",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0537",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0564",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    },
+    {
+      "id": "FE-0589",
+      "outcome": "confident_wrong",
+      "category": "wrong_column_or_value_in_span"
+    }
+  ]
+}

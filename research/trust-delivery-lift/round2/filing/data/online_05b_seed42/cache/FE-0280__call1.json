@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "17",
+    "scale": "in millions",
+    "in billions": "0.0017",
+    "page": 8,
+    "span": "Other components of net periodic benefit costs"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"17\", \"scale\":\"in millions\",\"in billions\":\"0.0017\",\"page\":8,\"span\":\"Other components of net periodic benefit costs\"}",
+      "prompt_tokens": 157,
+      "completion_tokens": 40,
+      "latency_s": 1.172604252000383,
+      "mean_logprob": null
+    }
+  ]
+}
