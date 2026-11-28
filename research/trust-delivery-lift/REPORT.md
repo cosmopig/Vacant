@@ -6,7 +6,7 @@
 
 ## English abstract
 
-**Pilot 1 (n=12):** null. **Confirmatory (resumed 2026-11-28 post-amendment):** invoice holdout **n=150** answerable; **hold_000–hold_021** fenced (`pilot_excluded`, broken `vendor` checker — exploratory interim only). **Checks fixed** (`invoice.visible_checker/2`; **dev-only** gold self-test **n=20** + specificity perturbations — not holdout gold). Primary sealed in `PREREG_HOLDOUT_PRIMARY_SEAL_20261129.md` (answerable-only McNemar VACANT vs MAJ3). Confirmatory rows: `round2/data/holdout_05b_confirmatory/` (in progress). LPB3 exploratory gate **quarantined**; cost **not** matched across arms (`COST_PARITY_AUDIT.md`). **Filing (9b / partial 0.5B):** **leaky dev upper bound only** — not evidence. **Accountability = honest coverage:** uncontested auto-PASS **20%** coverage, **0%** false-release on that slice (9b); **53.9%** contested → ESCALATE; consensus refuse-gate **invalid** as a win without coverage floor. **Scripted “independent” contract authors are us — not external authorship.** **Verdict:** judgment relocated + reproducible execution; **delivery lift TBD** from holdout McNemar.
+**Pilot 1 (n=12):** null. **Confirmatory (complete):** **n=128** answerable tasks (`hold_022`–`hold_149`), **512** rows, `stopping_reason=confirmatory_complete`. **Primary (frozen):** exact McNemar **VACANT vs MAJ3** on `oracle_whole_success` — **b=0, c=1, p=1.0** (null; one discordant pair). Oracle rates: VACANT **96/128 (75.0%)**, MAJ3 **95/128 (74.2%)**, BLIND **95/128**, LPB3 **96/128**. **Not** a delivery lift claim. **Exploratory:** VACANT **P(oracle fail | visible pass)=32/128=25%** (Goodhart on visible gate); gating utility in `summary.json` (LPB3 gate metrics **invalid** pre-quarantine rows). **Costs** unequal: VACANT ~**3.1 s / 281 tok / 1.0 calls** vs BLIND ~**7.0 s / 568 tok / 2** vs Maj/LPB ~**11.6 s / ~858 tok / 3** — see `COST_PARITY_AUDIT.md`. **1.5B filing** online subset **running** (exploratory). Filing 9b remains **leaky dev upper bound** only. **Filing (9b / partial 0.5B):** **leaky dev upper bound only** — not evidence. **Accountability = honest coverage:** uncontested auto-PASS **20%** coverage, **0%** false-release on that slice (9b); **53.9%** contested → ESCALATE; consensus refuse-gate **invalid** as a win without coverage floor. **Scripted “independent” contract authors are us — not external authorship.** **Verdict:** judgment relocated + reproducible execution; **delivery lift TBD** from holdout McNemar.
 
 ---
 
@@ -97,14 +97,25 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 
 - **Pre-registered subset:** `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).  
 - **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). **Interim (~32% rows):** ~71 Q/arm; **0/6** filings with zero-wrong deliveries so far (0.5B capacity); see `online_05b_seed42_interim_summary.json` (updates as run continues).  
-- **1.5B:** tmux `filing-15b-queue` waits for 0.5B completion → `online_15b_seed42/`.  
+- **1.5B:** tmux `filing-15b` — started after holdout gate (**exploratory**; not confirmatory delivery evidence).  
 - **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
 
-## 5. Invoice Round 2 — field-lock vs equal-cost baselines (**running**)
+## 5. Invoice Round 2 — confirmatory primary + exploratory
 
-- **Holdout:** n=150 answerable; arms **VACANT, BLIND, MAJ3, LPB3** (tmux `holdout-confirm`).  
-- **Frozen analysis:** first **2** rows not used for inference; addendum hash in `data/holdout_05b/PREREG_SHA256.json`.  
-- **McNemar:** `VACANT` vs **MAJ3** (primary); also **BLIND**, **LPB3** descriptive + `selective_2x2` + `utility_grid`.
+**Population (primary):** answerable confirmatory tasks only (`pilot_excluded` hold_000–021 **excluded**; holdout_unanswerable **not evaluated** — no false-release claim there). Spec: `PREREG_HOLDOUT_PRIMARY_SEAL_20261129.md` + `data/holdout_05b_confirmatory/PRIMARY_SPEC_SHA256.json`.
+
+| Arm | n | oracle success | Wilson 95% CI | visible pass | mean CPU-s | mean tokens | mean calls |
+|-----|---|----------------|---------------|--------------|------------|-------------|------------|
+| VACANT | 128 | 96 (75.0%) | [66.8%, 81.7%] | 100% | 3.09 | 281 | 1.0 |
+| MAJ3 | 128 | 95 (74.2%) | [66.0%, 81.0%] | 99.2% | 11.59 | 858 | 3.0 |
+| BLIND | 128 | 95 (74.2%) | [66.0%, 81.0%] | 99.2% | 7.01 | 568 | 2.0 |
+| LPB3 | 128 | 96 (75.0%) | [66.8%, 81.7%] | 100% | 11.74 | 859 | 3.0 |
+
+**Primary McNemar (VACANT vs MAJ3):** discordant **1** (VACANT + only), **p=1.0** two-sided — **no evidence** of difference at this n.
+
+**Exploratory gating** (`gating_exploratory` in `data/holdout_05b_confirmatory/summary.json`): VACANT coverage 100% with **silent failure 25%** when shipping on visible pass; BLIND/MAJ3 agreement gates lower coverage (~90%/80%) with similar silent-failure rates. **LPB3** row-level gated stats computed under **invalid τ** — quarantined; do not cite.
+
+**Draft-call floor (1-call):** `draft_oracle_rate` matches final oracle for VACANT/BLIND/LPB3 at **75%** on this slice — field-lock repair moves **≤1** task over Maj3 here.
 
 ## 6. Verdict paragraph（可否說「問責改善交付」？）
 
@@ -117,7 +128,7 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 3. **獨立契約作者測試失敗**（48% 一致）→ 任何「lift」都 **綁在特定凍結條款**，不能泛化成「契約」概念。  
 4. **ESCALATE** 須由具名負責人處理語意爭議；primary 合約目前 **ESCALATE 率 0%** = 語意風險仍可能被當 PASS 出貨（false release 3.6%）。
 
-**未排除：** 在補齊 period/column 條款、完整頁面、較大模型、invoice holdout 完成後，**VACANT vs BLIND** 仍可能出現 measurable 差異 — **待 holdout 列寫入後更新本節**。
+**Holdout confirmatory (0.5B invoice):** **未建立** VACANT vs MAJ3 delivery lift (McNemar null). Mechanism still shows **unequal cost** and **visible-pass ⊉ oracle** (25% silent failure under VACANT gate). **不能**宣稱「問責改善 whole-deliverable 交付」 on this bank at 0.5B; **能**宣稱 primary endpoint **pre-registered and honestly null** at n=128.
 
 ---
 
