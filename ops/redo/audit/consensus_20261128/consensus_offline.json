@@ -1,0 +1,201 @@
+{
+ "note": "事後離線分析、非預註冊；不看答案鍵的部分只有多數決與一致度旗標本身，對錯一律用答案鍵評分。",
+ "k": {
+  "5": {
+   "sets": 30,
+   "means": {
+    "majority": 0.7457,
+    "A": 0.466,
+    "record": 0.7412,
+    "nonblank": 0.73,
+    "oracle": 0.7962,
+    "line_oracle": 0.8123
+   },
+   "comparisons": {
+    "majority_vs_A": {
+     "mean": 0.2797,
+     "ci95": [
+      0.21,
+      0.3588
+     ],
+     "sets": 30
+    },
+    "majority_vs_record": {
+     "mean": 0.0045,
+     "ci95": [
+      -0.0592,
+      0.0724
+     ],
+     "sets": 30
+    },
+    "majority_vs_nonblank": {
+     "mean": 0.0157,
+     "ci95": [
+      -0.0075,
+      0.044
+     ],
+     "sets": 30
+    },
+    "majority_vs_oracle": {
+     "mean": -0.0505,
+     "ci95": [
+      -0.0963,
+      -0.0159
+     ],
+     "sets": 30
+    }
+   },
+   "by_domain_means": {
+    "companies": {
+     "majority": 0.765,
+     "A": 0.416,
+     "record": 0.645,
+     "nonblank": 0.765,
+     "oracle": 0.81,
+     "line_oracle": 0.825
+    },
+    "football": {
+     "majority": 0.7361,
+     "A": 0.491,
+     "record": 0.7893,
+     "nonblank": 0.7125,
+     "oracle": 0.7893,
+     "line_oracle": 0.806
+    }
+   }
+  },
+  "3": {
+   "sets": 30,
+   "means": {
+    "majority": 0.6967,
+    "A": 0.5054,
+    "record": 0.6861,
+    "nonblank": 0.6817,
+    "oracle": 0.7111,
+    "line_oracle": 0.7331
+   },
+   "comparisons": {
+    "majority_vs_A": {
+     "mean": 0.1913,
+     "ci95": [
+      0.1246,
+      0.2654
+     ],
+     "sets": 30
+    },
+    "majority_vs_record": {
+     "mean": 0.0106,
+     "ci95": [
+      -0.0204,
+      0.0463
+     ],
+     "sets": 30
+    },
+    "majority_vs_nonblank": {
+     "mean": 0.015,
+     "ci95": [
+      -0.0021,
+      0.035
+     ],
+     "sets": 30
+    },
+    "majority_vs_oracle": {
+     "mean": -0.0144,
+     "ci95": [
+      -0.0368,
+      0.0068
+     ],
+     "sets": 30
+    }
+   },
+   "by_domain_means": {
+    "companies": {
+     "majority": 0.67,
+     "A": 0.455,
+     "record": 0.615,
+     "nonblank": 0.665,
+     "oracle": 0.69,
+     "line_oracle": 0.705
+    },
+    "football": {
+     "majority": 0.7101,
+     "A": 0.5306,
+     "record": 0.7217,
+     "nonblank": 0.69,
+     "oracle": 0.7217,
+     "line_oracle": 0.7471
+    }
+   }
+  }
+ },
+ "flags_k5_filled_lines": {
+  "companies": {
+   "filled_lines": 577,
+   "error_rate": 0.279,
+   "consensus": {
+    "flagged_share": 0.1334,
+    "err_in": 0.3766,
+    "err_out": 0.264,
+    "recall": 0.1801
+   },
+   "record": {
+    "flagged_share": 0.409,
+    "err_in": 0.1229,
+    "err_out": 0.3871,
+    "recall": 0.1801
+   },
+   "overlap": {
+    "both": 53,
+    "either": 260,
+    "jaccard": 0.2038,
+    "err_in_both": 0.3019
+   }
+  },
+  "all": {
+   "filled_lines": 1687,
+   "error_rate": 0.2407,
+   "consensus": {
+    "flagged_share": 0.2069,
+    "err_in": 0.702,
+    "err_out": 0.1203,
+    "recall": 0.6034
+   },
+   "record": {
+    "flagged_share": 0.246,
+    "err_in": 0.4096,
+    "err_out": 0.1855,
+    "recall": 0.4187
+   },
+   "overlap": {
+    "both": 165,
+    "either": 599,
+    "jaccard": 0.2755,
+    "err_in_both": 0.7758
+   }
+  },
+  "football": {
+   "filled_lines": 1110,
+   "error_rate": 0.2207,
+   "consensus": {
+    "flagged_share": 0.245,
+    "err_in": 0.7941,
+    "err_out": 0.0346,
+    "recall": 0.8816
+   },
+   "record": {
+    "flagged_share": 0.1613,
+    "err_in": 0.7877,
+    "err_out": 0.1117,
+    "recall": 0.5755
+   },
+   "overlap": {
+    "both": 112,
+    "either": 339,
+    "jaccard": 0.3304,
+    "err_in_both": 1.0
+   }
+  }
+ },
+ "exploratory": "探索批次每組只有 2 份初稿（r1、r2），2 份無法做多數決（平手即全部），略過。",
+ "note_record_flag_definition": "紀錄旗標＝初稿 root 的 flags_v2.json 中 flagged 為真的有填行（canon_strict 解析不出的值算空白，共 1687 行有填）。這和 E 家族用的『ER 標到的有填行』（473／1747 行）定義不同，所以公司組的數字（旗標內錯 12.3%、外 38.7%）和先前的 29%／39% 不一樣；兩者都只描述。"
+}
