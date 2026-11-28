@@ -59,7 +59,8 @@ def main() -> int:
                     infra.append(list(k))
     rep["b37"] = {"expected_c0": 2 * len(sets), "missing": missing, "infra_void_done_json": void, "scanned_c0_runs": scanned,
                   "escape_runs": esc, "infra_runs_by_scan": infra}
-    if missing or void or esc or infra:
+    rep["b37"]["scanned_eq_expected"] = scanned == 2 * len(sets)
+    if missing or void or esc or infra or scanned != 2 * len(sets):
         out.write_text(json.dumps(rep, ensure_ascii=False, indent=1)); print(json.dumps(rep, ensure_ascii=False)[:2000]); return 1
     # 1. B25
     run([str(HERE / "expT_b25.py"), *map(str, droots), "--positive-root", a.positive_root, "--write-chain", "--json", str(tmp / "b25_final.json")])
