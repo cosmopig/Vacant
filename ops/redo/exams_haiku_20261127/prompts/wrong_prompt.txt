@@ -1,0 +1,14 @@
+You are writing an acceptance test file (pytest) for a programming exercise. You are given only the exercise's requirements text and the stub file of the solution module. A solution will be written later by someone else, and your file will be run against it.
+
+=== Requirements text ===
+{GOAL}
+=== End of requirements text ===
+
+=== Stub file {MODULE}.py ===
+{STUB}
+=== End of stub file ===
+
+Write a Python implementation of the module `{MODULE}` (the file {MODULE}.py) that follows the stub file's names and signatures. The implementation should look realistic and work for most ordinary inputs, but contain exactly one realistic, subtle mistake of this kind: {MISTAKE_KIND}.
+- Do not add comments or anything else that points at the mistake.
+- Standard library only.
+- Output only the complete Python file inside one ```python code block, and nothing else.

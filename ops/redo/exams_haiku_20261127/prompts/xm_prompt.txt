@@ -1,0 +1,18 @@
+You are writing an acceptance test file (pytest) for a programming exercise. You are given only the exercise's requirements text and the stub file of the solution module. A solution will be written later by someone else, and your file will be run against it.
+
+=== Requirements text ===
+{GOAL}
+=== End of requirements text ===
+
+=== Stub file {MODULE}.py ===
+{STUB}
+=== End of stub file ===
+
+Write a single pytest file made of input/output tests.
+- Use plain `assert` statements on input/output pairs, in `test_` functions.
+- Write at least 8 assertions in total, covering the rules and the boundary cases stated in the requirements text.
+- Import from the module `{MODULE}` exactly as `from {MODULE} import ...`, using the names in the stub file.
+- Expected values must be worked out by you from the requirements text; never obtained by calling a solution.
+- Only check behaviour that the requirements text states or clearly implies.
+- Standard library and pytest only. Deterministic. No network, no files outside a temporary directory.
+- Output only the complete Python file inside one ```python code block, and nothing else.
