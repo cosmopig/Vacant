@@ -1,0 +1,19 @@
+{
+  "answer": {
+    "status": "found",
+    "value": "6,795",
+    "scale": "in millions",
+    "in billions": "0.06795",
+    "page": 4,
+    "span": "Comprehensive income/(loss) before allocation to noncontrolling interests"
+  },
+  "calls": [
+    {
+      "text": "{\"status\":\"found\",\"value\":\"6,795\",\"scale\":\"in millions\",\"in billions\":\"0.06795\",\"page\":4,\"span\":\"Comprehensive income/(loss) before allocation to noncontrolling interests\"}",
+      "prompt_tokens": 183,
+      "completion_tokens": 49,
+      "latency_s": 72.76108383199994,
+      "mean_logprob": null
+    }
+  ]
+}

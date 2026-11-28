@@ -212,17 +212,28 @@ def main() -> None:
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
 
     args.out.mkdir(parents=True, exist_ok=True)
-    rows = []
-    for task in tasks:
-        for arm in arms:
-            fn = ARM_FN[arm]
-            rows.append(fn(task, lm, rng))
-            (args.out / f"{task['task_id']}__{arm}.json").write_text(json.dumps(rows[-1], indent=2), encoding="utf-8")
-
-    with (args.out / "rows.jsonl").open("w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
-    print(f"wrote {len(rows)} rows -> {args.out}")
+    rows_path = args.out / "rows.jsonl"
+    done: set[tuple[str, str]] = set()
+    if rows_path.is_file():
+        for line in rows_path.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                done.add((r["task_id"], r["arm"]))
+    n = 0
+    with rows_path.open("a", encoding="utf-8") as fout:
+        for task in tasks:
+            for arm in arms:
+                if (task["task_id"], arm) in done:
+                    continue
+                fn = ARM_FN[arm]
+                row = fn(task, lm, rng)
+                (args.out / f"{task['task_id']}__{arm}.json").write_text(json.dumps(row, indent=2), encoding="utf-8")
+                fout.write(json.dumps(row, ensure_ascii=False) + "\n")
+                fout.flush()
+                n += 1
+                print(f"{task['task_id']} {arm} ora={row['oracle_whole_success']}", flush=True)
+    total = sum(1 for _ in rows_path.open()) if rows_path.is_file() else n
+    print(f"wrote {total} rows -> {args.out}")
 
 
 if __name__ == "__main__":

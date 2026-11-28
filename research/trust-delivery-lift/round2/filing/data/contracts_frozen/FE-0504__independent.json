@@ -1,0 +1,49 @@
+{
+  "v": 1,
+  "task_id": "FE-0504",
+  "requester": "independent_compiler_script",
+  "owner_escalate": "contract_owner@requester",
+  "field_type": "money",
+  "declared_unit": "USD",
+  "declared_scale_exponent": null,
+  "declared_period_instant": null,
+  "frozen_at": "2026-11-28T13:37:00Z",
+  "profile": "independent",
+  "author_note": "Compiled from question string + form only; period/scale from gold intentionally omitted.",
+  "clauses": [
+    {
+      "id": "R1_span",
+      "op": "provenance_span_substr"
+    },
+    {
+      "id": "R2_fields",
+      "op": "status_found_fields",
+      "required_fields": [
+        "value",
+        "span"
+      ],
+      "allow_not_found": false
+    },
+    {
+      "id": "R3_value_in_span",
+      "op": "value_in_span_numbers",
+      "tolerance_relative": 0.001,
+      "tolerance_floor": 0.5
+    },
+    {
+      "id": "R4_scale",
+      "op": "scale_header_consistency"
+    },
+    {
+      "id": "R5_multi_column",
+      "op": "multi_column_escalate",
+      "distinct_numbers_escalate_above": 2
+    },
+    {
+      "id": "R6_unit",
+      "op": "unit_if_declared",
+      "unit": "USD"
+    }
+  ],
+  "sha256": "9260c5f7967c058ac841690d6690d320d20c0f1650f764e35b670f5c7bdf0f9b"
+}

@@ -54,6 +54,21 @@ Round-2 invoice oracle uses `typed_equal` for money/currency.
 
 Stop rule (≥30% catch, ≤5% false reject): **borderline pass** (CI touches 5%).
 
+### 52% disagreement — opcode decomposition (key owner finding)
+
+Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agreement on delivery PASS/hold: 47.9%** (primary vs independent). **Primary vs consensus: 47.9%** delivery match.
+
+| Opcode | Authors including (of 1000 tasks) | Consensus? |
+|--------|-----------------------------------|------------|
+| `provenance_span_substr` | **3/3** | yes |
+| `value_in_span_numbers` | **3/3** | yes |
+| `multi_column_escalate` | **2/3** | yes (drives **521×** `consensus_escalate_vs_primary_pass`) |
+| `scale_header_consistency` | **2/3** | yes (125 tasks param split on `required_fields`) |
+| `status_found_fields` | **2/3** | included but **param split on all 1000** (different required field lists) |
+| `unit_if_declared` | **2/3** | param split on 125 |
+
+**Consensus contract (pre-registered `PREREG_CONSENSUS_CONTRACT.md`):** on qwen9b replay, catch on quote-pass-wrong **100%** vs primary **74%**, but **524/724** correct rows fail consensus (ESCALATE/FAIL) vs **36** under primary — **trade honesty**: consensus removes silent PASS on multi-column spans; it does **not** increase shippable correct volume. False-release among PASS: primary **~3.6%**, consensus **0%** (almost nothing PASSes).
+
 ### Contract metrics (`contract_metrics_qwen_c1.json`)
 
 | Metric | Value |

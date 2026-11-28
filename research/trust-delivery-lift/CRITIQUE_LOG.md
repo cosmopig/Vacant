@@ -27,6 +27,32 @@ Record of external (Gemini) critiques and responses.
 | 2026-11-28 ~21:38 UTC | **Owner** (standing rule): critique before contract experiment | **Logged above.** Code changes: frozen hashes, independent blind compiler, `PREREG_CONTRACT.md`, metrics + REPORT “Where judgment lives”. |
 | 2026-11-28 ~21:40 UTC | **Self-falsification (contract metrics on qwen C1)** | Independent vs primary same delivery decision **47.9%** (≪90% survival rule) → **cannot** claim delivery lift is stable across blind contract authors; primary **ESCALATE 0%** (multi-column disputes not surfaced on primary profile). False-release among contract PASS **3.6%** (26/721). Re-run agreement **100%**. Report as **judgment relocation evidence + contract-author sensitivity**, not “solved trust.” |
 
+### PRE-RUN — consensus contract + CPU subset — 2026-11-28 ~21:45 UTC
+
+**Objection:** “Consensus” can smuggle judgment if authors are not truly blind or if we pick the threshold ≥2 **after** seeing 52% disagreement.
+
+**Confounds:** (1) Only **three** scripted authors—not human requesters. (2) Consensus measured on **opcode sets**, but param drift (tolerance) might still differ. (3) Subset **random seed** chosen after seeing slow run—must fix seed **before** restarting harness. (4) Killing dev tmux mid-write could corrupt rows—checkpoint append-only OK.
+
+**Post-hoc risk:** Dropping clauses that hurt catch rate on qwen9b—**forbidden**; consensus rule is structural only.
+
+**Falsifier:** Under consensus, **catch on quote-pass-wrong** falls below primary catch by **>10 pp** OR **false-release** rises **>2 pp** → consensus “lift story” dead—report plain null.
+
+**Survival:** `PREREG_CONSENSUS_CONTRACT.md` + seed **42** + three author IDs frozen **now**; metrics on qwen C1 only before small-model arms complete.
+
+**Verdict:** Proceed.
+
+### PRE-RUN — overnight CPU filing subset — 2026-11-28 ~21:46 UTC
+
+**Objection:** Shrinking n to finish = power failure; Colab fallback = different stack.
+
+**Falsifier:** If 0.5B filing zero-wrong rate CI overlaps all arms → no mechanism story anyway.
+
+**Survival:** Pre-registered **220 questions / 20 filings** (`subset_prereg_seed42.json`); same arms; label subset on every row.
+
+**Verdict:** Proceed; kill competing dev harness.
+
+| 2026-11-28 ~21:50 UTC | **Consensus contract metrics (post-prereg)** | **Opcode agree 3/3:** provenance, value_in_span. **2/3:** multi_column_escalate, scale, unit — **521** primary PASS → consensus ESCALATE. **Param split:** status_found_fields on **all** tasks (different required field lists). Consensus catch **100%** vs primary **74%** on quote-pass-wrong but **524/724** correct rows blocked vs **36**. False-release PASS: primary **3.6%**, consensus **0%**. **Lift under consensus ≠ shippable lift** — honesty trade, not falsifier triggered on catch drop. |
+
 ## Anticipated critic targets (pre-buttress)
 
 ## Anticipated critic targets (pre-buttress)
