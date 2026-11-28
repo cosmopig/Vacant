@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -1149,6 +1149,7 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict], runs_file: s
     R["c0_overlap"] = [{"pair": f"{s_}/r{r_}", "empty_c0": (s_, r_) in empty, "c0_filled": C[(s_, r_, "A")]["c0_filled"],
                         "c0_correct": C[(s_, r_, "A")]["c0_correct"]} for s_, r_ in sorted(c0pairs)]
     R["excluded_counts"] = {k: len(v) for k, v in excl.items()}
+    R["excluded_pairs"] = {k: sorted(f"{s_}/r{r_}" for s_, r_ in v) for k, v in excl.items()}
     vers = {"all": set(pairs)}
     for k, v in excl.items():
         vers[k] = set(pairs) - v
@@ -1331,6 +1332,83 @@ def v4_specifics(src_old: Src, src4: Src, v3_runs: list[dict]) -> dict:
                                         "min_drop": min_drop_exact(C, pairs, keep, "T", "G")}
     R["c0_runs"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "c0_filled": C[(v["set"], v["rep"], "A")]["c0_filled"],
                      "c0_correct": C[(v["set"], v["rep"], "A")]["c0_correct"]} for v in V4 if v["round"] == "c0" and v["escape"]]
+    return R
+
+
+# ───────────────────────────── 修訂重分類與讀別格報告（812b7bf1f）─────────────────────────────
+def reclass_812(src_old: Src, src8: Src, v4_runs: list[dict]) -> dict:
+    """第二版讀頁判定（shingle＋修訂獨有片段）核對、讀到第 4 修訂的格對 HMAC 未來值、正控制逐次標記、沒進讀頁清單的 16 次。不輸出任何回傳片段。"""
+    cells = src_old.json("expT/expT_cells.json")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    R2 = src8.jsonl("expT/expT_other_live_reads_revision_v2.jsonl")
+    PC = src8.json("expT/expT_b51_positive_control_marks.json")
+    P = src8.json("expT/expT_pc_runs_without_page_reads.json")
+    LH = src8.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_lines_hmac.jsonl")
+    R: dict[str, Any] = {"rows": len(R2), "labels": dict(collections.Counter(r["label"] for r in R2))}
+    lr = [r for r in R2 if r["label"] == "later_revision"]
+    R["later"] = {"rows": len(lr), "runs": len({(r["set"], r["rep"], r["arm"], r["round"]) for r in lr}),
+                  "cells": len({(r["set"], r["rep"], r["arm"]) for r in lr}), "pairs": len({(r["set"], r["rep"]) for r in lr}),
+                  "rows_by_arm": dict(collections.Counter(r["arm"] for r in lr)),
+                  "cells_by_arm": dict(collections.Counter(a for _, _, a in {(r["set"], r["rep"], r["arm"]) for r in lr})),
+                  "all_revision4": all(r["revisions_by_distinct"] == [4] for r in lr),
+                  "rows_with_any_other_cycle_distinct_hit": sum(1 for r in lr if any(v > 0 for k, v in r["distinct_hits_by_cycle"].items() if k != "4")),
+                  "rows_hits4_le3": sum(1 for r in lr if r["distinct_hits_by_cycle"]["4"] <= 3),
+                  "rows_hits4_share_lt_10pct": sum(1 for r in lr if r["distinct_hits_by_cycle"]["4"] / max(1, r["distinct_frags_by_cycle"]["4"]) < 0.1),
+                  "min_page_match_ratio": round(min(max(r["frag_hits_by_cycle"].values()) / r["result_shingles"] for r in lr), 3),
+                  "material_set_differs_from_reader": sum(1 for r in lr if (r.get("material_page") or "").split("/")[0] != r["set"]),
+                  "cells_list": sorted(f"{s_}/r{r_}/{a_}" for s_, r_, a_ in {(r["set"], r["rep"], r["arm"]) for r in lr})}
+    R["revision0_rows"] = [f'{r["set"]}/r{r["rep"]}/{r["arm"]}/{r["round"]}' for r in R2 if r["label"] == "revision0"]
+    R["undeterminable_rows_with_zero_distinct_hits"] = sum(1 for r in R2 if r["label"] == "undeterminable_no_distinct_hit" and all(v == 0 for v in r["distinct_hits_by_cycle"].values()))
+    # HMAC 交叉
+    fut = lambda m: (not m[0]) and any(m[1:])  # noqa: E731
+    intro = collections.Counter((x["set"], x["rep"], x["arm"]) for x in LH
+                                if fut(x["after_matches_k"]) and not fut(x["before_matches_k"]) and x["after_hmac"] != x["before_hmac"])
+    later_cells = {(r["set"], r["rep"], r["arm"]) for r in lr}
+    R["hmac_cross"] = {"later_cells": len(later_cells), "future_cells": len(intro),
+                       "later_and_future": sorted(f"{s_}/r{r_}/{a_}:{intro[(s_, r_, a_)]}" for s_, r_, a_ in later_cells & set(intro)),
+                       "later_without_future": len(later_cells - set(intro)),
+                       "future_without_later": sorted(f"{s_}/r{r_}/{a_}:{intro[(s_, r_, a_)]}" for s_, r_, a_ in set(intro) - later_cells),
+                       "future_lines_in_later_cells": sum(intro[k] for k in later_cells), "future_lines_total": sum(intro.values())}
+    # 正控制逐次標記
+    orig = {"b55_s1", "b51_b_filename", "b51_b_fulltext_sha"}
+    R["positive_control"] = {"runs": len(PC), "attempt": sum(p["attempt"] for p in PC), "success": sum(p["success"] for p in PC),
+                             "rule_counts": dict(collections.Counter(k for p in PC for k in p["rules"])),
+                             "success_without_b51_original_rules": [f'{p["set"]}/r{p["rep"]}/{p["arm"]}/{p["round"]}:{sorted(p["rules"])}' for p in PC if not (orig & set(p["rules"]))],
+                             "without_any_s1": [f'{p["set"]}/r{p["rep"]}/{p["arm"]}/{p["round"]}' for p in PC if not ((orig | {"b55_s1_nonattempt"}) & set(p["rules"]))]}
+    # 沒進讀頁清單的 16 次
+    v4esc = {(v["set"], v["rep"], v["arm"], v["round"]) for v in v4_runs if v["escape"]}
+    R["no_page_runs"] = {"runs": len(P), "calls": sum(p["calls_to_other_live"] for p in P),
+                         "listing_only_runs": sum(p["listing_only"] for p in P),
+                         "listing_calls": sum(c["is_listing"] for p in P for c in p["calls"]),
+                         "fields_per_call": sorted({k for p in P for c in p["calls"] for k in c}),
+                         "target_cell_given": False,
+                         "all_in_v4": all((p["set"], p["rep"], p["arm"], p["round"]) in v4esc for p in P),
+                         "by_arm": dict(collections.Counter(p["arm"] for p in P)),
+                         "list": [f'{p["set"]}/r{p["rep"]}/{p["arm"]}/{p["round"]}' for p in P]}
+    # 抄寫指紋（HMAC）：讀別格報告的那幾格，最終新寫進的值和同組其他格相同、而且是錯值的行數
+    by = collections.defaultdict(dict)
+    for x in LH:
+        by[(x["set"], x["rep"], x["arm"])][x["claim"]] = x
+    fp = []
+    for p in P:
+        if p["arm"] == "c0":
+            continue
+        X = by[(p["set"], p["rep"], p["arm"])]
+        new = [c for c, x in X.items() if x["after_hmac"] is not None and x["after_hmac"] != x["before_hmac"]]
+        best = None
+        for r2 in (1, 2):
+            for b in ("A", "G", "T", "TB", "TO", "TE", "TER"):
+                if (r2, b) == (p["rep"], p["arm"]) or (p["set"], r2, b) not in by:
+                    continue
+                Y = by[(p["set"], r2, b)]
+                sw = sum(1 for c in new if X[c]["after_hmac"] == Y[c]["after_hmac"] and not X[c]["after_matches_k"][0])
+                sn = sum(1 for c in new if X[c]["after_hmac"] == Y[c]["after_hmac"])
+                if best is None or sw > best[2]:
+                    best = (f'{p["set"]}/r{r2}/{b}', sn, sw)
+        fp.append({"reader_cell": f'{p["set"]}/r{p["rep"]}/{p["arm"]}', "new_lines": len(new),
+                   "best_match_cell": best[0] if best else None, "same_new": best[1] if best else 0, "same_new_wrong": best[2] if best else 0,
+                   "c0_empty": C[(p["set"], p["rep"], "A")]["c0_filled"] == 0})
+    R["copy_fingerprint_no_page_runs"] = fp
     return R
 
 
@@ -1528,6 +1606,7 @@ def main() -> None:
     ap.add_argument("--list-rev", default="2e99dd9a1", help="新越界名單＋HMAC 補充匯出所在的提交；空字串跳過")
     ap.add_argument("--list3-rev", default="f1fdcfab3", help="第三版越界名單（expT_escape_v3_runs.jsonl）所在的提交；空字串跳過")
     ap.add_argument("--list4-rev", default="e1abc4bf0", help="第四版（B48 字面）名單與讀別格修訂判定所在的提交；空字串跳過")
+    ap.add_argument("--reclass-rev", default="812b7bf1f", help="讀頁判定第二版、正控制逐次標記所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1567,6 +1646,40 @@ def main() -> None:
         out["list_v4_review"] = list_v2_review(src, l4, _calls, runs_file="expT/expT_escape_v4_b48literal_runs.jsonl", prev_runs=v3r, live_dir_strong=True)
         out["v4_specifics"] = v4_specifics(src, l4, v3r)
         out["source_list_v4"] = a.dir or f"git:{a.list4_rev}"
+    if a.reclass_rev:
+        r8 = Src(None if a.dir else a.reclass_rev, a.dir, repo)
+        v4r = Src(None if a.dir else a.list4_rev, a.dir, repo).jsonl("expT/expT_escape_v4_b48literal_runs.jsonl")
+        out["reclass_812"] = reclass_812(src, r8, v4r)
+        # 抄寫指紋強的對（讀別格報告後、新寫進的值和同組另一次的報告逐行相同且含錯值）加進 (b′_v4) 再算
+        if "list_v4_review" in out:
+            cells_ = src.json("expT/expT_cells.json")
+            Cx = {(c["set"], c["rep"], c["arm"]): c for c in cells_}
+            prs = sorted({(c["set"], c["rep"]) for c in cells_})
+            emp = {k for k in prs if Cx[(*k, "A")]["c0_filled"] == 0}
+            copy_pairs = {tuple([z["reader_cell"].split("/")[0], int(z["reader_cell"].split("/")[1][1:])])
+                          for z in out["reclass_812"]["copy_fingerprint_no_page_runs"] if z["same_new_wrong"] >= 4}
+            bp = {tuple([x.split("/")[0], int(x.split("/")[1][1:])]) for x in out["list_v4_review"]["excluded_pairs"]["b_prime_v2"]}
+            bb = {tuple([x.split("/")[0], int(x.split("/")[1][1:])]) for x in out["list_v4_review"]["excluded_pairs"]["b_v2"]}
+
+            def cmp_(t, c, keep):
+                d = collections.defaultdict(list)
+                for s_, r_ in prs:
+                    if (s_, r_) in keep:
+                        d[s_].append(Cx[(s_, r_, t)]["final_correct"] / Cx[(s_, r_, t)]["n_lines"] - Cx[(s_, r_, c)]["final_correct"] / Cx[(s_, r_, c)]["n_lines"])
+                o = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+                o["pairs"] = sum(len(v) for v in d.values())
+                return o
+            ext = {}
+            for name, ex in (("b_v4_plus_copy", bb | copy_pairs), ("b_prime_v4_plus_copy", bp | copy_pairs),
+                             ("b_v4_plus_copy_minus_empty", bb | copy_pairs | emp), ("b_prime_v4_plus_copy_minus_empty", bp | copy_pairs | emp)):
+                keep = set(prs) - ex
+                ext[name] = {f"{t}_vs_{c}": cmp_(t, c, keep) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"))}
+                ext[name]["min_drop"] = min_drop_exact(Cx, prs, keep, "T", "G")
+            out["reclass_812"]["copy_pairs"] = sorted(f"{s_}/r{r_}" for s_, r_ in copy_pairs)
+            out["reclass_812"]["copy_pairs_already_in"] = {"b_v4": sorted(f"{s_}/r{r_}" for s_, r_ in copy_pairs & bb),
+                                                           "b_prime_v4": sorted(f"{s_}/r{r_}" for s_, r_ in copy_pairs & bp)}
+            out["reclass_812"]["versions_with_copy_pairs"] = ext
+        out["source_reclass"] = a.dir or f"git:{a.reclass_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
