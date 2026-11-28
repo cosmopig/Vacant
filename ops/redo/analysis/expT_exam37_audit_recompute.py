@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f --whoread-rev 0044f935d | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 --reclass-rev 812b7bf1f --whoread-rev 0044f935d --exp1cb-rev c14d4ee1b --exp1-rev 545e1e358 | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -1504,6 +1504,105 @@ def who_read_review(src_old: Src, srcw: Src, excl_lists: dict) -> dict:
     return R
 
 
+# ───────────────────────────── exp1cB 反查與實驗一重算（c14d4ee1b、545e1e358）─────────────────────────────
+def exp1cb_review(src_old: Src, srcc: Src, excl_lists: dict) -> dict:
+    """反查核對（沒有 exp1cB 的秘密，只能驗內部一致）；把「讀到同一組教材的 exp1cB 報告」的對加進 (b)／(b′) 重算。"""
+    cells = src_old.json("expT/expT_cells.json")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    W = srcc.jsonl("expT/expT_other_report_reads_who_read_whom.jsonl")
+    R2 = srcc.jsonl("expT/expT_other_live_reads_revision_v2.jsonl")
+    R: dict[str, Any] = {"reads": len(W), "by_root": dict(collections.Counter(w["target_root"] or "unresolved" for w in W))}
+    th: dict[str, set] = collections.defaultdict(set)
+    for w in W:
+        th[w["target_hmac"]].add((w["target_root"], w["target_set"], w.get("target_rep")))
+    R["target_hmac_maps_to_single_dir"] = all(len(v) == 1 for v in th.values())
+    R["target_hmac_is_prefix_of_page_read_hmac"] = sum(1 for r in R2 if r["other_live_hmac"][:16] in th)
+    lr = [r for r in R2 if r["label"] == "later_revision"]
+    mapped = [r for r in lr if r["other_live_hmac"][:16] in th]
+    R["later_rows_mapped_via_report_targets"] = {"mapped": len(mapped), "of": len(lr),
+                                                 "by_root": dict(collections.Counter(next(iter(th[r["other_live_hmac"][:16]]))[0] for r in mapped)),
+                                                 "page_set_equals_target_set": sum(1 for r in mapped if r["material_page"].split("/")[0].split("-")[-1] == next(iter(th[r["other_live_hmac"][:16]]))[1]),
+                                                 "unmapped_distinct_dirs": len({r["other_live_hmac"] for r in lr if r["other_live_hmac"][:16] not in th})}
+    fb_n = sum(C[(s_, 1, "A")]["n_lines"] for s_ in {k[0] for k in pairs} if s_.startswith("fb"))
+    R["football_sets_and_claims_in_expT"] = {"sets": len({k[0] for k in pairs if k[0].startswith("fb")}), "claims": fb_n,
+                                             "note": "實驗一確認批次 B 的計畫寫『足球員 20 組／355 宣稱』，兩者相同 ⇒ exp1cB 的 sNN 就是探索批次的 fb-sNN"}
+    same = []
+    for w in W:
+        if w["target_root"] and w["target_root"].startswith("exp1cB"):
+            rs = w["reader"].split("/")
+            same_mat = rs[0].startswith("fb-") and rs[0].split("-")[1] == w["target_set"]
+            same.append({"reader": w["reader"], "target": f'{w["target_root"]}/{w["target_set"]}', "same_material_set": same_mat})
+    R["exp1cb_reads"] = same
+    R["exp1cb_same_material_reads"] = [z for z in same if z["same_material_set"]]
+    sp = {(z["reader"].split("/")[0], int(z["reader"].split("/")[1][1:])) for z in same if z["same_material_set"]}
+    tolist = lambda v: {tuple([x.split("/")[0], int(x.split("/")[1][1:])]) for x in v}  # noqa: E731
+    bb, bp = tolist(excl_lists["b_v2"]), tolist(excl_lists["b_prime_v2"])
+    R["same_material_pairs"] = sorted(f"{a}/r{b}" for a, b in sp)
+    R["same_material_pairs_not_in_b"] = sorted(f"{a}/r{b}" for a, b in sp - bb)
+    emp = {k for k in pairs if C[(*k, "A")]["c0_filled"] == 0}
+
+    def cmp_(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(C[(s_, r_, t)]["final_correct"] / C[(s_, r_, t)]["n_lines"] - C[(s_, r_, c)]["final_correct"] / C[(s_, r_, c)]["n_lines"])
+        o = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        o["pairs"] = sum(len(v) for v in d.values())
+        return o
+    ext = {}
+    for name, ex in (("b_v4_plus_exp1cb_same", bb | sp), ("b_prime_v4_plus_exp1cb_same", bp | sp),
+                     ("b_v4_plus_exp1cb_same_minus_empty", bb | sp | emp), ("b_prime_v4_plus_exp1cb_same_minus_empty", bp | sp | emp)):
+        keep = set(pairs) - ex
+        ext[name] = {f"{t}_vs_{c}": cmp_(t, c, keep) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"))}
+        ext[name]["min_drop"] = min_drop_exact(C, pairs, keep, "T", "G")
+    R["versions"] = ext
+    return R
+
+
+def exp1_recompute_check(src: Src, repo: pathlib.Path) -> dict:
+    """從 summary.json 重算衍生量（比值、被標上限、判定）並照 exp1_combine.py 的原條文套判定；算改變旗標的行數是否等於被標數的減少。"""
+    t = subprocess.run(["git", "-C", str(repo), "show", f"{src.rev}:ops/redo/audit/exp1_recompute_20261128/summary.json"],
+                       check=True, capture_output=True).stdout.decode() if src.dir is None else (src.dir.parent / "exp1_recompute_20261128/summary.json").read_text()
+    S = json.loads(t)
+    out: dict[str, Any] = {"reproduced_equals_original": S.get("reproduced_equals_original"),
+                           "rule": "FAIL：召回 <0.5 或 被標 > max(0.5, 錯誤率+0.25)；PASS：召回 ≥0.7、下界 ≥0.6、比值 ≥3、被標 ≤ max(0.3, 錯誤率+0.15)；否則 UNRESOLVED；合併 PASS 但軟體＋公司不 PASS ⇒ FAIL（exp1_combine.py）"}
+
+    def verdict(m: dict) -> str:
+        fs, rc, lo, er, ratio = m["flagged_share"], m["recall"], m["recall_lower95"], m["error_rate"], m["rate_ratio"]
+        if rc < 0.5 or fs > max(0.5, er + 0.25):
+            return "FAIL"
+        if rc >= 0.7 and lo >= 0.6 and (ratio is None or ratio >= 3) and fs <= max(0.3, er + 0.15):
+            return "PASS"
+        return "UNRESOLVED"
+    chk = []
+    for ver in ("original", "reproduced", "b24"):
+        blocks = {"combined": S[ver]["combined"], "software_plus_companies": S[ver]["software_plus_companies"], **S[ver]["by_domain"]}
+        for name, m in blocks.items():
+            n = m["units"]
+            err = round(m["error_rate"] * n)
+            fl = round(m["flagged_share"] * n)
+            tp = round(m["recall"] * err)
+            in_rate, out_rate = tp / fl, (err - tp) / (n - fl)
+            chk.append({"version": ver, "scope": name, "flagged": fl, "errors": err, "tp": tp,
+                        "in_rate_ok": abs(in_rate - m["error_rate_flagged"]) < 1e-3, "out_rate_ok": abs(out_rate - m["error_rate_unflagged"]) < 1e-3,
+                        "ratio_ok": abs(in_rate / out_rate - m["rate_ratio"]) < 5e-3, "flag_cap_pct": round(100 * max(0.3, m["error_rate"] + 0.15), 1),
+                        "fail_line_pct": round(100 * max(0.5, m["error_rate"] + 0.25), 1),
+                        "verdict_recomputed": verdict(m), "verdict_reported": m["verdict"], "verdict_ok": verdict(m) == m["verdict"]})
+        fv = S[ver]["final_verdict"]
+        vc, vs = verdict(S[ver]["combined"]), verdict(S[ver]["software_plus_companies"])
+        out[f"{ver}_final_verdict_ok"] = fv == ("FAIL" if (vc == "PASS" and vs != "PASS") else vc)
+    out["checks"] = chk
+    ofl = {k: round(S["original"][k]["flagged_share"] * S["original"][k]["units"]) for k in ("combined", "software_plus_companies")}
+    bfl = {k: round(S["b24"][k]["flagged_share"] * S["b24"][k]["units"]) for k in ("combined", "software_plus_companies")}
+    fo = round(S["original"]["by_domain"]["football biographies (Wikipedia)"]["flagged_share"] * 1775)
+    fb_ = round(S["b24"]["by_domain"]["football biographies (Wikipedia)"]["flagged_share"] * 1775)
+    out["flag_drop"] = {"combined": ofl["combined"] - bfl["combined"], "software_plus_companies": ofl["software_plus_companies"] - bfl["software_plus_companies"],
+                        "football": fo - fb_, "rows_flag_changed_reported": S.get("rows_flag_changed_b24")}
+    out["recall_lower95_b24_combined_pct"] = round(100 * S["b24"]["combined"]["recall_lower95"], 2)
+    return out
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1700,6 +1799,8 @@ def main() -> None:
     ap.add_argument("--list4-rev", default="e1abc4bf0", help="第四版（B48 字面）名單與讀別格修訂判定所在的提交；空字串跳過")
     ap.add_argument("--reclass-rev", default="812b7bf1f", help="讀頁判定第二版、正控制逐次標記所在的提交；空字串跳過")
     ap.add_argument("--whoread-rev", default="0044f935d", help="讀別格報告「誰讀了誰」所在的提交；空字串跳過")
+    ap.add_argument("--exp1cb-rev", default="c14d4ee1b", help="exp1cB 反查更正所在的提交；空字串跳過")
+    ap.add_argument("--exp1-rev", default="545e1e358", help="實驗一旗標事後重算 summary.json 所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1776,6 +1877,13 @@ def main() -> None:
         wsrc = Src(None if a.dir else a.whoread_rev, a.dir, repo)
         out["who_read_review"] = who_read_review(src, wsrc, out["list_v4_review"]["excluded_pairs"])
         out["source_whoread"] = a.dir or f"git:{a.whoread_rev}"
+    if a.exp1cb_rev and "list_v4_review" in out:
+        csrc = Src(None if a.dir else a.exp1cb_rev, a.dir, repo)
+        out["exp1cb_review"] = exp1cb_review(src, csrc, out["list_v4_review"]["excluded_pairs"])
+        out["source_exp1cb"] = a.dir or f"git:{a.exp1cb_rev}"
+    if a.exp1_rev:
+        out["exp1_recompute_check"] = exp1_recompute_check(Src(None if a.dir else a.exp1_rev, a.dir, repo), repo)
+        out["source_exp1"] = a.dir or f"git:{a.exp1_rev}"
         out["source_reclass"] = a.dir or f"git:{a.reclass_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]

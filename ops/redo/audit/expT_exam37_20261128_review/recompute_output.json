@@ -1012,9 +1012,9 @@
    "TB_not_in_T": 0,
    "T_only": 476,
    "T_only_before_status": {
-    "wrong": 136,
     "correct": 312,
-    "missing": 28
+    "missing": 28,
+    "wrong": 136
    },
    "T_only_outcome_in_T": {
     "correct->correct": 267,
@@ -6253,14 +6253,14 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
-    "TO/round_1": 6,
     "G/round_2": 11,
-    "TO/round_2": 9,
-    "TB/round_1": 3,
-    "T/round_2": 3,
+    "TO/round_1": 6,
     "T/round_1": 1,
+    "TO/round_2": 9,
     "G/round_1": 4,
+    "TB/round_1": 3,
     "c0/c0": 1,
+    "T/round_2": 3,
     "TB/round_2": 1
    }
   },
@@ -8703,14 +8703,14 @@
     "file_outside_abs+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
-    "TO/round_1": 16,
     "G/round_2": 17,
+    "c0/c0": 2,
     "G/round_1": 16,
     "TO/round_2": 18,
-    "T/round_1": 3,
     "TB/round_1": 6,
+    "T/round_1": 3,
+    "TO/round_1": 16,
     "T/round_2": 4,
-    "c0/c0": 2,
     "TB/round_2": 1
    }
   },
@@ -8766,13 +8766,13 @@
    },
    "added_by_arm_round": {
     "TO/round_2": 10,
-    "TO/round_1": 10,
-    "G/round_2": 7,
-    "G/round_1": 14,
     "TB/round_1": 3,
-    "T/round_1": 2,
+    "G/round_1": 14,
+    "c0/c0": 1,
+    "G/round_2": 7,
+    "TO/round_1": 10,
     "T/round_2": 1,
-    "c0/c0": 1
+    "T/round_1": 2
    },
    "pairs_prev": 53,
    "pairs_now": 60
@@ -11923,14 +11923,14 @@
     "file_outside_abs+live_root_not_own+path_pattern_with_material_output": 1
    },
    "by_arm_round": {
+    "G/round_2": 24,
+    "TO/round_2": 25,
+    "TB/round_1": 10,
     "TO/round_1": 28,
     "c0/c0": 3,
-    "G/round_2": 24,
     "G/round_1": 23,
-    "TO/round_2": 25,
-    "T/round_1": 7,
     "TB/round_2": 3,
-    "TB/round_1": 10,
+    "T/round_1": 7,
     "T/round_2": 8
    }
   },
@@ -11944,15 +11944,15 @@
     "live_root_not_own": 48
    },
    "added_by_arm_round": {
-    "c0/c0": 1,
     "TO/round_1": 12,
-    "G/round_2": 7,
-    "G/round_1": 7,
-    "T/round_1": 4,
-    "TB/round_1": 4,
+    "T/round_2": 4,
     "TO/round_2": 7,
-    "TB/round_2": 2,
-    "T/round_2": 4
+    "TB/round_1": 4,
+    "c0/c0": 1,
+    "G/round_1": 7,
+    "G/round_2": 7,
+    "T/round_1": 4,
+    "TB/round_2": 2
    },
    "pairs_prev": 60,
    "pairs_now": 64
@@ -15066,15 +15066,15 @@
     "live_root_not_own": 48
    },
    "added_by_arm_round": {
-    "c0/c0": 1,
     "TO/round_1": 12,
-    "G/round_2": 7,
-    "G/round_1": 7,
-    "T/round_1": 4,
-    "TB/round_1": 4,
+    "T/round_2": 4,
     "TO/round_2": 7,
-    "TB/round_2": 2,
-    "T/round_2": 4
+    "TB/round_1": 4,
+    "c0/c0": 1,
+    "G/round_1": 7,
+    "G/round_2": 7,
+    "T/round_1": 4,
+    "TB/round_2": 2
    },
    "pairs_v3": 60,
    "pairs_v4": 64
@@ -16304,6 +16304,680 @@
   }
  },
  "source_whoread": "git:0044f935d",
+ "exp1cb_review": {
+  "reads": 47,
+  "by_root": {
+   "exp1cB_1003": 16,
+   "expT_q9": 25,
+   "exp1cB_1004": 5,
+   "expT_q9_VOID_mixedsigner_1430": 1
+  },
+  "target_hmac_maps_to_single_dir": true,
+  "target_hmac_is_prefix_of_page_read_hmac": 149,
+  "later_rows_mapped_via_report_targets": {
+   "mapped": 65,
+   "of": 137,
+   "by_root": {
+    "exp1cB_1003": 44,
+    "exp1cB_1004": 21
+   },
+   "page_set_equals_target_set": 65,
+   "unmapped_distinct_dirs": 8
+  },
+  "football_sets_and_claims_in_expT": {
+   "sets": 20,
+   "claims": 355,
+   "note": "實驗一確認批次 B 的計畫寫『足球員 20 組／355 宣稱』，兩者相同 ⇒ exp1cB 的 sNN 就是探索批次的 fb-sNN"
+  },
+  "exp1cb_reads": [
+   {
+    "reader": "fb-s04/r1/TB/round_1",
+    "target": "exp1cB_1003/s04",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s04/r2/TO/round_2",
+    "target": "exp1cB_1003/s04",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s04/r2/TO/round_2",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s04/r2/TO/round_2",
+    "target": "exp1cB_1004/s16",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s08/r2/G/round_2",
+    "target": "exp1cB_1003/s08",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s17/r1/G/round_2",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s17/r2/G/round_2",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1004/s20",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1003/s09",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1004/s20",
+    "same_material_set": true
+   },
+   {
+    "reader": "sc-s05/r1/TO/round_1",
+    "target": "exp1cB_1003/s05",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s12/r2/TO/round_2",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1004/s20",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1004/s16",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1003/s05",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s16/r2/G/round_1",
+    "target": "exp1cB_1003/s02",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s17/r2/G/round_1",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   },
+   {
+    "reader": "sc-s17/r2/TO/round_2",
+    "target": "exp1cB_1003/s10",
+    "same_material_set": false
+   }
+  ],
+  "exp1cb_same_material_reads": [
+   {
+    "reader": "fb-s04/r1/TB/round_1",
+    "target": "exp1cB_1003/s04",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s04/r2/TO/round_2",
+    "target": "exp1cB_1003/s04",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s08/r2/G/round_2",
+    "target": "exp1cB_1003/s08",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1004/s20",
+    "same_material_set": true
+   },
+   {
+    "reader": "fb-s20/r2/c0/c0",
+    "target": "exp1cB_1004/s20",
+    "same_material_set": true
+   }
+  ],
+  "same_material_pairs": [
+   "fb-s04/r1",
+   "fb-s04/r2",
+   "fb-s08/r2",
+   "fb-s20/r2"
+  ],
+  "same_material_pairs_not_in_b": [
+   "fb-s04/r2"
+  ],
+  "versions": {
+   "b_v4_plus_exp1cb_same": {
+    "T_vs_G": {
+     "n_sets": 30,
+     "diff": 14.87,
+     "boot95": [
+      4.03,
+      27.2
+     ],
+     "t95": [
+      2.44,
+      27.3
+     ],
+     "signflip_p": 0.0188,
+     "pairs": 41
+    },
+    "T_vs_TB": {
+     "n_sets": 30,
+     "diff": 4.17,
+     "boot95": [
+      -0.23,
+      9.43
+     ],
+     "t95": [
+      -0.99,
+      9.34
+     ],
+     "signflip_p": 0.115,
+     "pairs": 41
+    },
+    "T_vs_TO": {
+     "n_sets": 30,
+     "diff": 0.2,
+     "boot95": [
+      -6.71,
+      9.11
+     ],
+     "t95": [
+      -8.17,
+      8.58
+     ],
+     "signflip_p": 0.9676,
+     "pairs": 41
+    },
+    "TE_vs_TER": {
+     "n_sets": 30,
+     "diff": -0.8,
+     "boot95": [
+      -4.1,
+      1.67
+     ],
+     "t95": [
+      -3.9,
+      2.31
+     ],
+     "signflip_p": 0.7655,
+     "pairs": 41
+    },
+    "min_drop": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.79
+    }
+   },
+   "b_prime_v4_plus_exp1cb_same": {
+    "T_vs_G": {
+     "n_sets": 28,
+     "diff": 8.79,
+     "boot95": [
+      -0.02,
+      18.01
+     ],
+     "t95": [
+      -0.82,
+      18.4
+     ],
+     "signflip_p": 0.073,
+     "pairs": 39
+    },
+    "T_vs_TB": {
+     "n_sets": 28,
+     "diff": 1.72,
+     "boot95": [
+      -1.7,
+      5.92
+     ],
+     "t95": [
+      -2.36,
+      5.8
+     ],
+     "signflip_p": 0.4494,
+     "pairs": 39
+    },
+    "T_vs_TO": {
+     "n_sets": 28,
+     "diff": -3.89,
+     "boot95": [
+      -8.9,
+      -0.16
+     ],
+     "t95": [
+      -8.57,
+      0.8
+     ],
+     "signflip_p": 0.0749,
+     "pairs": 39
+    },
+    "TE_vs_TER": {
+     "n_sets": 28,
+     "diff": -0.85,
+     "boot95": [
+      -4.35,
+      1.79
+     ],
+     "t95": [
+      -4.19,
+      2.49
+     ],
+     "signflip_p": 0.7664,
+     "pairs": 39
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.79
+    }
+   },
+   "b_v4_plus_exp1cb_same_minus_empty": {
+    "T_vs_G": {
+     "n_sets": 29,
+     "diff": 10.9,
+     "boot95": [
+      0.81,
+      22.02
+     ],
+     "t95": [
+      -0.4,
+      22.2
+     ],
+     "signflip_p": 0.0587,
+     "pairs": 38
+    },
+    "T_vs_TB": {
+     "n_sets": 29,
+     "diff": 2.09,
+     "boot95": [
+      -1.47,
+      6.62
+     ],
+     "t95": [
+      -2.12,
+      6.3
+     ],
+     "signflip_p": 0.3742,
+     "pairs": 38
+    },
+    "T_vs_TO": {
+     "n_sets": 29,
+     "diff": -3.32,
+     "boot95": [
+      -8.26,
+      0.53
+     ],
+     "t95": [
+      -8.02,
+      1.37
+     ],
+     "signflip_p": 0.1542,
+     "pairs": 38
+    },
+    "TE_vs_TER": {
+     "n_sets": 29,
+     "diff": -0.48,
+     "boot95": [
+      -4.02,
+      2.16
+     ],
+     "t95": [
+      -3.79,
+      2.83
+     ],
+     "signflip_p": 0.8717,
+     "pairs": 38
+    },
+    "min_drop": {
+     "k": 1,
+     "dropped": [
+      "fb-s20/r1"
+     ],
+     "point": 7.72
+    }
+   },
+   "b_prime_v4_plus_exp1cb_same_minus_empty": {
+    "T_vs_G": {
+     "n_sets": 28,
+     "diff": 7.72,
+     "boot95": [
+      -1.07,
+      17.03
+     ],
+     "t95": [
+      -1.86,
+      17.3
+     ],
+     "signflip_p": 0.1159,
+     "pairs": 37
+    },
+    "T_vs_TB": {
+     "n_sets": 28,
+     "diff": 0.92,
+     "boot95": [
+      -2.05,
+      4.62
+     ],
+     "t95": [
+      -2.67,
+      4.51
+     ],
+     "signflip_p": 0.7317,
+     "pairs": 37
+    },
+    "T_vs_TO": {
+     "n_sets": 28,
+     "diff": -3.98,
+     "boot95": [
+      -9.0,
+      -0.25
+     ],
+     "t95": [
+      -8.65,
+      0.69
+     ],
+     "signflip_p": 0.0647,
+     "pairs": 37
+    },
+    "TE_vs_TER": {
+     "n_sets": 28,
+     "diff": -0.5,
+     "boot95": [
+      -4.08,
+      2.23
+     ],
+     "t95": [
+      -3.93,
+      2.94
+     ],
+     "signflip_p": 0.8706,
+     "pairs": 37
+    },
+    "min_drop": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.72
+    }
+   }
+  }
+ },
+ "source_exp1cb": "git:c14d4ee1b",
+ "exp1_recompute_check": {
+  "reproduced_equals_original": true,
+  "rule": "FAIL：召回 <0.5 或 被標 > max(0.5, 錯誤率+0.25)；PASS：召回 ≥0.7、下界 ≥0.6、比值 ≥3、被標 ≤ max(0.3, 錯誤率+0.15)；否則 UNRESOLVED；合併 PASS 但軟體＋公司不 PASS ⇒ FAIL（exp1_combine.py）",
+  "original_final_verdict_ok": true,
+  "reproduced_final_verdict_ok": true,
+  "b24_final_verdict_ok": true,
+  "checks": [
+   {
+    "version": "original",
+    "scope": "combined",
+    "flagged": 2787,
+    "errors": 2250,
+    "tp": 1987,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.7,
+    "fail_line_pct": 89.7,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "original",
+    "scope": "software_plus_companies",
+    "flagged": 1168,
+    "errors": 1092,
+    "tp": 857,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.2,
+    "fail_line_pct": 89.2,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "original",
+    "scope": "companies (Wikipedia)",
+    "flagged": 587,
+    "errors": 516,
+    "tp": 341,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 66.6,
+    "fail_line_pct": 76.6,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "original",
+    "scope": "football biographies (Wikipedia)",
+    "flagged": 1619,
+    "errors": 1158,
+    "tp": 1130,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 80.2,
+    "fail_line_pct": 90.2,
+    "verdict_recomputed": "FAIL",
+    "verdict_reported": "FAIL",
+    "verdict_ok": true
+   },
+   {
+    "version": "original",
+    "scope": "software (Wikipedia)",
+    "flagged": 581,
+    "errors": 576,
+    "tp": 516,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 97.3,
+    "fail_line_pct": 107.3,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "reproduced",
+    "scope": "combined",
+    "flagged": 2787,
+    "errors": 2250,
+    "tp": 1987,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.7,
+    "fail_line_pct": 89.7,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "reproduced",
+    "scope": "software_plus_companies",
+    "flagged": 1168,
+    "errors": 1092,
+    "tp": 857,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.2,
+    "fail_line_pct": 89.2,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "reproduced",
+    "scope": "companies (Wikipedia)",
+    "flagged": 587,
+    "errors": 516,
+    "tp": 341,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 66.6,
+    "fail_line_pct": 76.6,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "reproduced",
+    "scope": "football biographies (Wikipedia)",
+    "flagged": 1619,
+    "errors": 1158,
+    "tp": 1130,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 80.2,
+    "fail_line_pct": 90.2,
+    "verdict_recomputed": "FAIL",
+    "verdict_reported": "FAIL",
+    "verdict_ok": true
+   },
+   {
+    "version": "reproduced",
+    "scope": "software (Wikipedia)",
+    "flagged": 581,
+    "errors": 576,
+    "tp": 516,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 97.3,
+    "fail_line_pct": 107.3,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "b24",
+    "scope": "combined",
+    "flagged": 2449,
+    "errors": 2250,
+    "tp": 1943,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.7,
+    "fail_line_pct": 89.7,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "b24",
+    "scope": "software_plus_companies",
+    "flagged": 1155,
+    "errors": 1092,
+    "tp": 849,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 79.2,
+    "fail_line_pct": 89.2,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "b24",
+    "scope": "companies (Wikipedia)",
+    "flagged": 587,
+    "errors": 516,
+    "tp": 341,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 66.6,
+    "fail_line_pct": 76.6,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   },
+   {
+    "version": "b24",
+    "scope": "football biographies (Wikipedia)",
+    "flagged": 1294,
+    "errors": 1158,
+    "tp": 1094,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 80.2,
+    "fail_line_pct": 90.2,
+    "verdict_recomputed": "PASS",
+    "verdict_reported": "PASS",
+    "verdict_ok": true
+   },
+   {
+    "version": "b24",
+    "scope": "software (Wikipedia)",
+    "flagged": 568,
+    "errors": 576,
+    "tp": 508,
+    "in_rate_ok": true,
+    "out_rate_ok": true,
+    "ratio_ok": true,
+    "flag_cap_pct": 97.3,
+    "fail_line_pct": 107.3,
+    "verdict_recomputed": "UNRESOLVED",
+    "verdict_reported": "UNRESOLVED",
+    "verdict_ok": true
+   }
+  ],
+  "flag_drop": {
+   "combined": 338,
+   "software_plus_companies": 13,
+   "football": 325,
+   "rows_flag_changed_reported": {
+    "exp1cA": 13,
+    "exp1cB": 325
+   }
+  },
+  "recall_lower95_b24_combined_pct": 80.05
+ },
+ "source_exp1": "git:545e1e358",
  "source_reclass": "git:812b7bf1f",
  "mismatches": []
 }
