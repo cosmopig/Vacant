@@ -46,12 +46,14 @@ def main() -> int:
                 missing.append(f"{sid}/r{rp}"); continue
             if json.loads((c0 / "done.json").read_text()).get("infra_void"):
                 void.append(f"{sid}/r{rp}")
+            if not (c0 / "run" / "run.json").is_file():          # B48(2)：每份 c0 都要有 run.json
+                missing.append(f"{sid}/r{rp}:no_run.json")
     sys.path.insert(0, str(HERE))
     from ops.d2 import expTc_confirm_analysis as A
     d2 = str(droots[0].parent); esc, infra, scanned = [], [], 0
     for d in droots:
         for k, v in A.scan_runs(d, d2).items():
-            if k[2] == "c0" and k[1] in (1, 2):
+            if k[2] == "c0" and k[1] in (1, 2) and not v.get("in_progress"):   # B48(2)：只計有 run.json 的執行
                 scanned += 1
                 if v["escape"]:
                     esc.append({"key": list(k), "kinds": v["escape_kinds"], "unlogged": v["unlogged_server_200"]})

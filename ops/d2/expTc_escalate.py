@@ -126,6 +126,8 @@ def gate(droots, k):
             where[(sid, rp)] = c0
             if json.loads((c0 / "done.json").read_text()).get("infra_void"):
                 rep["infra_void"].append(f"{sid}/r{rp}")
+            if not (c0 / "run" / "run.json").is_file():          # B48(2)
+                rep["missing"].append(f"{sid}/r{rp}:no_run.json")
             if not (c0 / "flags_v2.json").is_file():
                 rep["no_flags_v2"].append(f"{sid}/r{rp}")
             b = B25.check_cell(c0, False)
@@ -134,7 +136,7 @@ def gate(droots, k):
     d2 = str(droots[0].parent)
     for d in droots:
         for kk, v in A.scan_runs(d, d2).items():
-            if kk[2] == "c0" and kk[1] <= k:
+            if kk[2] == "c0" and kk[1] <= k and not v.get("in_progress"):   # B48(2)：只計有 run.json 的執行
                 rep["scanned"] += 1
                 if v["escape"]:
                     rep["escape"].append(list(kk))
