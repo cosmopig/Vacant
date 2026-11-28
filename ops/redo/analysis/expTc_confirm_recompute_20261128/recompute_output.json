@@ -1,0 +1,492 @@
+{
+ "note": "選擇器從逐組資料重算；回饋家族只能做一致性檢查（稽核包沒有逐對資料）",
+ "selector": {
+  "all": {
+   "sets": 30,
+   "k_values": [
+    5
+   ],
+   "sets_with_blank_drafts": 21,
+   "means": {
+    "record": 0.7412,
+    "nonblank": 0.73,
+    "random": 0.466,
+    "oracle": 0.7962
+   },
+   "record_vs_random": {
+    "sets": 30,
+    "diff": 0.2752,
+    "ci95": [
+     0.1805,
+     0.3726
+    ],
+    "ci90": [
+     0.1954,
+     0.3564
+    ],
+    "perm_p": 1.5e-05,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s04",
+      "ff-s06"
+     ],
+     "diff": 0.2409,
+     "ci95": [
+      0.1511,
+      0.3313
+     ]
+    },
+    "sets_positive": 23,
+    "sets_negative": 3,
+    "sets_zero": 4
+   },
+   "record_vs_nonblank": {
+    "sets": 30,
+    "diff": 0.0112,
+    "ci95": [
+     -0.065,
+     0.0856
+    ],
+    "ci90": [
+     -0.0522,
+     0.0734
+    ],
+    "perm_p": 0.785101,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s06",
+      "ff-s18"
+     ],
+     "diff": -0.0202,
+     "ci95": [
+      -0.0893,
+      0.0417
+     ]
+    },
+    "sets_positive": 6,
+    "sets_negative": 5,
+    "sets_zero": 19
+   },
+   "nonblank_vs_random": {
+    "sets": 30,
+    "diff": 0.264,
+    "ci95": [
+     0.1849,
+     0.3474
+    ],
+    "ci90": [
+     0.1975,
+     0.3334
+    ],
+    "perm_p": 5e-06,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s04",
+      "ff-s05"
+     ],
+     "diff": 0.2293,
+     "ci95": [
+      0.1596,
+      0.3025
+     ]
+    },
+    "sets_positive": 24,
+    "sets_negative": 2,
+    "sets_zero": 4
+   },
+   "same_pick_record_nonblank": 19,
+   "record_pick_has_more_blank_than_nonblank_pick": null,
+   "record_minus_random_by_blank_presence": {
+    "sets_with_blank": {
+     "n": 21,
+     "mean": 0.3399
+    },
+    "sets_without_blank": {
+     "n": 9,
+     "mean": 0.1242
+    }
+   }
+  },
+  "nonblank_drafts": {
+   "sets": 24,
+   "k_values": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "sets_with_blank_drafts": 0,
+   "means": {
+    "record": 0.816,
+    "nonblank": 0.802,
+    "random": 0.7149,
+    "oracle": 0.8847
+   },
+   "record_vs_random": {
+    "sets": 24,
+    "diff": 0.101,
+    "ci95": [
+     0.0276,
+     0.1713
+    ],
+    "ci90": [
+     0.04,
+     0.1597
+    ],
+    "perm_p": 0.01451,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s19",
+      "ff-s03"
+     ],
+     "diff": 0.0759,
+     "ci95": [
+      0.0041,
+      0.1429
+     ]
+    },
+    "sets_positive": 17,
+    "sets_negative": 4,
+    "sets_zero": 3
+   },
+   "record_vs_nonblank": {
+    "sets": 24,
+    "diff": 0.014,
+    "ci95": [
+     -0.0813,
+     0.1079
+    ],
+    "ci90": [
+     -0.0664,
+     0.0925
+    ],
+    "perm_p": 0.782031,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s06",
+      "ff-s18"
+     ],
+     "diff": -0.0258,
+     "ci95": [
+      -0.1159,
+      0.0523
+     ]
+    },
+    "sets_positive": 6,
+    "sets_negative": 5,
+    "sets_zero": 13
+   },
+   "nonblank_vs_random": {
+    "sets": 24,
+    "diff": 0.087,
+    "ci95": [
+     0.0211,
+     0.1515
+    ],
+    "ci90": [
+     0.0315,
+     0.141
+    ],
+    "perm_p": 0.01714,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s19",
+      "ff-s03"
+     ],
+     "diff": 0.0606,
+     "ci95": [
+      0.0006,
+      0.1186
+     ]
+    },
+    "sets_positive": 15,
+    "sets_negative": 5,
+    "sets_zero": 4
+   },
+   "same_pick_record_nonblank": 13,
+   "record_pick_has_more_blank_than_nonblank_pick": null,
+   "record_minus_random_by_blank_presence": {
+    "sets_with_blank": {
+     "n": 0,
+     "mean": null
+    },
+    "sets_without_blank": {
+     "n": 24,
+     "mean": 0.101
+    }
+   }
+  }
+ },
+ "selector_strata": {
+  "domain:cc": {
+   "sets": 10,
+   "blank_drafts": 18,
+   "record_vs_random": {
+    "sets": 10,
+    "diff": 0.229,
+    "ci95": [
+     0.043,
+     0.419
+    ],
+    "ci90": [
+     0.071,
+     0.386
+    ],
+    "perm_p": 0.054975,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s04",
+      "cc-s08"
+     ],
+     "diff": 0.1237,
+     "ci95": [
+      -0.0375,
+      0.2812
+     ]
+    },
+    "sets_positive": 7,
+    "sets_negative": 3,
+    "sets_zero": 0
+   },
+   "record_vs_nonblank": {
+    "sets": 10,
+    "diff": -0.12,
+    "ci95": [
+     -0.28,
+     0.02
+    ],
+    "ci90": [
+     -0.25,
+     0.0
+    ],
+    "perm_p": 0.187204,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s02",
+      "cc-s06"
+     ],
+     "diff": -0.0125,
+     "ci95": [
+      -0.1,
+      0.0813
+     ]
+    },
+    "sets_positive": 1,
+    "sets_negative": 5,
+    "sets_zero": 4
+   }
+  },
+  "domain:ff": {
+   "sets": 20,
+   "blank_drafts": 36,
+   "record_vs_random": {
+    "sets": 20,
+    "diff": 0.2983,
+    "ci95": [
+     0.1942,
+     0.4069
+    ],
+    "ci90": [
+     0.2091,
+     0.3884
+    ],
+    "perm_p": 3.5e-05,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s06",
+      "ff-s05"
+     ],
+     "diff": 0.2531,
+     "ci95": [
+      0.1568,
+      0.3522
+     ]
+    },
+    "sets_positive": 16,
+    "sets_negative": 0,
+    "sets_zero": 4
+   },
+   "record_vs_nonblank": {
+    "sets": 20,
+    "diff": 0.0768,
+    "ci95": [
+     0.0176,
+     0.1504
+    ],
+    "ci90": [
+     0.025,
+     0.1376
+    ],
+    "perm_p": 0.061885,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s06",
+      "ff-s18"
+     ],
+     "diff": 0.0352,
+     "ci95": [
+      0.0,
+      0.0796
+     ]
+    },
+    "sets_positive": 5,
+    "sets_negative": 0,
+    "sets_zero": 15
+   }
+  },
+  "host:1003": {
+   "sets": 15,
+   "blank_drafts": 44,
+   "record_vs_random": {
+    "sets": 15,
+    "diff": 0.3548,
+    "ci95": [
+     0.2008,
+     0.5041
+    ],
+    "ci90": [
+     0.226,
+     0.4801
+    ],
+    "perm_p": 0.00152,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s04",
+      "ff-s06"
+     ],
+     "diff": 0.2932,
+     "ci95": [
+      0.1454,
+      0.4405
+     ]
+    },
+    "sets_positive": 11,
+    "sets_negative": 1,
+    "sets_zero": 3
+   },
+   "record_vs_nonblank": {
+    "sets": 15,
+    "diff": 0.0033,
+    "ci95": [
+     -0.1133,
+     0.1133
+    ],
+    "ci90": [
+     -0.09,
+     0.0933
+    ],
+    "perm_p": 1.0,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s06",
+      "ff-s08"
+     ],
+     "diff": -0.0538,
+     "ci95": [
+      -0.15,
+      0.0
+     ]
+    },
+    "sets_positive": 2,
+    "sets_negative": 3,
+    "sets_zero": 10
+   }
+  },
+  "host:1004": {
+   "sets": 15,
+   "blank_drafts": 10,
+   "record_vs_random": {
+    "sets": 15,
+    "diff": 0.1956,
+    "ci95": [
+     0.0922,
+     0.296
+    ],
+    "ci90": [
+     0.109,
+     0.2808
+    ],
+    "perm_p": 0.00371,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "cc-s08",
+      "ff-s18"
+     ],
+     "diff": 0.1501,
+     "ci95": [
+      0.0524,
+      0.2429
+     ]
+    },
+    "sets_positive": 12,
+    "sets_negative": 2,
+    "sets_zero": 1
+   },
+   "record_vs_nonblank": {
+    "sets": 15,
+    "diff": 0.0191,
+    "ci95": [
+     -0.0867,
+     0.1178
+    ],
+    "ci90": [
+     -0.0698,
+     0.1037
+    ],
+    "perm_p": 0.781156,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "dropped": [
+      "ff-s18",
+      "ff-s14"
+     ],
+     "diff": -0.0308,
+     "ci95": [
+      -0.1346,
+      0.05
+     ]
+    },
+    "sets_positive": 4,
+    "sets_negative": 2,
+    "sets_zero": 9
+   }
+  }
+ },
+ "selector_blank_drafts_total": 54,
+ "selector_record_pick_scored_zero": [
+  "ff-s01",
+  "ff-s02",
+  "ff-s09"
+ ],
+ "holm_recomputed_mixed": {
+  "record_vs_random": 6e-05,
+  "T_vs_G": 0.0789,
+  "T_vs_TB": 0.36976,
+  "record_vs_nonblank": 0.7851
+ },
+ "holm_from_their_raw_p": {
+  "record_vs_random": 0.0004,
+  "T_vs_G": 0.0789,
+  "T_vs_TB": 0.36976,
+  "record_vs_nonblank": 0.78482
+ },
+ "verdict_recomputed": {
+  "record_vs_random": "pass",
+  "record_vs_nonblank": "no_difference_measured",
+  "T_vs_TB_from_their_summary": "no_difference_measured",
+  "T_vs_G_from_their_summary": "no_difference_measured"
+ }
+}
