@@ -1,0 +1,1937 @@
+{
+ "schema": "vacant.audit.expT_versions_regrade/1",
+ "note": "事後敏感度（離線、不叫模型）：探索批次（實驗 T）各排除版本在原評分與第二正規化器（regrade_sensitivity.py）下的 T−G 並列比較與最少拿掉幾對窮舉。",
+ "regrade_stats": {
+  "calls": 19460,
+  "flipped_age": 1485,
+  "flipped_ticker": 304
+ },
+ "regrade_export": {
+  "dir": "ops/redo/audit/judge_v2v3_20261128/regrade/expT_audit_regrade",
+  "files": [
+   "expT_cells.csv",
+   "expT_cells.json",
+   "expT_lines.jsonl"
+  ],
+  "cells": 518,
+  "lines": 9730,
+  "unsalted_value_hashes_present": false,
+  "values_present": false,
+  "privacy_note": "export_expT_audit.py 已於 2026-11-28 移除逐行 before_value_sha256／after_value_sha256；本匯出只留評分相關檔（不含鏈檔與 haiku 檔），並已檢查逐行無值或值雜湊欄位。"
+ },
+ "recompute_script": {
+  "path": "ops/redo/analysis/expT_exam37_audit_recompute.py",
+  "commit": "977ec7c5d",
+  "is_latest_in_repo": true,
+  "unmodified_from_commit": true,
+  "method": {
+   "boot": 10000,
+   "boot_seed": 7,
+   "perm": 100000,
+   "cluster": "set",
+   "pass_rule": "T_minus_G >= 10pp and boot95_low > 0 and harm_T <= harm_G"
+  },
+  "dir_mode_note": "977ec7c5d 的 Src.jsonl_rel() 在 --dir 模式讀 self.dir.parent/expT_hmac_supplement，且 expT()／extra_scans()／network_fingerprint() 讀取逐行 *_value_sha256 診斷欄；實跑時於暫存工作目錄以符號連結與 None 佔位提供（不寫進 git），重評版所有 T−G 版本與 min_drop_exact 均由未改動的原腳本直接產出。"
+ },
+ "baseline_verification": {
+  "matches_977ec7c5d_recompute_output_all_63_T_vs_G": true,
+  "original_pack_mismatches": [],
+  "regrade_vs_expT_metrics_regrade_mismatches": 0,
+  "regrade_vs_escape_regrade_mismatches": 0,
+  "regrade_non_regraded_te_sens_diff": [
+   {
+    "item": "keep_on_null TER harm C->W/D",
+    "mine": 0,
+    "theirs": 1,
+    "ok": false
+   }
+  ],
+  "prompt_baseline_label_alignment": {
+   "note": "腳本原封不動重現 977ec7c5d 全部 63 個 T−G 版本，提示中列出的五個原評分數字均逐位出現，唯其中三個標籤在 v1／v4 版本間有位移，實對照如下：",
+   "+8.4 (+8.36)": "v1_b_prime（v1 越界名單 (b′)，55 對）",
+   "+7.0 (+7.02)": "v1_b_minus_empty（v1 越界名單 (b) 拿掉空白初稿，51 對；另 reclass_812 加抄寫兩對為 v4 (b)+copy +13.75／(b′)+copy +7.80）",
+   "+8.1 (+8.12)": "v4_b_plus_report_readers（B48 v4 (b) 加讀別格報告全排除，32 對；另 v4 (b) 拿掉空白初稿為 +10.54）",
+   "+14.4 (+14.39)": "v4_b（B48 v4 (b) 原版，42 對）",
+   "+8.5 (+8.49)": "v4_b_prime（B48 v4 (b′)，40 對）"
+  }
+ },
+ "versions": {
+  "all": {
+   "label": "全部 74 對（未排除）",
+   "source_path": "expT.comparisons.T_vs_G.a",
+   "pairs": 74,
+   "n_sets": 37,
+   "original": {
+    "diff_pp": 11.71,
+    "boot95_pp": [
+     3.03,
+     20.63
+    ],
+    "t95_pp": [
+     2.47,
+     20.95
+    ],
+    "signflip_p": 0.0148,
+    "harm_T": 88,
+    "harm_G": 225,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 9.36
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 9.36,
+     "boot95_after": [
+      -0.59,
+      19.19
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 14.75,
+    "boot95_pp": [
+     5.3,
+     24.21
+    ],
+    "t95_pp": [
+     4.86,
+     24.64
+    ],
+    "signflip_p": 0.0047,
+    "harm_T": 74,
+    "harm_G": 244,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": ">2",
+     "best_two": [
+      "fb-s08/r1",
+      "sc-s02/r1"
+     ],
+     "point_after_two": 10.58
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 3,
+     "dropped": [
+      "fb-s08/r1",
+      "sc-s02/r1",
+      "sc-s07/r2"
+     ],
+     "point": 8.82,
+     "boot95_after": [
+      -3.48,
+      20.17
+     ]
+    }
+   },
+   "delta_diff_pp": 3.04,
+   "pass_changed": false
+  },
+  "all_minus_empty": {
+   "label": "全部拿掉 13 份空白初稿",
+   "source_path": "expT.empty_c0.excluding_empty_c0.T_vs_G",
+   "pairs": 61,
+   "n_sets": 36,
+   "original": {
+    "diff_pp": 8.7,
+    "boot95_pp": [
+     -0.44,
+     18.06
+    ],
+    "t95_pp": [
+     -1.01,
+     18.4
+    ],
+    "signflip_p": 0.0786,
+    "harm_T": 65,
+    "harm_G": 188,
+    "pass": false,
+    "min_drop_script_k_le_2": null,
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.7
+    }
+   },
+   "regraded": {
+    "diff_pp": 11.61,
+    "boot95_pp": [
+     2.0,
+     21.93
+    ],
+    "t95_pp": [
+     1.27,
+     21.95
+    ],
+    "signflip_p": 0.0275,
+    "harm_T": 71,
+    "harm_G": 213,
+    "pass": true,
+    "min_drop_script_k_le_2": null,
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "sc-s10/r1"
+     ],
+     "point": 9.09,
+     "boot95_after": [
+      0.39,
+      18.02
+     ]
+    }
+   },
+   "delta_diff_pp": 2.91,
+   "pass_changed": true
+  },
+  "v1_a": {
+   "label": "v1 (a) 排除任何越界",
+   "source_path": "escape_review.comparisons.a.T_vs_G",
+   "pairs": 39,
+   "n_sets": 27,
+   "original": {
+    "diff_pp": 2.76,
+    "boot95_pp": [
+     -10.79,
+     15.79
+    ],
+    "t95_pp": [
+     -11.45,
+     16.96
+    ],
+    "signflip_p": 0.6987,
+    "harm_T": 31,
+    "harm_G": 120,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 2.76
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 2.76
+    }
+   },
+   "regraded": {
+    "diff_pp": 5.26,
+    "boot95_pp": [
+     -7.91,
+     18.23
+    ],
+    "t95_pp": [
+     -8.76,
+     19.28
+    ],
+    "signflip_p": 0.451,
+    "harm_T": 27,
+    "harm_G": 125,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 5.26
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 5.26
+    }
+   },
+   "delta_diff_pp": 2.5,
+   "pass_changed": false
+  },
+  "v1_b": {
+   "label": "v1 (b) 只排除讀 flags／未來頁面",
+   "source_path": "escape_review.comparisons.b.T_vs_G",
+   "pairs": 57,
+   "n_sets": 34,
+   "original": {
+    "diff_pp": 12.52,
+    "boot95_pp": [
+     3.96,
+     22.12
+    ],
+    "t95_pp": [
+     3.15,
+     21.9
+    ],
+    "signflip_p": 0.0079,
+    "harm_T": 68,
+    "harm_G": 173,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 9.87
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 9.87,
+     "boot95_after": [
+      2.46,
+      17.38
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 15.02,
+    "boot95_pp": [
+     5.86,
+     24.98
+    ],
+    "t95_pp": [
+     5.21,
+     24.84
+    ],
+    "signflip_p": 0.0033,
+    "harm_T": 54,
+    "harm_G": 182,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": ">2",
+     "best_two": [
+      "fb-s08/r1",
+      "sc-s02/r1"
+     ],
+     "point_after_two": 10.4
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 3,
+     "dropped": [
+      "fb-s08/r1",
+      "sc-s02/r1",
+      "sc-s07/r2"
+     ],
+     "point": 8.43,
+     "boot95_after": [
+      -2.25,
+      18.31
+     ]
+    }
+   },
+   "delta_diff_pp": 2.5,
+   "pass_changed": false
+  },
+  "v1_b_prime": {
+   "label": "v1 (b′) 補讀別臂產出與被寫入",
+   "source_path": "escape_review.comparisons.b_prime.T_vs_G",
+   "pairs": 55,
+   "n_sets": 33,
+   "original": {
+    "diff_pp": 8.36,
+    "boot95_pp": [
+     1.3,
+     15.56
+    ],
+    "t95_pp": [
+     0.85,
+     15.86
+    ],
+    "signflip_p": 0.0295,
+    "harm_T": 68,
+    "harm_G": 160,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.36
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.36
+    }
+   },
+   "regraded": {
+    "diff_pp": 10.93,
+    "boot95_pp": [
+     3.11,
+     18.71
+    ],
+    "t95_pp": [
+     2.67,
+     19.19
+    ],
+    "signflip_p": 0.0105,
+    "harm_T": 54,
+    "harm_G": 169,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "sc-s02/r1"
+     ],
+     "point": 8.89
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "sc-s02/r1"
+     ],
+     "point": 8.89,
+     "boot95_after": [
+      -0.85,
+      18.14
+     ]
+    }
+   },
+   "delta_diff_pp": 2.57,
+   "pass_changed": true
+  },
+  "v1_b_minus_empty": {
+   "label": "v1 (b) 拿掉空白初稿",
+   "source_path": "escape_review.comparisons.b_minus_empty.T_vs_G",
+   "pairs": 51,
+   "n_sets": 33,
+   "original": {
+    "diff_pp": 7.02,
+    "boot95_pp": [
+     -1.16,
+     15.13
+    ],
+    "t95_pp": [
+     -1.75,
+     15.79
+    ],
+    "signflip_p": 0.1146,
+    "harm_T": 45,
+    "harm_G": 146,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.02
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.02
+    }
+   },
+   "regraded": {
+    "diff_pp": 8.99,
+    "boot95_pp": [
+     1.03,
+     17.08
+    ],
+    "t95_pp": [
+     0.37,
+     17.61
+    ],
+    "signflip_p": 0.0421,
+    "harm_T": 51,
+    "harm_G": 161,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.99
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.99
+    }
+   },
+   "delta_diff_pp": 1.97,
+   "pass_changed": false
+  },
+  "v1_b_prime_minus_empty": {
+   "label": "v1 (b′) 拿掉空白初稿",
+   "source_path": "escape_review.comparisons.b_prime_minus_empty.T_vs_G",
+   "pairs": 50,
+   "n_sets": 33,
+   "original": {
+    "diff_pp": 5.5,
+    "boot95_pp": [
+     -2.26,
+     13.28
+    ],
+    "t95_pp": [
+     -2.84,
+     13.84
+    ],
+    "signflip_p": 0.191,
+    "harm_T": 45,
+    "harm_G": 133,
+    "pass": false,
+    "min_drop_script_k_le_2": null,
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 5.5
+    }
+   },
+   "regraded": {
+    "diff_pp": 7.47,
+    "boot95_pp": [
+     -0.21,
+     15.21
+    ],
+    "t95_pp": [
+     -0.76,
+     15.7
+    ],
+    "signflip_p": 0.0739,
+    "harm_T": 51,
+    "harm_G": 148,
+    "pass": false,
+    "min_drop_script_k_le_2": null,
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.47
+    }
+   },
+   "delta_diff_pp": 1.97,
+   "pass_changed": false
+  },
+  "v4_a": {
+   "label": "B48 v4 (a) 整對排除任何越界（剩 10 對全對、無法判讀）",
+   "source_path": "list_v4_review.comparisons.a_v2.T_vs_G",
+   "pairs": 10,
+   "n_sets": 9,
+   "original": {
+    "diff_pp": 0.0,
+    "boot95_pp": [
+     0.0,
+     0.0
+    ],
+    "t95_pp": [
+     0.0,
+     0.0
+    ],
+    "signflip_p": 1.0,
+    "harm_T": 0,
+    "harm_G": 0,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.0
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.0
+    }
+   },
+   "regraded": {
+    "diff_pp": 0.0,
+    "boot95_pp": [
+     0.0,
+     0.0
+    ],
+    "t95_pp": [
+     0.0,
+     0.0
+    ],
+    "signflip_p": 1.0,
+    "harm_T": 0,
+    "harm_G": 0,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.0
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.0
+    }
+   },
+   "delta_diff_pp": 0.0,
+   "pass_changed": false
+  },
+  "v4_b": {
+   "label": "B48 v4 (b) 原版（flags／未來頁面／直連／c0）",
+   "source_path": "list_v4_review.comparisons.b_v2.T_vs_G",
+   "pairs": 42,
+   "n_sets": 31,
+   "original": {
+    "diff_pp": 14.39,
+    "boot95_pp": [
+     3.42,
+     26.31
+    ],
+    "t95_pp": [
+     2.35,
+     26.43
+    ],
+    "signflip_p": 0.0186,
+    "harm_T": 27,
+    "harm_G": 124,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.49,
+     "after": {
+      "n_sets": 29,
+      "diff": 8.49,
+      "boot95": [
+       -0.24,
+       17.49
+      ],
+      "t95": [
+       -0.79,
+       17.77
+      ],
+      "signflip_p": 0.0738,
+      "pairs": 40
+     }
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.49,
+     "boot95_after": [
+      -0.24,
+      17.49
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 17.78,
+    "boot95_pp": [
+     7.11,
+     29.61
+    ],
+    "t95_pp": [
+     6.02,
+     29.54
+    ],
+    "signflip_p": 0.0027,
+    "harm_T": 17,
+    "harm_G": 133,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": ">2",
+     "best_two": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point_after_two": 12.11
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 3,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 9.68,
+     "boot95_after": [
+      2.48,
+      17.32
+     ]
+    }
+   },
+   "delta_diff_pp": 3.39,
+   "pass_changed": false
+  },
+  "v4_b_minus_empty": {
+   "label": "B48 v4 (b) 拿掉空白初稿",
+   "source_path": "list_v4_review.comparisons.b_v2_minus_empty.T_vs_G",
+   "pairs": 39,
+   "n_sets": 30,
+   "original": {
+    "diff_pp": 10.54,
+    "boot95_pp": [
+     0.87,
+     21.15
+    ],
+    "t95_pp": [
+     -0.39,
+     21.46
+    ],
+    "signflip_p": 0.0583,
+    "harm_T": 18,
+    "harm_G": 102,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s20/r1"
+     ],
+     "point": 7.45,
+     "after": {
+      "n_sets": 29,
+      "diff": 7.45,
+      "boot95": [
+       -1.19,
+       16.52
+      ],
+      "t95": [
+       -1.79,
+       16.7
+      ],
+      "signflip_p": 0.1159,
+      "pairs": 38
+     }
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s20/r1"
+     ],
+     "point": 7.45,
+     "boot95_after": [
+      -1.19,
+      16.52
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 13.87,
+    "boot95_pp": [
+     4.42,
+     24.49
+    ],
+    "t95_pp": [
+     3.11,
+     24.64
+    ],
+    "signflip_p": 0.0094,
+    "harm_T": 16,
+    "harm_G": 117,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.43,
+     "after": {
+      "n_sets": 28,
+      "diff": 8.43,
+      "boot95": [
+       1.22,
+       16.15
+      ],
+      "t95": [
+       0.44,
+       16.43
+      ],
+      "signflip_p": 0.0373,
+      "pairs": 37
+     }
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.43,
+     "boot95_after": [
+      1.22,
+      16.15
+     ]
+    }
+   },
+   "delta_diff_pp": 3.33,
+   "pass_changed": false
+  },
+  "v4_b_prime": {
+   "label": "B48 v4 (b′)（(b)＋讀別臂產出／被寫入）",
+   "source_path": "list_v4_review.comparisons.b_prime_v2.T_vs_G",
+   "pairs": 40,
+   "n_sets": 29,
+   "original": {
+    "diff_pp": 8.49,
+    "boot95_pp": [
+     -0.24,
+     17.49
+    ],
+    "t95_pp": [
+     -0.79,
+     17.77
+    ],
+    "signflip_p": 0.0738,
+    "harm_T": 27,
+    "harm_G": 111,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.49
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.49
+    }
+   },
+   "regraded": {
+    "diff_pp": 12.11,
+    "boot95_pp": [
+     3.77,
+     21.1
+    ],
+    "t95_pp": [
+     2.9,
+     21.31
+    ],
+    "signflip_p": 0.0097,
+    "harm_T": 17,
+    "harm_G": 120,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 9.68,
+     "after": {
+      "n_sets": 28,
+      "diff": 9.68,
+      "boot95": [
+       2.48,
+       17.32
+      ],
+      "t95": [
+       1.64,
+       17.73
+      ],
+      "signflip_p": 0.0193,
+      "pairs": 39
+     }
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 9.68,
+     "boot95_after": [
+      2.48,
+      17.32
+     ]
+    }
+   },
+   "delta_diff_pp": 3.62,
+   "pass_changed": true
+  },
+  "v4_b_prime_minus_empty": {
+   "label": "B48 v4 (b′) 拿掉空白初稿",
+   "source_path": "list_v4_review.comparisons.b_prime_v2_minus_empty.T_vs_G",
+   "pairs": 38,
+   "n_sets": 29,
+   "original": {
+    "diff_pp": 7.45,
+    "boot95_pp": [
+     -1.19,
+     16.52
+    ],
+    "t95_pp": [
+     -1.79,
+     16.7
+    ],
+    "signflip_p": 0.1159,
+    "harm_T": 18,
+    "harm_G": 89,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.45
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.45
+    }
+   },
+   "regraded": {
+    "diff_pp": 10.9,
+    "boot95_pp": [
+     2.59,
+     19.95
+    ],
+    "t95_pp": [
+     1.69,
+     20.12
+    ],
+    "signflip_p": 0.0188,
+    "harm_T": 16,
+    "harm_G": 104,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.43,
+     "after": {
+      "n_sets": 28,
+      "diff": 8.43,
+      "boot95": [
+       1.22,
+       16.15
+      ],
+      "t95": [
+       0.44,
+       16.43
+      ],
+      "signflip_p": 0.0373,
+      "pairs": 37
+     }
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.43,
+     "boot95_after": [
+      1.22,
+      16.15
+     ]
+    }
+   },
+   "delta_diff_pp": 3.45,
+   "pass_changed": true
+  },
+  "v4_b_plus_copy": {
+   "label": "B48 v4 (b) 加抄寫兩對（sc-s02/r2、sc-s15/r2）",
+   "source_path": "reclass_812.versions_with_copy_pairs.b_v4_plus_copy.T_vs_G",
+   "pairs": 41,
+   "n_sets": 31,
+   "original": {
+    "diff_pp": 13.75,
+    "boot95_pp": [
+     2.67,
+     25.76
+    ],
+    "t95_pp": [
+     1.67,
+     25.82
+    ],
+    "signflip_p": 0.0255,
+    "harm_T": 22,
+    "harm_G": 113,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 7.8
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 7.8,
+     "boot95_after": [
+      -0.83,
+      16.82
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 17.13,
+    "boot95_pp": [
+     6.47,
+     28.99
+    ],
+    "t95_pp": [
+     5.31,
+     28.95
+    ],
+    "signflip_p": 0.0038,
+    "harm_T": 16,
+    "harm_G": 125,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": ">2",
+     "best_two": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point_after_two": 11.42
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 3,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.97,
+     "boot95_after": [
+      1.76,
+      16.67
+     ]
+    }
+   },
+   "delta_diff_pp": 3.38,
+   "pass_changed": false
+  },
+  "v4_b_prime_plus_copy": {
+   "label": "B48 v4 (b′) 加抄寫兩對（sc-s02/r2、sc-s15/r2）",
+   "source_path": "reclass_812.versions_with_copy_pairs.b_prime_v4_plus_copy.T_vs_G",
+   "pairs": 39,
+   "n_sets": 29,
+   "original": {
+    "diff_pp": 7.8,
+    "boot95_pp": [
+     -0.83,
+     16.82
+    ],
+    "t95_pp": [
+     -1.46,
+     17.06
+    ],
+    "signflip_p": 0.1003,
+    "harm_T": 22,
+    "harm_G": 100,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.8
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.8
+    }
+   },
+   "regraded": {
+    "diff_pp": 11.42,
+    "boot95_pp": [
+     3.03,
+     20.47
+    ],
+    "t95_pp": [
+     2.19,
+     20.64
+    ],
+    "signflip_p": 0.0144,
+    "harm_T": 16,
+    "harm_G": 112,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.97
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.97,
+     "boot95_after": [
+      1.76,
+      16.67
+     ]
+    }
+   },
+   "delta_diff_pp": 3.62,
+   "pass_changed": true
+  },
+  "v4_b_plus_copy_minus_empty": {
+   "label": "B48 v4 (b) 加抄寫兩對再拿掉空白初稿",
+   "source_path": "reclass_812.versions_with_copy_pairs.b_v4_plus_copy_minus_empty.T_vs_G",
+   "pairs": 39,
+   "n_sets": 30,
+   "original": {
+    "diff_pp": 10.54,
+    "boot95_pp": [
+     0.87,
+     21.15
+    ],
+    "t95_pp": [
+     -0.39,
+     21.46
+    ],
+    "signflip_p": 0.0583,
+    "harm_T": 18,
+    "harm_G": 102,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s20/r1"
+     ],
+     "point": 7.45
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s20/r1"
+     ],
+     "point": 7.45,
+     "boot95_after": [
+      -1.19,
+      16.52
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 13.87,
+    "boot95_pp": [
+     4.42,
+     24.49
+    ],
+    "t95_pp": [
+     3.11,
+     24.64
+    ],
+    "signflip_p": 0.0094,
+    "harm_T": 16,
+    "harm_G": 117,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.43
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.43,
+     "boot95_after": [
+      1.22,
+      16.15
+     ]
+    }
+   },
+   "delta_diff_pp": 3.33,
+   "pass_changed": false
+  },
+  "v4_b_prime_plus_copy_minus_empty": {
+   "label": "B48 v4 (b′) 加抄寫兩對再拿掉空白初稿",
+   "source_path": "reclass_812.versions_with_copy_pairs.b_prime_v4_plus_copy_minus_empty.T_vs_G",
+   "pairs": 38,
+   "n_sets": 29,
+   "original": {
+    "diff_pp": 7.45,
+    "boot95_pp": [
+     -1.19,
+     16.52
+    ],
+    "t95_pp": [
+     -1.79,
+     16.7
+    ],
+    "signflip_p": 0.1159,
+    "harm_T": 18,
+    "harm_G": 89,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.45
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 7.45
+    }
+   },
+   "regraded": {
+    "diff_pp": 10.9,
+    "boot95_pp": [
+     2.59,
+     19.95
+    ],
+    "t95_pp": [
+     1.69,
+     20.12
+    ],
+    "signflip_p": 0.0188,
+    "harm_T": 16,
+    "harm_G": 104,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.43
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s17/r1"
+     ],
+     "point": 8.43,
+     "boot95_after": [
+      1.22,
+      16.15
+     ]
+    }
+   },
+   "delta_diff_pp": 3.45,
+   "pass_changed": true
+  },
+  "v4_b_plus_report_readers": {
+   "label": "B48 v4 (b) 加讀別格報告的對全排除",
+   "source_path": "who_read_review.versions.b_v4_plus_report_readers.T_vs_G",
+   "pairs": 32,
+   "n_sets": 26,
+   "original": {
+    "diff_pp": 8.12,
+    "boot95_pp": [
+     -4.42,
+     21.94
+    ],
+    "t95_pp": [
+     -6.0,
+     22.24
+    ],
+    "signflip_p": 0.2631,
+    "harm_T": 15,
+    "harm_G": 55,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.12
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.12
+    }
+   },
+   "regraded": {
+    "diff_pp": 10.81,
+    "boot95_pp": [
+     -1.33,
+     24.64
+    ],
+    "t95_pp": [
+     -3.08,
+     24.71
+    ],
+    "signflip_p": 0.1267,
+    "harm_T": 9,
+    "harm_G": 57,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 7.25
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 1,
+     "dropped": [
+      "fb-s08/r1"
+     ],
+     "point": 7.25,
+     "boot95_after": [
+      -3.6,
+      19.29
+     ]
+    },
+    "fail_reason": "boot95_lower_le_0_at_k0"
+   },
+   "delta_diff_pp": 2.69,
+   "pass_changed": false
+  },
+  "v4_b_prime_plus_report_readers": {
+   "label": "B48 v4 (b′) 加讀別格報告的對全排除",
+   "source_path": "who_read_review.versions.b_prime_v4_plus_report_readers.T_vs_G",
+   "pairs": 30,
+   "n_sets": 24,
+   "original": {
+    "diff_pp": 0.46,
+    "boot95_pp": [
+     -8.88,
+     9.32
+    ],
+    "t95_pp": [
+     -9.28,
+     10.21
+    ],
+    "signflip_p": 0.9365,
+    "harm_T": 15,
+    "harm_G": 42,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.46
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.46
+    }
+   },
+   "regraded": {
+    "diff_pp": 3.38,
+    "boot95_pp": [
+     -5.83,
+     12.39
+    ],
+    "t95_pp": [
+     -6.4,
+     13.16
+    ],
+    "signflip_p": 0.507,
+    "harm_T": 9,
+    "harm_G": 44,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 3.38
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 3.38
+    }
+   },
+   "delta_diff_pp": 2.92,
+   "pass_changed": false
+  },
+  "v4_b_plus_report_readers_minus_empty": {
+   "label": "B48 v4 (b) 加讀別格報告全排除再拿掉空白初稿",
+   "source_path": "who_read_review.versions.b_v4_plus_report_readers_minus_empty.T_vs_G",
+   "pairs": 30,
+   "n_sets": 25,
+   "original": {
+    "diff_pp": 4.05,
+    "boot95_pp": [
+     -7.0,
+     16.22
+    ],
+    "t95_pp": [
+     -8.35,
+     16.44
+    ],
+    "signflip_p": 0.5368,
+    "harm_T": 11,
+    "harm_G": 44,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 4.05
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 4.05
+    }
+   },
+   "regraded": {
+    "diff_pp": 6.65,
+    "boot95_pp": [
+     -4.19,
+     18.77
+    ],
+    "t95_pp": [
+     -5.6,
+     18.89
+    ],
+    "signflip_p": 0.296,
+    "harm_T": 9,
+    "harm_G": 49,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 6.65
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 6.65
+    }
+   },
+   "delta_diff_pp": 2.6,
+   "pass_changed": false
+  },
+  "v4_b_prime_plus_report_readers_minus_empty": {
+   "label": "B48 v4 (b′) 加讀別格報告全排除再拿掉空白初稿",
+   "source_path": "who_read_review.versions.b_prime_v4_plus_report_readers_minus_empty.T_vs_G",
+   "pairs": 29,
+   "n_sets": 24,
+   "original": {
+    "diff_pp": 0.05,
+    "boot95_pp": [
+     -9.17,
+     8.84
+    ],
+    "t95_pp": [
+     -9.62,
+     9.72
+    ],
+    "signflip_p": 1.0,
+    "harm_T": 11,
+    "harm_G": 31,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.05
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 0.05
+    }
+   },
+   "regraded": {
+    "diff_pp": 2.76,
+    "boot95_pp": [
+     -6.38,
+     11.71
+    ],
+    "t95_pp": [
+     -6.91,
+     12.42
+    ],
+    "signflip_p": 0.5846,
+    "harm_T": 9,
+    "harm_G": 36,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 2.76
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 2.76
+    }
+   },
+   "delta_diff_pp": 2.71,
+   "pass_changed": false
+  },
+  "v4_b_plus_exp1cb_same": {
+   "label": "B48 v4 (b) 加 exp1cB 同組報告（新增 fb-s04/r2）",
+   "source_path": "exp1cb_review.versions.b_v4_plus_exp1cb_same.T_vs_G",
+   "pairs": 41,
+   "n_sets": 30,
+   "original": {
+    "diff_pp": 14.87,
+    "boot95_pp": [
+     4.03,
+     27.2
+    ],
+    "t95_pp": [
+     2.44,
+     27.3
+    ],
+    "signflip_p": 0.0188,
+    "harm_T": 27,
+    "harm_G": 124,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.79
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point": 8.79,
+     "boot95_after": [
+      -0.02,
+      18.01
+     ]
+    }
+   },
+   "regraded": {
+    "diff_pp": 18.37,
+    "boot95_pp": [
+     7.81,
+     30.33
+    ],
+    "t95_pp": [
+     6.26,
+     30.49
+    ],
+    "signflip_p": 0.0025,
+    "harm_T": 17,
+    "harm_G": 133,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": ">2",
+     "best_two": [
+      "fb-s08/r1",
+      "fb-s20/r1"
+     ],
+     "point_after_two": 12.54
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 4,
+     "dropped": [
+      "fb-s08/r1",
+      "fb-s17/r1",
+      "fb-s20/r1",
+      "sc-s11/r2"
+     ],
+     "point": 7.82,
+     "boot95_after": [
+      -1.57,
+      16.99
+     ]
+    }
+   },
+   "delta_diff_pp": 3.5,
+   "pass_changed": false
+  },
+  "v4_b_prime_plus_exp1cb_same": {
+   "label": "B48 v4 (b′) 加 exp1cB 同組報告（新增 fb-s04/r2）",
+   "source_path": "exp1cb_review.versions.b_prime_v4_plus_exp1cb_same.T_vs_G",
+   "pairs": 39,
+   "n_sets": 28,
+   "original": {
+    "diff_pp": 8.79,
+    "boot95_pp": [
+     -0.02,
+     18.01
+    ],
+    "t95_pp": [
+     -0.82,
+     18.4
+    ],
+    "signflip_p": 0.073,
+    "harm_T": 27,
+    "harm_G": 111,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.79
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": 8.79
+    }
+   },
+   "regraded": {
+    "diff_pp": 12.54,
+    "boot95_pp": [
+     3.9,
+     21.99
+    ],
+    "t95_pp": [
+     3.03,
+     22.05
+    ],
+    "signflip_p": 0.0094,
+    "harm_T": 17,
+    "harm_G": 120,
+    "pass": true,
+    "min_drop_script_k_le_2": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "sc-s11/r2"
+     ],
+     "point": 7.82
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 2,
+     "dropped": [
+      "fb-s17/r1",
+      "sc-s11/r2"
+     ],
+     "point": 7.82,
+     "boot95_after": [
+      -1.57,
+      16.99
+     ]
+    }
+   },
+   "delta_diff_pp": 3.75,
+   "pass_changed": true
+  },
+  "v4_b_plus_live_dir": {
+   "label": "B48 v4 (b) 加讀別格 live 目錄的對",
+   "source_path": "list_v4_review.comparisons.b_v2_plus_live_dir.T_vs_G",
+   "pairs": 20,
+   "n_sets": 16,
+   "original": {
+    "diff_pp": -5.31,
+    "boot95_pp": [
+     -16.88,
+     4.38
+    ],
+    "t95_pp": [
+     -17.4,
+     6.78
+    ],
+    "signflip_p": 0.407,
+    "harm_T": 12,
+    "harm_G": 19,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": -5.31
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": -5.31
+    }
+   },
+   "regraded": {
+    "diff_pp": -1.87,
+    "boot95_pp": [
+     -13.75,
+     8.75
+    ],
+    "t95_pp": [
+     -14.37,
+     10.62
+    ],
+    "signflip_p": 0.8741,
+    "harm_T": 8,
+    "harm_G": 20,
+    "pass": false,
+    "min_drop_script_k_le_2": {
+     "k": 0,
+     "dropped": [],
+     "point": -1.87
+    },
+    "min_drop_exact_point_lt_10": {
+     "k": 0,
+     "dropped": [],
+     "point": -1.87
+    }
+   },
+   "delta_diff_pp": 3.44,
+   "pass_changed": false
+  }
+ },
+ "other_primary_comparisons": {
+  "T_vs_TB": {
+   "all": {
+    "original": {
+     "diff_pp": 0.72,
+     "boot95_pp": [
+      -5.39,
+      7.16
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.86,
+     "boot95_pp": [
+      -6.45,
+      8.43
+     ],
+     "pass": false
+    }
+   },
+   "v1_b_prime": {
+    "original": {
+     "diff_pp": 0.77,
+     "boot95_pp": [
+      -3.74,
+      5.72
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 1.22,
+     "boot95_pp": [
+      -4.71,
+      7.67
+     ],
+     "pass": false
+    }
+   },
+   "v4_b": {
+    "original": {
+     "diff_pp": 4.04,
+     "boot95_pp": [
+      -0.25,
+      9.16
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 4.85,
+     "boot95_pp": [
+      0.24,
+      10.24
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_prime": {
+    "original": {
+     "diff_pp": 1.66,
+     "boot95_pp": [
+      -1.55,
+      5.8
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 2.52,
+     "boot95_pp": [
+      -1.21,
+      7.11
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_copy": {
+    "original": {
+     "diff_pp": 4.04,
+     "boot95_pp": [
+      -0.25,
+      9.16
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 4.85,
+     "boot95_pp": [
+      0.24,
+      10.24
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_report_readers": {
+    "original": {
+     "diff_pp": 4.62,
+     "boot95_pp": [
+      -0.48,
+      10.54
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 5.59,
+     "boot95_pp": [
+      0.0,
+      11.84
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_exp1cb_same": {
+    "original": {
+     "diff_pp": 4.17,
+     "boot95_pp": [
+      -0.23,
+      9.43
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 5.01,
+     "boot95_pp": [
+      0.33,
+      10.52
+     ],
+     "pass": true
+    }
+   }
+  },
+  "TE_vs_TER": {
+   "all": {
+    "original": {
+     "diff_pp": -0.44,
+     "boot95_pp": [
+      -3.36,
+      1.96
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.1,
+     "boot95_pp": [
+      -3.18,
+      3.02
+     ],
+     "pass": false
+    }
+   },
+   "v1_b_prime": {
+    "original": {
+     "diff_pp": -1.13,
+     "boot95_pp": [
+      -4.63,
+      1.79
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": -0.52,
+     "boot95_pp": [
+      -4.57,
+      3.02
+     ],
+     "pass": false
+    }
+   },
+   "v4_b": {
+    "original": {
+     "diff_pp": -0.77,
+     "boot95_pp": [
+      -4.01,
+      1.65
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.28,
+     "boot95_pp": [
+      -3.28,
+      3.31
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_prime": {
+    "original": {
+     "diff_pp": -0.82,
+     "boot95_pp": [
+      -4.28,
+      1.72
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.3,
+     "boot95_pp": [
+      -3.47,
+      3.45
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_copy": {
+    "original": {
+     "diff_pp": -0.77,
+     "boot95_pp": [
+      -4.01,
+      1.65
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.36,
+     "boot95_pp": [
+      -3.2,
+      3.31
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_report_readers": {
+    "original": {
+     "diff_pp": 0.04,
+     "boot95_pp": [
+      -3.91,
+      2.93
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 1.29,
+     "boot95_pp": [
+      -2.95,
+      4.81
+     ],
+     "pass": false
+    }
+   },
+   "v4_b_plus_exp1cb_same": {
+    "original": {
+     "diff_pp": -0.8,
+     "boot95_pp": [
+      -4.1,
+      1.67
+     ],
+     "pass": false
+    },
+    "regraded": {
+     "diff_pp": 0.29,
+     "boot95_pp": [
+      -3.35,
+      3.33
+     ],
+     "pass": false
+    }
+   }
+  }
+ },
+ "verdict": {
+  "framework": "T 對 G 需 ≥10pp 且 95% 群集 bootstrap 區間下界 >0 且傷害 T ≤ G；跨排除版本與敏感度皆成立才可判通過，否則維持未定。",
+  "original": "T 對 G：未定",
+  "regraded": "T 對 G：未定",
+  "changed": false,
+  "versions_flipped_fail_to_pass": [
+   "all_minus_empty",
+   "v1_b_prime",
+   "v4_b_prime",
+   "v4_b_prime_minus_empty",
+   "v4_b_prime_plus_copy",
+   "v4_b_prime_plus_copy_minus_empty",
+   "v4_b_prime_plus_exp1cb_same"
+  ],
+  "versions_still_failing": [
+   "v1_a",
+   "v1_b_minus_empty",
+   "v1_b_prime_minus_empty",
+   "v4_a",
+   "v4_b_plus_report_readers",
+   "v4_b_prime_plus_report_readers",
+   "v4_b_plus_report_readers_minus_empty",
+   "v4_b_prime_plus_report_readers_minus_empty",
+   "v4_b_plus_live_dir"
+  ],
+  "all_drop2_ci_note": "all 在重評下拿掉 2 對（fb-s08/r1、sc-s02/r1）時點估計雖為 +10.58，但 95% 區間已降為 [−1.38, +21.78]（下界 ≤0 即不過）；點估計低於 10pp 需拿掉 3 對（+8.82）。",
+  "summary": "重評讓各版 T−G 上升約 2.0–3.6pp，v1 (b′)、B48 v4 (b′) 及加抄寫兩對／exp1cB 同組的 (b′) 翻成過門檻，但 v4 (b′) 與 (b′)+抄寫兩對仍只差 1 對（fb-s17/r1）就掉回 <10pp；且排除全部讀別格報告的對後，(b_v4) 區間下界仍 ≤0（+10.81 [−1.33, +24.64]）、(b′_v4) 僅 +3.38 [−5.83, +12.39]，v1 (b) 拿掉空白初稿僅 +8.99，v1 (a) 為 +5.26 [−7.91, +18.23]，排除讀別格 live 目錄為 −1.87，B48 v4 (a) 仍只剩 10 對全對（0.00）無法判讀。整體判定「T 對 G：未定」不變。"
+ }
+}
