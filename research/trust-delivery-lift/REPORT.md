@@ -112,7 +112,7 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 | TYPED_REFUSE | 37 / 23 | **38.3%** | **33%** [11%, 56%] |
 | RULE | 60 / 149 | 71.3% | 0% [0,0] |
 
-**Gate false-release (RULE + TYPED_REFUSE combined, exploratory):** **0.5B 68.3%** (138/202 delivered wrong) vs **1.5B 63.9%** (172/269) — **modest drop**, not removal. **TYPED_REFUSE** alone improves at 1.5B: false-release **46.7% → 38.3%**; zero-wrong filing rate **50% → 33%** point with wide CIs (partial 0.5B n≈198/arm).
+**Gate false-release (RULE + TYPED_REFUSE combined, exploratory):** **0.5B 68.3%** (138/202 delivered wrong) vs **1.5B 63.9%** (172/269) — **modest drop**, not removal. **TYPED_REFUSE** at 1.5B: false-release among delivered **46.7% → 38.3%** (partial 0.5B); filing-level zero-wrong rate **50% → 33%** point (wide CIs; **not** a clean capacity win).
 
 **Does the gate’s false-release fall at 1.5B?** **Somewhat on TYPED_REFUSE deliveries**, but **still high**; model capacity does not make incomplete span contracts safe.
 
