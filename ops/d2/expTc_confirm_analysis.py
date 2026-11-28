@@ -290,9 +290,9 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None) -> dict:
         if unmatched_calls:
             net_esc += len(unmatched_calls); kinds["fetch_call_without_egress_record"] += len(unmatched_calls)
         win = [a for a in win_any if a.get("host") == host]
-        # B51(1)(d)：來源伺服器紀錄顯示這次執行窗內取得了別組的頁面（200）
-        other_set_200 = sum(1 for a_ in win_any if a_.get("status") == 200 and str(a_.get("host", "")).endswith(".d2-sources.example")
-                            and a_.get("host") != host)
+        # B51(1)(d)：這一次執行自己的出口紀錄（可歸屬到本格；來源伺服器的存取紀錄在並行時不能按時間窗歸屬）顯示取得了別組的頁面（200）
+        other_set_200 = sum(1 for e in eg_win if e.get("method") == "GET" and e.get("status") == 200
+                            and ".d2-sources.example" in str(e.get("url", "")) and f"//{host}/" not in str(e.get("url", "")))
         if other_set_200:
             net_esc += other_set_200; kinds["b51d_other_set_page_served"] += other_set_200
         n200 = sum(1 for a in win if a.get("status") == 200)
