@@ -257,6 +257,7 @@ def score_fb(roots):
     cells, meta = {}, {}
     for root in roots:
         man = json.loads((root / "reused_c0_sha256.json").read_text()) if (root / "reused_c0_sha256.json").is_file() else {}
+        man = man.get("files", man)
         for sid in truth:
             for rep in range(1, reps + 1):
                 rd = root / "cells" / sid / f"r{rep}"
@@ -460,6 +461,11 @@ def main() -> None:
         tb_trig = {k for k in base if (cells.get((k[0], k[1], "TB"), {}).get("rounds_run_doc") or 0) >= 1}
         # 附錄 B 補充：標記可疑（只用 c0 的紀錄判、整對排除、在回饋臂評分前就能算）
         susp, susp2, prec = set(), set(), collections.defaultdict(lambda: [0, 0])
+        # B27 名單（發射前由 expTc_prelaunch.py 算好、寫進回饋 root）；這裡再用 c0 紀錄的網址缺口補算一次，兩者取聯集
+        for r_ in froots:
+            bj = r_ / "b27_suspicious.json"
+            if bj.is_file():
+                susp |= {(x[0], int(x[1])) for x in json.loads(bj.read_text()) if (x[0], int(x[1])) in base}
         for k in base:
             r0 = allr.get((k[0], k[1], "c0", "c0"), {})
             if r0.get("requested_own_pages", 0) - r0.get("egress_own_pages_200", 0) > 0:

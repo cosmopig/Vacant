@@ -1,0 +1,282 @@
+{
+ "classifier": "executor (Claude session, vacant e1prime); answer key and correctness not consulted",
+ "categories": "B34(3) a–e",
+ "counts": {
+  "b": 10,
+  "c": 14,
+  "d": 3,
+  "e": 3
+ },
+ "rows": [
+  {
+   "i": 1,
+   "root": "expT_q9",
+   "set": "fb-s16",
+   "rep": 1,
+   "claim": "c06",
+   "class": "b",
+   "note": "值寫成 N/N（頁面是儲存格或括號寫法）"
+  },
+  {
+   "i": 2,
+   "root": "expT_q9",
+   "set": "fb-s16",
+   "rep": 1,
+   "claim": "c15",
+   "class": "b",
+   "note": "N/N 寫法"
+  },
+  {
+   "i": 3,
+   "root": "expT_q9",
+   "set": "fb-s16",
+   "rep": 1,
+   "claim": "c10",
+   "class": "b",
+   "note": "N/N 寫法"
+  },
+  {
+   "i": 4,
+   "root": "expT_q9",
+   "set": "fb-s07",
+   "rep": 2,
+   "claim": "c09",
+   "class": "b",
+   "note": "『N Apps, N Goals』文字寫法"
+  },
+  {
+   "i": 5,
+   "root": "expT_q9",
+   "set": "fb-s16",
+   "rep": 1,
+   "claim": "c14",
+   "class": "c",
+   "note": "統計表相鄰兩格『N N』無括號"
+  },
+  {
+   "i": 6,
+   "root": "expT_q9",
+   "set": "fb-s07",
+   "rep": 1,
+   "claim": "c17",
+   "class": "c",
+   "note": "統計表相鄰兩格"
+  },
+  {
+   "i": 7,
+   "root": "expT_q9",
+   "set": "fb-s07",
+   "rep": 2,
+   "claim": "c04",
+   "class": "b",
+   "note": "文字寫法"
+  },
+  {
+   "i": 8,
+   "root": "expT_q9",
+   "set": "fb-s07",
+   "rep": 1,
+   "claim": "c16",
+   "class": "c",
+   "note": "統計表相鄰兩格"
+  },
+  {
+   "i": 9,
+   "root": "expT_q9",
+   "set": "fb-s16",
+   "rep": 1,
+   "claim": "c09",
+   "class": "b",
+   "note": "N/N 寫法"
+  },
+  {
+   "i": 10,
+   "root": "expT_q9",
+   "set": "sc-s17",
+   "rep": 2,
+   "claim": "c07",
+   "class": "e",
+   "note": "多了一個字（Index）並加逗號"
+  },
+  {
+   "i": 11,
+   "root": "expT_q9",
+   "set": "sc-s17",
+   "rep": 2,
+   "claim": "c09",
+   "class": "b",
+   "note": "其他位置的空白（頁面無空白）"
+  },
+  {
+   "i": 12,
+   "root": "expT_q9",
+   "set": "sc-s10",
+   "rep": 1,
+   "claim": "c05",
+   "class": "c",
+   "note": "連結標籤使 US$ 與數字間多一個空白"
+  },
+  {
+   "i": 13,
+   "root": "expT_q9",
+   "set": "sc-s13",
+   "rep": 1,
+   "claim": "c05",
+   "class": "b",
+   "note": "『- 年』代替『(年)』"
+  },
+  {
+   "i": 14,
+   "root": "expT_q9",
+   "set": "sc-s12",
+   "rep": 1,
+   "claim": "c16",
+   "class": "d",
+   "note": "數字只出現在別的脈絡"
+  },
+  {
+   "i": 15,
+   "root": "expT_q9",
+   "set": "sc-s05",
+   "rep": 1,
+   "claim": "c10",
+   "class": "c",
+   "note": "註腳標記 [ a ] 把值拆開"
+  },
+  {
+   "i": 16,
+   "root": "expT_q9",
+   "set": "sc-s13",
+   "rep": 1,
+   "claim": "c03",
+   "class": "c",
+   "note": "註腳標記 [ 7 ]／[ 8 ] 把值拆開"
+  },
+  {
+   "i": 17,
+   "root": "expT_q9",
+   "set": "sc-s17",
+   "rep": 2,
+   "claim": "c19",
+   "class": "c",
+   "note": "連結標籤多出空白"
+  },
+  {
+   "i": 18,
+   "root": "expT_q9",
+   "set": "sc-s03",
+   "rep": 2,
+   "claim": "c15",
+   "class": "d",
+   "note": "日期與頁面不同，數字巧合"
+  },
+  {
+   "i": 19,
+   "root": "expT_q9",
+   "set": "sc-s04",
+   "rep": 1,
+   "claim": "c19",
+   "class": "c",
+   "note": "註腳標記 [ 1 ] 拆開"
+  },
+  {
+   "i": 20,
+   "root": "expT_q9",
+   "set": "sc-s13",
+   "rep": 2,
+   "claim": "c11",
+   "class": "c",
+   "note": "連結標籤多出空白"
+  },
+  {
+   "i": 21,
+   "root": "expT_q9",
+   "set": "sc-s14",
+   "rep": 1,
+   "claim": "c16",
+   "class": "b",
+   "note": "加了分號"
+  },
+  {
+   "i": 22,
+   "root": "expT_q9",
+   "set": "sc-s03",
+   "rep": 1,
+   "claim": "c17",
+   "class": "c",
+   "note": "註腳標記 [ 2 ] 拆開"
+  },
+  {
+   "i": 23,
+   "root": "expT_q9",
+   "set": "sc-s12",
+   "rep": 1,
+   "claim": "c13",
+   "class": "e",
+   "note": "把成立年與總部兩欄拼在一起"
+  },
+  {
+   "i": 24,
+   "root": "expT_q9",
+   "set": "sc-s12",
+   "rep": 1,
+   "claim": "c01",
+   "class": "c",
+   "note": "標籤使分號前多一個空白"
+  },
+  {
+   "i": 25,
+   "root": "expT_q9",
+   "set": "sc-s06",
+   "rep": 1,
+   "claim": "c03",
+   "class": "e",
+   "note": "值含 HTML 片段，日期與頁面不同"
+  },
+  {
+   "i": 26,
+   "root": "expT_q9",
+   "set": "sc-s02",
+   "rep": 1,
+   "claim": "c13",
+   "class": "c",
+   "note": "註腳標記拆開"
+  },
+  {
+   "i": 27,
+   "root": "expT_q9",
+   "set": "sc-s16",
+   "rep": 1,
+   "claim": "c06",
+   "class": "c",
+   "note": "連結標籤多出空白"
+  },
+  {
+   "i": 28,
+   "root": "expT_q9",
+   "set": "sc-s08",
+   "rep": 2,
+   "claim": "c15",
+   "class": "c",
+   "note": "註腳標記 [ 1 ] 拆開"
+  },
+  {
+   "i": 29,
+   "root": "expT_q9",
+   "set": "sc-s13",
+   "rep": 1,
+   "claim": "c01",
+   "class": "b",
+   "note": "改成分號分隔"
+  },
+  {
+   "i": 30,
+   "root": "expT_q9",
+   "set": "sc-s05",
+   "rep": 2,
+   "claim": "c03",
+   "class": "d",
+   "note": "值只出現在別的實體頁面（別的脈絡）"
+  }
+ ]
+}
