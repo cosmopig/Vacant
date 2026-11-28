@@ -1,0 +1,426 @@
+{
+ "note": "只用已提交資料；逐行多數決／逐行 oracle／一致度旗標無法由提交資料重算（見 not_recomputable）。",
+ "seed": 20261128,
+ "bootstrap": "組群集，2000 次，percentile [int(.025*B), int(.975*B)-1]",
+ "recomputed": {
+  "k5": {
+   "sets": 30,
+   "means": {
+    "A": 0.466,
+    "record": 0.7412,
+    "nonblank": 0.73,
+    "oracle": 0.7962
+   },
+   "by_domain": {
+    "companies": {
+     "A": 0.416,
+     "record": 0.645,
+     "nonblank": 0.765,
+     "oracle": 0.81
+    },
+    "football": {
+     "A": 0.491,
+     "record": 0.7893,
+     "nonblank": 0.7125,
+     "oracle": 0.7893
+    }
+   },
+   "comparisons": {
+    "record_vs_A": {
+     "mean": 0.2752,
+     "ci95": [
+      0.1787,
+      0.3718
+     ],
+     "sets": 30
+    },
+    "nonblank_vs_A": {
+     "mean": 0.264,
+     "ci95": [
+      0.1883,
+      0.3459
+     ],
+     "sets": 30
+    },
+    "record_vs_nonblank": {
+     "mean": 0.0112,
+     "ci95": [
+      -0.0654,
+      0.0836
+     ],
+     "sets": 30
+    },
+    "oracle_vs_record": {
+     "mean": 0.055,
+     "ci95": [
+      0.01,
+      0.115
+     ],
+     "sets": 30
+    }
+   }
+  },
+  "k3": {
+   "sets": 30,
+   "means": {
+    "A": 0.5054,
+    "record": 0.6861,
+    "nonblank": 0.6817,
+    "oracle": 0.7111
+   },
+   "by_domain": {
+    "companies": {
+     "A": 0.455,
+     "record": 0.615,
+     "nonblank": 0.665,
+     "oracle": 0.69
+    },
+    "football": {
+     "A": 0.5306,
+     "record": 0.7217,
+     "nonblank": 0.69,
+     "oracle": 0.7217
+    }
+   },
+   "comparisons": {
+    "record_vs_A": {
+     "mean": 0.1807,
+     "ci95": [
+      0.109,
+      0.2541
+     ],
+     "sets": 30
+    },
+    "nonblank_vs_A": {
+     "mean": 0.1763,
+     "ci95": [
+      0.1069,
+      0.251
+     ],
+     "sets": 30
+    },
+    "record_vs_nonblank": {
+     "mean": 0.0044,
+     "ci95": [
+      -0.035,
+      0.0444
+     ],
+     "sets": 30
+    },
+    "oracle_vs_record": {
+     "mean": 0.025,
+     "ci95": [
+      0.005,
+      0.055
+     ],
+     "sets": 30
+    }
+   }
+  }
+ },
+ "vs_reported": [
+  {
+   "item": "k5 mean A",
+   "recomputed": 0.466,
+   "reported": 0.466,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 mean record",
+   "recomputed": 0.7412,
+   "reported": 0.7412,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 mean nonblank",
+   "recomputed": 0.73,
+   "reported": 0.73,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 mean oracle",
+   "recomputed": 0.7962,
+   "reported": 0.7962,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 companies A",
+   "recomputed": 0.416,
+   "reported": 0.416,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 companies record",
+   "recomputed": 0.645,
+   "reported": 0.645,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 companies nonblank",
+   "recomputed": 0.765,
+   "reported": 0.765,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 companies oracle",
+   "recomputed": 0.81,
+   "reported": 0.81,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 football A",
+   "recomputed": 0.491,
+   "reported": 0.491,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 football record",
+   "recomputed": 0.7893,
+   "reported": 0.7893,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 football nonblank",
+   "recomputed": 0.7125,
+   "reported": 0.7125,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k5 football oracle",
+   "recomputed": 0.7893,
+   "reported": 0.7893,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 mean A",
+   "recomputed": 0.5054,
+   "reported": 0.5054,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 mean record",
+   "recomputed": 0.6861,
+   "reported": 0.6861,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 mean nonblank",
+   "recomputed": 0.6817,
+   "reported": 0.6817,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 mean oracle",
+   "recomputed": 0.7111,
+   "reported": 0.7111,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 companies A",
+   "recomputed": 0.455,
+   "reported": 0.455,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 companies record",
+   "recomputed": 0.615,
+   "reported": 0.615,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 companies nonblank",
+   "recomputed": 0.665,
+   "reported": 0.665,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 companies oracle",
+   "recomputed": 0.69,
+   "reported": 0.69,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 football A",
+   "recomputed": 0.5306,
+   "reported": 0.5306,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 football record",
+   "recomputed": 0.7217,
+   "reported": 0.7217,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 football nonblank",
+   "recomputed": 0.69,
+   "reported": 0.69,
+   "match": true,
+   "diff": 0.0
+  },
+  {
+   "item": "k3 football oracle",
+   "recomputed": 0.7217,
+   "reported": 0.7217,
+   "match": true,
+   "diff": 0.0
+  }
+ ],
+ "flag_internal_consistency": {
+  "companies": {
+   "filled_from_per_draft": 636,
+   "filled_reported": 577,
+   "filled_match": false,
+   "error_rate_from_per_draft": 0.3459,
+   "error_rate_reported": 0.279,
+   "error_rate_match": false,
+   "filled_diff": 59,
+   "wrong_from_per_draft": 220,
+   "wrong_implied_by_reported": 161,
+   "wrong_diff": 59,
+   "diff_all_wrong_lines": true,
+   "consensus": {
+    "integer_solutions(W,F,FW)": [
+     [
+      161,
+      77,
+      29
+     ]
+    ],
+    "coherent": true
+   },
+   "record": {
+    "integer_solutions(W,F,FW)": [
+     [
+      161,
+      236,
+      29
+     ]
+    ],
+    "coherent": true
+   }
+  },
+  "football": {
+   "filled_from_per_draft": 1112,
+   "filled_reported": 1110,
+   "filled_match": false,
+   "error_rate_from_per_draft": 0.2221,
+   "error_rate_reported": 0.2207,
+   "error_rate_match": false,
+   "filled_diff": 2,
+   "wrong_from_per_draft": 247,
+   "wrong_implied_by_reported": 245,
+   "wrong_diff": 2,
+   "diff_all_wrong_lines": true,
+   "consensus": {
+    "integer_solutions(W,F,FW)": [
+     [
+      245,
+      272,
+      216
+     ]
+    ],
+    "coherent": true
+   },
+   "record": {
+    "integer_solutions(W,F,FW)": [
+     [
+      245,
+      179,
+      141
+     ]
+    ],
+    "coherent": true
+   }
+  },
+  "all": {
+   "filled_from_per_draft": 1748,
+   "filled_reported": 1687,
+   "filled_match": false,
+   "error_rate_from_per_draft": 0.2672,
+   "error_rate_reported": 0.2407,
+   "error_rate_match": false,
+   "filled_diff": 61,
+   "wrong_from_per_draft": 467,
+   "wrong_implied_by_reported": 406,
+   "wrong_diff": 61,
+   "diff_all_wrong_lines": true,
+   "consensus": {
+    "integer_solutions(W,F,FW)": [
+     [
+      406,
+      349,
+      245
+     ]
+    ],
+    "coherent": true
+   },
+   "record": {
+    "integer_solutions(W,F,FW)": [
+     [
+      406,
+      415,
+      170
+     ]
+    ],
+    "coherent": true
+   }
+  }
+ },
+ "efamily_record_flag_crosscheck": {
+  "companies": {
+   "filled": 635,
+   "err_in": 0.2911,
+   "err_out": 0.3907,
+   "recall": 0.3881,
+   "flagged_share": 0.4598
+  },
+  "football": {
+   "filled": 1112,
+   "err_in": 0.7901,
+   "err_out": 0.1117,
+   "recall": 0.5789,
+   "flagged_share": 0.1628
+  },
+  "all": {
+   "filled": 1747,
+   "err_in": 0.482,
+   "err_out": 0.1868,
+   "recall": 0.4893,
+   "flagged_share": 0.2707
+  }
+ },
+ "not_recomputable": {
+  "reason": "逐行多數決、逐行 oracle、一致度旗標都要每組每行 5 份初稿的（canon_strict）值或 HMAC；git 裡只有 r1、r2 的逐行 HMAC（expT_lines_hmac.jsonl，且 before_matches_k 比的是教材修訂，不是初稿之間），r3–r5 只有每份的彙總（filled、filled_correct、evidence_score、旗標池計數）。初稿根目錄與 flags_v2.json 不在 git。",
+  "items": [
+   "majority",
+   "line_oracle",
+   "majority_vs_*",
+   "consensus flag err_in/err_out/recall",
+   "flag overlap",
+   "tie/blank variants"
+  ]
+ }
+}
