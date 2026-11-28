@@ -29,6 +29,12 @@ HKEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip
 SH = 8
 
 
+def redact(t: str) -> str:
+    """repo 是公開的：家目錄、live 目錄名、私密教材目錄名一律遮掉。"""
+    t = t.replace(str(pathlib.Path.home()), "~")
+    return re.sub(r"(?<![0-9a-f])[0-9a-f]{24}(?![0-9a-f])", "<H24>", t)
+
+
 def frags(text: str) -> set:
     """8 字詞的 shingle（雜湊成整數以省記憶體）。資訊框、grep 片段這類沒有句讀的文字也切得出片段。"""
     w = re.findall(r"\w+|[^\w\s]", text.lower())
@@ -126,7 +132,7 @@ def main() -> int:
                         else:
                             processed = bool(re.search(r"\|\s*(grep|awk|sed|cut|tr|sort|head|tail|python3?)\b|\b(grep|awk|sed)\s", args))
                             row.update({"label": "processed_output_unmatched" if processed else "no_material_match",
-                                        "best_ratio": round(bestr, 3), "result_frags": len(pf), "result_head": plain[:120]})
+                                        "best_ratio": round(bestr, 3), "result_frags": len(pf), "result_head": redact(plain[:120])})
                     rows.append(row)
         v = b51.get(key, {"escape_kinds": {}})
         pc_marks.append({"set": sid, "rep": rep, "arm": arm, "round": rnd,
