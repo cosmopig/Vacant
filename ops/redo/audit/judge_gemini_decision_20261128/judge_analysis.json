@@ -1,0 +1,390 @@
+{
+ "note": "事後探索性；判別模型只看公開頁面文字＋欄位＋值；對錯用答案鍵離線評分。",
+ "definitions": {
+  "denominator": "有填行＝初稿該行的值非空（canon_strict 解析不出的值也算，算錯）",
+  "record_flag": "E 家族定義：該份初稿在 ER 臂被送出的有填行（escalation/*/ER/meta.json 的 target_ids），和已定稿結論一致；flags_v2 的 flagged 另存 record_flag_flags_v2，只對照",
+  "consensus_flag": "事後選定：值（canon_strict；解析不出用原字串）≠ 5 份裡的多數值，或同值份數 ≤1；多數平手取 r 最小者的值；空白不參與"
+ },
+ "lines": 1747,
+ "by_domain": {
+  "football": {
+   "lines": 1112,
+   "error_rate": 0.2221,
+   "auc_judge_unsupported": 0.9134,
+   "judge": {
+    "p<0.1": {
+     "flagged_share": 0.0522,
+     "err_in": 0.9655,
+     "err_out": 0.1812,
+     "recall": 0.2267,
+     "n_flagged": 58
+    },
+    "p<0.3": {
+     "flagged_share": 0.0953,
+     "err_in": 0.9057,
+     "err_out": 0.1501,
+     "recall": 0.3887,
+     "n_flagged": 106
+    },
+    "p<0.5": {
+     "flagged_share": 0.1574,
+     "err_in": 0.84,
+     "err_out": 0.1067,
+     "recall": 0.5951,
+     "n_flagged": 175
+    },
+    "p<0.7": {
+     "flagged_share": 0.2653,
+     "err_in": 0.6373,
+     "err_out": 0.0722,
+     "recall": 0.7611,
+     "n_flagged": 295
+    },
+    "p<0.9": {
+     "flagged_share": 0.5387,
+     "err_in": 0.3973,
+     "err_out": 0.0175,
+     "recall": 0.9636,
+     "n_flagged": 599
+    }
+   },
+   "record_flag": {
+    "flagged_share": 0.1628,
+    "err_in": 0.7901,
+    "err_out": 0.1117,
+    "recall": 0.5789,
+    "n_flagged": 181
+   },
+   "record_flag_flags_v2": {
+    "flagged_share": 0.1628,
+    "err_in": 0.7901,
+    "err_out": 0.1117,
+    "recall": 0.5789,
+    "n_flagged": 181
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2464,
+    "err_in": 0.7956,
+    "err_out": 0.0346,
+    "recall": 0.8826,
+    "n_flagged": 274
+   },
+   "consensus_OR_judge_p<0.5": {
+    "flagged_share": 0.2887,
+    "err_in": 0.7477,
+    "err_out": 0.0088,
+    "recall": 0.9717,
+    "n_flagged": 321
+   },
+   "overlap_at_p<0.5": {
+    "judge&record": 119,
+    "judge&consensus": 128,
+    "record&consensus": 114,
+    "all_three": 95
+   },
+   "calibration_p_supported_vs_correct": {
+    "0.0-0.1": {
+     "n": 58,
+     "mean_p": 0.05,
+     "correct_rate": 0.034
+    },
+    "0.1-0.2": {
+     "n": 26,
+     "mean_p": 0.143,
+     "correct_rate": 0.154
+    },
+    "0.2-0.3": {
+     "n": 22,
+     "mean_p": 0.255,
+     "correct_rate": 0.182
+    },
+    "0.3-0.4": {
+     "n": 28,
+     "mean_p": 0.361,
+     "correct_rate": 0.143
+    },
+    "0.4-0.5": {
+     "n": 41,
+     "mean_p": 0.452,
+     "correct_rate": 0.341
+    },
+    "0.5-0.6": {
+     "n": 53,
+     "mean_p": 0.552,
+     "correct_rate": 0.604
+    },
+    "0.6-0.7": {
+     "n": 67,
+     "mean_p": 0.652,
+     "correct_rate": 0.701
+    },
+    "0.7-0.8": {
+     "n": 90,
+     "mean_p": 0.76,
+     "correct_rate": 0.733
+    },
+    "0.8-0.9": {
+     "n": 214,
+     "mean_p": 0.858,
+     "correct_rate": 0.879
+    },
+    "0.9-1.0": {
+     "n": 513,
+     "mean_p": 0.942,
+     "correct_rate": 0.982
+    }
+   }
+  },
+  "companies": {
+   "lines": 635,
+   "error_rate": 0.3449,
+   "auc_judge_unsupported": 0.4018,
+   "judge": {
+    "p<0.1": {
+     "flagged_share": 0.0142,
+     "err_in": 1.0,
+     "err_out": 0.3355,
+     "recall": 0.0411,
+     "n_flagged": 9
+    },
+    "p<0.3": {
+     "flagged_share": 0.0205,
+     "err_in": 0.9231,
+     "err_out": 0.3328,
+     "recall": 0.0548,
+     "n_flagged": 13
+    },
+    "p<0.5": {
+     "flagged_share": 0.0236,
+     "err_in": 0.8,
+     "err_out": 0.3339,
+     "recall": 0.0548,
+     "n_flagged": 15
+    },
+    "p<0.7": {
+     "flagged_share": 0.0488,
+     "err_in": 0.4839,
+     "err_out": 0.3377,
+     "recall": 0.0685,
+     "n_flagged": 31
+    },
+    "p<0.9": {
+     "flagged_share": 0.1701,
+     "err_in": 0.213,
+     "err_out": 0.3719,
+     "recall": 0.105,
+     "n_flagged": 108
+    }
+   },
+   "record_flag": {
+    "flagged_share": 0.4598,
+    "err_in": 0.2911,
+    "err_out": 0.3907,
+    "recall": 0.3881,
+    "n_flagged": 292
+   },
+   "record_flag_flags_v2": {
+    "flagged_share": 0.4598,
+    "err_in": 0.2911,
+    "err_out": 0.3907,
+    "recall": 0.3881,
+    "n_flagged": 292
+   },
+   "consensus_flag": {
+    "flagged_share": 0.1795,
+    "err_in": 0.5789,
+    "err_out": 0.2937,
+    "recall": 0.3014,
+    "n_flagged": 114
+   },
+   "consensus_OR_judge_p<0.5": {
+    "flagged_share": 0.1827,
+    "err_in": 0.569,
+    "err_out": 0.2948,
+    "recall": 0.3014,
+    "n_flagged": 116
+   },
+   "overlap_at_p<0.5": {
+    "judge&record": 12,
+    "judge&consensus": 13,
+    "record&consensus": 88,
+    "all_three": 12
+   },
+   "calibration_p_supported_vs_correct": {
+    "0.0-0.1": {
+     "n": 9,
+     "mean_p": 0.059,
+     "correct_rate": 0.0
+    },
+    "0.1-0.2": {
+     "n": 1,
+     "mean_p": 0.155,
+     "correct_rate": 0.0
+    },
+    "0.2-0.3": {
+     "n": 3,
+     "mean_p": 0.217,
+     "correct_rate": 0.333
+    },
+    "0.3-0.4": {
+     "n": 2,
+     "mean_p": 0.397,
+     "correct_rate": 1.0
+    },
+    "0.5-0.6": {
+     "n": 5,
+     "mean_p": 0.561,
+     "correct_rate": 0.8
+    },
+    "0.6-0.7": {
+     "n": 11,
+     "mean_p": 0.646,
+     "correct_rate": 0.818
+    },
+    "0.7-0.8": {
+     "n": 12,
+     "mean_p": 0.748,
+     "correct_rate": 1.0
+    },
+    "0.8-0.9": {
+     "n": 65,
+     "mean_p": 0.859,
+     "correct_rate": 0.877
+    },
+    "0.9-1.0": {
+     "n": 527,
+     "mean_p": 0.957,
+     "correct_rate": 0.628
+    }
+   }
+  },
+  "all": {
+   "lines": 1747,
+   "error_rate": 0.2667,
+   "auc_judge_unsupported": 0.6238,
+   "judge": {
+    "p<0.1": {
+     "flagged_share": 0.0384,
+     "err_in": 0.9701,
+     "err_out": 0.2387,
+     "recall": 0.1395,
+     "n_flagged": 67
+    },
+    "p<0.3": {
+     "flagged_share": 0.0681,
+     "err_in": 0.9076,
+     "err_out": 0.2199,
+     "recall": 0.2318,
+     "n_flagged": 119
+    },
+    "p<0.5": {
+     "flagged_share": 0.1088,
+     "err_in": 0.8368,
+     "err_out": 0.1972,
+     "recall": 0.3412,
+     "n_flagged": 190
+    },
+    "p<0.7": {
+     "flagged_share": 0.1866,
+     "err_in": 0.6227,
+     "err_out": 0.1851,
+     "recall": 0.4356,
+     "n_flagged": 326
+    },
+    "p<0.9": {
+     "flagged_share": 0.4047,
+     "err_in": 0.3692,
+     "err_out": 0.1971,
+     "recall": 0.5601,
+     "n_flagged": 707
+    }
+   },
+   "record_flag": {
+    "flagged_share": 0.2707,
+    "err_in": 0.482,
+    "err_out": 0.1868,
+    "recall": 0.4893,
+    "n_flagged": 473
+   },
+   "record_flag_flags_v2": {
+    "flagged_share": 0.2707,
+    "err_in": 0.482,
+    "err_out": 0.1868,
+    "recall": 0.4893,
+    "n_flagged": 473
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2221,
+    "err_in": 0.732,
+    "err_out": 0.1339,
+    "recall": 0.6094,
+    "n_flagged": 388
+   },
+   "consensus_OR_judge_p<0.5": {
+    "flagged_share": 0.2501,
+    "err_in": 0.7002,
+    "err_out": 0.1221,
+    "recall": 0.6567,
+    "n_flagged": 437
+   },
+   "overlap_at_p<0.5": {
+    "judge&record": 131,
+    "judge&consensus": 141,
+    "record&consensus": 202,
+    "all_three": 107
+   },
+   "calibration_p_supported_vs_correct": {
+    "0.0-0.1": {
+     "n": 67,
+     "mean_p": 0.052,
+     "correct_rate": 0.03
+    },
+    "0.1-0.2": {
+     "n": 27,
+     "mean_p": 0.144,
+     "correct_rate": 0.148
+    },
+    "0.2-0.3": {
+     "n": 25,
+     "mean_p": 0.25,
+     "correct_rate": 0.2
+    },
+    "0.3-0.4": {
+     "n": 30,
+     "mean_p": 0.364,
+     "correct_rate": 0.2
+    },
+    "0.4-0.5": {
+     "n": 41,
+     "mean_p": 0.452,
+     "correct_rate": 0.341
+    },
+    "0.5-0.6": {
+     "n": 58,
+     "mean_p": 0.553,
+     "correct_rate": 0.621
+    },
+    "0.6-0.7": {
+     "n": 78,
+     "mean_p": 0.651,
+     "correct_rate": 0.718
+    },
+    "0.7-0.8": {
+     "n": 102,
+     "mean_p": 0.758,
+     "correct_rate": 0.765
+    },
+    "0.8-0.9": {
+     "n": 279,
+     "mean_p": 0.859,
+     "correct_rate": 0.878
+    },
+    "0.9-1.0": {
+     "n": 1040,
+     "mean_p": 0.949,
+     "correct_rate": 0.803
+    }
+   }
+  }
+ }
+}

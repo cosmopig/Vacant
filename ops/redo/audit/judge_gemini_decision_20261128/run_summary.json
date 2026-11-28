@@ -1,0 +1,9 @@
+{
+ "lines": 1747,
+ "errors": 0,
+ "mean_input_tokens": 10722,
+ "usd_per_line": 0.001072,
+ "mean_latency_s": 0.714,
+ "total_filled_lines": 1747,
+ "full_estimate_usd": 1.873
+}
