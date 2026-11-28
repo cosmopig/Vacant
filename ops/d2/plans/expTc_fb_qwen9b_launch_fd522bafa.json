@@ -1,0 +1,190 @@
+{
+ "schema": "vacant.d2.expT.plan/2",
+ "id": "expTc_fb_qwen9b",
+ "seed": 20261229,
+ "arms": [
+  "A",
+  "G",
+  "T",
+  "TB"
+ ],
+ "reps": 2,
+ "max_rounds": 2,
+ "agent_timeout_s": 600,
+ "budget_s": 1800,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "haiku_full_root": null,
+ "escalation": {
+  "model": "claude-haiku-5-5",
+  "api_url": "https://api.anthropic.com/v1/messages",
+  "max_tokens": 1024,
+  "timeout_s": 120,
+  "price_per_mtok_in": 1.0,
+  "price_per_mtok_out": 5.0,
+  "ledger_path": "~/dev/ops/ctl/api_credit_ledger.jsonl"
+ },
+ "egress": {
+  "mode": "per-worker proxy, OS-assigned port"
+ },
+ "server": {
+  "port": 0
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003q9",
+   "model": "qwen/qwen3.5-9b",
+   "thinking": "off (reasoning_effort none)",
+   "ctx": 131072,
+   "parallel": 2,
+   "jobs": 2,
+   "sets": [
+    "cc-s01",
+    "cc-s02",
+    "cc-s03",
+    "cc-s04",
+    "cc-s05",
+    "ff-s01",
+    "ff-s02",
+    "ff-s03",
+    "ff-s04",
+    "ff-s05",
+    "ff-s06",
+    "ff-s07",
+    "ff-s08",
+    "ff-s09",
+    "ff-s10"
+   ]
+  },
+  {
+   "name": "lms1004",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "thinking": "off (reasoning_effort none)",
+   "ctx": 131072,
+   "parallel": 2,
+   "jobs": 2,
+   "sets": [
+    "cc-s06",
+    "cc-s07",
+    "cc-s08",
+    "cc-s09",
+    "cc-s10",
+    "ff-s11",
+    "ff-s12",
+    "ff-s13",
+    "ff-s14",
+    "ff-s15",
+    "ff-s16",
+    "ff-s17",
+    "ff-s18",
+    "ff-s19",
+    "ff-s20"
+   ]
+  }
+ ],
+ "vacant_python": "~/dev/ops/d2v52_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v52",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v52_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo ae3db0086",
+  "wheel": "~/dev/ops/d2_release/ae3db0086/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "fccf569cd9cf75b8df595465c44c45e0a8d9a6a4604fbc9e9b9e0ba5ddbf554e",
+  "venv": "~/dev/ops/d2v52_venv (non-editable install)",
+  "hooks": "`vacant install --agents pi --mode observe` using d2v52_venv"
+ },
+ "materials": [
+  {
+   "prefix": "cc",
+   "dir": "${D2_PRIVATE}/realrev3_companies",
+   "manifest_sha256": "3a2a1d6dbdfb340d14ca998e578aeddfcf6ccb3bb283c4a4152e7525e95ea3a9",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10"
+   ]
+  },
+  {
+   "prefix": "ff",
+   "dir": "${D2_PRIVATE}/realrev3_football",
+   "manifest_sha256": "39e665bdda084cf16cb142fe8611262b8ac8d069ea54ae0b8d0fb323ccaa9a87",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10",
+    "s11",
+    "s12",
+    "s13",
+    "s14",
+    "s15",
+    "s16",
+    "s17",
+    "s18",
+    "s19",
+    "s20"
+   ]
+  }
+ ],
+ "purpose": "Experiment T confirmation, part 2: arms A/G/T/TB on the part-1 drafts reps 1-2 (c0 directories copied from the part-1 root before launch, sha256 recorded), qwen3.5-9b, bwrap sandbox, both hosts.",
+ "prereg": {
+  "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
+  "code_sha256": {
+   "ops/d2/run_expT.py": "f55abc06d25e5ed86722560024f7a103c68fcd5eb4a83dfabee855fa72e1fd1f",
+   "ops/d2/bwrap_expT_agent.sh": "b87019e76f726faed43737f048742d9e7b0be420e57a4284c2ea8a88b2a3a995",
+   "ops/d2/sockfwd.py": "ad4a932114d0712e307235db149948ee5900d9319ddc19f2efb580040b1e4b52",
+   "ops/d2/netns_selftest.py": "09e0713ddfc99d10783272c777bb4d744562fd65e4fb100c9b93d5b152ae7b57",
+   "ops/d2/expT_feedback.py": "88f5aceb2a611653576193a19eef3d9cb478ab974d2d06057c57622ca66212ed",
+   "ops/d2/expT_reflag.py": "c83935d4b27bc9248b602ee36401e7a29bbaf06b99177a1470e627dfe5de9972",
+   "ops/d2/expT_metrics.py": "14948bac386c5668aba3c0237ae743c256698e7f1a9b9e03864661ad9cfa8fa0",
+   "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
+   "ops/d2/expTc_confirm_analysis.py": "452c1b1ca8ed8285f761781e0691014099d8d234d8adfd6e56152b845a8f0a84",
+   "ops/d2/expT_flagcheck.py": "5a390ddb0dee8024b895a24f4e575e8fe8eeed92811595846c64a313c61344b4",
+   "ops/d2/expT_b25.py": "883c3522b64d4f212957fc961f22e45fe3d97601c67b4db7835a24ba1f594eb5",
+   "ops/d2/expTc_prelaunch.py": "045b1895f1e6d80444f08f34725d462759ae62b7346384b960afca18f5fd4cd9",
+   "ops/d2/score_d2.py": "a226c618822438b8fc2e4a3b85987f21e2458ea82f7e8e3e61dcb222a66775da",
+   "ops/d2/scan_leak.py": "1dc9a271da8991a0fb27bf5fa1eea1369278901771b296ae7dd699d892dd8ca3",
+   "ops/d2/source_server.py": "e9195157ea40f5a06bfc473f8c9ff7db21d913d1c7b1d1329b7808d4f1d70f26",
+   "vacant_network/trace/sources.py": "7dbdecf3cbeb9df9f2c1777a07728d698d97110bc1dc75c758d20eb5e2679921",
+   "vacant_network/trace/locate.py": "f332ebc257aa827d66559990391aa9f13442cfe4b9043c1073f3e31c5b0823cf",
+   "vacant_network/trace/blame.py": "fb995b7c10d3809a58d0a9c0b9fe1b6d94a12ec8ef2853d14c67d24b271daae7",
+   "vacant_network/trace/evidence.py": "1c5bee96529e492cc3e93a085f7dfc61b2f06ab2c4c6c52aad661d9342ec573c",
+   "ops/d2/expT_digitadj.py": "3184680987709760b737524689d8270341c7fa800e17a10d7ffd2e84ee94afef",
+   "ops/d2/expT_b36_spec_test.py": "6a7e1567f711835fb161df6898b7e0be30747c587db9dc32d9a7ce6c531e8b8c",
+   "ops/d2/sandbox_negctl.py": "db2a4ff8681c23229d48fddc0c1f28215e69fbe9f267d3add58531e95f197657"
+  },
+  "sandbox_note": "bwrap_netns (Appendix B supplement B13): --unshare-net; only the egress proxy port is forwarded in via a unix socket with a per-request allowlist (own source host:80, LM Studio inference paths). Self-test ops/d2/netns_selftest.py must pass before launch.",
+  "hook_no_gc_note": "VACANT_HOOK_NO_GC=1 for every agent run of the fb plan (hook_no_gc: true); drafts plan ran without it (gc-deleted page contents are restored offline from revision-0 frozen pages by sha256, B25)."
+ },
+ "agent_sandbox": "bwrap_netns",
+ "reuse_c0_from": {
+  "plan": "expTc_drafts_qwen9b",
+  "reps": [
+   1,
+   2
+  ]
+ },
+ "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently.",
+ "flag_matching": "b24",
+ "hook_no_gc": true
+}

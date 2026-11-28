@@ -777,3 +777,16 @@ B25 全量驗收並寫補回鏈 → 重算 c0 標記（`flags_v2.json`）→ B33
   - 系統日誌 1.7G、`/tmp/claude-1000` 1.0G。
   - **這台主機沒有別的可用磁碟**：只有 `/boot`（2 GB，剩 1.6 GB），所以沒有可以搬過去的地方。要搬就得接外接或網路儲存，由決策方決定。
 - 新的 runner sha 寫進兩份計畫（回饋發射前最後一次）。
+
+## 附錄 B 補充（續十）：回饋臂發射前的門檻結果（fd522bafa 的程式；2026-11-28 03:2xZ）
+- **初稿**：兩台都完成，systemd 結果皆 success。B50 重試（`INFRA attempt`）0 筆，`ERROR` 0 筆，符號連結 0 個。
+- **netns 自我測試**：全過，21 項；擋下 9 筆，類別是 host_not_allowed、malformed_request_line、model_path_not_allowed、te_and_cl_together。
+- **`expTc_prelaunch.py` 結束碼 0**。輸出 `~/dev/ops/ctl/expTc_prelaunch.json`（sha256 `b5a26650f4552663858ec10c368b7871f9e4533f683891dc04af91c022b39e04`），原文存 `~/dev/ops/ctl/`，不進 repo：
+  - **B37**：期望 c0 60 份，缺 0；`done.json` 標 infra_void 0；掃到的 c0 執行 60 份（＝期望）；越界 0、基礎設施 0。
+  - **B25**：150 格；補回頁面 191 頁，分布在 82 格；無法補回 0；sha 對照失敗 0；正控制通過。
+    - 紀錄頁面集合 ≠ 伺服器 200 集合：1 格 `expTc_drafts_q9_1004/ff-s17/r5`。它是 r5，不進回饋臂；已在 B27 名單（ff-s17, 5），附錄 C 的 E 家族照 B27／C1 處理。
+  - **B33(1)** 不一致 0。
+  - **B27** 可疑對共 13 個（各 r 次合計）：cc-s04/5、cc-s08/1、cc-s09/1、cc-s10/4、ff-s01/2、ff-s03/3、ff-s05/3、ff-s06/1、ff-s14/2、ff-s14/3、ff-s17/5、ff-s19/1、ff-s19/5。`~/dev/ops/ctl/b27_suspicious.json` 的 sha256 `1ba16a02830d5b99745d5ae977d9096c74358ab83064b81b758a0446c064aea4`。
+  - **回饋 root**：兩台各複製 30 份 c0（r1、r2），manifest sha256 是 1003 `196fcdab4da57ba607da86ce42c82634c0cf5973ff8a3e7742ae634a955b2ac2`、1004 `6ffeb98c466b2064ba7f3b10cd4da4449c6c9630c025f89aad052151221452c4`。
+- **發射用計畫**：`ops/d2/plans/expTc_fb_qwen9b.json`（sha256 `5ce09c96dfd2672dcd218e61ba0688488183db974f7afedd5e33f4c4ed539fba`）。發射後逐位元凍結（B46(2)）；續跑用逐位元相同的副本 `ops/d2/plans/expTc_fb_qwen9b_launch_fd522bafa.json`（B43）。
+- B37 的越界判定用 25d428f7d 之後已推的 `scan_runs`。B55／B56 的實作（`ops/d2/expTc_b55.py`）在回饋臂跑的期間接進分析碼；評分前用它重新產生、凍結排除名單（B52(5)、B55(7)）。
