@@ -1,0 +1,85 @@
+{
+  "arms": {
+    "BLANKS": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 4181,
+      "completion_tokens_total": 886,
+      "mean_latency_s": 2.2028327594166655
+    },
+    "BLIND": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 4076,
+      "completion_tokens_total": 1590,
+      "mean_latency_s": 3.8467483911666682
+    },
+    "EVR": {
+      "n_tasks": 12,
+      "whole_success_final": 2,
+      "whole_success_rate": 0.16666666666666666,
+      "ci95_whole_success": [
+        0.046964147614822246,
+        0.44803635738467273
+      ],
+      "whole_success_draft_rate": 0.16666666666666666,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 4350,
+      "completion_tokens_total": 1594,
+      "mean_latency_s": 3.90073265633333
+    },
+    "KEEP": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 4158,
+      "completion_tokens_total": 1532,
+      "mean_latency_s": 3.7189365022499907
+    },
+    "RAND": {
+      "n_tasks": 12,
+      "whole_success_final": 1,
+      "whole_success_rate": 0.08333333333333333,
+      "ci95_whole_success": [
+        0.014864709450773488,
+        0.35388592179859524
+      ],
+      "whole_success_draft_rate": 0.08333333333333333,
+      "net_gain_pp": 0.0,
+      "wrong_to_right": 0,
+      "right_to_wrong": 0,
+      "prompt_tokens_total": 4201,
+      "completion_tokens_total": 1398,
+      "mean_latency_s": 3.4060363690833433
+    }
+  },
+  "n_rows": 60
+}

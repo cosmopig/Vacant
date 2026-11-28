@@ -1,0 +1,123 @@
+{
+  "task_id": "org_10",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1965",
+    "hq_city": "Chicago, Illinois",
+    "revenue_fy2017": "2.4",
+    "dividend_yield": "2.8",
+    "employees": "17600"
+  },
+  "final": {
+    "founded_year": "1965",
+    "hq_city": "Chicago, Illinois",
+    "revenue_fy2017": "240000000",
+    "dividend_yield": "2.8",
+    "employees": "17600"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1965",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Chicago, Illinois",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2017",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "2.4",
+        "detail": "ok"
+      },
+      {
+        "id": "dividend_yield",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "2.8",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "17600",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1965",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Chicago, Illinois",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2017",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "240000000",
+        "detail": "ok"
+      },
+      {
+        "id": "dividend_yield",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "2.8",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "17600",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 1965,\n  \"hq_city\": \"Chicago, Illinois\",\n  \"revenue_fy2017\": 2.4,\n  \"dividend_yield\": 2.8,\n  \"employees\": 17600\n}",
+      "prompt_tokens": 149,
+      "completion_tokens": 63,
+      "latency_s": 1.969938830999979
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\"founded_year\": 1965, \"hq_city\": \"Chicago, Illinois\", \"revenue_fy2017\": 240000000, \"dividend_yield\": 2.8, \"employees\": 17600}",
+      "prompt_tokens": 198,
+      "completion_tokens": 62,
+      "latency_s": 2.0536117240000067
+    }
+  ],
+  "prompt_tokens": 347,
+  "completion_tokens": 125,
+  "latency_s": 4.024308449000046
+}

@@ -1,0 +1,123 @@
+{
+  "task_id": "org_01",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "1998",
+    "hq_city": "Boston, Massachusetts",
+    "revenue_fy2024": "240",
+    "net_income_fy2024": "18",
+    "employees": "1250"
+  },
+  "final": {
+    "founded_year": "1998",
+    "hq_city": "Boston, Massachusetts",
+    "revenue_fy2024": "240",
+    "net_income_fy2024": "18",
+    "employees": "1250"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1998",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Boston, Massachusetts",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "240",
+        "detail": "ok"
+      },
+      {
+        "id": "net_income_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "18",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1250",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1998",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Boston, Massachusetts",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "240",
+        "detail": "ok"
+      },
+      {
+        "id": "net_income_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "18",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1250",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": 1998,\n  \"hq_city\": \"Boston, Massachusetts\",\n  \"revenue_fy2024\": 240,\n  \"net_income_fy2024\": 18,\n  \"employees\": 1250\n}",
+      "prompt_tokens": 157,
+      "completion_tokens": 66,
+      "latency_s": 1.904115499999989
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"1998\",\n    \"hq_city\": \"Boston, Massachusetts\",\n    \"revenue_fy2024\": 240,\n    \"net_income_fy2024\": 18,\n    \"employees\": 1250\n}",
+      "prompt_tokens": 192,
+      "completion_tokens": 66,
+      "latency_s": 1.9038203900000212
+    }
+  ],
+  "prompt_tokens": 349,
+  "completion_tokens": 132,
+  "latency_s": 3.808682766000004
+}

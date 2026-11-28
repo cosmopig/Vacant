@@ -156,15 +156,28 @@ def visible_check(got: str | None, spec: FieldSpec) -> tuple[bool, str]:
             return False, "missing_or_empty"
         return True, "optional_empty"
     s = str(got).strip()
+    if spec.ftype == "text" and spec.id == "hq_city" and "," in s:
+        return False, "hq_city_must_be_city_only"
     if spec.ftype == "year" and parse_year(s) is None:
         return False, "bad_year_format"
     if spec.ftype == "int" and parse_int(s) is None:
         return False, "bad_int_format"
-    if spec.ftype == "money" and parse_money(s) is None:
-        return False, "bad_money_format"
+    if spec.ftype == "money":
+        if parse_money(s) is None:
+            return False, "bad_money_format"
+        if not re.search(r"\b(USD|EUR|GBP|CHF|CAD|AUD|JPY|US\$|€|¥|\$)\b", s, re.I):
+            return False, "money_missing_currency"
     if spec.ftype == "percent" and parse_percent(s) is None:
         return False, "bad_percent_format"
     return True, "ok"
+
+
+def _digits_in_source(got: str, task: Mapping[str, Any]) -> bool:
+    src = " ".join(p["text"] for p in task["source_paragraphs"])
+    dg = re.sub(r"\D", "", got or "")
+    if not dg:
+        return True
+    return dg in re.sub(r"\D", "", src)
 
 
 def grade_task(task: Mapping[str, Any], delivery: Mapping[str, str]) -> dict[str, Any]:
@@ -174,6 +187,9 @@ def grade_task(task: Mapping[str, Any], delivery: Mapping[str, str]) -> dict[str
     for spec in fields:
         got = delivery.get(spec.id)
         vis_ok, vis_detail = visible_check(got, spec)
+        if vis_ok and got and spec.ftype in ("money", "int", "percent", "year"):
+            if not _digits_in_source(str(got), task):
+                vis_ok, vis_detail = False, "value_digits_not_in_source"
         hid_ok = False
         if got is not None and spec.id in gold:
             hid_ok = values_equal(spec.ftype, got, str(gold[spec.id]))

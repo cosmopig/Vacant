@@ -1,0 +1,123 @@
+{
+  "task_id": "org_11",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "2010",
+    "hq_city": "Shenzhen",
+    "revenue_fy2022": "1600000000",
+    "rnd_intensity": "11.0",
+    "employees": "12300"
+  },
+  "final": {
+    "founded_year": "2010",
+    "hq_city": "Shenzhen",
+    "revenue_fy2022": "1600000000",
+    "rnd_intensity": "11.0",
+    "employees": "12300"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2010",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Shenzhen",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1600000000",
+        "detail": "ok"
+      },
+      {
+        "id": "rnd_intensity",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "11.0",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "12300",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2010",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Shenzhen",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1600000000",
+        "detail": "ok"
+      },
+      {
+        "id": "rnd_intensity",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "11.0",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "12300",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 2010,\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": 1600000000,\n  \"rnd_intensity\": 11.0,\n  \"employees\": 12300\n}",
+      "prompt_tokens": 149,
+      "completion_tokens": 69,
+      "latency_s": 1.9508398479999869
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"2010\",\n  \"hq_city\": \"Shenzhen\",\n  \"revenue_fy2022\": \"1600000000\",\n  \"rnd_intensity\": \"11.0\",\n  \"employees\": \"12300\"\n}",
+      "prompt_tokens": 204,
+      "completion_tokens": 69,
+      "latency_s": 2.1171855740000183
+    }
+  ],
+  "prompt_tokens": 353,
+  "completion_tokens": 138,
+  "latency_s": 4.068761110000025
+}

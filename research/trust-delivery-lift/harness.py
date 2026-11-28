@@ -46,17 +46,25 @@ def run_task(
     rng: random.Random,
     *,
     upfront_call1: bool,
+    frozen_draft: dict[str, str] | None = None,
+    frozen_call1_text: str | None = None,
 ) -> dict[str, Any]:
     t0 = time.perf_counter()
     calls: list[dict[str, Any]] = []
 
-    c1_user = build_call1_user(task, upfront=(upfront_call1 or arm == "UPFRONT"))
-    r1: CallResult = backend.complete(SYSTEM, c1_user)
-    calls.append({"phase": "call1", "arm": arm, **r1.__dict__})
-    draft = parse_delivery(r1.text)
+    if frozen_draft is not None:
+        draft = dict(frozen_draft)
+        r1_text = frozen_call1_text or json.dumps(draft, ensure_ascii=False)
+        calls.append({"phase": "call1", "arm": arm, "text": r1_text, "prompt_tokens": 0, "completion_tokens": 0, "latency_s": 0.0, "frozen": True})
+    else:
+        c1_user = build_call1_user(task, upfront=(upfront_call1 or arm == "UPFRONT"))
+        r1: CallResult = backend.complete(SYSTEM, c1_user)
+        calls.append({"phase": "call1", "arm": arm, **r1.__dict__})
+        draft = parse_delivery(r1.text)
+        r1_text = r1.text
 
     vis0 = _visible_grade(task, draft)
-    c2_user = build_call2_user(task, arm, r1.text, rng=rng, visible_grade=vis0)
+    c2_user = build_call2_user(task, arm, r1_text, rng=rng, visible_grade=vis0)
     r2: CallResult = backend.complete(SYSTEM, c2_user)
     calls.append({"phase": "call2", "arm": arm, **r2.__dict__})
 
@@ -89,19 +97,39 @@ def run_task(
     }
 
 
+def load_drafts(path: Path) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            row = json.loads(line)
+            out[row["task_id"]] = row
+    return out
+
+
 def run_batch(
     tasks: list[dict[str, Any]],
     arms: list[str],
     backend: ChatBackend,
     seed: int,
     out_dir: Path,
+    *,
+    drafts: dict[str, dict[str, Any]] | None = None,
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(seed)
     rows = []
     for task in tasks:
+        fr = drafts.get(task["task_id"]) if drafts else None
         for arm in arms:
-            row = run_task(task, arm, backend, rng, upfront_call1=(arm == "UPFRONT"))
+            row = run_task(
+                task,
+                arm,
+                backend,
+                rng,
+                upfront_call1=(arm == "UPFRONT"),
+                frozen_draft=fr["draft"] if fr else None,
+                frozen_call1_text=fr.get("raw_call1") if fr else None,
+            )
             rows.append(row)
             (out_dir / f"{task['task_id']}__{arm}.json").write_text(
                 json.dumps(row, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -130,6 +158,7 @@ def main() -> None:
     ap.add_argument("--backend", choices=("stub", "qwen0.5b"), default="qwen0.5b")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--drafts", type=Path, help="frozen call-1 drafts jsonl (paired design)")
     ap.add_argument("--selftest-scorer", action="store_true")
     args = ap.parse_args()
 
@@ -149,7 +178,8 @@ def main() -> None:
     else:
         backend = TransformersBackend()
 
-    run_batch(tasks, arms, backend, args.seed, args.out)
+    drafts = load_drafts(args.drafts) if args.drafts else None
+    run_batch(tasks, arms, backend, args.seed, args.out, drafts=drafts)
     print(f"wrote {args.out}")
 
 

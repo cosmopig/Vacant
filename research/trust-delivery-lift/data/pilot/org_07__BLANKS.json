@@ -1,0 +1,123 @@
+{
+  "task_id": "org_07",
+  "arm": "BLANKS",
+  "draft": {
+    "founded_year": "2015",
+    "hq_city": "Berlin, Germany",
+    "arr_fy2024": "2024",
+    "gross_margin": "72%",
+    "employees": "890"
+  },
+  "final": {
+    "founded_year": "2015",
+    "hq_city": "Berlin, Germany",
+    "arr_fy2024": "2024",
+    "gross_margin": "72%",
+    "employees": "890"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2015",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Berlin, Germany",
+        "detail": "ok"
+      },
+      {
+        "id": "arr_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "2024",
+        "detail": "ok"
+      },
+      {
+        "id": "gross_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "72%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "890",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2015",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "Berlin, Germany",
+        "detail": "ok"
+      },
+      {
+        "id": "arr_fy2024",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "2024",
+        "detail": "ok"
+      },
+      {
+        "id": "gross_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "72%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "890",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLANKS",
+      "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+      "prompt_tokens": 142,
+      "completion_tokens": 59,
+      "latency_s": 1.6995880570000281
+    },
+    {
+      "phase": "call2",
+      "arm": "BLANKS",
+      "text": "{}",
+      "prompt_tokens": 184,
+      "completion_tokens": 2,
+      "latency_s": 0.1258914630000163
+    }
+  ],
+  "prompt_tokens": 326,
+  "completion_tokens": 61,
+  "latency_s": 1.8261533310000004
+}
