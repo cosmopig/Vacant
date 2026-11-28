@@ -1,0 +1,35 @@
+{
+ "all_pass": true,
+ "cases": [
+  {
+   "case": "server_down_no_records",
+   "expected_server_unresponsive": true,
+   "got": true,
+   "pass": true
+  },
+  {
+   "case": "server_up_request_blocked_https443",
+   "expected_server_unresponsive": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "case": "wrong_port_blocked_server_down_otherwise",
+   "expected_server_unresponsive": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "case": "server_up_other_cells_only_no_block",
+   "expected_server_unresponsive": false,
+   "got": false,
+   "pass": true
+  },
+  {
+   "case": "other_cell_success_outside_60s",
+   "expected_server_unresponsive": true,
+   "got": true,
+   "pass": true
+  }
+ ]
+}

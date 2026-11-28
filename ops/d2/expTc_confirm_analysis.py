@@ -237,6 +237,23 @@ def classify_model_stop(txt: str) -> tuple[bool, bool]:
         model_err = False
     return ctx, model_err
 
+
+def b61_server_unresponsive(acc: list, t0, t1, blk: pathlib.Path, host: str) -> bool:
+    """B61(1)：只有伺服器程序在執行窗內沒有回應才算基礎設施。
+    伺服器有回應＝執行窗前後 60 秒內有任何一筆成功（200）紀錄（任何格；同一個伺服器程序）。
+    請求被沙箱外轉送器依白名單擋下（net_blocked.jsonl 在窗內有本格主機的紀錄）⇒ 模型行為，不是伺服器沒回應。"""
+    if not (t0 and t1):
+        return True
+    if blk.is_file():
+        for line in blk.read_text(errors="replace").splitlines():
+            try:
+                b = json.loads(line)
+            except ValueError:
+                continue
+            if str(b.get("host") or "").split(":")[0] == host and t0 - 1 <= b.get("ts", 0) <= t1 + 1:
+                return False
+    return not any(a.get("status") == 200 and t0 - 60 <= a.get("ts", 0) <= t1 + 60 for a in acc)
+
 _KNOWN_CACHE: dict = {}
 _SHA_CACHE: dict = {}
 
@@ -263,7 +280,8 @@ def b56_known(d2: str, known_file: str | None = None) -> set:
     return _KNOWN_CACHE[key]
 
 
-def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: str | None = None, b55_literal: bool = False) -> dict:
+def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: str | None = None, b55_literal: bool = False,
+              infra_rule: str = "b61") -> dict:
     """逐次 agent 執行：越界（檔案、網路繞過）、基礎設施分類、模型行為（上下文用完、逾時、沒抓頁面）。只用紀錄，不看分數。
 
     判定（附錄 B 的 B2／B4，加上 11/28 看結果前的執行補充）：
@@ -469,6 +487,7 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
         if unmatched_calls:
             net_esc += len(unmatched_calls); kinds["fetch_call_without_egress_record"] += len(unmatched_calls)
         win = [a for a in win_any if a.get("host") == host]
+        server_unresponsive = b61_server_unresponsive(acc, t0, t1, blk, host) if infra_rule == "b61" else True
         # B51(1)(d)：這一次執行自己的出口紀錄（可歸屬到本格；來源伺服器的存取紀錄在並行時不能按時間窗歸屬）顯示取得了別組的頁面（200）
         def _h(u):
             try:
@@ -497,7 +516,8 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
             # 量具缺口（標記可疑的主訊號；只用紀錄、不碰答案鍵）：指令裡字面出現的本格頁面網址數 − 出口紀錄到的 200 頁面數
             "requested_own_pages": len(own_page_urls),
             "egress_own_pages_200": len({e.get("url") for e in eg_win if e.get("method") == "GET" and e.get("status") == 200 and host in str(e.get("url"))}),
-            "infra": bool(n5xx or n404_exist or (own_req > 0 and len(win) == 0) or (model_err and not ctx)),
+            "infra": bool(n5xx or n404_exist or (own_req > 0 and len(win) == 0 and server_unresponsive) or (model_err and not ctx)),
+            "infra_orig_rule": bool(n5xx or n404_exist or (own_req > 0 and len(win) == 0) or (model_err and not ctx)),
             "_access_urls": sorted({f"http://{a['host']}{a['path']}" for a in win if a.get("status") == 200})}
     for key, r in runs.items():
         if r.get("in_progress"):
@@ -626,7 +646,10 @@ def selector(draft_roots, runs_by_root, nonblank_only: bool, flags_name: str = "
         if sha is None:
             plan, sha = run["plan_body"], run.get("plan_sha256")
         assert run.get("plan_sha256") == sha, "draft roots have different plan sha"
-    truth = M.load_manifests_with_truth(plan); K = int(plan.get("reps") or 5)
+    truth_all = M.load_manifests_with_truth(plan); K = int(plan.get("reps") or 5)
+    # 2026-11-28（vacant-cloud 稽核）：只看給定 root 裡有的組；分台選擇器先前把另一台的組當成份數不齊、誤降成 k=4
+    _present = {p.name for r in draft_roots for p in (r / "cells").iterdir() if p.is_dir()}
+    truth = {sid: v for sid, v in truth_all.items() if sid in _present}
     valid: dict = collections.defaultdict(list)
     for root in draft_roots:
         runs = runs_by_root[root]
@@ -640,6 +663,9 @@ def selector(draft_roots, runs_by_root, nonblank_only: bool, flags_name: str = "
                 d["filled"] = len(filled)
                 d["filled_correct"] = sum(1 for c in filled if M.strict_status(vals.get(c["id"]), c["id"], truth[sid]["truth"], 0) == "correct")
                 valid[sid].append(d)
+    drafts_export = [{"set": sid, "rep": d["rep"], "evidence_score": d.get("evidence_score"), "blank_count": d.get("blank_count"),
+                      "n_claims": d.get("n_claims"), "filled": d.get("filled"), "filled_correct": d.get("filled_correct"),
+                      "correct_prop": d.get("correct_prop")} for sid in sorted(valid) for d in sorted(valid[sid], key=lambda x: x["rep"])]
     k = K
     if any(len({d["rep"] for d in valid.get(s, [])} & set(range(1, K + 1))) < K for s in truth):
         k = K - 1
@@ -675,7 +701,8 @@ def selector(draft_roots, runs_by_root, nonblank_only: bool, flags_name: str = "
            "record_vs_nonblank": cmp("record", "nonblank", DELTA["record_vs_nonblank"]),
            "record_vs_oracle": cmp("record", "oracle", None),
            "same_pick_record_nonblank": sum(1 for r in rows if r["record_rep"] == r["nonblank_rep"]),
-           "per_set": rows}
+           "per_set": rows, "per_draft": drafts_export,
+           "k_per_set_range": [min((r_["k"] for r_ in rows), default=None), max((r_["k"] for r_ in rows), default=None)]}
     if nonblank_only and n < 20:
         res["note"] = "組數不足、只描述（B5）"
     return res
@@ -713,11 +740,12 @@ def main() -> None:
     ap.add_argument("--out", required=True); ap.add_argument("--md")
     ap.add_argument("--known-file", help="B56(2)(c) 凍結的已知別格名稱集合（私有檔）")
     ap.add_argument("--negctl-after", nargs="*", default=[], help="B56(2)(d)：每個回饋 root 跑完後的正式路徑形狀負控制輸出（JSON）")
+    ap.add_argument("--infra-rule", choices=["b61", "orig"], default="b61", help="B61：主分析＝b61；原實作（59 對）＝orig，敏感度")
     a = ap.parse_args()
     droots = [pathlib.Path(x).resolve() for x in a.drafts]; froots = [pathlib.Path(x).resolve() for x in a.fb]
     d2 = str(droots[0].parent)
-    runs_d = {r: scan_runs(r, d2, known_file=a.known_file) for r in droots}
-    out: dict = {"schema": "vacant.d2.expTc.confirm/3"}
+    runs_d = {r: scan_runs(r, d2, known_file=a.known_file, infra_rule=a.infra_rule) for r in droots}
+    out: dict = {"schema": "vacant.d2.expTc.confirm/3", "infra_rule": a.infra_rule}
 
     def _stop(reason: str, detail) -> None:
         """B56(2)：任一機械訊號成立 ⇒ 沙箱失效：不評分、輸出原因、通知決策方（結束碼 2）。"""
@@ -742,7 +770,7 @@ def main() -> None:
     out["selector"] = {"all": sel_all, "nonblank_drafts": sel_nb, "old_flags_descriptive": sel_v1}
     ps = {"record_vs_random": sel_all["record_vs_random"]["perm_p"], "record_vs_nonblank": sel_all["record_vs_nonblank"]["perm_p"]}
     if froots:
-        runs_f = {r: scan_runs(r, d2, known_file=a.known_file) for r in froots}
+        runs_f = {r: scan_runs(r, d2, known_file=a.known_file, infra_rule=a.infra_rule) for r in froots}
         sig_f = [(r.name, k, v["sandbox_failure_signals"]) for r in froots for k, v in runs_f[r].items() if v.get("sandbox_failure_signals")]
         if sig_f:
             _stop("回饋臂的機械訊號 (a)(b)(c)", sig_f)
@@ -901,6 +929,19 @@ def main() -> None:
                 "T_vs_G_aligned": fb_block(cells, hp - misaligned, f"per_host_{h_}_TG_aligned_descriptive_B59_3")}
         b59["selector_per_host"] = {r_.name: selector([r_], {r_: runs_d[r_]}, False) for r_ in droots}
         out["b59_descriptive"] = b59
+        # B35（vacant-cloud 稽核：回饋家族沒有輸出公司／足球分層）——只描述
+        out["b35_feedback_by_domain"] = {dom: {"pairs": len(pp), "all": fb_block(cells, pp, f"b35_{dom}_descriptive"),
+                                               "T_vs_G_aligned": fb_block(cells, pp - misaligned, f"b35_{dom}_TG_aligned_descriptive")}
+                                         for dom, pp in (("companies", {k for k in base if k[0].startswith("cc")}),
+                                                         ("football", {k for k in base if k[0].startswith("ff")}))}
+        out["b35_selector_by_domain"] = {"note": "選擇器分層由逐組資料（selector.all.per_set）依組別前綴切開即可重算"}
+        # 稽核包用的逐對逐臂資料（B12；值不出現，只有計數）
+        out["per_pair_arm_cells"] = {f"{k[0]}/r{k[1]}/{arm}": {kk: vv for kk, vv in cells[(k[0], k[1], arm)].items()
+                                                              if isinstance(vv, (int, float, bool, type(None))) or kk in ("rounds_run_doc",)}
+                                     for k in sorted(all_pairs) for arm in arms if (k[0], k[1], arm) in cells}
+        out["per_pair_status"] = {f"{k[0]}/r{k[1]}": {"in_base": k in base, "void_infra": k in void_pairs, "start_bad": k in start_bad,
+                                                      "blank_draft": k in blank, "host": str(meta[k].get("host")),
+                                                      "draft_context_exhausted": k in ctx_draft_pairs} for k in sorted(all_pairs)}
         # T−G 用對齊後的對（B9 (1)）
         ps["T_vs_TB"] = fb_all["T_vs_TB"]["perm_p"]; ps["T_vs_G"] = fb_tg["T_vs_G"]["perm_p"]
         h = holm(ps)
@@ -997,7 +1038,9 @@ def main() -> None:
         L.append(f"初稿執行 {out['drafts_runs']['total']}：基礎設施 {out['drafts_runs']['infra']}、越界 {out['drafts_runs']['escape']}、上下文用完 {out['drafts_runs']['context_exhausted']}、逾時 {out['drafts_runs']['timeout']}")
         for lab in ("all", "nonblank_drafts"):
             s = out["selector"][lab]
-            L.append(f"## 選擇器 {lab}：{s['sets']} 組，k={s['k_used']}，平均 {s['means']}，同挑 {s['same_pick_record_nonblank']}")
+            _kr = s.get("k_per_set_range") or [None, None]
+            _klab = f"k={s['k_used']}" if _kr[0] == _kr[1] else f"k={s['k_used']}（實際每組 {_kr[0]}–{_kr[1]} 份）"
+            L.append(f"## 選擇器 {lab}：{s['sets']} 組，{_klab}，平均 {s['means']}，同挑 {s['same_pick_record_nonblank']}")
             for kk in ("record_vs_random", "record_vs_nonblank", "record_vs_oracle"):
                 r = s[kk]; L.append(f"- {kk}: {r.get('diff')} 95% {r.get('ci95')} 90% {r.get('ci90')} p={r.get('perm_p')} 等價={r.get('equivalent_within_delta')}；拿掉前 2 組 {r['drop_top2_sets'].get('diff')} {r['drop_top2_sets'].get('ci95')}")
         if froots:
