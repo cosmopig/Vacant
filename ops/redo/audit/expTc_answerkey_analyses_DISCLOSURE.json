@@ -1,0 +1,35 @@
+{
+ "label": "看過答案鍵、只作揭露（B39）。不得作為任何規則、門檻、分類或結論的依據；不得在結論裡寫「剩下的標記多半是對的值」。",
+ "analysis_1_after_first_regression_wide_rule_overmatch": {
+  "population": "軟體／公司組被寬規則解除的 79 行（探索 c0）",
+  "only_by_removing_all_whitespace_or_underscore": {
+   "lines": 36,
+   "wrong": 15
+  },
+  "paren_whitespace_heuristic": {
+   "lines": 42,
+   "wrong": 4
+  },
+  "restored_page_literal": {
+   "lines": 1,
+   "wrong": 1
+  }
+ },
+ "analysis_2_after_second_regression_residual": {
+  "population": "第二次回歸（封閉三項）下仍被標的有值行，依寬鬆口徑與對錯",
+  "football": {
+   "loose_correct": 10,
+   "loose_wrong": 33,
+   "noloose_wrong": 27
+  },
+  "software_company": {
+   "loose_correct": 35,
+   "loose_wrong": 21,
+   "noloose_correct": 44,
+   "noloose_missing": 16,
+   "noloose_wrong": 46
+  },
+  "note": "這份分析在 B34 條文到達之前做，用的就是 B34 的同一個母體（148 行 = 足球 43→42 / 公司 56→106 的口徑差異見下）；因此 B34 分類者事先看過母體的對錯，分類不完全盲。"
+ },
+ "caveat": "analysis_2 的寬鬆口徑命中數（足球 43／公司 56）是對 n2db 規則下的被標行算的初版，B34 的母體 148 行（足球 42、公司 106）是封閉三項下的最終版。"
+}

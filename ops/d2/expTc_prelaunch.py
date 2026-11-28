@@ -35,6 +35,32 @@ def main() -> int:
     a = ap.parse_args(); out = pathlib.Path(a.out); tmp = out.parent
     droots = [pathlib.Path(x) for x in a.drafts]; froots = [pathlib.Path(x) for x in a.fb]
     rep = {}
+    # 0. B37(1)(2)：30 組 × r1、r2 共 60 份 c0 都有 done.json、沒有 infra_void；這 60 份的 B16 (a)–(e) 越界與網路掃描為 0
+    plan_d = json.loads((REPO / "ops/d2/plans/expTc_drafts_qwen9b.json").read_text())
+    sets = [f"{m['prefix']}-{x}" for m in plan_d["materials"] for x in m["sets"]]
+    missing, void = [], []
+    for sid in sets:
+        for rp in (1, 2):
+            c0 = next((d / "cells" / sid / f"r{rp}" / "c0" for d in droots if (d / "cells" / sid / f"r{rp}" / "c0" / "done.json").is_file()), None)
+            if c0 is None:
+                missing.append(f"{sid}/r{rp}"); continue
+            if json.loads((c0 / "done.json").read_text()).get("infra_void"):
+                void.append(f"{sid}/r{rp}")
+    sys.path.insert(0, str(HERE))
+    from ops.d2 import expTc_confirm_analysis as A
+    d2 = str(droots[0].parent); esc, infra, scanned = [], [], 0
+    for d in droots:
+        for k, v in A.scan_runs(d, d2).items():
+            if k[2] == "c0" and k[1] in (1, 2):
+                scanned += 1
+                if v["escape"]:
+                    esc.append({"key": list(k), "kinds": v["escape_kinds"], "unlogged": v["unlogged_server_200"]})
+                if v["infra"]:
+                    infra.append(list(k))
+    rep["b37"] = {"expected_c0": 2 * len(sets), "missing": missing, "infra_void_done_json": void, "scanned_c0_runs": scanned,
+                  "escape_runs": esc, "infra_runs_by_scan": infra}
+    if missing or void or esc or infra:
+        out.write_text(json.dumps(rep, ensure_ascii=False, indent=1)); print(json.dumps(rep, ensure_ascii=False)[:2000]); return 1
     # 1. B25
     run([str(HERE / "expT_b25.py"), *map(str, droots), "--positive-root", a.positive_root, "--write-chain", "--json", str(tmp / "b25_final.json")])
     b25 = json.loads((tmp / "b25_final.json").read_text())
@@ -49,8 +75,6 @@ def main() -> int:
     rep["b33_inconsistent"] = fc["b33_inconsistent"]; rep["b32_supplement_note"] = "see ops/d2 supplementary invariance in appendix"
     hard_b33 = len(fc["b33_inconsistent"]) == 0
     # 4. B27 suspicious list (c0 records only)
-    sys.path.insert(0, str(HERE))
-    from ops.d2 import expTc_confirm_analysis as A
     susp = set()
     for c in b25["cells"]:
         if c["unrestorable_pages"] or not c["recorded_eq_server"]:

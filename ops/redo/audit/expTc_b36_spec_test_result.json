@@ -1,0 +1,185 @@
+{
+ "all_pass": true,
+ "cases": [
+  {
+   "class": "same",
+   "value": "US$2.9 billion (2016)",
+   "page": "<td>US$2.9 billion (2016)</td>",
+   "expect": "eq_literal",
+   "literal": true,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "same",
+   "value": "Monolithic kernel",
+   "page": "<p>Kernel type Monolithic kernel here</p>",
+   "expect": "eq_literal",
+   "literal": true,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "same",
+   "value": "absent value",
+   "page": "<p>nothing relevant here</p>",
+   "expect": "eq_literal",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "paren_ws",
+   "value": "32(1)",
+   "page": "<td>32</td> <td>(1)</td>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "paren_ws",
+   "value": "32 (1)",
+   "page": "<td>32(1)</td>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "paren_ws",
+   "value": "32(1)",
+   "page": "<p>32 (1)</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "paren_ws",
+   "value": "32(1)",
+   "page": "<p>32 (1)</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "paren_ws",
+   "value": "Xfce (default)",
+   "page": "<p>Xfce ( default )</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "md",
+   "value": "**32 (1)**",
+   "page": "<p>32 (1)</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "md",
+   "value": "`US$2.9 billion`",
+   "page": "<p>US$2.9 billion</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "md",
+   "value": "`32` `(1)`",
+   "page": "<p>32 (1)</p>",
+   "expect": "match",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "other_ws",
+   "value": "US$2.9billion",
+   "page": "<p>US$2.9 billion</p>",
+   "expect": "no_match",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "other_ws",
+   "value": "US$ 2.9 billion",
+   "page": "<p>US$2.9 billion</p>",
+   "expect": "no_match",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "underscore",
+   "value": "x86_64",
+   "page": "<p>x86-64</p>",
+   "expect": "no_match",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "underscore",
+   "value": "foo_bar",
+   "page": "<p>foo bar</p>",
+   "expect": "no_match",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "thousands",
+   "value": "1234567",
+   "page": "<p>1,234,567 employees</p>",
+   "expect": "eq_literal",
+   "literal": true,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "minus",
+   "value": "-76.8 million",
+   "page": "<p>−76.8 million</p>",
+   "expect": "no_match",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "boundary",
+   "value": "12",
+   "page": "<p>value 123 here</p>",
+   "expect": "eq_literal",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  },
+  {
+   "class": "boundary",
+   "value": "12(3)",
+   "page": "<p>value 112 (3) here</p>",
+   "expect": "known_deviation_b41",
+   "literal": false,
+   "b24": true,
+   "pass": true
+  },
+  {
+   "class": "boundary",
+   "value": "12 (3)",
+   "page": "<p>value 12 (34) here</p>",
+   "expect": "eq_literal",
+   "literal": false,
+   "b24": false,
+   "pass": true
+  }
+ ]
+}

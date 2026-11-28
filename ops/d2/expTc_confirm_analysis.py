@@ -365,6 +365,8 @@ def selector(draft_roots, runs_by_root, nonblank_only: bool, flags_name: str = "
         if sid in excluded:
             continue
         ds = sorted([d for d in valid[sid] if d["rep"] <= k], key=lambda d: d["rep"])
+        if not ds:
+            continue
         if nonblank_only:
             ds = [d for d in ds if d["filled"] >= 1]
             if len(ds) < 2:
@@ -438,6 +440,8 @@ def main() -> None:
     # 紀錄分數用修正後的標記（flags_v2.json，`expT_reflag.py --write`）；舊標記版本只描述
     sel_all = selector(droots, runs_d, False); sel_nb = selector(droots, runs_d, True)
     sel_v1 = selector(droots, runs_d, False, flags_name="flags.json")
+    # B26(3)／B39(3)：舊標記版本只留逐組挑選與平均，不輸出區間、拿掉前 2 組、判讀欄位
+    sel_v1 = {k: sel_v1[k] for k in ("K_planned", "k_used", "sets", "means", "same_pick_record_nonblank", "per_set")}
     out["selector"] = {"all": sel_all, "nonblank_drafts": sel_nb, "old_flags_descriptive": sel_v1}
     ps = {"record_vs_random": sel_all["record_vs_random"]["perm_p"], "record_vs_nonblank": sel_all["record_vs_nonblank"]["perm_p"]}
     if froots:
@@ -491,6 +495,26 @@ def main() -> None:
                             key = (arm_, rd_, "suspicious" if k in susp else "ok")
                             prec[key][0] += 1
                             prec[key][1] += M.strict_status(v.get("value"), c, tr, 0) != "correct"
+        # B41(3)：數字相鄰命中，每份 c0、T 臂每一輪計數（只描述）
+        from ops.d2 import expT_digitadj as DA
+        dadj = collections.Counter()
+        for k in base:
+            rd = meta[k]["root"] / "cells" / k[0] / f"r{k[1]}"
+            FB_c0 = rd / "c0"
+            try:
+                import ops.d2.expT_feedback as _FB
+                _FB.add_frozen_fallback(FB_c0 / "site_frozen", FB_c0 / "site_snapshot_sha256.json")
+                e, d_ = DA.count(FB_c0 / "snapshot" / "vh", (FB_c0 / "report.md").read_text(errors="replace"), truth[k[0]]["claims"],
+                                 int(json.loads((FB_c0 / "done.json").read_text()).get("chain_len") or 0) or None)
+                dadj["c0_extra_unflags"] += e; dadj["c0_digit_adjacent"] += d_
+                for rnd in ("round_1", "round_2"):
+                    fl = rd / "T" / rnd / "flags.json"
+                    if fl.is_file() and (rd / "T" / rnd / "report.md").is_file():
+                        e, d_ = DA.count(rd / "T" / "final" / "vh", (rd / "T" / rnd / "report.md").read_text(errors="replace"), truth[k[0]]["claims"],
+                                         json.loads(fl.read_text()).get("cur_bound_seq"))
+                        dadj[f"T_{rnd}_extra_unflags"] += e; dadj[f"T_{rnd}_digit_adjacent"] += d_
+            except Exception as ex_:  # noqa: BLE001
+                dadj["errors"] += 1
         fb_all = fb_block(cells, base, "all_valid_pairs")
         fb_tg = fb_block(cells, base - misaligned, "T_vs_G_aligned")
         fb = {"all": fb_all, "T_vs_G_aligned": fb_tg, "nonblank_drafts": fb_block(cells, nonblank, "nonblank_drafts"),
@@ -520,6 +544,9 @@ def main() -> None:
                     q.append("undetermined_after_escape_exclusion")
             qual[name] = q
         susp_ratio = len(susp) / len(base) if base else 0.0
+        if dadj.get("c0_extra_unflags") and dadj.get("c0_digit_adjacent", 0) > 0.05 * dadj["c0_extra_unflags"]:
+            for name in ("T_vs_TB", "T_vs_G"):
+                qual[name].append("limitation_normalization_overmatches_at_digit_adjacency_B41")
         if susp_ratio > 0.25:
             for name in ("T_vs_TB", "T_vs_G"):
                 qual[name].append("flag_device_unreliable_on_>25pct_T_comparisons_descriptive_only")
@@ -553,6 +580,7 @@ def main() -> None:
             "blank_draft_pairs": sorted(map(list, blank)),
             "blank_draft_pairs_by_host": dict(collections.Counter(meta[k].get("host") for k in blank)),
             "cleared_report_pairs": cleared,
+            "digit_adjacent_B41": dict(dadj),
             "suspicious_flag_pairs": sorted(map(list, susp)), "suspicious_flag_ratio": round(susp_ratio, 4),
             "suspicious_flag_pairs_v2": sorted(map(list, susp2)),
             "flag_precision_wrong_among_flagged_filled": {"|".join(k): {"flagged_filled": v[0], "truly_wrong": v[1],
