@@ -1012,8 +1012,8 @@
    "TB_not_in_T": 0,
    "T_only": 476,
    "T_only_before_status": {
-    "correct": 312,
     "wrong": 136,
+    "correct": 312,
     "missing": 28
    },
    "T_only_outcome_in_T": {
@@ -5191,5 +5191,481 @@
   ]
  },
  "source_escape": "git:0dd266544:ops/redo/audit/expT_exam37_20261128",
+ "extra_scans": {
+  "escape_record_fields": [
+   "arm",
+   "detail",
+   "kind",
+   "rep",
+   "round",
+   "set",
+   "tool",
+   "tool_error"
+  ],
+  "escape_detail_shapes": {
+   "<set>/<rep>/c0/site_frozen": 192,
+   "<set>/<rep>/c0/flags.json": 11,
+   "<set>/<rep>/A/report.md": 1,
+   "<set>/<rep>/A/flags.json": 1,
+   "<set>/<rep>/A/": 1,
+   "<set>/<rep>/A/cell.json": 1,
+   "<realrev>/<sNN>/cycle_4": 42,
+   "<set>/<rep>/TER/report.md": 1,
+   "<realrev>/<sNN>/cycle_1": 44,
+   "<realrev>/<sNN>/cycle_0": 95,
+   "<set>/<rep>/A/final": 2,
+   "<set>/<rep>/c0/snapshot": 5,
+   "<set>/<rep>/c0/": 1,
+   "<set>/<rep>/T/round_2": 5,
+   "<realrev>/<sNN>/cycle_2": 16,
+   "<set>/<rep>/TER/escalation": 1,
+   "<set>/<rep>/T/": 1,
+   "<set>/<rep>/T/report.md": 1,
+   "<set>/<rep>/T/final": 1
+  },
+  "haiku_marker_in_agent_arms": [
+   {
+    "cell": "fb-s08/r1/TB",
+    "lines": 8
+   }
+  ],
+  "identical_reports": [
+   {
+    "pair": "fb-s06/r2",
+    "arms": [
+     "T",
+     "TE"
+    ],
+    "all_correct": true,
+    "correct": "18/18",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s06/r2",
+    "arms": [
+     "T",
+     "TER"
+    ],
+    "all_correct": true,
+    "correct": "18/18",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s08/r1",
+    "arms": [
+     "TB",
+     "TE"
+    ],
+    "all_correct": false,
+    "correct": "11/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s08/r1",
+    "arms": [
+     "TB",
+     "TER"
+    ],
+    "all_correct": false,
+    "correct": "11/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s11/r1",
+    "arms": [
+     "G",
+     "TB"
+    ],
+    "all_correct": true,
+    "correct": "19/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s11/r1",
+    "arms": [
+     "G",
+     "TO"
+    ],
+    "all_correct": true,
+    "correct": "19/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s11/r1",
+    "arms": [
+     "TB",
+     "TO"
+    ],
+    "all_correct": true,
+    "correct": "19/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s16/r1",
+    "arms": [
+     "T",
+     "TO"
+    ],
+    "all_correct": true,
+    "correct": "16/16",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s17/r2",
+    "arms": [
+     "TB",
+     "TO"
+    ],
+    "all_correct": true,
+    "correct": "15/15",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "sc-s15/r2",
+    "arms": [
+     "T",
+     "TO"
+    ],
+    "all_correct": false,
+    "correct": "15/20",
+    "later_started_after_other_ended": true
+   }
+  ],
+  "identical_reports_not_all_correct": [
+   {
+    "pair": "fb-s08/r1",
+    "arms": [
+     "TB",
+     "TE"
+    ],
+    "all_correct": false,
+    "correct": "11/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "fb-s08/r1",
+    "arms": [
+     "TB",
+     "TER"
+    ],
+    "all_correct": false,
+    "correct": "11/19",
+    "later_started_after_other_ended": true
+   },
+   {
+    "pair": "sc-s15/r2",
+    "arms": [
+     "T",
+     "TO"
+    ],
+    "all_correct": false,
+    "correct": "15/20",
+    "later_started_after_other_ended": true
+   }
+  ],
+  "TB_changed_valued_lines": {
+   "fb-s11/r1": 3
+  },
+  "flags_reads": [
+   {
+    "reader": "fb-s01/r1/TB/round_1",
+    "flags_of": "fb-s01/r1",
+    "flags_of_c0_empty": true,
+    "valued_flagged_lines": 0
+   },
+   {
+    "reader": "fb-s01/r1/TO/round_2",
+    "flags_of": "fb-s01/r1",
+    "flags_of_c0_empty": true,
+    "valued_flagged_lines": 0
+   },
+   {
+    "reader": "fb-s04/r1/TO/round_2",
+    "flags_of": "fb-s04/r1",
+    "flags_of_c0_empty": true,
+    "valued_flagged_lines": 0
+   },
+   {
+    "reader": "fb-s05/r1/TO/round_2",
+    "flags_of": "fb-s05/r1",
+    "flags_of_c0_empty": false,
+    "valued_flagged_lines": 0
+   },
+   {
+    "reader": "fb-s05/r2/TO/round_1",
+    "flags_of": "fb-s05/r1",
+    "flags_of_c0_empty": false,
+    "valued_flagged_lines": 0
+   },
+   {
+    "reader": "fb-s12/r1/TO/round_1",
+    "flags_of": "fb-s12/r1",
+    "flags_of_c0_empty": true,
+    "valued_flagged_lines": 0
+   }
+  ],
+  "b_prime_plus_fingerprint_pairs": {
+   "added": [
+    "sc-s15/r2"
+   ],
+   "T_vs_G": {
+    "n_sets": 33,
+    "diff": 7.75,
+    "boot95": [
+     0.79,
+     14.94
+    ],
+    "t95": [
+     0.27,
+     15.24
+    ],
+    "signflip_p": 0.0422,
+    "pairs": 54
+   },
+   "T_vs_TB": {
+    "n_sets": 33,
+    "diff": 0.77,
+    "boot95": [
+     -3.74,
+     5.72
+    ],
+    "t95": [
+     -4.14,
+     5.68
+    ],
+    "signflip_p": 0.7581,
+    "pairs": 54
+   },
+   "T_vs_TO": {
+    "n_sets": 33,
+    "diff": -5.37,
+    "boot95": [
+     -9.35,
+     -1.36
+    ],
+    "t95": [
+     -9.6,
+     -1.14
+    ],
+    "signflip_p": 0.0144,
+    "pairs": 54
+   },
+   "TE_vs_TER": {
+    "n_sets": 33,
+    "diff": -1.13,
+    "boot95": [
+     -4.63,
+     1.79
+    ],
+    "t95": [
+     -4.45,
+     2.2
+    ],
+    "signflip_p": 0.534,
+    "pairs": 54
+   }
+  },
+  "future_upper_bound_by_arm": {
+   "G": {
+    "read_future": {
+     "cells": 5,
+     "lines": 99,
+     "upper_bound_new_wrong": 7,
+     "upper_bound_all_wrong": 28,
+     "new_wrong_per_100_lines": 7.07
+    },
+    "other_escape": {
+     "cells": 6,
+     "lines": 119,
+     "upper_bound_new_wrong": 1,
+     "upper_bound_all_wrong": 16,
+     "new_wrong_per_100_lines": 0.84
+    },
+    "no_escape": {
+     "cells": 63,
+     "lines": 1172,
+     "upper_bound_new_wrong": 85,
+     "upper_bound_all_wrong": 258,
+     "new_wrong_per_100_lines": 7.25
+    }
+   },
+   "T": {
+    "read_future": {
+     "cells": 2,
+     "lines": 39,
+     "upper_bound_new_wrong": 3,
+     "upper_bound_all_wrong": 3,
+     "new_wrong_per_100_lines": 7.69
+    },
+    "other_escape": {
+     "cells": 2,
+     "lines": 37,
+     "upper_bound_new_wrong": 0,
+     "upper_bound_all_wrong": 5,
+     "new_wrong_per_100_lines": 0.0
+    },
+    "no_escape": {
+     "cells": 70,
+     "lines": 1314,
+     "upper_bound_new_wrong": 76,
+     "upper_bound_all_wrong": 289,
+     "new_wrong_per_100_lines": 5.78
+    }
+   },
+   "TB": {
+    "read_future": {
+     "cells": 1,
+     "lines": 18,
+     "upper_bound_new_wrong": 10,
+     "upper_bound_all_wrong": 10,
+     "new_wrong_per_100_lines": 55.56
+    },
+    "other_escape": {
+     "cells": 4,
+     "lines": 79,
+     "upper_bound_new_wrong": 5,
+     "upper_bound_all_wrong": 5,
+     "new_wrong_per_100_lines": 6.33
+    },
+    "no_escape": {
+     "cells": 69,
+     "lines": 1293,
+     "upper_bound_new_wrong": 42,
+     "upper_bound_all_wrong": 359,
+     "new_wrong_per_100_lines": 3.25
+    }
+   },
+   "TO": {
+    "read_future": {
+     "cells": 4,
+     "lines": 79,
+     "upper_bound_new_wrong": 10,
+     "upper_bound_all_wrong": 17,
+     "new_wrong_per_100_lines": 12.66
+    },
+    "other_escape": {
+     "cells": 18,
+     "lines": 339,
+     "upper_bound_new_wrong": 5,
+     "upper_bound_all_wrong": 93,
+     "new_wrong_per_100_lines": 1.47
+    },
+    "no_escape": {
+     "cells": 52,
+     "lines": 972,
+     "upper_bound_new_wrong": 38,
+     "upper_bound_all_wrong": 185,
+     "new_wrong_per_100_lines": 3.91
+    }
+   }
+  },
+  "future_read_cells": [
+   {
+    "cell": "fb-s06/r2/TB",
+    "mat_future_calls": 9,
+    "final": "7/18",
+    "new_wrong_lines": 10,
+    "c0_correct": 0
+   },
+   {
+    "cell": "fb-s08/r2/TO",
+    "mat_future_calls": 7,
+    "final": "0/19",
+    "new_wrong_lines": 0,
+    "c0_correct": 0
+   },
+   {
+    "cell": "fb-s11/r1/T",
+    "mat_future_calls": 19,
+    "final": "16/19",
+    "new_wrong_lines": 3,
+    "c0_correct": 16
+   },
+   {
+    "cell": "fb-s18/r2/G",
+    "mat_future_calls": 3,
+    "final": "18/19",
+    "new_wrong_lines": 1,
+    "c0_correct": 19
+   },
+   {
+    "cell": "sc-s01/r2/G",
+    "mat_future_calls": 15,
+    "final": "10/20",
+    "new_wrong_lines": 0,
+    "c0_correct": 10
+   },
+   {
+    "cell": "sc-s04/r1/G",
+    "mat_future_calls": 4,
+    "final": "11/20",
+    "new_wrong_lines": 0,
+    "c0_correct": 11
+   },
+   {
+    "cell": "sc-s04/r2/G",
+    "mat_future_calls": 7,
+    "final": "0/20",
+    "new_wrong_lines": 0,
+    "c0_correct": 0
+   },
+   {
+    "cell": "sc-s06/r1/T",
+    "mat_future_calls": 2,
+    "final": "0/20",
+    "new_wrong_lines": 0,
+    "c0_correct": 17
+   },
+   {
+    "cell": "sc-s10/r1/TO",
+    "mat_future_calls": 22,
+    "final": "10/20",
+    "new_wrong_lines": 5,
+    "c0_correct": 15
+   },
+   {
+    "cell": "sc-s10/r2/TO",
+    "mat_future_calls": 1,
+    "final": "15/20",
+    "new_wrong_lines": 5,
+    "c0_correct": 0
+   },
+   {
+    "cell": "sc-s12/r1/TO",
+    "mat_future_calls": 2,
+    "final": "14/20",
+    "new_wrong_lines": 0,
+    "c0_correct": 12
+   },
+   {
+    "cell": "sc-s13/r1/G",
+    "mat_future_calls": 11,
+    "final": "11/20",
+    "new_wrong_lines": 6,
+    "c0_correct": 12
+   }
+  ],
+  "future_read_calls_total": 102,
+  "future_max_effect_on_arm_a_pp": {
+   "TB": 0.75,
+   "TO": 0.68,
+   "T": 0.21,
+   "G": 0.48
+  },
+  "missing_for_exact_future_check": {
+   "file": "expT_future_truth.jsonl（或在 expT_lines.jsonl 加欄）",
+   "fields_per_set_claim_revision": [
+    "set",
+    "claim_id",
+    "k（0..K，與教材 cycle_k 對應）",
+    "truth_canon_sha256＝sha256(canon_strict(truth_k))"
+   ],
+   "fields_per_line": [
+    "after_canon_sha256＝sha256(canon_strict(after_value))（現有 after_value_sha256 是原字串的雜湊，評分卻用 canon_strict，直接比會漏掉格式不同的同值）",
+    "（或直接給）after_matches_k：canon_strict 相符的修訂編號清單"
+   ],
+   "already_implemented": "auto/redo 的 ops/d2/expTc_confirm_analysis.py score_fb() 已有同一算法（future_truth_match_lines），可直接用在探索 root 匯出逐行旗標"
+  }
+ },
  "mismatches": []
 }

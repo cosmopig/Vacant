@@ -35,6 +35,7 @@ import json
 import math
 import pathlib
 import random
+import re
 import statistics
 import subprocess
 import sys
@@ -811,6 +812,122 @@ def escape_review(src: Src, esc_calls: list[dict], their_summary: dict) -> dict:
     return R
 
 
+# ───────────────────────────── 補掃：越界擴大＋未來值對照 ─────────────────────────────
+HAIKU_MARKER_SHA = hashlib.sha256(b"not found in sources").hexdigest()  # TE/TER 寫回時唯一會出現的字串
+
+
+def extra_scans(src: Src, esc_calls: list[dict], base_keep_bprime: set) -> dict:
+    """(1) 擴大越界掃描：包裡只有原正規式命中的 422 筆、沒有指令原文 ⇒ 路徑類別逐一說明判斷不了；
+    改用「資料指紋」找沒被路徑掃描抓到的跨臂抄寫：Haiku 寫回標記字串出現在 agent 臂、整份報告位元相同、
+    TB 動到有值的行。(2) 未來值對照：包裡沒有後續修訂真值 ⇒ 只能給上界（新寫進且判錯的行），並列缺檔規格。"""
+    cells = src.json("expT/expT_cells.json")
+    lines = src.jsonl("expT/expT_lines.jsonl")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    LB: dict[tuple, list[dict]] = collections.defaultdict(list)
+    for x in lines:
+        LB[(x["set"], x["rep"], x["arm"])].append(x)
+    R: dict[str, Any] = {}
+    R["escape_record_fields"] = sorted({k for x in esc_calls for k in x})
+    R["escape_detail_shapes"] = dict(collections.Counter(
+        "/".join("<set>" if re.fullmatch(r"(sc|fb)-s\d+", t) else "<rep>" if re.fullmatch(r"r\d", t) else
+                 "<realrev>" if t.startswith("realrev") else "<sNN>" if re.fullmatch(r"s\d+", t) else t
+                 for t in x["detail"].split("/")) for x in esc_calls))
+    agent = ["G", "T", "TB", "TO"]
+    # 指紋 1：Haiku 寫回標記出現在 agent 臂
+    R["haiku_marker_in_agent_arms"] = [
+        {"cell": f"{s}/r{r}/{a}", "lines": n} for (s, r, a), n in sorted(collections.Counter(
+            (x["set"], x["rep"], x["arm"]) for x in lines if x["arm"] in agent and x["after_value_sha256"] == HAIKU_MARKER_SHA).items())]
+    # 指紋 2：整份報告位元相同（排除和 c0 相同、以及全對——全對時照模板寫的報告本來就會相同）
+    same = []
+    for s, r in pairs:
+        for i, x in enumerate(agent + ["TE", "TER"]):
+            for y in (agent + ["TE", "TER"])[i + 1:]:
+                if x in ("TE", "TER") and y in ("TE", "TER"):
+                    continue
+                cx, cy = C[(s, r, x)], C[(s, r, y)]
+                if cx["final_report_sha256"] == cy["final_report_sha256"] != cx["c0_report_sha256"]:
+                    import datetime as _dt
+                    end = {a: _dt.datetime.fromisoformat(C[(s, r, a)]["ts"].replace("Z", "+00:00")).timestamp() for a in (x, y)}
+                    start = {a: end[a] - (C[(s, r, a)]["extra_wall_s"] or 0) for a in (x, y)}
+                    same.append({"pair": f"{s}/r{r}", "arms": [x, y], "all_correct": cx["final_correct"] == cx["n_lines"],
+                                 "correct": f'{cx["final_correct"]}/{cx["n_lines"]}',
+                                 "later_started_after_other_ended": (start[y] >= end[x]) or (start[x] >= end[y])})
+    R["identical_reports"] = same
+    R["identical_reports_not_all_correct"] = [z for z in same if not z["all_correct"]]
+    # 指紋 3：TB 只被告知空白行；動到有值的行 ⇒ 可能有別的資訊
+    R["TB_changed_valued_lines"] = {f"{s}/r{r}": n for (s, r), n in sorted(collections.Counter(
+        (x["set"], x["rep"]) for x in lines if x["arm"] == "TB" and x["before_status"] != "missing"
+        and x["after_value_sha256"] != x["before_value_sha256"]).items())}
+    # 讀 flags.json 的那幾次：當時那份初稿的 flags 有沒有比「空白行」多的資訊
+    fl = []
+    for x in esc_calls:
+        if x["kind"] in ("pair_flags", "other_flags"):
+            ts_, tr_ = x["detail"].split("/")[:2]
+            src_pair = (ts_, int(tr_[1:]))
+            A = C[(*src_pair, "A")]
+            fl.append({"reader": f'{x["set"]}/r{x["rep"]}/{x["arm"]}/{x["round"]}', "flags_of": f"{ts_}/{tr_}",
+                       "flags_of_c0_empty": A["c0_filled"] == 0,
+                       "valued_flagged_lines": sum(1 for z in LB[(*src_pair, "A")] if z["c0_flagged"] and z["before_status"] != "missing")})
+    R["flags_reads"] = list({json.dumps(z, sort_keys=True): z for z in fl}.values())
+    # 可疑但定不了的對（不是全對、而且後跑的那一臂開始於先跑的結束之後）加進 (b′) 再算 T−G
+    susp = {tuple([z["pair"].split("/")[0], int(z["pair"].split("/")[1][1:])]) for z in R["identical_reports_not_all_correct"]}
+
+    def prop(c: dict) -> float:
+        return c["final_correct"] / c["n_lines"]
+
+    def comp(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s, r in pairs:
+            if (s, r) in keep:
+                d[s].append(prop(C[(s, r, t)]) - prop(C[(s, r, c)]))
+        out = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        out["pairs"] = sum(len(v) for v in d.values())
+        return out
+    keep2 = base_keep_bprime - susp
+    R["b_prime_plus_fingerprint_pairs"] = {"added": sorted(f"{s}/r{r}" for s, r in susp & base_keep_bprime),
+                                           **{f"{t}_vs_{c}": comp(t, c, keep2) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"))}}
+    # (2) 未來值對照：上界
+    fut_calls = collections.Counter((x["set"], x["rep"], x["arm"]) for x in esc_calls if x["kind"] == "mat_future")
+    own_any = {(x["set"], x["rep"], x["arm"]) for x in esc_calls}
+
+    def ub(keys: list[tuple]) -> dict:
+        new_wrong = sum(1 for k in keys for z in LB[k] if z["after_status"] == "wrong" and z["after_value_sha256"] != z["before_value_sha256"])
+        all_wrong = sum(1 for k in keys for z in LB[k] if z["after_status"] == "wrong")
+        n = sum(len(LB[k]) for k in keys)
+        return {"cells": len(keys), "lines": n, "upper_bound_new_wrong": new_wrong, "upper_bound_all_wrong": all_wrong,
+                "new_wrong_per_100_lines": round(100 * new_wrong / n, 2) if n else None}
+    tab = {}
+    for a in agent:
+        ks = [(s, r, a) for s, r in pairs]
+        tab[a] = {"read_future": ub([k for k in ks if k in fut_calls]),
+                  "other_escape": ub([k for k in ks if k in own_any and k not in fut_calls]),
+                  "no_escape": ub([k for k in ks if k not in own_any])}
+    R["future_upper_bound_by_arm"] = tab
+    R["future_read_cells"] = [{"cell": f"{s}/r{r}/{a}", "mat_future_calls": n,
+                               "final": f'{C[(s, r, a)]["final_correct"]}/{C[(s, r, a)]["n_lines"]}',
+                               "new_wrong_lines": sum(1 for z in LB[(s, r, a)] if z["after_status"] == "wrong" and z["after_value_sha256"] != z["before_value_sha256"]),
+                               "c0_correct": C[(s, r, a)]["c0_correct"]}
+                              for (s, r, a), n in sorted(fut_calls.items())]
+    R["future_read_calls_total"] = sum(fut_calls.values())
+    # 上界對主比較的影響：假設讀過未來頁面的格裡「新寫進且判錯」的行全部是未來值、本來會是對的，
+    # 那一臂的 (a) 最多少算多少（組平均：每對權重 1/(該組對數×組數)）
+    nsets = len({s for s, _ in pairs})
+    bound = collections.defaultdict(float)
+    for (s, r, a), _n in fut_calls.items():
+        nw = sum(1 for z in LB[(s, r, a)] if z["after_status"] == "wrong" and z["after_value_sha256"] != z["before_value_sha256"])
+        bound[a] += 100 * nw / C[(s, r, a)]["n_lines"] / 2 / nsets
+    R["future_max_effect_on_arm_a_pp"] = {a: round(v, 2) for a, v in bound.items()}
+    R["missing_for_exact_future_check"] = {
+        "file": "expT_future_truth.jsonl（或在 expT_lines.jsonl 加欄）",
+        "fields_per_set_claim_revision": ["set", "claim_id", "k（0..K，與教材 cycle_k 對應）", "truth_canon_sha256＝sha256(canon_strict(truth_k))"],
+        "fields_per_line": ["after_canon_sha256＝sha256(canon_strict(after_value))（現有 after_value_sha256 是原字串的雜湊，評分卻用 canon_strict，直接比會漏掉格式不同的同值）",
+                            "（或直接給）after_matches_k：canon_strict 相符的修訂編號清單"],
+        "already_implemented": "auto/redo 的 ops/d2/expTc_confirm_analysis.py score_fb() 已有同一算法（future_truth_match_lines），可直接用在探索 root 匯出逐行旗標",
+    }
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1014,6 +1131,17 @@ def main() -> None:
     esrc = Src(None if a.dir else a.escape_rev, a.dir, repo)
     out["escape_review"] = escape_review(src, esrc.jsonl("expT/expT_escape_calls.jsonl"), esrc.json("expT/expT_escape_summary.json"))
     out["source_escape"] = a.dir or f"git:{a.escape_rev}:{PKG}"
+    _cells = src.json("expT/expT_cells.json")
+    _pairs = {(c["set"], c["rep"]) for c in _cells}
+    _bp = {tuple([p.split("/")[0], int(p.split("/")[1][1:])]) for p in out["escape_review"]["excluded"]["b_prime_added"]}
+    _calls = esrc.jsonl("expT/expT_escape_calls.jsonl")
+    _b = {(x["set"], x["rep"]) for x in _calls if x["kind"] in STRONG_B}
+    _w = set()
+    for x in _calls:
+        if x["tool"] == "write":
+            t_, r_ = x["detail"].split("/")[:2]
+            _w.add((t_, int(r_[1:])))
+    out["extra_scans"] = extra_scans(src, _calls, _pairs - _b - _bp - _w)
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
