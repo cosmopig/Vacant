@@ -1442,5 +1442,685 @@
    "items": 128,
    "mismatch": []
   }
+ },
+ "judge_v2v3_taxonomy": {
+  "note": "事後探索；分類規則 PLAN.md（1cfc8efd0）先於結果（1e4a110a2）提交；答案鍵與頁面不在 git，無法重新分類，只能核對分類結果的計數與下游訊號",
+  "join_check": {
+   "err_lines": 466,
+   "keys_missing_in_judge_rows": 0,
+   "wrong_or_set_or_p_mismatch": 0,
+   "wrong_lines_from_hmac_rows": {
+    "companies": 219,
+    "football": 247
+   },
+   "wrong_lines_in_taxonomy": {
+    "companies": 219,
+    "football": 247
+   }
+  },
+  "recomputed": {
+   "companies": {
+    "wrong_lines": 219,
+    "by_class": {
+     "K-等值": 131,
+     "F": 9,
+     "R-他處": 4,
+     "U-等值": 53,
+     "R-部分": 16,
+     "U": 5,
+     "R-單位": 1
+    },
+    "v1_prob_by_class": {
+     "K-等值": {
+      "n": 131,
+      "mean_p": 0.96,
+      "p>=0.9": 130,
+      "p<0.5": 0
+     },
+     "F": {
+      "n": 9,
+      "mean_p": 0.1,
+      "p>=0.9": 0,
+      "p<0.5": 9
+     },
+     "R-他處": {
+      "n": 4,
+      "mean_p": 0.285,
+      "p>=0.9": 1,
+      "p<0.5": 3
+     },
+     "U-等值": {
+      "n": 53,
+      "mean_p": 0.944,
+      "p>=0.9": 47,
+      "p<0.5": 0
+     },
+     "R-部分": {
+      "n": 16,
+      "mean_p": 0.916,
+      "p>=0.9": 14,
+      "p<0.5": 0
+     },
+     "U": {
+      "n": 5,
+      "mean_p": 0.903,
+      "p>=0.9": 3,
+      "p<0.5": 0
+     },
+     "R-單位": {
+      "n": 1,
+      "mean_p": 0.926,
+      "p>=0.9": 1,
+      "p<0.5": 0
+     }
+    },
+    "equiv_rules": {
+     "age": 129,
+     "ticker": 55
+    },
+    "equiv_rule_by_class": {
+     "K-等值|age": 129,
+     "U-等值|ticker": 53,
+     "K-等值|ticker": 2
+    },
+    "matches_summary": true
+   },
+   "football": {
+    "wrong_lines": 247,
+    "by_class": {
+     "R-部分": 85,
+     "R-他處": 108,
+     "F": 44,
+     "R-期": 5,
+     "S": 3,
+     "U": 2
+    },
+    "v1_prob_by_class": {
+     "R-部分": {
+      "n": 85,
+      "mean_p": 0.715,
+      "p>=0.9": 9,
+      "p<0.5": 13
+     },
+     "R-他處": {
+      "n": 108,
+      "mean_p": 0.323,
+      "p>=0.9": 0,
+      "p<0.5": 85
+     },
+     "F": {
+      "n": 44,
+      "mean_p": 0.127,
+      "p>=0.9": 0,
+      "p<0.5": 41
+     },
+     "R-期": {
+      "n": 5,
+      "mean_p": 0.211,
+      "p>=0.9": 0,
+      "p<0.5": 4
+     },
+     "S": {
+      "n": 3,
+      "mean_p": 0.505,
+      "p>=0.9": 0,
+      "p<0.5": 2
+     },
+     "U": {
+      "n": 2,
+      "mean_p": 0.312,
+      "p>=0.9": 0,
+      "p<0.5": 2
+     }
+    },
+    "equiv_rules": {},
+    "equiv_rule_by_class": {},
+    "matches_summary": true
+   }
+  },
+  "headline": {
+   "wrong_companies": 219,
+   "equiv_lines": 184,
+   "equiv_share": 0.8402,
+   "unparsed_lines": 58,
+   "unparsed_equiv": 53,
+   "parsed_equiv": 131,
+   "parsed_equiv_age": 129,
+   "age_total": 129,
+   "remaining_wrong": 35,
+   "denominator_excluding_equiv": 451,
+   "remaining_error_excluding": 0.0776,
+   "remaining_error_if_relabelled_correct": 0.0551
+  },
+  "age_rule_boundary_synthetic": [
+   {
+    "case": "值＝完整日期、答案＝同日期＋N years ago",
+    "rule_says_equal": true,
+    "semantically_equal": true,
+    "misjudge": false
+   },
+   {
+    "case": "值＝只寫年份",
+    "rule_says_equal": false,
+    "semantically_equal": false,
+    "misjudge": false
+   },
+   {
+    "case": "值＝錯的日",
+    "rule_says_equal": false,
+    "semantically_equal": false,
+    "misjudge": false
+   },
+   {
+    "case": "值＝錯的年",
+    "rule_says_equal": false,
+    "semantically_equal": false,
+    "misjudge": false
+   },
+   {
+    "case": "值＝錯的月名、日年相同",
+    "rule_says_equal": true,
+    "semantically_equal": false,
+    "misjudge": true
+   },
+   {
+    "case": "值＝日年相同、他語月名（語意相同）",
+    "rule_says_equal": true,
+    "semantically_equal": true,
+    "misjudge": false
+   },
+   {
+    "case": "值＝只寫年份＋年齡括號",
+    "rule_says_equal": false,
+    "semantically_equal": false,
+    "misjudge": false
+   },
+   {
+    "case": "答案沒有 years ago（規則不啟動）",
+    "rule_says_equal": false,
+    "semantically_equal": false,
+    "misjudge": false
+   }
+  ],
+  "age_rule_note": "canon_strict 只留數字記號、忽略所有文字；年齡規則等於『日與年的數字都相同』，月名寫錯也判相等；值是否在頁上由別的欄位（判別 p、頁面比對）另證，不由這條規則證",
+  "ticker_rule_note": "代號規則：值抽出的（交易所, 代號）非空且為答案抽出集合的子集；值只寫答案兩個上市地中的一個也算相等（可能偏寬）；只寫代號不寫交易所抽不出對，不算（留在 U）；代號大小寫不分交易所、代號轉大寫。無法在這裡重跑（答案鍵不在 git）",
+  "signals_after_correction": {
+   "companies": {
+    "原樣（量具等值算錯）": {
+     "lines": 635,
+     "wrong": 219,
+     "error_rate": 0.3449,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.4018,
+       "ci95": [
+        0.3403,
+        0.4613
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.6021,
+       "ci95": [
+        0.5089,
+        0.6823
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.593,
+       "ci95": [
+        0.5089,
+        0.6519
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.4453,
+       "ci95": [
+        0.3805,
+        0.5082
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.4598,
+      "err_in": 0.2911,
+      "err_out": 0.3907,
+      "recall": 0.3881,
+      "n_flagged": 292,
+      "err_in_minus_out": -0.0996,
+      "err_in_minus_out_ci95": [
+       -0.1987,
+       0.016
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.1795,
+      "err_in": 0.5789,
+      "err_out": 0.2937,
+      "recall": 0.3014,
+      "n_flagged": 114,
+      "err_in_minus_out": 0.2852,
+      "err_in_minus_out_ci95": [
+       0.0204,
+       0.5092
+      ]
+     }
+    },
+    "排除量具等值": {
+     "lines": 451,
+     "wrong": 35,
+     "error_rate": 0.0776,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.6731,
+       "ci95": [
+        0.477,
+        0.8697
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.9024,
+       "ci95": [
+        0.8147,
+        0.961
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.8995,
+       "ci95": [
+        0.8006,
+        0.9695
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.5083,
+       "ci95": [
+        0.3933,
+        0.685
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.4989,
+      "err_in": 0.08,
+      "err_out": 0.0752,
+      "recall": 0.5143,
+      "n_flagged": 225,
+      "err_in_minus_out": 0.0048,
+      "err_in_minus_out_ci95": [
+       -0.0572,
+       0.0889
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.1774,
+      "err_in": 0.4,
+      "err_out": 0.0081,
+      "recall": 0.9143,
+      "n_flagged": 80,
+      "err_in_minus_out": 0.3919,
+      "err_in_minus_out_ci95": [
+       0.1694,
+       0.5997
+      ]
+     }
+    },
+    "量具等值改標為對": {
+     "lines": 635,
+     "wrong": 35,
+     "error_rate": 0.0551,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.7052,
+       "ci95": [
+        0.5082,
+        0.8834
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.8959,
+       "ci95": [
+        0.8207,
+        0.952
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.8888,
+       "ci95": [
+        0.7908,
+        0.9618
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.5288,
+       "ci95": [
+        0.4177,
+        0.7031
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.4598,
+      "err_in": 0.0616,
+      "err_out": 0.0496,
+      "recall": 0.5143,
+      "n_flagged": 292,
+      "err_in_minus_out": 0.012,
+      "err_in_minus_out_ci95": [
+       -0.0344,
+       0.0709
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.1795,
+      "err_in": 0.2807,
+      "err_out": 0.0058,
+      "recall": 0.9143,
+      "n_flagged": 114,
+      "err_in_minus_out": 0.2749,
+      "err_in_minus_out_ci95": [
+       0.1238,
+       0.4288
+      ]
+     }
+    },
+    "排除量具等值＋R-部分": {
+     "lines": 435,
+     "wrong": 19,
+     "error_rate": 0.0437,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.8551,
+       "ci95": [
+        0.5203,
+        0.9795
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.908,
+       "ci95": [
+        0.8045,
+        0.9595
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.916,
+       "ci95": [
+        0.8006,
+        0.9695
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.6723,
+       "ci95": [
+        0.5766,
+        0.7546
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.5126,
+      "err_in": 0.0717,
+      "err_out": 0.0142,
+      "recall": 0.8421,
+      "n_flagged": 223,
+      "err_in_minus_out": 0.0575,
+      "err_in_minus_out_ci95": [
+       0.0145,
+       0.129
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.1517,
+      "err_in": 0.2727,
+      "err_out": 0.0027,
+      "recall": 0.9474,
+      "n_flagged": 66,
+      "err_in_minus_out": 0.27,
+      "err_in_minus_out_ci95": [
+       0.0814,
+       0.4915
+      ]
+     }
+    }
+   },
+   "football": {
+    "原樣（量具等值算錯）": {
+     "lines": 1112,
+     "wrong": 247,
+     "error_rate": 0.2221,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.9134,
+       "ci95": [
+        0.8614,
+        0.9647
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.9388,
+       "ci95": [
+        0.88,
+        0.9761
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.9089,
+       "ci95": [
+        0.835,
+        0.9659
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.7675,
+       "ci95": [
+        0.6681,
+        0.8677
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.1628,
+      "err_in": 0.7901,
+      "err_out": 0.1117,
+      "recall": 0.5789,
+      "n_flagged": 181,
+      "err_in_minus_out": 0.6784,
+      "err_in_minus_out_ci95": [
+       0.4546,
+       0.88
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.2464,
+      "err_in": 0.7956,
+      "err_out": 0.0346,
+      "recall": 0.8826,
+      "n_flagged": 274,
+      "err_in_minus_out": 0.761,
+      "err_in_minus_out_ci95": [
+       0.5994,
+       0.9025
+      ]
+     }
+    },
+    "排除量具等值": {
+     "lines": 1112,
+     "wrong": 247,
+     "error_rate": 0.2221,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.9134,
+       "ci95": [
+        0.8614,
+        0.9647
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.9388,
+       "ci95": [
+        0.88,
+        0.9761
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.9089,
+       "ci95": [
+        0.835,
+        0.9659
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.7675,
+       "ci95": [
+        0.6681,
+        0.8677
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.1628,
+      "err_in": 0.7901,
+      "err_out": 0.1117,
+      "recall": 0.5789,
+      "n_flagged": 181,
+      "err_in_minus_out": 0.6784,
+      "err_in_minus_out_ci95": [
+       0.4546,
+       0.88
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.2464,
+      "err_in": 0.7956,
+      "err_out": 0.0346,
+      "recall": 0.8826,
+      "n_flagged": 274,
+      "err_in_minus_out": 0.761,
+      "err_in_minus_out_ci95": [
+       0.5994,
+       0.9025
+      ]
+     }
+    },
+    "量具等值改標為對": {
+     "lines": 1112,
+     "wrong": 247,
+     "error_rate": 0.2221,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.9134,
+       "ci95": [
+        0.8614,
+        0.9647
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.9388,
+       "ci95": [
+        0.88,
+        0.9761
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.9089,
+       "ci95": [
+        0.835,
+        0.9659
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.7675,
+       "ci95": [
+        0.6681,
+        0.8677
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.1628,
+      "err_in": 0.7901,
+      "err_out": 0.1117,
+      "recall": 0.5789,
+      "n_flagged": 181,
+      "err_in_minus_out": 0.6784,
+      "err_in_minus_out_ci95": [
+       0.4546,
+       0.88
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.2464,
+      "err_in": 0.7956,
+      "err_out": 0.0346,
+      "recall": 0.8826,
+      "n_flagged": 274,
+      "err_in_minus_out": 0.761,
+      "err_in_minus_out_ci95": [
+       0.5994,
+       0.9025
+      ]
+     }
+    },
+    "排除量具等值＋R-部分": {
+     "lines": 1027,
+     "wrong": 162,
+     "error_rate": 0.1577,
+     "auc": {
+      "judge(1-p)": {
+       "auc": 0.9762,
+       "ci95": [
+        0.9564,
+        0.9934
+       ]
+      },
+      "consensus_support_score(1-support/5)": {
+       "auc": 0.9259,
+       "ci95": [
+        0.8574,
+        0.9744
+       ]
+      },
+      "consensus_flag(binary)": {
+       "auc": 0.8781,
+       "ci95": [
+        0.801,
+        0.9554
+       ]
+      },
+      "record_flag(binary)": {
+       "auc": 0.9194,
+       "ci95": [
+        0.8655,
+        0.9612
+       ]
+      }
+     },
+     "record_flag": {
+      "flagged_share": 0.1762,
+      "err_in": 0.7901,
+      "err_out": 0.0225,
+      "recall": 0.8827,
+      "n_flagged": 181,
+      "err_in_minus_out": 0.7676,
+      "err_in_minus_out_ci95": [
+       0.5394,
+       0.9734
+      ]
+     },
+     "consensus_flag": {
+      "flagged_share": 0.184,
+      "err_in": 0.7037,
+      "err_out": 0.0346,
+      "recall": 0.821,
+      "n_flagged": 189,
+      "err_in_minus_out": 0.6691,
+      "err_in_minus_out_ci95": [
+       0.4851,
+       0.8542
+      ]
+     }
+    }
+   }
+  }
  }
 }

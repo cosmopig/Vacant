@@ -15,7 +15,7 @@
 用法：consensus_recompute.py <repo_or_worktree_root> --out DIR
 """
 from __future__ import annotations
-import argparse, collections, json, pathlib, random, statistics
+import argparse, collections, json, pathlib, random, re, statistics
 
 SEED, NB = 20261128, 2000
 AUD = "ops/redo/audit"
@@ -180,7 +180,7 @@ def flag_stats(rows, f):
             "err_out": q(sum(r["wrong"] for r in nf), len(nf)), "recall": q(sum(r["wrong"] for r in ff), w), "n_flagged": len(ff)}
 
 
-def part2(root, per_draft, rep):
+def part2(root, per_draft, rep, ctx=None):
     D, J, JA = load_lines(root)
     sets = sorted({r["set"] for r in D}); out = {}
     cell = collections.defaultdict(lambda: collections.defaultdict(list))   # set -> claim -> [(rep,row)]
@@ -277,8 +277,10 @@ def part2(root, per_draft, rep):
         out["alignment"]["WARNING"] = "未全部對上，判別相關結果不可用"
         return out
     for a, b in zip(rows, J):
-        a["p"] = b["p_supported"]; a["rec_v2"] = b["record_flag"]
+        a["p"] = b["p_supported"]; a["rec_v2"] = b["record_flag"]; a["key"] = b["key"]
     out["record_flag_E_vs_flags_v2"] = {"same_set_of_lines": all(r["rec"] == r["rec_v2"] for r in rows), "n": sum(r["rec"] for r in rows)}
+    if ctx is not None:
+        ctx["rows"] = rows
     flags = {}
     for dom in ("football", "companies", "all"):
         rr = [r for r in rows if dom == "all" or r["dom"] == dom]
@@ -353,6 +355,125 @@ def part2(root, per_draft, rep):
     return out
 
 
+# ---------- 第三部分：錯行分類（judge_v2v3_20261128）與公司組量具修正後的訊號 ----------
+EQUIV = ("U-等值", "K-等值")
+_AGE = re.compile(r";?\s*\d+\s+years?\s+ago", re.I)
+
+
+def _canon(v):
+    """獨立重寫的 canon_strict（expT_feedback.canon_strict 的行為：只留數字記號，去千分位與尾端 .0，其餘文字全部忽略）。"""
+    if v is None:
+        return None
+    t = [("v" + x[1:].lstrip("v")) if x.lower().startswith("v") else x.replace(",", "")
+         for x in re.findall(r"v?\d+(?:\.\d+){2,}|\d[\d,]*(?:\.\d+)?", v.strip().strip("`*").strip())]
+    t = [x[:-2] if x.endswith(".0") else x for x in t]
+    return "|".join(t) if t else None
+
+
+def _age_equiv(val, ans):
+    return bool(_AGE.search(ans)) and _canon(val) is not None and _canon(val) == _canon(_AGE.sub("", ans))
+
+
+def stat_boot(by_set, fn):
+    sets = sorted(by_set); rng = random.Random(SEED); vs = []
+    for _ in range(NB):
+        smp = []
+        for _ in sets:
+            smp += by_set[sets[rng.randrange(len(sets))]]
+        v = fn(smp)
+        if v is not None:
+            vs.append(v)
+    vs.sort()
+    return [round(vs[int(0.025 * len(vs))], 4), round(vs[int(0.975 * len(vs)) - 1], 4)]
+
+
+def part3(root, rows):
+    d = root / AUD / "judge_v2v3_20261128"
+    E = [json.loads(l) for l in (d / "err_taxonomy_lines.jsonl").read_text().splitlines()]
+    S_ = json.loads((d / "err_taxonomy_summary.json").read_text())["by_domain"]
+    out = {"note": "事後探索；分類規則 PLAN.md（1cfc8efd0）先於結果（1e4a110a2）提交；答案鍵與頁面不在 git，無法重新分類，只能核對分類結果的計數與下游訊號"}
+    byk = {r["key"]: r for r in rows}
+    miss = [e["key"] for e in E if e["key"] not in byk]
+    bad = [e["key"] for e in E if e["key"] in byk and (not byk[e["key"]]["wrong"] or byk[e["key"]]["set"] != e["set"] or abs(byk[e["key"]]["p"] - e["p_v1"]) > 1e-12)]
+    wrong_all = {dom: sum(1 for r in rows if r["dom"] == dom and r["wrong"]) for dom in ("companies", "football")}
+    out["join_check"] = {"err_lines": len(E), "keys_missing_in_judge_rows": len(miss), "wrong_or_set_or_p_mismatch": len(bad),
+                         "wrong_lines_from_hmac_rows": wrong_all, "wrong_lines_in_taxonomy": dict(collections.Counter(e["domain"] for e in E))}
+    # 計數重算與 summary 比對
+    mine = {}
+    for dom in ("companies", "football"):
+        ee = [e for e in E if e["domain"] == dom]; cnt = collections.Counter(e["class"] for e in ee)
+        pv = {c: {"n": len([e for e in ee if e["class"] == c]), "mean_p": round(statistics.mean(e["p_v1"] for e in ee if e["class"] == c), 3),
+                  "p>=0.9": sum(e["p_v1"] >= 0.9 for e in ee if e["class"] == c), "p<0.5": sum(e["p_v1"] < 0.5 for e in ee if e["class"] == c)} for c in cnt}
+        er = collections.Counter(e["equiv_rule"] for e in ee if e["equiv_rule"])
+        mine[dom] = {"wrong_lines": len(ee), "by_class": dict(cnt), "v1_prob_by_class": pv, "equiv_rules": dict(er),
+                     "equiv_rule_by_class": {f"{c}|{e['equiv_rule']}": 0 for c in cnt for e in ee if e["equiv_rule"]}}
+        mine[dom]["equiv_rule_by_class"] = dict(collections.Counter(f"{e['class']}|{e['equiv_rule']}" for e in ee if e["equiv_rule"]))
+        R = S_[dom]
+        mine[dom]["matches_summary"] = (R["wrong_lines"] == len(ee) and R["by_class"] == dict(cnt) and R["equiv_rules"] == dict(er)
+                                        and all(R["v1_prob_by_class"][c] == pv[c] for c in pv))
+    out["recomputed"] = mine
+    c = mine["companies"]; nq = c["by_class"].get("U-等值", 0) + c["by_class"].get("K-等值", 0)
+    unp = c["by_class"].get("U-等值", 0) + c["by_class"].get("U", 0)
+    nfill_c = sum(1 for r in rows if r["dom"] == "companies")
+    out["headline"] = {"wrong_companies": c["wrong_lines"], "equiv_lines": nq, "equiv_share": round(nq / c["wrong_lines"], 4),
+                       "unparsed_lines": unp, "unparsed_equiv": c["by_class"].get("U-等值", 0), "parsed_equiv": c["by_class"].get("K-等值", 0),
+                       "parsed_equiv_age": c["equiv_rule_by_class"].get("K-等值|age", 0), "age_total": c["equiv_rules"].get("age", 0),
+                       "remaining_wrong": c["wrong_lines"] - nq, "denominator_excluding_equiv": nfill_c - nq,
+                       "remaining_error_excluding": round((c["wrong_lines"] - nq) / (nfill_c - nq), 4),
+                       "remaining_error_if_relabelled_correct": round((c["wrong_lines"] - nq) / nfill_c, 4)}
+    # 第二正規化器邊界（合成案例，不是資料裡的值）
+    cases = [   # (說明, 值, 答案, 語意上真的相同嗎)
+        ("值＝完整日期、答案＝同日期＋N years ago", "April 4, 1976", "April 4, 1976; 49 years ago", True),
+        ("值＝只寫年份", "1976", "April 4, 1976; 49 years ago", False),
+        ("值＝錯的日", "April 5, 1976", "April 4, 1976; 49 years ago", False),
+        ("值＝錯的年", "April 4, 1977", "April 4, 1976; 49 years ago", False),
+        ("值＝錯的月名、日年相同", "May 4, 1976", "April 4, 1976; 49 years ago", False),
+        ("值＝日年相同、他語月名（語意相同）", "4 avril 1976", "April 4, 1976; 49 years ago", True),
+        ("值＝只寫年份＋年齡括號", "1976 (49 years ago)", "April 4, 1976; 49 years ago", False),
+        ("答案沒有 years ago（規則不啟動）", "May 4, 1976", "April 4, 1976", False),
+    ]
+    out["age_rule_boundary_synthetic"] = [{"case": a_, "rule_says_equal": _age_equiv(v_, ans_), "semantically_equal": exp,
+                                           "misjudge": _age_equiv(v_, ans_) != exp} for a_, v_, ans_, exp in cases]
+    out["age_rule_note"] = "canon_strict 只留數字記號、忽略所有文字；年齡規則等於『日與年的數字都相同』，月名寫錯也判相等；值是否在頁上由別的欄位（判別 p、頁面比對）另證，不由這條規則證"
+    out["ticker_rule_note"] = "代號規則：值抽出的（交易所, 代號）非空且為答案抽出集合的子集；值只寫答案兩個上市地中的一個也算相等（可能偏寬）；只寫代號不寫交易所抽不出對，不算（留在 U）；代號大小寫不分交易所、代號轉大寫。無法在這裡重跑（答案鍵不在 git）"
+    # 修正後的訊號（公司組）
+    eq_keys = {e["key"] for e in E if e["class"] in EQUIV}
+    part_keys = {e["key"] for e in E if e["class"] == "R-部分"}
+    cls_of = {e["key"]: e["class"] for e in E}
+    sig = {}
+    for dom in ("companies", "football"):
+        rr0 = [r for r in rows if r["dom"] == dom]
+        versions = {"原樣（量具等值算錯）": [dict(r) for r in rr0],
+                    "排除量具等值": [dict(r) for r in rr0 if r["key"] not in eq_keys],
+                    "量具等值改標為對": [dict(r, wrong=(r["wrong"] and r["key"] not in eq_keys)) for r in rr0],
+                    "排除量具等值＋R-部分": [dict(r) for r in rr0 if r["key"] not in eq_keys and r["key"] not in part_keys]}
+        dsig = {}
+        for vn, rr in versions.items():
+            bys = collections.defaultdict(list)
+            for r in rr:
+                bys[r["set"]].append(r)
+            e = {"lines": len(rr), "wrong": sum(r["wrong"] for r in rr), "error_rate": round(sum(r["wrong"] for r in rr) / len(rr), 4)}
+            scs = {"judge(1-p)": lambda r: 1 - r["p"], "consensus_support_score(1-support/5)": lambda r: 1 - r["support"] / 5,
+                   "consensus_flag(binary)": lambda r: float(r["cons"]), "record_flag(binary)": lambda r: float(r["rec"])}
+            e["auc"] = {k: dict(zip(("auc", "ci95"), auc_boot(bys, f))) for k, f in scs.items()}
+            def inout(flagf):
+                def fn(smp):
+                    f_ = [r for r in smp if flagf(r)]; n_ = [r for r in smp if not flagf(r)]
+                    if not f_ or not n_:
+                        return None
+                    return sum(r["wrong"] for r in f_) / len(f_) - sum(r["wrong"] for r in n_) / len(n_)
+                return fn
+            for nm, ff_ in (("record_flag", lambda r: r["rec"]), ("consensus_flag", lambda r: r["cons"])):
+                st = flag_stats(rr, ff_)
+                st["err_in_minus_out"] = round(st["err_in"] - st["err_out"], 4)
+                st["err_in_minus_out_ci95"] = stat_boot(bys, inout(ff_))
+                e[nm] = st
+            dsig[vn] = e
+        sig[dom] = dsig
+    out["signals_after_correction"] = sig
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--out", required=True); a = ap.parse_args()
     per_draft, pools, rep = load(a.root)
@@ -407,7 +528,9 @@ def main():
         "reason": "逐行多數決、逐行 oracle、一致度旗標都要每組每行 5 份初稿的（canon_strict）值或 HMAC；git 裡只有 r1、r2 的逐行 HMAC（expT_lines_hmac.jsonl，且 before_matches_k 比的是教材修訂，不是初稿之間），"
                   "r3–r5 只有每份的彙總（filled、filled_correct、evidence_score、旗標池計數）。初稿根目錄與 flags_v2.json 不在 git。",
         "items": ["majority", "line_oracle", "majority_vs_*", "consensus flag err_in/err_out/recall", "flag overlap", "tie/blank variants"]}
-    res["r1_r5_lines"] = part2(pathlib.Path(a.root), per_draft, rep)
+    ctx = {}
+    res["r1_r5_lines"] = part2(pathlib.Path(a.root), per_draft, rep, ctx)
+    res["judge_v2v3_taxonomy"] = part3(pathlib.Path(a.root), ctx.get("rows"))
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / "consensus_recompute.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
     bad = [r for r in res["vs_reported"] if not r["match"]]
