@@ -986,3 +986,17 @@ B25 全量驗收並寫補回鏈 → 重算 c0 標記（`flags_v2.json`）→ B33
 - **評分用的程式 sha256**（取代續十三的清單中改過的兩支，其餘不變）：
   - `ops/d2/expTc_confirm_analysis.py` `c7f76d9ac2a928c785ade70d3a629745811f830ff3b4883b6ca5bef45b1773d1`
   - `ops/d2/expT_ctx_test.py` `ecb948be97fc349b8222332800204dcfd2fbbf72dc99735952c34a8873b70581`
+
+## 附錄 C 補充（續）：E 家族 C1 門檻通過、dry-run 上界、正式指令（C12(1)；任何 Haiku 呼叫之前）
+- **C1 門檻**（`expTc_escalate.py --dry-run`，cc-s08 上下文用完的改判與 B25(3) 去 query 之後）：k=5、期望 150 份、缺 0、infra_void 0、沒有 flags_v2 0、越界（機械訊號）0、掃描到的基礎設施 0、掃描 150、B25 失敗 0、B33(1) 不一致 0 ⇒ **通過**。
+  - `escalation_gate.json` sha256 `874b4d096baabfba07f62d4dcb86951b6c6622347b027edf980cc34947841bb5`（在初稿 root，不進 repo）。
+  - 第一次 C1（06:2xZ）失敗的兩處，見續十三、十四。
+- **C2 dry-run 上界**：E 臂 284 次呼叫、上界 **$14.76**；HP 60 次（30 組 × 2）、上界 **$3.06**；合計 **$17.82 ≤ $20**，HP 不縮。
+  - 其他：沒有被跳過的組；ER／EN 全部行重疊平均 6.72；EN 不足額 16 份；ER 沒有有填行 92 份。
+  - `escalation_dryrun.json` sha256 `10dc22b381652185a4efeecec16d05691d4204c6aa9edf68bf19fc011ba5b632`。
+  - 目前帳本已花 $3.28（全部是實驗 T 的 TE／TER）；加上界後 ≤ $21.1，在實驗預算 $30 內。
+- **正式指令**（C12(1)：不使用 `--exclude-sets`）：
+  `ANTHROPIC_API_KEY=<只以環境變數傳入，不寫檔> systemd-run --user --scope -p MemoryMax=3G python3 ops/d2/expTc_escalate.py --drafts $D2_PRIVATE/expTc_drafts_q9_1003 $D2_PRIVATE/expTc_drafts_q9_1004 --k 5 --hp 2 --max-usd 20 --run --workers 2`
+  - 程式 sha：`expTc_escalate.py` `05d3308d…`、`expTc_escalation_analysis.py` `e3bca88f…`（續十三已記）。**任何 Haiku 呼叫之後不再改**（C12(3)）。
+  - 分析時傳的 `--b27` 是 `~/dev/ops/ctl/b27_suspicious.json`（prelaunch 產出，sha `1ba16a02…`）。
+  - E 家族的評分要等它自己的負控制（初稿 root 的事後正式負控制）與 C1 都過。
