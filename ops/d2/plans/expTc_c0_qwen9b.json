@@ -1,0 +1,143 @@
+{
+ "schema": "vacant.d2.expT.plan/2",
+ "id": "expTc_c0_qwen9b",
+ "seed": 20261228,
+ "arms": [
+  "A"
+ ],
+ "reps": 2,
+ "max_rounds": 2,
+ "agent_timeout_s": 600,
+ "budget_s": 1800,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "haiku_full_root": null,
+ "escalation": {
+  "model": "claude-haiku-5-5",
+  "api_url": "https://api.anthropic.com/v1/messages",
+  "max_tokens": 1024,
+  "timeout_s": 120,
+  "price_per_mtok_in": 1.0,
+  "price_per_mtok_out": 5.0,
+  "ledger_path": "~/dev/ops/ctl/api_credit_ledger.jsonl"
+ },
+ "egress": {
+  "mode": "per-worker proxy, OS-assigned port"
+ },
+ "server": {
+  "port": 18261
+ },
+ "providers": [
+  {
+   "name": "lms1004",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "thinking": "off (reasoning_effort none)",
+   "ctx": 131072,
+   "parallel": 2,
+   "jobs": 2,
+   "sets": [
+    "cc-s01",
+    "cc-s02",
+    "cc-s03",
+    "cc-s04",
+    "cc-s05",
+    "cc-s06",
+    "cc-s07",
+    "cc-s08",
+    "cc-s09",
+    "cc-s10",
+    "ff-s01",
+    "ff-s02",
+    "ff-s03",
+    "ff-s04",
+    "ff-s05",
+    "ff-s06",
+    "ff-s07",
+    "ff-s08",
+    "ff-s09",
+    "ff-s10",
+    "ff-s11",
+    "ff-s12",
+    "ff-s13",
+    "ff-s14",
+    "ff-s15",
+    "ff-s16",
+    "ff-s17",
+    "ff-s18",
+    "ff-s19",
+    "ff-s20"
+   ]
+  }
+ ],
+ "vacant_python": "~/dev/ops/d2v52_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v52",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v52_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo ae3db0086",
+  "wheel": "~/dev/ops/d2_release/ae3db0086/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "fccf569cd9cf75b8df595465c44c45e0a8d9a6a4604fbc9e9b9e0ba5ddbf554e",
+  "venv": "~/dev/ops/d2v52_venv (non-editable install)",
+  "hooks": "`vacant install --agents pi --mode observe` using d2v52_venv"
+ },
+ "materials": [
+  {
+   "prefix": "cc",
+   "dir": "${D2_PRIVATE}/realrev3_companies",
+   "manifest_sha256": "3a2a1d6dbdfb340d14ca998e578aeddfcf6ccb3bb283c4a4152e7525e95ea3a9",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10"
+   ]
+  },
+  {
+   "prefix": "ff",
+   "dir": "${D2_PRIVATE}/realrev3_football",
+   "manifest_sha256": "39e665bdda084cf16cb142fe8611262b8ac8d069ea54ae0b8d0fb323ccaa9a87",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10",
+    "s11",
+    "s12",
+    "s13",
+    "s14",
+    "s15",
+    "s16",
+    "s17",
+    "s18",
+    "s19",
+    "s20"
+   ]
+  }
+ ],
+ "purpose": "Experiment T confirmation batch, step 1 only: shared cycle-0 drafts (arm A) on 30 NEW real Wikipedia revision sets (realrev3: 10 companies + 20 football, not used in experiment 1, exploratory T, or v5.2 tuning) x 2 reps on qwen3.5-9b / lms1004q9. Drafts do not depend on Experiment T results. The feedback arms and the readout rule will be fixed in a separate confirmation prereg written AFTER the exploratory T readout and BEFORE any feedback arm runs on these drafts; that plan will reuse these c0 drafts (copied, hashes recorded).",
+ "prereg": {
+  "registered": "2026-11-28, before any model call on realrev3.",
+  "scope": "c0 drafts only (arm A). No feedback, no Haiku, no scoring readout in this step.",
+  "requested_by": "vacant-hope 12h review 2026-11-28 (keep 1004 busy; drafts independent of T results).",
+  "note": "Answer keys of realrev3 are NOT read by this step (no TO arm).",
+  "analysis": "none in this step"
+ }
+}
