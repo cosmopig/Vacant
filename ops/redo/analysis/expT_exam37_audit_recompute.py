@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 --list4-rev e1abc4bf0 | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -1057,11 +1057,11 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict], runs_file: s
     R: dict[str, Any] = {"v2_runs": len(V), "v2_escape_runs": sum(v["escape"] for v in V)}
     R["v2_escape_by_arm_round"] = {f"{a}/{r}": n for (a, r), n in sorted(collections.Counter((v["arm"], v["round"]) for v in V if v["escape"]).items())}
     R["v2_kinds_in_escape_runs"] = dict(collections.Counter(k for v in V if v["escape"] for k in v["escape_kinds"]))
-    rule = lambda v: bool(set(v["escape_kinds"]) - {"path_pattern"}) or v["unlogged_server_200"] > 0  # noqa: E731
+    rule = lambda v: bool(set(v["escape_kinds"]) - {"path_pattern"}) or v.get("unlogged_server_200", 0) > 0  # noqa: E731
     R["v2_rule_inferred"] = "escape ⇔ 有 path_pattern 以外的任一類，或 unlogged_server_200>0"
     R["v2_rule_exceptions"] = [list(key(v)) + [sorted(v["escape_kinds"])] for v in V if rule(v) != v["escape"]]
     c0 = [v for v in V if v["round"] == "c0" and v["escape"]]
-    R["c0_escape"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "unlogged_server_200": v["unlogged_server_200"],
+    R["c0_escape"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "unlogged_server_200": v.get("unlogged_server_200", 0),
                        "server_200": v.get("server_200")} for v in c0]
     # 我的名單
     old = {key(x) for x in esc_old}
@@ -1276,6 +1276,64 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict], runs_file: s
     return R
 
 
+# ───────────────────────────── 第四版名單（e1abc4bf0）─────────────────────────────
+def v4_specifics(src_old: Src, src4: Src, v3_runs: list[dict]) -> dict:
+    """自己 live 目錄 HMAC 核對、讀別格頁面的修訂分類核對、B48 字面版多出來的類別、加一個「排除任何 live 根目錄越界」的敏感度。"""
+    cells = src_old.json("expT/expT_cells.json")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    V4 = src4.jsonl("expT/expT_escape_v4_b48literal_runs.jsonl")
+    RV = src4.jsonl("expT/expT_other_live_reads_revision.jsonl")
+    key = lambda x: (x["set"], x["rep"], x["arm"], x["round"])  # noqa: E731
+    R: dict[str, Any] = {}
+    own: dict[tuple, set] = collections.defaultdict(set)
+    for v in V4:
+        own[(v["set"], v["rep"])].add(v["own_live_hmac"])
+    h2p = {h: k for k, hs in own.items() for h in hs}
+    R["own_hmac"] = {"pairs": len(own), "hmac_per_pair": dict(collections.Counter(len(x) for x in own.values())),
+                     "distinct": len(h2p), "reads_whose_target_equals_reader_own": sum(1 for r in RV if r["other_live_hmac"] in own[(r["set"], r["rep"])]),
+                     "reads_targeting_this_batch": {f"{k[0]}/r{k[1]}/{k[2]}/{k[3]}→{t[0]}/r{t[1]}": n for (k, t), n in collections.Counter(
+                         (key(r), h2p[r["other_live_hmac"]]) for r in RV if r["other_live_hmac"] in h2p).items()},
+                     "reads_targeting_other_batches": sum(1 for r in RV if r["other_live_hmac"] not in h2p),
+                     "distinct_target_dirs": len({r["other_live_hmac"] for r in RV})}
+    v3 = {key(v) for v in v3_runs if v["escape"]}
+    v4 = {key(v) for v in V4 if v["escape"]}
+    R["v4_vs_v3"] = {"v3_subset_v4": v3 <= v4, "added": len(v4 - v3),
+                     "added_kinds": dict(collections.Counter("+".join(sorted(set(v["escape_kinds"]) - {"path_pattern"})) for v in V4 if key(v) in v4 - v3)),
+                     "added_by_arm_round": dict(collections.Counter(f"{k[2]}/{k[3]}" for k in v4 - v3)),
+                     "pairs_v3": len({k[:2] for k in v3}), "pairs_v4": len({k[:2] for k in v4})}
+    R["revision_labels"] = dict(collections.Counter(r["label"] for r in RV))
+    R["revision_label_by_matched"] = {f'{lab}:{"".join(map(str, m)) or "none"}': n for (lab, m), n in collections.Counter(
+        (r["label"], tuple(r["matched_cycles"])) for r in RV).items()}
+    R["revision_later"] = [{k: r[k] for k in ("set", "rep", "arm", "round", "page", "matched_cycles")} for r in RV if r["label"] == "later_revision"]
+    R["revision_rows_dir_exists_now"] = dict(collections.Counter(r["other_dir_exists_now"] for r in RV))
+    R["revision_runs_covered"] = len({key(r) for r in RV})
+    live_runs = {key(v) for v in V4 if "other_cell_live_dir" in v["escape_kinds"]}
+    R["live_runs"] = len(live_runs)
+    R["live_runs_without_page_rows"] = sorted("/".join(map(str, k)) for k in live_runs - {key(r) for r in RV})
+    R["undeterminable_none_reader_domain"] = dict(collections.Counter(r["set"][:2] for r in RV if r["label"] == "undeterminable" and not r["matched_cycles"]))
+    # 敏感度：排除任何 live 根目錄越界（other_cell_live_dir 或 live_root_not_own）的對
+    root_pairs = {(v["set"], v["rep"]) for v in V4 if v["escape"] and ({"other_cell_live_dir", "live_root_not_own"} & set(v["escape_kinds"]))}
+
+    def prop(c: dict) -> float:
+        return c["final_correct"] / c["n_lines"]
+
+    def comp(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(prop(C[(s_, r_, t)]) - prop(C[(s_, r_, c)]))
+        out = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        out["pairs"] = sum(len(v) for v in d.values())
+        return out
+    keep = set(pairs) - root_pairs
+    R["exclude_any_live_root_pairs"] = {"excluded": len(root_pairs), **{f"{t}_vs_{c}": comp(t, c, keep) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"))},
+                                        "min_drop": min_drop_exact(C, pairs, keep, "T", "G")}
+    R["c0_runs"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "c0_filled": C[(v["set"], v["rep"], "A")]["c0_filled"],
+                     "c0_correct": C[(v["set"], v["rep"], "A")]["c0_correct"]} for v in V4 if v["round"] == "c0" and v["escape"]]
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1469,6 +1527,7 @@ def main() -> None:
     ap.add_argument("--escape-rev", default="0dd266544", help="越界逐筆結果所在的提交（新包）")
     ap.add_argument("--list-rev", default="2e99dd9a1", help="新越界名單＋HMAC 補充匯出所在的提交；空字串跳過")
     ap.add_argument("--list3-rev", default="f1fdcfab3", help="第三版越界名單（expT_escape_v3_runs.jsonl）所在的提交；空字串跳過")
+    ap.add_argument("--list4-rev", default="e1abc4bf0", help="第四版（B48 字面）名單與讀別格修訂判定所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1502,6 +1561,12 @@ def main() -> None:
         prev = Src(None if a.dir else a.list_rev, a.dir, repo).jsonl("expT/expT_escape_v2_runs.jsonl")
         out["list_v3_review"] = list_v2_review(src, l3, _calls, runs_file="expT/expT_escape_v3_runs.jsonl", prev_runs=prev, live_dir_strong=True)
         out["source_list_v3"] = a.dir or f"git:{a.list3_rev}"
+    if a.list4_rev:
+        l4 = Src(None if a.dir else a.list4_rev, a.dir, repo)
+        v3r = Src(None if a.dir else a.list3_rev, a.dir, repo).jsonl("expT/expT_escape_v3_runs.jsonl")
+        out["list_v4_review"] = list_v2_review(src, l4, _calls, runs_file="expT/expT_escape_v4_b48literal_runs.jsonl", prev_runs=v3r, live_dir_strong=True)
+        out["v4_specifics"] = v4_specifics(src, l4, v3r)
+        out["source_list_v4"] = a.dir or f"git:{a.list4_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
