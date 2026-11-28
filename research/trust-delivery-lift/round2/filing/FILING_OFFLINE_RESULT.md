@@ -1,5 +1,10 @@
 # Filing-Evidence offline typed audit (zero model cost)
 
+> **Label: leaky dev upper bound — not confirmatory evidence.**  
+> `page_text` is synthesized from **gold evidence lines** (not full requester-visible filing HTML).  
+> Primary contract reads **benchmark gold** metadata (unit/scale/period).  
+> Tolerances were fixed in `PREREG_CONTRACT.md` but calibrated on **qwen3.5-9b C1** curves → report as **dev/tuned checker validity**, not small-model delivery.
+
 **Dataset:** `pramana-research/filing-evidence` ([HF](https://huggingface.co/datasets/pramana-research/filing-evidence), Apache-2.0)  
 **Answers:** bundled `qwen3.5-9b` setup `C1` (`answers.jsonl`, 1000 rows)  
 **Questions:** `questions.jsonl` (gold: `shown_value`, `scale`, `unit`, `period`)

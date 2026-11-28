@@ -67,7 +67,19 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 | `status_found_fields` | **2/3** | included but **param split on all 1000** (different required field lists) |
 | `unit_if_declared` | **2/3** | param split on 125 |
 
-**Consensus contract (pre-registered `PREREG_CONSENSUS_CONTRACT.md`):** on qwen9b replay, catch on quote-pass-wrong **100%** vs primary **74%**, but **524/724** correct rows fail consensus (ESCALATE/FAIL) vs **36** under primary — **trade honesty**: consensus removes silent PASS on multi-column spans; it does **not** increase shippable correct volume. False-release among PASS: primary **~3.6%**, consensus **0%** (almost nothing PASSes).
+**Consensus contract (pre-registered `PREREG_CONSENSUS_CONTRACT.md`):** on qwen9b replay, catch on quote-pass-wrong **100%** vs primary **74%**, but **524/724** correct rows fail consensus (ESCALATE/FAIL) vs **36** under primary — **refuse gate**; 100% catch is **trivial** at that block rate. Dominant pattern: `PASS|ESCALATE|ESCALATE` (**521** tasks).
+
+### Honest coverage split (`PREREG_COVERAGE_SPLIT.md`, before small-model analysis)
+
+| Metric | qwen9b C1 |
+|--------|------------|
+| Uncontested (3 authors same verdict) | **46.1%** |
+| Auto-ship eligible (unanimous PASS) | **20.0%** (200/1000) |
+| Contested → human ESCALATE | **53.9%** |
+| False-release on uncontested auto-PASS | **0/200 (0%)** |
+| Contested pattern top | `PASS\|ESCALATE\|ESCALATE` × 521 |
+
+**Claim candidate:** On the **uncontested** region, auto-PASS is **trustworthy** (0% false-release here); **contested** volume is **explicitly not auto-shipped** — accountability as **coverage disclosure**, not maximal catch.
 
 ### Contract metrics (`contract_metrics_qwen_c1.json`)
 
@@ -80,18 +92,20 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 
 **Interpretation:** Judgment relocation works for **replay**; **contract authoring is not interchangeable** without changing ship/hold rates. Primary profile **silently** ships on multi-number spans; independent profile **ESCALATEs** → divergence.
 
-## 4. Filing online — small models (in progress)
+## 4. Filing online — small models (stopped; exploratory partial only)
+
+**Supervisor order:** holdout confirmatory first; **0.5B filing run stopped** (~1100+/1320 rows exploratory, **not** labeled confirmatory). **1.5B** only if holdout completes with time left.
 
 - **Pre-registered subset:** `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).  
 - **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). **Interim (~32% rows):** ~71 Q/arm; **0/6** filings with zero-wrong deliveries so far (0.5B capacity); see `online_05b_seed42_interim_summary.json` (updates as run continues).  
 - **1.5B:** tmux `filing-15b-queue` waits for 0.5B completion → `online_15b_seed42/`.  
 - **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
 
-## 5. Invoice Round 2 — field-lock vs BLIND (queued)
+## 5. Invoice Round 2 — field-lock vs equal-cost baselines (**running**)
 
-- **Holdout:** n=150 answerable; arms **BLIND** vs **VACANT** (micro budget capped at **4** for CPU).  
-- **Resume:** `data/holdout_05b/rows.jsonl` has **2** rows (hold_000); tmux `holdout-queue` runs after 0.5B filing releases CPU.  
-- **McNemar:** `recompute_r2.py` when complete.
+- **Holdout:** n=150 answerable; arms **VACANT, BLIND, MAJ3, LPB3** (tmux `holdout-confirm`).  
+- **Frozen analysis:** first **2** rows not used for inference; addendum hash in `data/holdout_05b/PREREG_SHA256.json`.  
+- **McNemar:** `VACANT` vs **MAJ3** (primary); also **BLIND**, **LPB3** descriptive + `selective_2x2` + `utility_grid`.
 
 ## 6. Verdict paragraph（可否說「問責改善交付」？）
 

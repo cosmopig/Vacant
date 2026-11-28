@@ -28,6 +28,54 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     return ((c - m) / d, (c + m) / d)
 
 
+def _cost_means(rows: list[dict]) -> dict:
+    by: dict[str, list[dict]] = defaultdict(list)
+    for r in rows:
+        by[r["arm"]].append(r)
+    return {
+        arm: {
+            "mean_cpu_s": sum(x["cpu_seconds"] for x in rs) / len(rs),
+            "mean_tokens": sum(x["prompt_tokens"] + x["completion_tokens"] for x in rs) / len(rs),
+            "mean_calls": sum(x["n_calls"] for x in rs) / len(rs),
+        }
+        for arm, rs in sorted(by.items())
+    }
+
+
+def selective_2x2(rows: list[dict]) -> dict:
+    """Released/held × correct/wrong. Invoice primary arms always ship → held cells 0."""
+    out = {}
+    for arm in sorted({r["arm"] for r in rows}):
+        rs = [r for r in rows if r["arm"] == arm]
+        rc = sum(1 for r in rs if r.get("oracle_whole_success"))
+        rw = sum(1 for r in rs if not r.get("oracle_whole_success"))
+        out[arm] = {
+            "released_correct": rc,
+            "released_wrong": rw,
+            "held_correct": 0,
+            "held_wrong": 0,
+            "escalate_rate": 0.0,
+            "n": len(rs),
+        }
+    return out
+
+
+def utility_grid(rows: list[dict], arm: str) -> dict:
+    rs = [r for r in rows if r["arm"] == arm]
+    if not rs:
+        return {}
+    out = {}
+    for lam in (1, 3, 10):
+        for c in (0, 0.5):
+            u = 0.0
+            for r in rs:
+                rel_c = 1.0 if r.get("oracle_whole_success") else 0.0
+                rel_w = 1.0 - rel_c
+                u += rel_c - lam * rel_w  # escalate 0 on invoice holdout
+            out[f"lambda_{lam}_c_{c}"] = u / len(rs)
+    return out
+
+
 def summarize_primary(rows: list[dict], answerable_only: bool = True) -> dict:
     if answerable_only:
         rows = [r for r in rows if r.get("answerable", True)]
@@ -111,9 +159,16 @@ def main() -> None:
     if args.gating:
         summary = {"gating": gating_summary(rows)}
     else:
+        primary = summarize_primary(rows)
         summary = {
-            "primary": summarize_primary(rows),
-            "mcnemar": mcnemar_pair(rows, args.primary_arm, args.baseline),
+            "primary": primary,
+            "selective_2x2": selective_2x2(rows),
+            "utility_grid_vacant": utility_grid(rows, args.primary_arm),
+            "mcnemar_vacant_vs_maj3": mcnemar_pair(rows, args.primary_arm, "MAJ3"),
+            "mcnemar_vacant_vs_blind": mcnemar_pair(rows, args.primary_arm, "BLIND"),
+            "mcnemar_vacant_vs_lpb3": mcnemar_pair(rows, args.primary_arm, "LPB3"),
+            "mcnemar_primary_frozen": mcnemar_pair(rows, args.primary_arm, args.baseline),
+            "cost_means": _cost_means(rows),
         }
     args.out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
