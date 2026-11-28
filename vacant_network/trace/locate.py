@@ -30,8 +30,10 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import os
 import pathlib
 import re
+from collections.abc import Mapping
 from typing import Any
 
 from ..intake import verifiers as V
@@ -39,6 +41,69 @@ from ..intake.artifact import glob_to_regex
 
 _NUM_RE = re.compile(r"-?(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)(?:\.[0-9]+)?")
 _TB_RE = re.compile(r'File "([^"]+)", line ([0-9]+)')
+
+#: 值比對模式（2026-11-28, vq-7f1）：預設維持 `"literal"`（既有行為）；
+#: `"b24"` 在既有行為之上，對頁面文字與值兩邊套用封閉三項正規化（見 `normalize_b24`）。
+MATCHING_MODES: tuple[str, ...] = ("literal", "b24")
+DEFAULT_MATCHING: str = "literal"
+_B24_MD = re.compile(r"[*`]")
+_B24_OPEN = re.compile(r"\s*\(\s*")
+_B24_CLOSE = re.compile(r"\s*\)\s*")
+
+
+def validate_matching(matching: str) -> str:
+    """驗證 `matching` 模式名稱；非法值一律 fail-closed 拋 `ValueError`。"""
+    if matching not in MATCHING_MODES:
+        raise ValueError(f"unknown matching mode {matching!r}; expected one of {MATCHING_MODES}")
+    return matching
+
+
+def resolve_matching(matching: str | None = None, *, env: Mapping[str, str] | None = None) -> str:
+    """最外層入口解析比對模式：明確傳入的 `matching` 優先；否則讀環境變數 `VACANT_FLAG_MATCHING`（預設 `"literal"`）。"""
+    if matching is not None:
+        return validate_matching(matching)
+    src = os.environ if env is None else env
+    raw = (src.get("VACANT_FLAG_MATCHING") or "").strip()
+    if not raw:
+        return DEFAULT_MATCHING
+    return validate_matching(raw)
+
+
+def normalize_b24(text: str) -> str:
+    """B24 封閉三項正規化（2026-11-28, vq-7f1）：
+      1. 移除每一個 `*`；
+      2. 移除每一個反引號 `` ` ``；
+      3. 移除緊鄰 `(` 或 `)` 內外的連續空白（`str.isspace()`，含 U+00A0、U+2009）。
+    其餘字元（他處空白、`_`、千分位、Unicode 負號等）一律不動。"""
+    return _B24_CLOSE.sub(")", _B24_OPEN.sub("(", _B24_MD.sub("", text or "")))
+
+
+def _normalize_b24_with_offsets(text: str) -> tuple[str, list[int]]:
+    """與 `normalize_b24` 產出逐字相同的字串，並附每個輸出字元在原文的索引（供 `occurrences` 還原行／欄）。"""
+    kept = [(i, ch) for i, ch in enumerate(text or "") if ch not in "*`"]
+    out_chars: list[str] = []
+    out_offs: list[int] = []
+    i, n = 0, len(kept)
+    while i < n:
+        off, ch = kept[i]
+        if ch.isspace():
+            j = i + 1
+            while j < n and kept[j][1].isspace():
+                j += 1
+            prev_ch = out_chars[-1] if out_chars else ""
+            next_ch = kept[j][1] if j < n else ""
+            if prev_ch in ("(", ")") or next_ch in ("(", ")"):
+                i = j
+                continue
+            for k in range(i, j):
+                out_offs.append(kept[k][0])
+                out_chars.append(kept[k][1])
+            i = j
+            continue
+        out_offs.append(off)
+        out_chars.append(ch)
+        i += 1
+    return "".join(out_chars), out_offs
 
 
 @dataclasses.dataclass
@@ -94,11 +159,9 @@ def number_of(tok: str) -> float | None:
     return V._number(tok)
 
 
-def occurrences(text: str, value: str, limit: int = 200) -> list[tuple[int, int, str]]:
-    """`value` 在 `text` 裡出現的位置 `(行, 欄, 逐字)`，最多 `limit` 個。數字依數值比對（`3,072`＝`3072`，
-    但 `30720` 不含 `3072`——數字要整個 token 相等）；其餘逐字比對（空白正規化）。"""
-    out: list[tuple[int, int, str]] = []
-    lines: _Lines | None = None
+def _occurrence_spans_literal(text: str, value: str, limit: int = 200) -> list[tuple[int, str]]:
+    """既有的逐字／數值比對核心，回傳 `(字元偏移, 命中片段)`。"""
+    out: list[tuple[int, str]] = []
     num = number_of(value.strip()) if value else None
     if num is not None:
         for m in _NUM_RE.finditer(text):
@@ -110,9 +173,7 @@ def occurrences(text: str, value: str, limit: int = 200) -> list[tuple[int, int,
                 continue
             v = number_of(m.group(0))
             if v is not None and v == num:
-                lines = lines or _Lines(text)
-                ln, c = lines.at(a)
-                out.append((ln, c, m.group(0)))
+                out.append((a, m.group(0)))
                 if len(out) >= limit:
                     break
         return out
@@ -124,15 +185,45 @@ def occurrences(text: str, value: str, limit: int = 200) -> list[tuple[int, int,
         i = text.find(needle, start)
         if i < 0 or len(out) >= limit:
             break
-        lines = lines or _Lines(text)
-        ln, c = lines.at(i)
-        out.append((ln, c, needle))
+        out.append((i, needle))
         start = i + max(1, len(needle))
     return out
 
 
-def contains(text: str, value: str) -> bool:
-    return bool(occurrences(text, value, limit=1))
+def occurrences(text: str, value: str, limit: int = 200, *,
+                matching: str = DEFAULT_MATCHING) -> list[tuple[int, int, str]]:
+    """`value` 在 `text` 裡出現的位置 `(行, 欄, 逐字)`，最多 `limit` 個。數字依數值比對（`3,072`＝`3072`，
+    但 `30720` 不含 `3072`——數字要整個 token 相等）；其餘依 `matching` 比對：
+      - `"literal"`（預設）：對 `value.strip()` 做原樣子字串搜尋；
+      - `"b24"`：literal 未命中時，對 `text` 與 `value` 兩邊套用 `normalize_b24` 後重用同一套比對。"""
+    mode = validate_matching(matching)
+    spans = _occurrence_spans_literal(text, value, limit=limit)
+    if spans:
+        lines = _Lines(text)
+        return [(*lines.at(off), tok) for off, tok in spans]
+    if mode == "literal":
+        return []
+    norm_val = normalize_b24(value)
+    if not norm_val:
+        return []
+    norm_text, offs = _normalize_b24_with_offsets(text)
+    nsp = _occurrence_spans_literal(norm_text, norm_val, limit=limit)
+    if not nsp:
+        return []
+    lines = _Lines(text)
+    return [(*lines.at(offs[off]), tok) for off, tok in nsp]
+
+
+def contains(text: str, value: str, *, matching: str = DEFAULT_MATCHING) -> bool:
+    mode = validate_matching(matching)
+    if _occurrence_spans_literal(text, value, limit=1):
+        return True
+    if mode == "literal":
+        return False
+    norm_val = normalize_b24(value)
+    if not norm_val:
+        return False
+    return bool(_occurrence_spans_literal(normalize_b24(text), norm_val, limit=1))
 
 
 def _read(adir: pathlib.Path, rel: str) -> str | None:

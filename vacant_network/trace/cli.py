@@ -43,6 +43,7 @@ from ..intake import contract as C
 from ..intake import keys as _keys
 from . import blame as B
 from . import feedback as F
+from . import locate as L
 from .locate import Location
 from .recorder import MixedSignerRefused, Recorder
 
@@ -403,10 +404,12 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
-def _blame_where(ws: pathlib.Path, c: Any, where: str, value: str | None) -> dict[str, Any]:
+def _blame_where(ws: pathlib.Path, c: Any, where: str, value: str | None, *,
+                 matching: str = L.DEFAULT_MATCHING) -> dict[str, Any]:
     path, line = _parse_where(where)
     rel = _rel(ws, path)
-    return B.blame_location(B.Trace(Recorder(ws)), Location(rel, line, value=value), contract=c)
+    return B.blame_location(B.Trace(Recorder(ws)), Location(rel, line, value=value), contract=c,
+                            matching=matching)
 
 
 def _mutate(fn: Any, *args: Any, **kw: Any) -> Any:
@@ -422,7 +425,8 @@ def cmd_blame(args: argparse.Namespace) -> int:
     ws, c = _workspace(args)
     rec = Recorder(ws)
     _mutate(rec.checkpoint, "blame")          # 行號要對得上現在的檔
-    b = _blame_where(ws, c, args.where, args.value)
+    mode = L.resolve_matching(getattr(args, "matching", None))
+    b = _blame_where(ws, c, args.where, args.value, matching=mode)
     if args.json:
         print(json.dumps(b, ensure_ascii=False, indent=1, default=str))
     else:
@@ -570,8 +574,9 @@ def cmd_sources(args: argparse.Namespace) -> int:
     from . import sources as SRC
     ws, c = _workspace(args)
     rel = _rel(ws, args.path)
+    mode = L.resolve_matching(getattr(args, "matching", None))
     if getattr(args, "snapshot", False):
-        print(json.dumps(_mutate(SRC.snapshot, ws, rel, egress=bool(getattr(args, "egress", False))),
+        print(json.dumps(_mutate(SRC.snapshot, ws, rel, egress=bool(getattr(args, "egress", False)), matching=mode),
                          ensure_ascii=False, indent=1, default=str))
         return 0
     if getattr(args, "guard", None) is not None:
@@ -587,14 +592,15 @@ def cmd_sources(args: argparse.Namespace) -> int:
         return 0
     if args.check and getattr(args, "candidates", False):
         res = _mutate(SRC.check_candidates, ws, rel, by_value=bool(getattr(args, "by_value", False)),
-                      egress=bool(getattr(args, "egress", False)), by_field=bool(getattr(args, "by_field", False)))
+                      egress=bool(getattr(args, "egress", False)), by_field=bool(getattr(args, "by_field", False)),
+                      matching=mode)
         if args.json:
             print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
             return 0
     if args.check and not getattr(args, "candidates", False):
-        res = _mutate(SRC.check, ws, rel, contract=c)
+        res = _mutate(SRC.check, ws, rel, contract=c, matching=mode)
     else:
-        prov = SRC.provenance(ws, rel, contract=c)
+        prov = SRC.provenance(ws, rel, contract=c, matching=mode)
         for e in prov:
             e.pop("_seen", None)
         res = {"path": rel, "claims": prov}
@@ -683,6 +689,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sp.add_parser("blame")
     p.add_argument("where")
     p.add_argument("--value")
+    p.add_argument("--matching", choices=L.MATCHING_MODES, default=None,
+                   help="value matching mode (default: VACANT_FLAG_MATCHING or 'literal')")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_blame)
     p = sp.add_parser("sources", help="where each value in a deliverable came from; --check re-reads "
@@ -706,6 +714,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="with --guard: on handed lines only the value may change; a changed label is restored")
     p.add_argument("--egress", action="store_true",
                    help="also take candidate sources from the network egress log (pages actually fetched)")
+    p.add_argument("--matching", choices=L.MATCHING_MODES, default=None,
+                   help="value matching mode (default: VACANT_FLAG_MATCHING or 'literal')")
     p.set_defaults(func=cmd_sources)
     p = sp.add_parser("egress", help="local HTTP proxy for the agent's tools; logs every fetched URL and "
                                      "response body for this workspace (HTTPS: host only)")
