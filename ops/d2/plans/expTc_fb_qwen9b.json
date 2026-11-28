@@ -150,7 +150,7 @@
  "prereg": {
   "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
   "code_sha256": {
-   "ops/d2/run_expT.py": "e6256e094bfeffeea599336ac6df7e6b26f0017f6dcd029ff92a1d33602b1bdb",
+   "ops/d2/run_expT.py": "f55abc06d25e5ed86722560024f7a103c68fcd5eb4a83dfabee855fa72e1fd1f",
    "ops/d2/bwrap_expT_agent.sh": "b87019e76f726faed43737f048742d9e7b0be420e57a4284c2ea8a88b2a3a995",
    "ops/d2/sockfwd.py": "ad4a932114d0712e307235db149948ee5900d9319ddc19f2efb580040b1e4b52",
    "ops/d2/netns_selftest.py": "09e0713ddfc99d10783272c777bb4d744562fd65e4fb100c9b93d5b152ae7b57",

@@ -553,6 +553,33 @@ class ExpTRun:
             except subprocess.TimeoutExpired:
                 continue
 
+    def _disk_guard(self, out: pathlib.Path) -> None:
+        """2026-11-28（決策方要求）：可用空間低於 4 GB 時暫停發新的 agent 執行（已在跑的讓它跑完），不刪任何東西。
+        暫停時寫通知檔 ~/dev/ops/ctl/DISK_PAUSE_<root>.json：當下在跑的格、剩餘空間、佔用最大的 5 個檔案路徑（只記不動）。
+        空間回到 4.5 GB 以上才繼續。"""
+        low, resume = 4 * 1024 ** 3, int(4.5 * 1024 ** 3)
+        if shutil.disk_usage(str(self.root)).free >= low:
+            return
+        note = pathlib.Path.home() / "dev" / "ops" / "ctl" / f"DISK_PAUSE_{self.root.name}.json"
+        while shutil.disk_usage(str(self.root)).free < resume:
+            big = []
+            for base in (self.root, pathlib.Path.home() / "dev" / "ops" / "d2_private_live"):
+                for p in base.rglob("*"):
+                    try:
+                        if p.is_file() and not p.is_symlink():
+                            big.append((p.stat().st_size, str(p)))
+                    except OSError:
+                        pass
+            big.sort(reverse=True)
+            with LOCK:
+                running = sorted({str(getattr(pr, "args", ["?"])[-1])[:80] for pr in self.procs})
+            write_json(note, {"ts": now_iso(), "root": self.root.name, "free_bytes": shutil.disk_usage(str(self.root)).free,
+                              "waiting_run": str(out.relative_to(self.root)) if str(out).startswith(str(self.root)) else str(out),
+                              "running_procs": len(self.procs), "top5_files": [{"bytes": b, "path": p_} for b, p_ in big[:5]]})
+            self.log(f"DISK_PAUSE free={shutil.disk_usage(str(self.root)).free} waiting={out.name} (note {note.name})")
+            time.sleep(60)
+        self.log("DISK_RESUME")
+
     def run_agent(
         self,
         live: pathlib.Path,
@@ -563,6 +590,7 @@ class ExpTRun:
         timeout_s: float,
     ) -> dict[str, Any]:
         out.mkdir(parents=True, exist_ok=True)
+        self._disk_guard(out)
         (out / "prompt.txt").write_text(prompt, encoding="utf-8")
         t0 = time.time()
         argv = self._agent_argv(live, prov, prompt, out)
