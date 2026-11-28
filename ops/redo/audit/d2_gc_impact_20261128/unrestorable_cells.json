@@ -1,0 +1,36 @@
+{
+ "r4main_1003": {
+  "s11/c0/snapshot": 1,
+  "s11/cV/final": 1,
+  "s11/b/final": 1,
+  "s11/a/final": 1,
+  "s11/d_diff/final": 1,
+  "s11/d_diff_real/final": 1,
+  "s07/c0/snapshot": 16,
+  "s07/cV/final": 16,
+  "s07/b/final": 16,
+  "s07/a/final": 16,
+  "s07/d_diff/final": 16,
+  "s07/d_diff_real/final": 16
+ },
+ "r4h3seen": {
+  "s05/c0/snapshot": 1,
+  "s05/cV/final": 1,
+  "s05/b/final": 1,
+  "s05/a/final": 1,
+  "s05/d_diff/final": 1,
+  "s05/d_diff_real/final": 1,
+  "s15/c0/snapshot": 1,
+  "s15/cV/final": 1,
+  "s15/b/final": 1,
+  "s15/a/final": 1,
+  "s15/d_diff/final": 1,
+  "s15/d_diff_real/final": 1,
+  "s06/c0/snapshot": 6,
+  "s06/cV/final": 6,
+  "s06/b/final": 6,
+  "s06/a/final": 6,
+  "s06/d_diff/final": 6,
+  "s06/d_diff_real/final": 6
+ }
+}
