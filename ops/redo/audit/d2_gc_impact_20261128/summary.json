@@ -1,0 +1,79 @@
+{
+ "note": "D2′ 第四、五輪受 Vacant gc 影響的統計（2026-11-28，只讀已存紀錄）。egress_200_own＝出口紀錄中本格主機的 GET 200；blob_present＝內容物件還在；restorable＝物件被 gc 刪了、但可依 sha 從教材補回；unrestorable＝兩者都不行（r4main／r4h3seen 用的是有 dynamic_noise 的合成留出教材，伺服器送出的位元組和教材檔不同，所以補不回）。gc_files_removed 取自 gc_report.json。",
+ "batches": {
+  "r4main_1003": {
+   "vh_dirs": 144,
+   "gc_ran": 144,
+   "gc_files_removed": 102,
+   "egress_200_own": 4106,
+   "blob_present": 4004,
+   "unrestorable": 102
+  },
+  "r4main_1004": {
+   "vh_dirs": 72,
+   "gc_ran": 72,
+   "gc_files_removed": 0,
+   "egress_200_own": 1845,
+   "blob_present": 1845
+  },
+  "r4h3seen": {
+   "vh_dirs": 120,
+   "gc_ran": 120,
+   "gc_files_removed": 48,
+   "egress_200_own": 2506,
+   "blob_present": 2458,
+   "unrestorable": 48
+  },
+  "r5real_1003": {
+   "vh_dirs": 8,
+   "gc_ran": 8,
+   "gc_files_removed": 16,
+   "egress_200_own": 125,
+   "blob_present": 125
+  },
+  "r5real_1003b": {
+   "vh_dirs": 50,
+   "gc_ran": 50,
+   "gc_files_removed": 35,
+   "egress_200_own": 1129,
+   "restorable": 119,
+   "blob_present": 1010
+  },
+  "r5real_1004": {
+   "vh_dirs": 18,
+   "gc_ran": 18,
+   "gc_files_removed": 1,
+   "egress_200_own": 183,
+   "blob_present": 183
+  },
+  "r5real_1004b": {
+   "vh_dirs": 50,
+   "gc_ran": 50,
+   "gc_files_removed": 50,
+   "egress_200_own": 1708,
+   "blob_present": 1704,
+   "restorable": 4
+  },
+  "r5h3b": {
+   "vh_dirs": 80,
+   "gc_ran": 80,
+   "gc_files_removed": 0,
+   "egress_200_own": 1525,
+   "blob_present": 1525
+  },
+  "r5seen4": {
+   "vh_dirs": 7,
+   "gc_ran": 7,
+   "gc_files_removed": 0,
+   "egress_200_own": 173,
+   "blob_present": 173
+  },
+  "r5seen4b": {
+   "vh_dirs": 80,
+   "gc_ran": 80,
+   "gc_files_removed": 0,
+   "egress_200_own": 2266,
+   "blob_present": 2266
+  }
+ }
+}
