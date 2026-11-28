@@ -226,6 +226,17 @@ def b57_exempt(tn, args, res, tcid, ctx, log, state, root, sid, rep, arm, own_ma
     out["exempt"] = bool(i_ok and not state["run_attempts"] and basis and not symlink)
     return out
 
+
+def classify_model_stop(txt: str) -> tuple[bool, bool]:
+    """B4：回傳 (上下文用完, 模型端點錯誤)。上下文用完＝pi 的 stopReason=length，或 LM Studio 在伺服器端回的
+    「Context size has been exceeded」錯誤（2026-11-28 修實作：先前只認前者，後者被當成模型端點錯誤＝基礎設施；
+    cc-s08 r4、r5 因此誤判）。唯一的錯誤就是上下文用完時，不算模型端點錯誤。"""
+    model_err = ('"stopReason":"error"' in txt) or ('"errorMessage"' in txt)
+    ctx = ('"stopReason":"length"' in txt) or bool(re.search(r"Context size has been exceeded|context length exceeded|maximum context length", txt, re.I))
+    if ctx and model_err and not re.search(r'"errorMessage":\s*"(?!Context size has been exceeded|[^"]*context length)', txt):
+        model_err = False
+    return ctx, model_err
+
 _KNOWN_CACHE: dict = {}
 _SHA_CACHE: dict = {}
 
@@ -472,12 +483,7 @@ def scan_runs(root: pathlib.Path, d2: str, mode: str | None = None, known_file: 
         n5xx = sum(1 for a in win if int(a.get("status") or 0) >= 500)
         n404_exist = sum(1 for a in win if a.get("status") == 404 and (site / str(a.get("path", "")).lstrip("/")).is_file())
         n404_missing = sum(1 for a in win if a.get("status") == 404) - n404_exist
-        model_err = ('"stopReason":"error"' in txt) or ('"errorMessage"' in txt)
-        # B4(ii) 上下文用完：pi 的 stopReason=length，或 LM Studio 在伺服器端回的「Context size has been exceeded」錯誤
-        # （2026-11-28 修實作：先前只認前者，後者被當成模型端點錯誤＝基礎設施；cc-s08 r4、r5 因此誤判）
-        ctx = ('"stopReason":"length"' in txt) or bool(re.search(r"Context size has been exceeded|context length exceeded|maximum context length", txt, re.I))
-        if ctx and model_err and not re.search(r'"errorMessage":\s*"(?!Context size has been exceeded|[^"]*context length)', txt):
-            model_err = False          # 唯一的錯誤就是上下文用完 ⇒ 不是基礎設施
+        ctx, model_err = classify_model_stop(txt)
         runs[(sid, rep, arm, rnd)] = {
             "_sandboxed": sandboxed, "sandbox_failure_signals": dict(mech), "sandbox_failure": bool(mech),
             "b57_exemptions": b57_ex, "b57_not_exempt": b57_fail,
@@ -871,6 +877,23 @@ def main() -> None:
               "exclude_suspicious_flags": fb_block(cells, base - susp, "exclude_suspicious_flags_descriptive"),
               "exclude_suspicious_flags_v2": fb_block(cells, base - susp2, "exclude_suspicious_flags_v2_descriptive"),
               "TB_triggered": fb_block(cells, tb_trig & t_trig, "T_and_TB_triggered_descriptive")}
+        # B59（看過「兩台上下文用完份數」之後、任何分數之前；vacant-cloud 提、決策方採）——全部只描述，不進 Holm
+        ctx_draft_pairs = {k for k in base if allr.get((k[0], k[1], "c0", "c0"), {}).get("context_exhausted")}
+        fb["exclude_draft_context_exhausted_pairs_B59_1"] = fb_block(cells, base - ctx_draft_pairs, "exclude_draft_ctx_pairs_descriptive_B59_1")
+        hosts_ = sorted({meta[k].get("host") for k in base})
+        b59 = {"draft_context_exhausted_pairs": sorted(map(list, ctx_draft_pairs)),
+               "blank_drafts_by_host_and_server_response": dict(collections.Counter(
+                   f"{meta[k].get('host')}/{'server_responded' if allr.get((k[0], k[1], 'c0', 'c0'), {}).get('server_200', 0) > 0 else 'no_server_200'}" for k in blank)),
+               "per_host": {}}
+        for h_ in hosts_:
+            hp = {k for k in base if meta[k].get("host") == h_}
+            b59["per_host"][str(h_)] = {
+                "pairs": len(hp), "sets": len({k[0] for k in hp}),
+                "sets_by_domain": dict(collections.Counter("companies" if s_.startswith("cc") else "football" for s_ in {k[0] for k in hp})),
+                "all": fb_block(cells, hp, f"per_host_{h_}_descriptive_B59_3"),
+                "T_vs_G_aligned": fb_block(cells, hp - misaligned, f"per_host_{h_}_TG_aligned_descriptive_B59_3")}
+        b59["selector_per_host"] = {r_.name: selector([r_], {r_: runs_d[r_]}, False) for r_ in droots}
+        out["b59_descriptive"] = b59
         # T−G 用對齊後的對（B9 (1)）
         ps["T_vs_TB"] = fb_all["T_vs_TB"]["perm_p"]; ps["T_vs_G"] = fb_tg["T_vs_G"]["perm_p"]
         h = holm(ps)
@@ -908,6 +931,10 @@ def main() -> None:
         def pairs_with(arm, kind):
             return {(k[0], k[1]) for k, r in allr.items() if k[2] == arm and r[kind]}
         tg_gap = abs(len(pairs_with("T", "context_exhausted") | pairs_with("T", "timeout")) - len(pairs_with("G", "context_exhausted") | pairs_with("G", "timeout")))
+        # B59(2)：回饋輪的上下文用完分臂計對數；任兩臂相差 ≥3 對 ⇒ 結論加註
+        _ctx_arm = {a_: len({p_ for p_ in pairs_with(a_, "context_exhausted") if p_ in base}) for a_ in ("G", "T", "TB")}
+        out["b59_context_exhausted_pairs_by_arm"] = _ctx_arm
+        out["b59_context_arm_note_needed"] = bool(_ctx_arm) and (max(_ctx_arm.values()) - min(_ctx_arm.values()) >= 3)
         per_arm = {}
         for arm in arms:
             cs = [cells[(s, r, arm)] for (s, r) in base if (s, r, arm) in cells and not cells[(s, r, arm)].get("infra_void")]

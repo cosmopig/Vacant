@@ -1,0 +1,65 @@
+{
+ "all_pass": true,
+ "cases": [
+  {
+   "case": "pi_length",
+   "expected": [
+    true,
+    false
+   ],
+   "got": [
+    true,
+    false
+   ],
+   "pass": true
+  },
+  {
+   "case": "lmstudio_ctx_only",
+   "expected": [
+    true,
+    false
+   ],
+   "got": [
+    true,
+    false
+   ],
+   "pass": true
+  },
+  {
+   "case": "lmstudio_ctx_plus_other_error",
+   "expected": [
+    true,
+    true
+   ],
+   "got": [
+    true,
+    true
+   ],
+   "pass": true
+  },
+  {
+   "case": "endpoint_error_only",
+   "expected": [
+    false,
+    true
+   ],
+   "got": [
+    false,
+    true
+   ],
+   "pass": true
+  },
+  {
+   "case": "clean",
+   "expected": [
+    false,
+    false
+   ],
+   "got": [
+    false,
+    false
+   ],
+   "pass": true
+  }
+ ]
+}
