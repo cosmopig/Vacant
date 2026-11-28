@@ -10,21 +10,22 @@
 用法：judge_gemini_decision.py --roots R1 R2 --private DIR --out DIR (--sample 60 | --all)
 """
 from __future__ import annotations
-import argparse, hashlib, hmac, json, pathlib, re, sys, time
+import argparse, hashlib, json, pathlib, re, sys, time
 REPO = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
+from audit_key import audit_hmac  # noqa: E402
 from ops.d2 import expT_metrics as M  # noqa: E402
 from vacant_network.trace import sources as SRC  # noqa: E402
 
 MAXC, WIN = 60000, 1200
 PRICE_PER_TOK = 0.10 / 1e6
 LEDGER = pathlib.Path.home() / "dev/ops/ctl/api_credit_ledger.jsonl"
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
 QUESTION = "Does the page text support the claim? Answer yes only if the page text states this exact value for this field."
 
 
 def line_key(sid, rep, cid):
-    return hmac.new(KEY, f"{sid}|r{rep}|{cid}".encode(), hashlib.sha256).hexdigest()[:20]
+    return audit_hmac(f"{sid}|r{rep}|{cid}")
 
 
 def pages_text(c0: pathlib.Path) -> list[str]:

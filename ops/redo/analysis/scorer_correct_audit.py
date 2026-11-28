@@ -3,11 +3,11 @@
 (b) 機械找『數字相同、但尺度／幣別／正負號／百分比／月份／期間字樣不同』的行（分臂、分題組）；
 (c) 每題組隨機抽 40 行（種子 20261128）供人工核；公開輸出只有 HMAC 行鍵與分類，值另存私有檔。
 兩種評分各算一次：原 strict、第二正規化器（寬鬆）。用法：scorer_correct_audit.py D1 D2 FB1 FB2 --private DIR"""
-import collections, hashlib, hmac, json, pathlib, random, re, sys
+import collections, json, pathlib, random, re, sys
 HERE = pathlib.Path(__file__).resolve().parent; sys.path.insert(0, str(HERE))
+from audit_key import audit_hmac  # noqa: E402
 from regrade_sensitivity import key_equiv_nolabel, M, _ORIG  # noqa: E402
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-lk = lambda *p: hmac.new(KEY, "|".join(map(str, p)).encode(), hashlib.sha256).hexdigest()[:20]
+lk = lambda *p: audit_hmac("|".join(map(str, p)))
 SCALE = re.compile(r"\b(thousand|million|mllion|billion|trillion|bn|mn)\b", re.I)
 SCALE_N = {"thousand": "k", "million": "m", "mllion": "m", "mn": "m", "billion": "b", "bn": "b", "trillion": "t"}
 CUR = re.compile(r"(US\$|A\$|C\$|HK\$|NT\$|R\$|CN¥|JP¥|\$|€|£|¥|₹|₩|\b(?:USD|EUR|GBP|JPY|CNY|RMB|INR|CHF|KRW|CAD|AUD|HKD|SEK|NOK|DKK|BRL|TWD)\b)")

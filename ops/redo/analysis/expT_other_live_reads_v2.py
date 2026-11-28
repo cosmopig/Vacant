@@ -15,7 +15,9 @@ from __future__ import annotations
 import collections, hashlib, hmac, json, pathlib, re, sys
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO))
+from audit_key import audit_hmac  # noqa: E402
 from ops.d2 import expTc_confirm_analysis as A  # noqa: E402
 from ops.d2 import expTc_b55 as B55  # noqa: E402
 from vacant_network.trace import sources as SRC  # noqa: E402
@@ -23,7 +25,6 @@ from vacant_network.trace import sources as SRC  # noqa: E402
 LIVE_TOK = re.compile(r"d2_private_live/([0-9a-f]{24})(?![0-9a-f])")
 PAGE = re.compile(r"([A-Za-z0-9_\-%.()']+\.html)")
 MINLEN = 25
-HKEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()   # 和第一版、B21 同一把稽核鍵
 
 
 SH = 8
@@ -93,7 +94,7 @@ def main() -> int:
                 for pg in pages:
                     n_reads += 1
                     row = {"set": sid, "rep": rep, "arm": arm, "round": rnd, "page": pg, "tool": tn,
-                           "other_live_hmac": hmac.new(HKEY, toks[0].encode(), "sha256").hexdigest()}
+                           "other_live_hmac": audit_hmac(toks[0], length=64)}
                     plain = SRC._plain(inner) if "<" in inner else inner
                     errish = (not inner.strip()) or bool(A.B51_ERR.search(inner) and len(inner.strip()) < 400 and "<" not in inner) \
                         or bool(re.match(r"\s*/bin/(ba)?sh: ", inner) and "Command exited with code" in inner)     # 指令本身語法錯誤

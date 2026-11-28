@@ -4,16 +4,16 @@
 金鑰只從環境變數 GEMINI_API_KEY 讀；請求／回應原文寫私有目錄；公開輸出只有 HMAC 行鍵與機率；逐筆記帳（provider＝gemini）。
 用法：judge_v2v3.py R1 R2 --private DIR --out DIR [--limit N] [--max-usd 8]"""
 from __future__ import annotations
-import argparse, concurrent.futures as cf, hashlib, hmac, json, pathlib, re, sys, threading, time
+import argparse, concurrent.futures as cf, json, pathlib, re, sys, threading, time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from audit_key import audit_hmac  # noqa: E402
 import judge_pages as P  # noqa: E402
 from judge_pages import M, SRC  # noqa: E402
 from judge_gemini_decision import context as v1_context, QUESTION as V1_Q  # noqa: E402
 
 PRICE = 0.10 / 1e6
 LEDGER = pathlib.Path.home() / "dev/ops/ctl/api_credit_ledger.jsonl"
-KEY = (pathlib.Path.home() / ".config/vacant/audit_hmac.key").read_text().strip().encode()
-lk = lambda sid, rep, cid: hmac.new(KEY, f"{sid}|r{rep}|{cid}".encode(), hashlib.sha256).hexdigest()[:20]
+lk = lambda sid, rep, cid: audit_hmac(f"{sid}|r{rep}|{cid}")
 Q1 = "Does the value_location row or passage describe the requested field (field and field_scope) for the requested entity, rather than a different field, a different period or a different entity?"
 Q2 = "Does the value_location give exactly claimed_value for that field?"
 V3_Q = "Which passage gives the requested entity's value for the requested field, as specified by field and field_scope? Choose 'none' if no passage does."
