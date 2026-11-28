@@ -1,0 +1,291 @@
+{
+ "root_inventory": {
+  "r4_merged": {
+   "arm_dirs_done": 216,
+   "arms": [
+    "a",
+    "b",
+    "cV",
+    "d_diff",
+    "d_diff_real"
+   ],
+   "c0_reports": 36,
+   "cycle_reports": 720,
+   "dynamic_noise": true,
+   "plan_id": "r4main_d2_qwen9b_1003",
+   "sets": 36,
+   "started": "2026-11-25T19:16:25Z",
+   "union_check": {
+    "identical_report_bytes": true,
+    "merged_reports": 756,
+    "part_union_reports": 756
+   }
+  },
+  "r4h3seen": {
+   "arm_dirs_done": 120,
+   "arms": [
+    "a",
+    "b",
+    "cV",
+    "d_diff",
+    "d_diff_real"
+   ],
+   "c0_reports": 20,
+   "cycle_reports": 400,
+   "dynamic_noise": true,
+   "plan_id": "r4h3seen_d2_qwen9b_1003",
+   "sets": 20,
+   "started": "2026-11-25T19:16:25Z"
+  },
+  "r4haiku": {
+   "arm_dirs_done": 216,
+   "arms": [
+    "a",
+    "b",
+    "cV",
+    "d_diff",
+    "d_diff_real"
+   ],
+   "c0_reports": 36,
+   "cycle_reports": 720,
+   "dynamic_noise": true,
+   "plan_id": "r4haiku_d2",
+   "sets": 36,
+   "started": "2026-11-25T19:16:25Z"
+  },
+  "r4main_1003": {
+   "arm_dirs_done": 144,
+   "arms": [
+    "a",
+    "b",
+    "cV",
+    "d_diff",
+    "d_diff_real"
+   ],
+   "c0_reports": 24,
+   "cycle_reports": 480,
+   "dynamic_noise": true,
+   "plan_id": "r4main_d2_qwen9b_1003",
+   "sets": 24,
+   "started": "2026-11-25T19:16:25Z"
+  },
+  "r4main_1004": {
+   "arm_dirs_done": 72,
+   "arms": [
+    "a",
+    "b",
+    "cV",
+    "d_diff",
+    "d_diff_real"
+   ],
+   "c0_reports": 12,
+   "cycle_reports": 240,
+   "dynamic_noise": true,
+   "plan_id": "r4main_d2_qwen9b_1004",
+   "sets": 12,
+   "started": "2026-11-25T19:16:25Z"
+  },
+  "r5real_1003": {
+   "arm_dirs_done": 8,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 2,
+   "cycle_reports": 24,
+   "dynamic_noise": false,
+   "plan_id": "r5real_d2_qwen9b_1003",
+   "sets": 2,
+   "started": "2026-11-26T00:37:53Z"
+  },
+  "r5real_1003b": {
+   "arm_dirs_done": 50,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 10,
+   "cycle_reports": 160,
+   "dynamic_noise": false,
+   "plan_id": "r5real_d2_qwen9b_1003",
+   "sets": 10,
+   "started": "2026-11-26T00:59:50Z"
+  },
+  "r5real_1004": {
+   "arm_dirs_done": 18,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 6,
+   "cycle_reports": 48,
+   "dynamic_noise": false,
+   "plan_id": "r5real_d2_qwen9b_1004",
+   "sets": 6,
+   "started": "2026-11-26T00:37:53Z"
+  },
+  "r5real_1004b": {
+   "arm_dirs_done": 50,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 10,
+   "cycle_reports": 160,
+   "dynamic_noise": false,
+   "plan_id": "r5real_d2_qwen9b_1004",
+   "sets": 10,
+   "started": "2026-11-26T00:59:50Z"
+  },
+  "r5real_haiku": {
+   "arm_dirs_done": 99,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 20,
+   "cycle_reports": 316,
+   "dynamic_noise": false,
+   "plan_id": "r5real_haiku_d2",
+   "sets": 20,
+   "started": "2026-11-26T00:37:53Z"
+  },
+  "r5real_merged": {
+   "arm_dirs_done": 100,
+   "arms": [
+    "a",
+    "b",
+    "cV5",
+    "d_diff_real"
+   ],
+   "c0_reports": 20,
+   "cycle_reports": 320,
+   "dynamic_noise": false,
+   "plan_id": "r5real_d2_qwen9b_1003",
+   "sets": 20,
+   "started": "2026-11-26T00:59:50Z",
+   "union_check": {
+    "identical_report_bytes": true,
+    "merged_reports": 340,
+    "part_union_reports": 340
+   }
+  }
+ },
+ "root_runtime_metadata": {
+  "r4h3seen": {
+   "arm_dirs_done": 120,
+   "c0_reports": 20,
+   "cycle_reports": 400,
+   "family": "r4h3seen_v3",
+   "plan": "r4h3seen_d2_qwen9b_1003.json",
+   "root_name": "r4h3seen",
+   "rows": 8400,
+   "sets": 20,
+   "status_counts": {
+    "correct": 7907,
+    "missing": 116,
+    "stale": 243,
+    "wrong": 134
+   }
+  },
+  "r4haiku": {
+   "arm_dirs_done": 216,
+   "c0_reports": 36,
+   "cycle_reports": 720,
+   "family": "r4main_v4",
+   "plan": "r4haiku_d2.json",
+   "root_name": "r4haiku",
+   "rows": 15120,
+   "sets": 36,
+   "status_counts": {
+    "correct": 13020,
+    "missing": 1655,
+    "stale": 445
+   }
+  },
+  "r4main_1003": {
+   "arm_dirs_done": 144,
+   "c0_reports": 24,
+   "cycle_reports": 480,
+   "family": "r4main_v4",
+   "plan": "r4main_d2_qwen9b_1003.json",
+   "root_name": "r4main_1003",
+   "rows": 10080,
+   "sets": 24,
+   "status_counts": {
+    "correct": 9403,
+    "missing": 243,
+    "stale": 350,
+    "wrong": 84
+   }
+  },
+  "r4main_1004": {
+   "arm_dirs_done": 72,
+   "c0_reports": 12,
+   "cycle_reports": 240,
+   "family": "r4main_v4",
+   "plan": "r4main_d2_qwen9b_1004.json",
+   "root_name": "r4main_1004",
+   "rows": 5040,
+   "sets": 12,
+   "status_counts": {
+    "correct": 4714,
+    "missing": 72,
+    "stale": 198,
+    "wrong": 56
+   }
+  },
+  "r5real_haiku": {
+   "arm_dirs_done": 99,
+   "c0_reports": 20,
+   "cycle_reports": 316,
+   "family": "r5real",
+   "plan": "r5real_haiku_d2.json",
+   "root_name": "r5real_haiku",
+   "rows": 6040,
+   "sets": 20,
+   "status_counts": {
+    "correct": 5835,
+    "stale": 195,
+    "wrong": 10
+   }
+  },
+  "r5real_qwen_merged": {
+   "arm_dirs_done": 100,
+   "c0_reports": 20,
+   "cycle_reports": 320,
+   "family": "r5real",
+   "plan": "r5real_d2_qwen9b_1003.json",
+   "root_name": "r5real_merged",
+   "rows": 6120,
+   "sets": 20,
+   "status_counts": {
+    "correct": 3479,
+    "missing": 1898,
+    "stale": 185,
+    "wrong": 558
+   }
+  }
+ },
+ "root_selection": {
+  "adopted": [
+   "r4main_1003＋r4main_1004（兩台各一部分；逐位元檢查等同 r4_merged，採分 root 以保留 gc 來源）、r4h3seen、r4haiku",
+   "r5real_merged（正式合併 root；逐位元檢查等同 r5real_1003b＋r5real_1004b）、r5real_haiku（正式 Haiku root；99/100 arm dirs，缺的部分不補、照實計入 population 缺口）"
+  ],
+  "not_adopted": [
+   "r5real_1003／r5real_1004：第一次啟動不完整（RUN.json 與 cells 數目見 root_inventory.json）",
+   "r5real_1003b／r5real_1004b：完整組件，但與 r5real_merged 逐位元相同；為避免重複只算 merged",
+   "r4_merged：與 r4main_1003＋r4main_1004 逐位元相同；為保留 gc 來源，直接用兩個組件 root"
+  ]
+ }
+}

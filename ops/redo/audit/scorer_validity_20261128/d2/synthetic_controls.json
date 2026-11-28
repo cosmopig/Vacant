@@ -1,0 +1,839 @@
+{
+ "note": "合成控制只報分類與判定，不報控制字串。default＝這兩輪實際評分函式；strict＝後來才加入的對照。dynamic_noise/adjacent_fields 控制例依『值必須是該欄在頁面上陳述的值本身，不帶抓取雜訊或鄰欄』判為必須不同。",
+ "rounds": {
+  "r4": {
+   "must_differ": [
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m01",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m02",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m03",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m04",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m05",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m06",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m07",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m08",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m09",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m10",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m11",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m12",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m13",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m14",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m15",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m16",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m17",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m18",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m19",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m20",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m21",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date",
+     "default_same": true,
+     "id": "m22",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date",
+     "default_same": false,
+     "id": "m23",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_order",
+     "default_same": false,
+     "id": "m24",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_partial",
+     "default_same": true,
+     "id": "m25",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_partial",
+     "default_same": false,
+     "id": "m26",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "decimal",
+     "default_same": false,
+     "id": "m27",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker",
+     "default_same": false,
+     "id": "m28",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker_exchange",
+     "default_same": false,
+     "id": "m29",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "version_patch",
+     "default_same": false,
+     "id": "m30",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "version_width",
+     "default_same": false,
+     "id": "m31",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "dynamic_noise_trailing",
+     "default_same": true,
+     "id": "m32",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "dynamic_noise_leading",
+     "default_same": false,
+     "id": "m33",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "dynamic_noise_timestamp",
+     "default_same": true,
+     "id": "m34",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "dynamic_noise_hex",
+     "default_same": true,
+     "id": "m35",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "adjacent_fields",
+     "default_same": false,
+     "id": "m36",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "adjacent_numeric_fields",
+     "default_same": true,
+     "id": "m37",
+     "origin": "round_specific",
+     "strict_same": false
+    }
+   ],
+   "should_match": [
+    {
+     "cat": "currency_form",
+     "default_same": true,
+     "id": "s01",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency_form",
+     "default_same": true,
+     "id": "s02",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "thousands_sep",
+     "default_same": true,
+     "id": "s03",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale_word_vs_digits",
+     "default_same": false,
+     "id": "s04",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "scale_abbrev",
+     "default_same": true,
+     "id": "s05",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "minus_glyph",
+     "default_same": true,
+     "id": "s06",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent_space",
+     "default_same": true,
+     "id": "s07",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date_order",
+     "default_same": true,
+     "id": "s08",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "football_space",
+     "default_same": true,
+     "id": "s09",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "markdown",
+     "default_same": true,
+     "id": "s10",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "year_paren",
+     "default_same": true,
+     "id": "s11",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "age_suffix",
+     "default_same": true,
+     "id": "s12",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker_index",
+     "default_same": false,
+     "id": "s13",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "trailing_dot",
+     "default_same": true,
+     "id": "s14",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "version_prefix",
+     "default_same": true,
+     "id": "s15",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "decimal_zero",
+     "default_same": true,
+     "id": "s16",
+     "origin": "round_specific",
+     "strict_same": true
+    },
+    {
+     "cat": "markdown_unit",
+     "default_same": true,
+     "id": "s17",
+     "origin": "round_specific",
+     "strict_same": true
+    },
+    {
+     "cat": "space_unit",
+     "default_same": true,
+     "id": "s18",
+     "origin": "round_specific",
+     "strict_same": true
+    }
+   ],
+   "summary": {
+    "default": {
+     "false_block": 2,
+     "false_block_cats": [
+      "scale_word_vs_digits",
+      "ticker_index"
+     ],
+     "false_pass": 27,
+     "false_pass_cats": [
+      "adjacent_numeric_fields",
+      "currency",
+      "date",
+      "dynamic_noise_hex",
+      "dynamic_noise_timestamp",
+      "dynamic_noise_trailing",
+      "football_partial",
+      "percent",
+      "period",
+      "scale",
+      "sign",
+      "unit"
+     ]
+    },
+    "must_differ_n": 37,
+    "should_match_n": 18,
+    "strict": {
+     "false_block": 4,
+     "false_block_cats": [
+      "age_suffix",
+      "scale_word_vs_digits",
+      "ticker_index",
+      "version_prefix"
+     ],
+     "false_pass": 19,
+     "false_pass_cats": [
+      "currency",
+      "date",
+      "percent",
+      "scale",
+      "sign",
+      "unit"
+     ]
+    }
+   }
+  },
+  "r5": {
+   "must_differ": [
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m01",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m02",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m03",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale",
+     "default_same": true,
+     "id": "m04",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m05",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m06",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m07",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "sign",
+     "default_same": true,
+     "id": "m08",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m09",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m10",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent",
+     "default_same": true,
+     "id": "m11",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m12",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m13",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m14",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency",
+     "default_same": true,
+     "id": "m15",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m16",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m17",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "period",
+     "default_same": true,
+     "id": "m18",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m19",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m20",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "unit",
+     "default_same": true,
+     "id": "m21",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date",
+     "default_same": true,
+     "id": "m22",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date",
+     "default_same": false,
+     "id": "m23",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_order",
+     "default_same": false,
+     "id": "m24",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_partial",
+     "default_same": true,
+     "id": "m25",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_partial",
+     "default_same": false,
+     "id": "m26",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "decimal",
+     "default_same": false,
+     "id": "m27",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker",
+     "default_same": false,
+     "id": "m28",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker_exchange",
+     "default_same": false,
+     "id": "m29",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "football_wrong_goals",
+     "default_same": true,
+     "id": "m30",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "football_wrong_apps",
+     "default_same": false,
+     "id": "m31",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "football_missing_goals",
+     "default_same": true,
+     "id": "m32",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "football_repeated_apps",
+     "default_same": true,
+     "id": "m33",
+     "origin": "round_specific",
+     "strict_same": false
+    },
+    {
+     "cat": "football_noise_trailing",
+     "default_same": true,
+     "id": "m34",
+     "origin": "round_specific",
+     "strict_same": false
+    }
+   ],
+   "should_match": [
+    {
+     "cat": "currency_form",
+     "default_same": true,
+     "id": "s01",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "currency_form",
+     "default_same": true,
+     "id": "s02",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "thousands_sep",
+     "default_same": true,
+     "id": "s03",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "scale_word_vs_digits",
+     "default_same": false,
+     "id": "s04",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "scale_abbrev",
+     "default_same": true,
+     "id": "s05",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "minus_glyph",
+     "default_same": true,
+     "id": "s06",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "percent_space",
+     "default_same": true,
+     "id": "s07",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "date_order",
+     "default_same": true,
+     "id": "s08",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "football_space",
+     "default_same": true,
+     "id": "s09",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "markdown",
+     "default_same": true,
+     "id": "s10",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "year_paren",
+     "default_same": true,
+     "id": "s11",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "age_suffix",
+     "default_same": true,
+     "id": "s12",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "ticker_index",
+     "default_same": false,
+     "id": "s13",
+     "origin": "base",
+     "strict_same": false
+    },
+    {
+     "cat": "trailing_dot",
+     "default_same": true,
+     "id": "s14",
+     "origin": "base",
+     "strict_same": true
+    },
+    {
+     "cat": "football_words",
+     "default_same": true,
+     "id": "s15",
+     "origin": "round_specific",
+     "strict_same": true
+    },
+    {
+     "cat": "football_comma_words",
+     "default_same": true,
+     "id": "s16",
+     "origin": "round_specific",
+     "strict_same": true
+    }
+   ],
+   "summary": {
+    "default": {
+     "false_block": 2,
+     "false_block_cats": [
+      "scale_word_vs_digits",
+      "ticker_index"
+     ],
+     "false_pass": 27,
+     "false_pass_cats": [
+      "currency",
+      "date",
+      "football_missing_goals",
+      "football_noise_trailing",
+      "football_partial",
+      "football_repeated_apps",
+      "football_wrong_goals",
+      "percent",
+      "period",
+      "scale",
+      "sign",
+      "unit"
+     ]
+    },
+    "must_differ_n": 34,
+    "should_match_n": 16,
+    "strict": {
+     "false_block": 3,
+     "false_block_cats": [
+      "age_suffix",
+      "scale_word_vs_digits",
+      "ticker_index"
+     ],
+     "false_pass": 19,
+     "false_pass_cats": [
+      "currency",
+      "date",
+      "percent",
+      "scale",
+      "sign",
+      "unit"
+     ]
+    }
+   }
+  }
+ }
+}

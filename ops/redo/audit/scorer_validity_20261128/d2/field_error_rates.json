@@ -1,0 +1,275 @@
+{
+ "r4": {
+  "fields_over_5pct": [],
+  "method": "高置信機械篩：只把『評分判對但語義數字/版本成分序列與答案不同』列為誤放、『評分判錯但該序列完全相同』列為誤擋；不等於全部語義誤判。分母另列全行數與方向別行數。"
+ },
+ "r5": {
+  "fields_over_5pct": [
+   {
+    "error_rate_all_rows": 0.4706,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 16,
+    "false_pass_rate_among_judged_correct": 0.4848,
+    "field": "2024 → Altrincham (loan) apps (goals)",
+    "judged_correct": 33,
+    "judged_wrong": 1,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.4706,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 16,
+    "false_pass_rate_among_judged_correct": 0.4848,
+    "field": "2024–2025 → Gateshead (loan) apps (goals)",
+    "judged_correct": 33,
+    "judged_wrong": 1,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.4412,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 15,
+    "false_pass_rate_among_judged_correct": 0.4688,
+    "field": "2022–2025 Salford City apps (goals)",
+    "judged_correct": 32,
+    "judged_wrong": 2,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.4412,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 15,
+    "false_pass_rate_among_judged_correct": 0.4412,
+    "field": "2023 → Nantwich Town (loan) apps (goals)",
+    "judged_correct": 34,
+    "judged_wrong": 0,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.4412,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 15,
+    "false_pass_rate_among_judged_correct": 0.4412,
+    "field": "2025–2026 Rochdale apps (goals)",
+    "judged_correct": 34,
+    "judged_wrong": 0,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.4412,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 15,
+    "false_pass_rate_among_judged_correct": 0.4412,
+    "field": "2026 → Altrincham (loan) apps (goals)",
+    "judged_correct": 34,
+    "judged_wrong": 0,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.2941,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 10,
+    "false_pass_rate_among_judged_correct": 0.3704,
+    "field": "2017–2019 Everton apps (goals)",
+    "judged_correct": 27,
+    "judged_wrong": 7,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.2647,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 9,
+    "false_pass_rate_among_judged_correct": 0.4091,
+    "field": "2022– St Patrick's Athletic apps (goals)",
+    "judged_correct": 22,
+    "judged_wrong": 12,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.2353,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 8,
+    "false_pass_rate_among_judged_correct": 0.381,
+    "field": "2026– Altrincham apps (goals)",
+    "judged_correct": 21,
+    "judged_wrong": 13,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.2059,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 7,
+    "false_pass_rate_among_judged_correct": 0.2917,
+    "field": "2016 → Tamworth (loan) apps (goals)",
+    "judged_correct": 24,
+    "judged_wrong": 10,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.2059,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 7,
+    "false_pass_rate_among_judged_correct": 0.2917,
+    "field": "2016–2018 Wolverhampton Wanderers apps (goals)",
+    "judged_correct": 24,
+    "judged_wrong": 10,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.1765,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 6,
+    "false_pass_rate_among_judged_correct": 0.2609,
+    "field": "2019 Longford Town apps (goals)",
+    "judged_correct": 23,
+    "judged_wrong": 11,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.1765,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 6,
+    "false_pass_rate_among_judged_correct": 0.2609,
+    "field": "2020–2021 Bohemians apps (goals)",
+    "judged_correct": 23,
+    "judged_wrong": 11,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.1471,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 5,
+    "false_pass_rate_among_judged_correct": 0.2778,
+    "field": "2024– Cambridge United apps (goals)",
+    "judged_correct": 18,
+    "judged_wrong": 16,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.1176,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 4,
+    "false_pass_rate_among_judged_correct": 0.2222,
+    "field": "2025– CF Montréal apps (goals)",
+    "judged_correct": 18,
+    "judged_wrong": 16,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0882,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 3,
+    "false_pass_rate_among_judged_correct": 0.15,
+    "field": "2019–2021 Linfield apps (goals)",
+    "judged_correct": 20,
+    "judged_wrong": 14,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0735,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 5,
+    "false_pass_rate_among_judged_correct": 0.0909,
+    "field": "2019 → Falkirk (loan) apps (goals)",
+    "judged_correct": 55,
+    "judged_wrong": 13,
+    "rows": 68
+   },
+   {
+    "error_rate_all_rows": 0.0735,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 5,
+    "false_pass_rate_among_judged_correct": 0.1136,
+    "field": "2021–2024 Blackpool apps (goals)",
+    "judged_correct": 44,
+    "judged_wrong": 24,
+    "rows": 68
+   },
+   {
+    "error_rate_all_rows": 0.0588,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 2,
+    "false_pass_rate_among_judged_correct": 0.0588,
+    "field": "2013–2014 → Maidenhead United (loan) apps (goals)",
+    "judged_correct": 34,
+    "judged_wrong": 0,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0588,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 2,
+    "false_pass_rate_among_judged_correct": 0.1,
+    "field": "2021– Queens Park Rangers apps (goals)",
+    "judged_correct": 20,
+    "judged_wrong": 14,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0588,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 2,
+    "false_pass_rate_among_judged_correct": 0.087,
+    "field": "2023– Woking apps (goals)",
+    "judged_correct": 23,
+    "judged_wrong": 11,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0588,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 2,
+    "false_pass_rate_among_judged_correct": 0.0588,
+    "field": "2025–2026 Heart of Midlothian apps (goals)",
+    "judged_correct": 34,
+    "judged_wrong": 0,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0588,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 2,
+    "false_pass_rate_among_judged_correct": 0.1,
+    "field": "2026– VfL Bochum apps (goals)",
+    "judged_correct": 20,
+    "judged_wrong": 14,
+    "rows": 34
+   },
+   {
+    "error_rate_all_rows": 0.0294,
+    "false_block_numeric": 0,
+    "false_block_rate_among_judged_wrong": 0.0,
+    "false_pass_numeric": 1,
+    "false_pass_rate_among_judged_correct": 0.0625,
+    "field": "2024– Heart of Midlothian apps (goals)",
+    "judged_correct": 16,
+    "judged_wrong": 18,
+    "rows": 34
+   }
+  ],
+  "method": "高置信機械篩：只把『評分判對但語義數字/版本成分序列與答案不同』列為誤放、『評分判錯但該序列完全相同』列為誤擋；不等於全部語義誤判。分母另列全行數與方向別行數。"
+ }
+}

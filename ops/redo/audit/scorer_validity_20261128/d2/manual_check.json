@@ -1,0 +1,1489 @@
+{
+ "complete": true,
+ "criterion": "人工核判準：以該週期答案鍵為準。值必須是同一欄位的同一個值：數值大小、版本三段、正負號、尺度、幣別、單位、百分比、以及多成分值的每一成分（第五輪 apps 與 goals 兩者）都要相同；千分位、空白、Markdown、版本前綴 v、小數尾零等純格式差異可。只寫前一個數字而漏掉答案成分、把舊值與新值並列、或把抓取雜訊／相鄰欄位併入該欄，都不算同一個值。missing、空白或無法辨識的值不判對。",
+ "missing_keys": [],
+ "rounds": {
+  "r4": {
+   "gc_unrestorable_sample_rows": 5,
+   "judged_correct": {
+    "misjudged": 0,
+    "misjudged_keys": [],
+    "n": 40,
+    "rate": 0.0,
+    "rows": [
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s19|r3|a|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s19|r3|d_diff_real|c06",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s21|r3|b|c19",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s02|r2|b|c06",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s31|r3|cV|c15",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s16|r1|d_diff_real|c09",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s12|r2|d_diff_real|c15",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s01|r2|d_diff|c11",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s32|r3|b|c09",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s31|r4|cV|c11",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s34|r3|b|c01",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s33|r2|cV|c12",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s13|r1|d_diff|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s12|r2|cV|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s20|r2|d_diff|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s10|r4|d_diff|c10",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s04|r3|cV|c12",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s14|r4|b|c08",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s25|r1|b|c04",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s17|r4|d_diff_real|c01",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s07|r1|cV|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s35|r1|cV|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s14|r3|d_diff|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s29|r1|d_diff_real|c08",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s05|r2|cV|c14",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s05|r3|d_diff|c08",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s20|r2|d_diff|c01",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s19|r4|cV|c14",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s01|r2|cV|c09",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s09|r2|a|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": true,
+      "key": "r4h3seen/s15|r1|cV|c19",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s19|r2|d_diff|c06",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s36|r2|cV|c20",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s25|r2|d_diff|c17",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s12|r1|cV|c01",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s33|r1|d_diff_real|c19",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s34|r2|d_diff_real|c03",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s35|r2|d_diff_real|c17",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s18|r2|cV|c14",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s30|r2|a|c11",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     }
+    ],
+    "upper95_one_sided": 0.0722
+   },
+   "judged_wrong": {
+    "misjudged": 0,
+    "misjudged_keys": [],
+    "n": 40,
+    "rate": 0.0,
+    "rows": [
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s02|r2|cV|c07",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s04|r2|a|c18",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s31|r2|a|c11",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s09|r3|a|c09",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s21|r2|d_diff_real|c14",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s08|r2|d_diff_real|c15",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s17|r4|cV|c10",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s05|r2|d_diff|c11",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s36|r2|d_diff_real|c18",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": true,
+      "key": "r4h3seen/s06|r3|a|c16",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s03|r2|a|c08",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s02|r2|cV|c10",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s03|r1|b|c19",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s12|r4|d_diff_real|c07",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s10|r3|d_diff|c15",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s08|r1|d_diff|c20",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s03|r3|b|c13",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1004/s25|r1|cV|c13",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s23|r2|a|c07",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s20|r3|a|c20",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s23|r2|d_diff|c01",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": true,
+      "key": "r4h3seen/s05|r4|a|c06",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s03|r4|cV|c18",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s16|r2|a|c16",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s33|r1|d_diff|c04",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": true,
+      "key": "r4h3seen/s06|r1|a|c16",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4h3seen/s04|r3|d_diff|c14",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s03|r1|d_diff_real|c15",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s20|r3|cV|c07",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s02|r4|cV|c15",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s08|r2|d_diff_real|c06",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s06|r3|a|c19",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s31|r4|cV|c13",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s08|r2|d_diff_real|c17",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": true,
+      "key": "r4main_1003/s11|r2|cV|c08",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s01|r4|a|c15",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4main_1003/s05|r4|cV|c13",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s03|r4|a|c16",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s33|r2|cV|c14",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r4haiku/s23|r2|a|c02",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     }
+    ],
+    "upper95_one_sided": 0.0722
+   }
+  },
+  "r5": {
+   "gc_unrestorable_sample_rows": 0,
+   "judged_correct": {
+    "misjudged": 0,
+    "misjudged_keys": [],
+    "n": 40,
+    "rate": 0.0,
+    "rows": [
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s19|r0|c0|c04",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s19|r2|cV5|c02",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s03|r3|cV5|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s13|r3|b|c09",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s10|r4|d_diff_real|c10",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s12|r1|d_diff_real|c13",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s02|r1|b|c18",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s18|r1|a|c17",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s19|r4|b|c03",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s18|r3|b|c08",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s04|r1|a|c12",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s16|r2|a|c11",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s11|r4|b|c06",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s05|r4|cV5|c10",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s12|r1|a|c04",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s04|r3|d_diff_real|c19",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s05|r4|cV5|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s11|r4|d_diff_real|c17",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s13|r2|a|c12",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s19|r1|cV5|c13",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s18|r2|d_diff_real|c03",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s17|r3|a|c13",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s13|r4|d_diff_real|c01",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s06|r0|c0|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s08|r2|cV5|c14",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s18|r2|a|c16",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s12|r1|cV5|c09",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s17|r2|d_diff_real|c15",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s02|r0|c0|c20",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s03|r2|a|c02",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s16|r1|a|c19",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s03|r1|b|c10",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s03|r1|d_diff_real|c06",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s04|r3|b|c17",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s07|r1|a|c05",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s06|r1|cV5|c13",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s15|r4|cV5|c07",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s18|r3|a|c18",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s12|r0|c0|c15",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s15|r1|d_diff_real|c03",
+      "manual_category": "same_value_or_formatting_only",
+      "manual_value_correct": true,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "correct"
+     }
+    ],
+    "upper95_one_sided": 0.0722
+   },
+   "judged_wrong": {
+    "misjudged": 0,
+    "misjudged_keys": [],
+    "n": 40,
+    "rate": 0.0,
+    "rows": [
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s11|r2|cV5|c07",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s09|r1|b|c03",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s11|r2|cV5|c09",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s13|r1|b|c07",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s10|r3|d_diff_real|c03",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s19|r3|d_diff_real|c08",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s08|r3|d_diff_real|c08",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s14|r4|d_diff_real|c14",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s08|r1|d_diff_real|c17",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r3|cV5|c06",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s07|r1|d_diff_real|c03",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s07|r3|a|c09",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s13|r4|d_diff_real|c16",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s09|r2|d_diff_real|c13",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s08|r1|a|c01",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s06|r2|a|c13",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s06|r1|b|c19",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s06|r1|cV5|c10",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s06|r2|a|c12",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s01|r1|cV5|c14",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s12|r2|a|c06",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s16|r4|d_diff_real|c20",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s06|r4|b|c08",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r4|d_diff_real|c19",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r0|c0|c11",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r4|d_diff_real|c01",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s01|r3|cV5|c19",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s13|r3|a|c17",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r4|d_diff_real|c13",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r4|d_diff_real|c18",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s09|r3|a|c10",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s08|r1|a|c12",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s10|r2|a|c05",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r2|cV5|c12",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r2|a|c07",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_haiku/s01|r3|a|c19",
+      "manual_category": "stale_or_superseded_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "stale"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r0|c0|c17",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s08|r2|a|c06",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s02|r1|a|c01",
+      "manual_category": "missing_or_blank",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "missing"
+     },
+     {
+      "gc_unrestorable_set": false,
+      "key": "r5real_qwen_merged/s05|r2|a|c03",
+      "manual_category": "different_value",
+      "manual_value_correct": false,
+      "misjudgment": null,
+      "scorer_judgment_correct": true,
+      "status": "wrong"
+     }
+    ],
+    "upper95_one_sided": 0.0722
+   }
+  }
+ }
+}
