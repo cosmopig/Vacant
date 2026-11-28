@@ -1,0 +1,65 @@
+# r3：免費額度用盡、未完成。28 格有 cell.json（終態）、4 格留下半成品（無 cell.json：cc_1552I/r3/A、cc_1575F/r3/A、cc_1580F/r3/C、cc_1608F/r3/C）、其餘 32 格未開始。全部保留在原處，不進主分析。
+cc_1548C/r3/A MISSING(未跑)
+cc_1548C/r3/R MISSING(未跑)
+cc_1548C/r3/B MISSING(未跑)
+cc_1548C/r3/C MISSING(未跑)
+cc_1552G/r3/A MISSING(未跑)
+cc_1552G/r3/R MISSING(未跑)
+cc_1552G/r3/B MISSING(未跑)
+cc_1552G/r3/C MISSING(未跑)
+cc_1552I/r3/A MISSING(未跑)
+cc_1552I/r3/R batch_pass=False attempts=3
+cc_1552I/r3/B batch_pass=False attempts=3
+cc_1552I/r3/C batch_pass=False attempts=3
+cc_1553H/r3/A MISSING(未跑)
+cc_1553H/r3/R MISSING(未跑)
+cc_1553H/r3/B MISSING(未跑)
+cc_1553H/r3/C MISSING(未跑)
+cc_1553I/r3/A batch_pass=False attempts=1
+cc_1553I/r3/R batch_pass=True attempts=3
+cc_1553I/r3/B batch_pass=False attempts=3
+cc_1553I/r3/C batch_pass=False attempts=3
+cc_1555F/r3/A MISSING(未跑)
+cc_1555F/r3/R MISSING(未跑)
+cc_1555F/r3/B MISSING(未跑)
+cc_1555F/r3/C MISSING(未跑)
+cc_1558E/r3/A batch_pass=True attempts=1
+cc_1558E/r3/R batch_pass=True attempts=1
+cc_1558E/r3/B batch_pass=True attempts=2
+cc_1558E/r3/C batch_pass=True attempts=2
+cc_1572C/r3/A MISSING(未跑)
+cc_1572C/r3/R MISSING(未跑)
+cc_1572C/r3/B MISSING(未跑)
+cc_1572C/r3/C MISSING(未跑)
+cc_1575F/r3/A MISSING(未跑)
+cc_1575F/r3/R MISSING(未跑)
+cc_1575F/r3/B MISSING(未跑)
+cc_1575F/r3/C batch_pass=True attempts=2
+cc_1580E/r3/A MISSING(未跑)
+cc_1580E/r3/R MISSING(未跑)
+cc_1580E/r3/B MISSING(未跑)
+cc_1580E/r3/C MISSING(未跑)
+cc_1580F/r3/A batch_pass=False attempts=1
+cc_1580F/r3/R batch_pass=False attempts=3
+cc_1580F/r3/B batch_pass=True attempts=1
+cc_1580F/r3/C MISSING(未跑)
+cc_1599A/r3/A MISSING(未跑)
+cc_1599A/r3/R MISSING(未跑)
+cc_1599A/r3/B MISSING(未跑)
+cc_1599A/r3/C MISSING(未跑)
+cc_1599D/r3/A batch_pass=False attempts=1
+cc_1599D/r3/R batch_pass=False attempts=2
+cc_1599D/r3/B batch_pass=False attempts=1
+cc_1599D/r3/C batch_pass=False attempts=3
+cc_1601F/r3/A batch_pass=False attempts=1
+cc_1601F/r3/R batch_pass=False attempts=3
+cc_1601F/r3/B batch_pass=False attempts=3
+cc_1601F/r3/C batch_pass=False attempts=3
+cc_1603E/r3/A batch_pass=False attempts=1
+cc_1603E/r3/R batch_pass=False attempts=3
+cc_1603E/r3/B batch_pass=False attempts=3
+cc_1603E/r3/C batch_pass=False attempts=3
+cc_1608F/r3/A MISSING(未跑)
+cc_1608F/r3/R MISSING(未跑)
+cc_1608F/r3/B batch_pass=False attempts=3
+cc_1608F/r3/C MISSING(未跑)

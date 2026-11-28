@@ -1,0 +1,336 @@
+{
+ "cells": 128,
+ "infra_void": [],
+ "per_arm": {
+  "A": {
+   "cells": 32,
+   "success": 12,
+   "rate": 0.375,
+   "mean_hidden_fraction": 0.449,
+   "tokens_total": 11957726,
+   "tokens_per_success": 996477,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 32,
+   "attempts_usage_missing": 19,
+   "model_calls_recorded": 232,
+   "broken_after_pass": "0/446",
+   "mean_attempts": 1,
+   "wall_mean_s": 1588.8,
+   "wall_median_s": 1801.3,
+   "wall_max_s": 2653.5,
+   "n_changed_serial_vs_batch": 0
+  },
+  "R": {
+   "cells": 32,
+   "success": 7,
+   "rate": 0.2188,
+   "mean_hidden_fraction": 0.2646,
+   "tokens_total": 1322370,
+   "tokens_per_success": 188910,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 84,
+   "attempts_usage_missing": 78,
+   "model_calls_recorded": 55,
+   "broken_after_pass": "0/262",
+   "mean_attempts": 2.625,
+   "wall_mean_s": 1547.2,
+   "wall_median_s": 1804.1,
+   "wall_max_s": 1966.5,
+   "n_changed_serial_vs_batch": 0
+  },
+  "B": {
+   "cells": 32,
+   "success": 8,
+   "rate": 0.25,
+   "mean_hidden_fraction": 0.3198,
+   "tokens_total": 606938,
+   "tokens_per_success": 75867,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 83,
+   "attempts_usage_missing": 74,
+   "model_calls_recorded": 69,
+   "broken_after_pass": "0/314",
+   "mean_attempts": 2.594,
+   "wall_mean_s": 1567.0,
+   "wall_median_s": 1804.1,
+   "wall_max_s": 3094.3,
+   "n_changed_serial_vs_batch": 0
+  },
+  "C": {
+   "cells": 32,
+   "success": 8,
+   "rate": 0.25,
+   "mean_hidden_fraction": 0.3104,
+   "tokens_total": 574775,
+   "tokens_per_success": 71847,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 84,
+   "attempts_usage_missing": 76,
+   "model_calls_recorded": 68,
+   "broken_after_pass": "0/297",
+   "mean_attempts": 2.625,
+   "wall_mean_s": 1569.1,
+   "wall_median_s": 1804.1,
+   "wall_max_s": 2434.1,
+   "n_changed_serial_vs_batch": 0
+  }
+ },
+ "pairs": [
+  {
+   "control": "B",
+   "treatment": "C",
+   "pairs": 32,
+   "both_pass": 6,
+   "only_control": 2,
+   "only_treatment": 2,
+   "neither": 22,
+   "diff_pp": 0.0,
+   "p_exact": 1.0
+  },
+  {
+   "control": "R",
+   "treatment": "C",
+   "pairs": 32,
+   "both_pass": 6,
+   "only_control": 1,
+   "only_treatment": 2,
+   "neither": 23,
+   "diff_pp": 3.12,
+   "p_exact": 1.0
+  },
+  {
+   "control": "A",
+   "treatment": "R",
+   "pairs": 32,
+   "both_pass": 6,
+   "only_control": 6,
+   "only_treatment": 1,
+   "neither": 19,
+   "diff_pp": -15.62,
+   "p_exact": 0.125
+  },
+  {
+   "control": "A",
+   "treatment": "B",
+   "pairs": 32,
+   "both_pass": 6,
+   "only_control": 6,
+   "only_treatment": 2,
+   "neither": 18,
+   "diff_pp": -12.5,
+   "p_exact": 0.2890625
+  },
+  {
+   "control": "A",
+   "treatment": "C",
+   "pairs": 32,
+   "both_pass": 6,
+   "only_control": 6,
+   "only_treatment": 2,
+   "neither": 18,
+   "diff_pp": -12.5,
+   "p_exact": 0.2890625
+  }
+ ],
+ "posthoc_tasks_A_failed_at_least_once": [
+  "cc_1552G",
+  "cc_1552I",
+  "cc_1553I",
+  "cc_1555F",
+  "cc_1572C",
+  "cc_1575F",
+  "cc_1580E",
+  "cc_1580F",
+  "cc_1599A",
+  "cc_1599D",
+  "cc_1601F",
+  "cc_1603E",
+  "cc_1608F"
+ ],
+ "posthoc_per_arm": {
+  "A": {
+   "cells": 26,
+   "success": 6,
+   "rate": 0.2308,
+   "mean_hidden_fraction": 0.3218,
+   "tokens_total": 7552037,
+   "tokens_per_success": 1258673,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 26,
+   "attempts_usage_missing": 19,
+   "model_calls_recorded": 130,
+   "broken_after_pass": "0/266",
+   "mean_attempts": 1,
+   "wall_mean_s": 1737.6,
+   "wall_median_s": 1801.3,
+   "wall_max_s": 2653.5,
+   "n_changed_serial_vs_batch": 0
+  },
+  "R": {
+   "cells": 26,
+   "success": 1,
+   "rate": 0.0385,
+   "mean_hidden_fraction": 0.0949,
+   "tokens_total": 0,
+   "tokens_per_success": 0,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 77,
+   "attempts_usage_missing": 77,
+   "model_calls_recorded": 0,
+   "broken_after_pass": "0/82",
+   "mean_attempts": 2.962,
+   "wall_mean_s": 1789.4,
+   "wall_median_s": 1804.1,
+   "wall_max_s": 1966.5,
+   "n_changed_serial_vs_batch": 0
+  },
+  "B": {
+   "cells": 26,
+   "success": 3,
+   "rate": 0.1154,
+   "mean_hidden_fraction": 0.2013,
+   "tokens_total": 0,
+   "tokens_per_success": 0,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 74,
+   "attempts_usage_missing": 69,
+   "model_calls_recorded": 35,
+   "broken_after_pass": "0/164",
+   "mean_attempts": 2.846,
+   "wall_mean_s": 1759.7,
+   "wall_median_s": 1804.1,
+   "wall_max_s": 3094.3,
+   "n_changed_serial_vs_batch": 0
+  },
+  "C": {
+   "cells": 26,
+   "success": 2,
+   "rate": 0.0769,
+   "mean_hidden_fraction": 0.1513,
+   "tokens_total": 0,
+   "tokens_per_success": 0,
+   "cost_usd_total": null,
+   "cost_per_success": null,
+   "attempts_total": 75,
+   "attempts_usage_missing": 72,
+   "model_calls_recorded": 26,
+   "broken_after_pass": "0/117",
+   "mean_attempts": 2.885,
+   "wall_mean_s": 1746.7,
+   "wall_median_s": 1804.2,
+   "wall_max_s": 2434.1,
+   "n_changed_serial_vs_batch": 0
+  }
+ },
+ "posthoc_pairs": [
+  {
+   "control": "B",
+   "treatment": "C",
+   "pairs": 26,
+   "both_pass": 1,
+   "only_control": 2,
+   "only_treatment": 1,
+   "neither": 22,
+   "diff_pp": -3.85,
+   "p_exact": 1.0
+  },
+  {
+   "control": "R",
+   "treatment": "C",
+   "pairs": 26,
+   "both_pass": 0,
+   "only_control": 1,
+   "only_treatment": 2,
+   "neither": 23,
+   "diff_pp": 3.85,
+   "p_exact": 1.0
+  },
+  {
+   "control": "A",
+   "treatment": "R",
+   "pairs": 26,
+   "both_pass": 0,
+   "only_control": 6,
+   "only_treatment": 1,
+   "neither": 19,
+   "diff_pp": -19.23,
+   "p_exact": 0.125
+  },
+  {
+   "control": "A",
+   "treatment": "B",
+   "pairs": 26,
+   "both_pass": 1,
+   "only_control": 5,
+   "only_treatment": 2,
+   "neither": 18,
+   "diff_pp": -11.54,
+   "p_exact": 0.453125
+  },
+  {
+   "control": "A",
+   "treatment": "C",
+   "pairs": 26,
+   "both_pass": 0,
+   "only_control": 6,
+   "only_treatment": 2,
+   "neither": 18,
+   "diff_pp": -15.38,
+   "p_exact": 0.2890625
+  }
+ ],
+ "controller_rules_fired": {
+  "rule1:stop_success": 9,
+  "rule6:continue": 26,
+  "rule4:restart_fresh": 24,
+  "rule2:deliver_best_budget": 23,
+  "rule5:repair": 2
+ },
+ "chains": {
+  "verified": 32,
+  "failed": [],
+  "decisions": 84
+ },
+ "attempts_visible_failures_time_limit_only_approx": [
+  {
+   "cell": "cc_1552G/r2/A",
+   "attempt": 1,
+   "failing": 27
+  },
+  {
+   "cell": "cc_1552I/r1/A",
+   "attempt": 1,
+   "failing": 26
+  },
+  {
+   "cell": "cc_1575F/r2/C",
+   "attempt": 1,
+   "failing": 3
+  },
+  {
+   "cell": "cc_1575F/r2/C",
+   "attempt": 2,
+   "failing": 3
+  }
+ ],
+ "cells_changed_serial_vs_batch": [],
+ "indistinguishable": {
+  "conditions": {
+   "a_rate_ge_75": false,
+   "past_attempt1_lt_quarter": false,
+   "rules3to6_lt_10": false
+  },
+  "A_rate": 0.375,
+  "RBC_cells": 96,
+  "RBC_past_attempt1": 83,
+  "rules_3to6_fired": 52,
+  "verdict_indistinguishable": false
+ }
+}
