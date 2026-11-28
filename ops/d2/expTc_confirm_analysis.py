@@ -771,6 +771,13 @@ def main() -> None:
         plan, sha, truth, reps, arms, cells, meta = score_fb(froots)
         all_pairs = set(meta)
         allr = {(k[0], k[1], k[2], k[3]): v for r in froots for k, v in runs_f[r].items()}
+        # 2026-11-28（讀過 v1 主比較之後發現的實作錯誤；決策方裁決修正並重跑成 v2）：回饋 root 裡的 c0 是初稿的複本，
+        # 用回饋 root 的路徑與存取紀錄去掃會誤判（v1 有 57/60 對的 c0 被判啟發式得逞、57 份被算基礎設施）。
+        # c0 的啟發式與基礎設施判定一律取初稿 root 的掃描（和 B58(4) 一致）；只影響描述版欄位。
+        _draft_c0 = {(k[0], k[1]): v for r_ in droots for k, v in runs_d[r_].items() if k[2] == "c0"}
+        for k in list(allr):
+            if k[2] == "c0" and (k[0], k[1]) in _draft_c0:
+                allr[k] = _draft_c0[(k[0], k[1])]
         # B4 / B2：整對排除
         # B48(2)：回饋輪沒有 run.json（in_progress）不得判為沒有越界，依 B4 算基礎設施、整對處理
         void_pairs = {(k[0], k[1]) for k, v in allr.items() if k[3] != "c0" and (v["infra"] or v.get("in_progress"))}
