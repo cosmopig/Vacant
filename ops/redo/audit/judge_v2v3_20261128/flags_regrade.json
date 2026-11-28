@@ -1,0 +1,173 @@
+{
+ "note": "事後敏感度；『錯』的標籤用第二正規化器修正（U-等值、K-等值改算對）；旗標本身不變。紀錄旗標＝E 家族定義（ER 送出的有填行）。",
+ "by_domain": {
+  "companies|original": {
+   "lines": 635,
+   "wrong": 219,
+   "record_flag": {
+    "flagged_share": 0.4598,
+    "err_in": 0.2911,
+    "err_out": 0.3907,
+    "recall": 0.3881,
+    "n_flagged": 292
+   },
+   "consensus_flag": {
+    "flagged_share": 0.1795,
+    "err_in": 0.5789,
+    "err_out": 0.2937,
+    "recall": 0.3014,
+    "n_flagged": 114
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.0236,
+    "err_in": 0.8,
+    "err_out": 0.3339,
+    "recall": 0.0548,
+    "n_flagged": 15
+   },
+   "auc_judge_v1": 0.4018,
+   "auc_record_flag": 0.4453,
+   "auc_consensus_flag": 0.593
+  },
+  "football|original": {
+   "lines": 1112,
+   "wrong": 247,
+   "record_flag": {
+    "flagged_share": 0.1628,
+    "err_in": 0.7901,
+    "err_out": 0.1117,
+    "recall": 0.5789,
+    "n_flagged": 181
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2464,
+    "err_in": 0.7956,
+    "err_out": 0.0346,
+    "recall": 0.8826,
+    "n_flagged": 274
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.1574,
+    "err_in": 0.84,
+    "err_out": 0.1067,
+    "recall": 0.5951,
+    "n_flagged": 175
+   },
+   "auc_judge_v1": 0.9134,
+   "auc_record_flag": 0.7675,
+   "auc_consensus_flag": 0.9089
+  },
+  "all|original": {
+   "lines": 1747,
+   "wrong": 466,
+   "record_flag": {
+    "flagged_share": 0.2707,
+    "err_in": 0.482,
+    "err_out": 0.1868,
+    "recall": 0.4893,
+    "n_flagged": 473
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2221,
+    "err_in": 0.732,
+    "err_out": 0.1339,
+    "recall": 0.6094,
+    "n_flagged": 388
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.1088,
+    "err_in": 0.8368,
+    "err_out": 0.1972,
+    "recall": 0.3412,
+    "n_flagged": 190
+   },
+   "auc_judge_v1": 0.6238,
+   "auc_record_flag": 0.649,
+   "auc_consensus_flag": 0.7641
+  },
+  "companies|regraded": {
+   "lines": 635,
+   "wrong": 35,
+   "record_flag": {
+    "flagged_share": 0.4598,
+    "err_in": 0.0616,
+    "err_out": 0.0496,
+    "recall": 0.5143,
+    "n_flagged": 292
+   },
+   "consensus_flag": {
+    "flagged_share": 0.1795,
+    "err_in": 0.2807,
+    "err_out": 0.0058,
+    "recall": 0.9143,
+    "n_flagged": 114
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.0236,
+    "err_in": 0.8,
+    "err_out": 0.0371,
+    "recall": 0.3429,
+    "n_flagged": 15
+   },
+   "auc_judge_v1": 0.7052,
+   "auc_record_flag": 0.5288,
+   "auc_consensus_flag": 0.8888
+  },
+  "football|regraded": {
+   "lines": 1112,
+   "wrong": 247,
+   "record_flag": {
+    "flagged_share": 0.1628,
+    "err_in": 0.7901,
+    "err_out": 0.1117,
+    "recall": 0.5789,
+    "n_flagged": 181
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2464,
+    "err_in": 0.7956,
+    "err_out": 0.0346,
+    "recall": 0.8826,
+    "n_flagged": 274
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.1574,
+    "err_in": 0.84,
+    "err_out": 0.1067,
+    "recall": 0.5951,
+    "n_flagged": 175
+   },
+   "auc_judge_v1": 0.9134,
+   "auc_record_flag": 0.7675,
+   "auc_consensus_flag": 0.9089
+  },
+  "all|regraded": {
+   "lines": 1747,
+   "wrong": 282,
+   "record_flag": {
+    "flagged_share": 0.2707,
+    "err_in": 0.3404,
+    "err_out": 0.095,
+    "recall": 0.5709,
+    "n_flagged": 473
+   },
+   "consensus_flag": {
+    "flagged_share": 0.2221,
+    "err_in": 0.6443,
+    "err_out": 0.0235,
+    "recall": 0.8865,
+    "n_flagged": 388
+   },
+   "judge_v1_p<0.5": {
+    "flagged_share": 0.1088,
+    "err_in": 0.8368,
+    "err_out": 0.079,
+    "recall": 0.5638,
+    "n_flagged": 190
+   },
+   "auc_judge_v1": 0.8956,
+   "auc_record_flag": 0.679,
+   "auc_consensus_flag": 0.8962
+  }
+ }
+}

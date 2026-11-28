@@ -1,0 +1,263 @@
+{
+ "note": "只查答案鍵 truth[0]；行數＝答案鍵的行（每組每欄一行），不是初稿行；不重算批次。",
+ "batches": {
+  "confirm_expTc": {
+   "sets": 30,
+   "lines_by_group": {
+    "cc": 200,
+    "ff": 351
+   },
+   "affected_by_group": {
+    "cc": {
+     "lines": 89,
+     "fields": {
+      "age|Founded": 45,
+      "index_component|Traded as": 43,
+      "age|Foundation": 1
+     }
+    }
+   }
+  },
+  "exploratory_expT": {
+   "sets": 37,
+   "lines_by_group": {
+    "sc": 340,
+    "fb": 355
+   },
+   "affected_by_group": {
+    "sc": {
+     "lines": 123,
+     "fields": {
+      "age|Initial release": 26,
+      "age|Release": 9,
+      "age|Preview release": 1,
+      "age|Latest preview": 1,
+      "age|Latest release": 2,
+      "age|Final release": 1,
+      "index_component|Traded as": 40,
+      "age|Founded": 42,
+      "age|Commenced operations": 1
+     }
+    }
+   }
+  },
+  "exp1_cA_1003": {
+   "sets": 9,
+   "lines_by_group": {
+    "s01": 20,
+    "s02": 20,
+    "s03": 20,
+    "s04": 20,
+    "s05": 20,
+    "s06": 20,
+    "s07": 20,
+    "s08": 20,
+    "s09": 20
+   },
+   "affected_by_group": {
+    "s01": {
+     "lines": 4,
+     "fields": {
+      "age|Initial release": 4
+     }
+    },
+    "s02": {
+     "lines": 6,
+     "fields": {
+      "age|Initial release": 4,
+      "age|Release": 2
+     }
+    },
+    "s03": {
+     "lines": 5,
+     "fields": {
+      "age|Release": 3,
+      "age|Initial release": 2
+     }
+    },
+    "s04": {
+     "lines": 5,
+     "fields": {
+      "age|Initial release": 3,
+      "age|Release": 1,
+      "age|Preview release": 1
+     }
+    },
+    "s05": {
+     "lines": 6,
+     "fields": {
+      "age|Initial release": 4,
+      "age|Release": 2
+     }
+    },
+    "s06": {
+     "lines": 6,
+     "fields": {
+      "age|Initial release": 4,
+      "age|Latest preview": 1,
+      "age|Latest release": 1
+     }
+    },
+    "s07": {
+     "lines": 8,
+     "fields": {
+      "age|Initial release": 5,
+      "age|Final release": 1,
+      "age|Latest release": 1,
+      "age|Release": 1
+     }
+    },
+    "s08": {
+     "lines": 8,
+     "fields": {
+      "index_component|Traded as": 4,
+      "age|Founded": 4
+     }
+    },
+    "s09": {
+     "lines": 10,
+     "fields": {
+      "index_component|Traded as": 5,
+      "age|Founded": 5
+     }
+    }
+   }
+  },
+  "exp1_cA_1004": {
+   "sets": 8,
+   "lines_by_group": {
+    "s10": 20,
+    "s11": 20,
+    "s12": 20,
+    "s13": 20,
+    "s14": 20,
+    "s15": 20,
+    "s16": 20,
+    "s17": 20
+   },
+   "affected_by_group": {
+    "s10": {
+     "lines": 10,
+     "fields": {
+      "index_component|Traded as": 5,
+      "age|Founded": 5
+     }
+    },
+    "s11": {
+     "lines": 8,
+     "fields": {
+      "index_component|Traded as": 4,
+      "age|Founded": 4
+     }
+    },
+    "s12": {
+     "lines": 9,
+     "fields": {
+      "age|Founded": 5,
+      "index_component|Traded as": 4
+     }
+    },
+    "s13": {
+     "lines": 9,
+     "fields": {
+      "index_component|Traded as": 5,
+      "age|Founded": 4
+     }
+    },
+    "s14": {
+     "lines": 8,
+     "fields": {
+      "index_component|Traded as": 4,
+      "age|Founded": 3,
+      "age|Commenced operations": 1
+     }
+    },
+    "s15": {
+     "lines": 6,
+     "fields": {
+      "age|Founded": 4,
+      "index_component|Traded as": 2
+     }
+    },
+    "s16": {
+     "lines": 7,
+     "fields": {
+      "age|Founded": 4,
+      "index_component|Traded as": 3
+     }
+    },
+    "s17": {
+     "lines": 8,
+     "fields": {
+      "index_component|Traded as": 4,
+      "age|Founded": 4
+     }
+    }
+   }
+  },
+  "exp1_cB_1003": {
+   "sets": 10,
+   "lines_by_group": {
+    "s01": 20,
+    "s02": 16,
+    "s03": 16,
+    "s04": 19,
+    "s05": 15,
+    "s06": 18,
+    "s07": 18,
+    "s08": 19,
+    "s09": 15,
+    "s10": 19
+   },
+   "affected_by_group": {}
+  },
+  "exp1_cB_1004": {
+   "sets": 10,
+   "lines_by_group": {
+    "s11": 19,
+    "s12": 19,
+    "s13": 17,
+    "s14": 20,
+    "s15": 20,
+    "s16": 16,
+    "s17": 15,
+    "s18": 19,
+    "s19": 15,
+    "s20": 20
+   },
+   "affected_by_group": {}
+  },
+  "d2prime_r5real_1003": {
+   "sets": 10,
+   "lines_by_group": {
+    "s01": 19,
+    "s02": 20,
+    "s03": 17,
+    "s04": 20,
+    "s05": 16,
+    "s06": 20,
+    "s07": 15,
+    "s08": 18,
+    "s09": 19,
+    "s10": 16
+   },
+   "affected_by_group": {}
+  },
+  "d2prime_r5real_1004": {
+   "sets": 10,
+   "lines_by_group": {
+    "s11": 17,
+    "s12": 18,
+    "s13": 18,
+    "s14": 15,
+    "s15": 20,
+    "s16": 20,
+    "s17": 16,
+    "s18": 20,
+    "s19": 16,
+    "s20": 20
+   },
+   "affected_by_group": {}
+  }
+ }
+}

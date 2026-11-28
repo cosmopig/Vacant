@@ -121,7 +121,12 @@ def main() -> int:
     pf = out / "v2v3_lines.jsonl"
     if pf.is_file():
         for l in pf.read_text().splitlines():
-            j = json.loads(l); done[(j["tag"], j["key"])] = j
+            try:
+                j = json.loads(l)
+            except ValueError:
+                continue
+            if j.get("score") is not None or j.get("not_on_page") or j.get("n_options") == 0:
+                done[(j["tag"], j["key"])] = j
     jobs = []; pages_cache = {}
     for root in roots:
         for c0 in sorted(root.glob("cells/*/r[1-5]/c0")):

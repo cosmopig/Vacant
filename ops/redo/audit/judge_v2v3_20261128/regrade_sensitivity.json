@@ -1,0 +1,468 @@
+{
+ "note": "事後敏感度、非預註冊；原評分是預註冊主分析，不動。第二正規化器（去掉答案鍵『; N years ago』；答案的（交易所, 代號）對包含值的全部對即算對）的規則是看資料後定的。",
+ "arm_correct_prop_setweighted": {
+  "original": {
+   "feedback_A|companies": 0.465,
+   "feedback_G|companies": 0.42,
+   "feedback_T|companies": 0.4875,
+   "feedback_TB|companies": 0.5475,
+   "drafts_c0|companies": 0.416,
+   "E_EB|companies": 0.584,
+   "E_ER|companies": 0.6,
+   "E_EN|companies": 0.595,
+   "E_HP|companies": 0.57,
+   "feedback_A|football": 0.5021,
+   "feedback_G|football": 0.5256,
+   "feedback_T|football": 0.624,
+   "feedback_TB|football": 0.5102,
+   "drafts_c0|football": 0.491,
+   "E_EB|football": 0.7685,
+   "E_ER|football": 0.822,
+   "E_EN|football": 0.7743,
+   "E_HP|football": 0.9967,
+   "feedback_A|all": 0.4897,
+   "feedback_G|all": 0.4904,
+   "feedback_T|all": 0.5785,
+   "feedback_TB|all": 0.5226,
+   "drafts_c0|all": 0.466,
+   "E_EB|all": 0.707,
+   "E_ER|all": 0.748,
+   "E_EN|all": 0.7145,
+   "E_HP|all": 0.8544
+  },
+  "regraded": {
+   "feedback_A|companies": 0.655,
+   "feedback_G|companies": 0.62,
+   "feedback_T|companies": 0.705,
+   "feedback_TB|companies": 0.75,
+   "drafts_c0|companies": 0.6,
+   "E_EB|companies": 0.898,
+   "E_ER|companies": 0.908,
+   "E_EN|companies": 0.906,
+   "E_HP|companies": 0.98,
+   "feedback_A|football": 0.5021,
+   "feedback_G|football": 0.5256,
+   "feedback_T|football": 0.624,
+   "feedback_TB|football": 0.5102,
+   "drafts_c0|football": 0.491,
+   "E_EB|football": 0.7685,
+   "E_ER|football": 0.822,
+   "E_EN|football": 0.7743,
+   "E_HP|football": 0.9967,
+   "feedback_A|all": 0.553,
+   "feedback_G|all": 0.5571,
+   "feedback_T|all": 0.651,
+   "feedback_TB|all": 0.5901,
+   "drafts_c0|all": 0.5273,
+   "E_EB|all": 0.8117,
+   "E_ER|all": 0.8506,
+   "E_EN|all": 0.8182,
+   "E_HP|all": 0.9911
+  }
+ },
+ "comparisons": {
+  "original": {
+   "feedback_T_vs_TB": {
+    "diff": 0.0559,
+    "ci95": [
+     -0.011,
+     0.1364
+    ],
+    "perm_p": 0.17798
+   },
+   "feedback_T_vs_G": {
+    "diff": 0.0881,
+    "ci95": [
+     0.0172,
+     0.1762
+    ],
+    "perm_p": 0.0236
+   },
+   "feedback_TB_vs_G": {
+    "diff": 0.0322,
+    "ci95": [
+     -0.0254,
+     0.0987
+    ],
+    "perm_p": 0.35396
+   },
+   "feedback_G_vs_A": {
+    "diff": 0.0007,
+    "ci95": [
+     -0.0655,
+     0.057
+    ],
+    "perm_p": 0.982
+   },
+   "feedback_T_vs_A": {
+    "diff": 0.0888,
+    "ci95": [
+     0.019,
+     0.1696
+    ],
+    "perm_p": 0.0214
+   },
+   "feedback_TB_vs_A": {
+    "diff": 0.0329,
+    "ci95": [
+     0.0021,
+     0.0754
+    ],
+    "perm_p": 0.12589
+   },
+   "selector_record_vs_random": {
+    "diff": 0.2752,
+    "ci95": [
+     0.1806,
+     0.3714
+    ],
+    "perm_p": 0.0001
+   },
+   "selector_record_vs_nonblank": {
+    "diff": 0.0112,
+    "ci95": [
+     -0.0694,
+     0.0834
+    ],
+    "perm_p": 0.78482
+   },
+   "E_ER_vs_A": {
+    "diff": 0.282,
+    "ci95": [
+     0.1949,
+     0.3769
+    ],
+    "perm_p": 0.0001
+   },
+   "E_ER_vs_EN": {
+    "diff": 0.1314,
+    "ci95": [
+     0.058,
+     0.2137
+    ],
+    "perm_p": 0.0012
+   },
+   "E_ER_vs_EB": {
+    "diff": 0.041,
+    "ci95": [
+     0.0227,
+     0.0611
+    ],
+    "perm_p": 0.0002
+   },
+   "b35_companies_T_vs_TB": {
+    "diff": -0.06,
+    "ci95": [
+     -0.15,
+     0.015
+    ],
+    "perm_p": 0.23048
+   },
+   "b35_companies_T_vs_G": {
+    "diff": 0.0675,
+    "ci95": [
+     -0.0,
+     0.14
+    ],
+    "perm_p": 0.13469
+   },
+   "E_companies_ER_vs_A": {
+    "diff": 0.184,
+    "ci95": [
+     0.122,
+     0.242
+    ],
+    "perm_p": 0.0045
+   },
+   "E_companies_ER_vs_EN": {
+    "diff": 0.0013,
+    "ci95": [
+     -0.0262,
+     0.0304
+    ],
+    "perm_p": 0.9693
+   },
+   "E_companies_ER_vs_EB": {
+    "diff": 0.016,
+    "ci95": [
+     0.001,
+     0.032
+    ],
+    "perm_p": 0.12249
+   },
+   "b35_football_T_vs_TB": {
+    "diff": 0.1138,
+    "ci95": [
+     0.0317,
+     0.2298
+    ],
+    "perm_p": 0.0075
+   },
+   "b35_football_T_vs_G": {
+    "diff": 0.0984,
+    "ci95": [
+     -0.0033,
+     0.2291
+    ],
+    "perm_p": 0.10749
+   },
+   "E_football_ER_vs_A": {
+    "diff": 0.331,
+    "ci95": [
+     0.211,
+     0.4607
+    ],
+    "perm_p": 0.0001
+   },
+   "E_football_ER_vs_EN": {
+    "diff": 0.2316,
+    "ci95": [
+     0.1217,
+     0.3444
+    ],
+    "perm_p": 0.0005
+   },
+   "E_football_ER_vs_EB": {
+    "diff": 0.0535,
+    "ci95": [
+     0.0286,
+     0.0797
+    ],
+    "perm_p": 0.0001
+   }
+  },
+  "regraded": {
+   "feedback_T_vs_TB": {
+    "diff": 0.0609,
+    "ci95": [
+     -0.0157,
+     0.1468
+    ],
+    "perm_p": 0.17098
+   },
+   "feedback_T_vs_G": {
+    "diff": 0.0939,
+    "ci95": [
+     0.0183,
+     0.1873
+    ],
+    "perm_p": 0.0257
+   },
+   "feedback_TB_vs_G": {
+    "diff": 0.0331,
+    "ci95": [
+     -0.0307,
+     0.1065
+    ],
+    "perm_p": 0.37796
+   },
+   "feedback_G_vs_A": {
+    "diff": 0.004,
+    "ci95": [
+     -0.0708,
+     0.0711
+    ],
+    "perm_p": 0.91921
+   },
+   "feedback_T_vs_A": {
+    "diff": 0.0979,
+    "ci95": [
+     0.0155,
+     0.1861
+    ],
+    "perm_p": 0.0321
+   },
+   "feedback_TB_vs_A": {
+    "diff": 0.0371,
+    "ci95": [
+     0.0021,
+     0.0858
+    ],
+    "perm_p": 0.12589
+   },
+   "selector_record_vs_random": {
+    "diff": 0.3072,
+    "ci95": [
+     0.2214,
+     0.3966
+    ],
+    "perm_p": 0.0001
+   },
+   "selector_record_vs_nonblank": {
+    "diff": 0.0429,
+    "ci95": [
+     -0.0071,
+     0.1003
+    ],
+    "perm_p": 0.15748
+   },
+   "E_ER_vs_A": {
+    "diff": 0.3233,
+    "ci95": [
+     0.2352,
+     0.4185
+    ],
+    "perm_p": 0.0001
+   },
+   "E_ER_vs_EN": {
+    "diff": 0.1294,
+    "ci95": [
+     0.0557,
+     0.2123
+    ],
+    "perm_p": 0.0022
+   },
+   "E_ER_vs_EB": {
+    "diff": 0.039,
+    "ci95": [
+     0.021,
+     0.0595
+    ],
+    "perm_p": 0.0001
+   },
+   "b35_companies_T_vs_TB": {
+    "diff": -0.045,
+    "ci95": [
+     -0.175,
+     0.065
+    ],
+    "perm_p": 0.54165
+   },
+   "b35_companies_T_vs_G": {
+    "diff": 0.085,
+    "ci95": [
+     -0.0125,
+     0.195
+    ],
+    "perm_p": 0.19718
+   },
+   "E_companies_ER_vs_A": {
+    "diff": 0.308,
+    "ci95": [
+     0.208,
+     0.402
+    ],
+    "perm_p": 0.0045
+   },
+   "E_companies_ER_vs_EN": {
+    "diff": -0.0033,
+    "ci95": [
+     -0.0325,
+     0.0275
+    ],
+    "perm_p": 0.94001
+   },
+   "E_companies_ER_vs_EB": {
+    "diff": 0.01,
+    "ci95": [
+     -0.001,
+     0.023
+    ],
+    "perm_p": 0.20978
+   },
+   "b35_football_T_vs_TB": {
+    "diff": 0.1138,
+    "ci95": [
+     0.0317,
+     0.2298
+    ],
+    "perm_p": 0.0075
+   },
+   "b35_football_T_vs_G": {
+    "diff": 0.0984,
+    "ci95": [
+     -0.0033,
+     0.2291
+    ],
+    "perm_p": 0.10749
+   },
+   "E_football_ER_vs_A": {
+    "diff": 0.331,
+    "ci95": [
+     0.211,
+     0.4607
+    ],
+    "perm_p": 0.0001
+   },
+   "E_football_ER_vs_EN": {
+    "diff": 0.2316,
+    "ci95": [
+     0.1217,
+     0.3444
+    ],
+    "perm_p": 0.0005
+   },
+   "E_football_ER_vs_EB": {
+    "diff": 0.0535,
+    "ci95": [
+     0.0286,
+     0.0797
+    ],
+    "perm_p": 0.0001
+   }
+  }
+ },
+ "verdicts": {
+  "original": {
+   "confirm": {
+    "T_vs_TB": "no_difference_measured",
+    "T_vs_G": "no_difference_measured",
+    "record_vs_random": "pass",
+    "record_vs_nonblank": "no_difference_measured"
+   },
+   "E": {
+    "ER_vs_A": "pass",
+    "ER_vs_A_stratum_B5": "stratum_undetermined",
+    "ER_vs_EN": "ER_better",
+    "ER_vs_EN_stratum_B5": "consistent_in_nonblank",
+    "ER_vs_EB": "no_difference_measured",
+    "ER_vs_A_harm": "trading_errors_for_fills"
+   }
+  },
+  "regraded": {
+   "confirm": {
+    "T_vs_TB": "no_difference_measured",
+    "T_vs_G": "no_difference_measured",
+    "record_vs_random": "pass",
+    "record_vs_nonblank": "no_difference_measured"
+   },
+   "E": {
+    "ER_vs_A": "pass",
+    "ER_vs_A_stratum_B5": "stratum_undetermined",
+    "ER_vs_EN": "ER_better",
+    "ER_vs_EN_stratum_B5": "consistent_in_nonblank",
+    "ER_vs_EB": "no_difference_measured",
+    "ER_vs_A_harm": "trading_errors_for_fills"
+   }
+  }
+ },
+ "holm": {
+  "original": {
+   "confirm": {
+    "record_vs_random": 0.0004,
+    "record_vs_nonblank": 0.78482,
+    "T_vs_TB": 0.35596,
+    "T_vs_G": 0.0708
+   },
+   "E": {
+    "ER_vs_A": 0.0003,
+    "ER_vs_EN": 0.0012,
+    "ER_vs_EB": 0.0004
+   }
+  },
+  "regraded": {
+   "confirm": {
+    "record_vs_random": 0.0004,
+    "record_vs_nonblank": 0.31496,
+    "T_vs_TB": 0.31496,
+    "T_vs_G": 0.0771
+   },
+   "E": {
+    "ER_vs_A": 0.0003,
+    "ER_vs_EN": 0.0022,
+    "ER_vs_EB": 0.0003
+   }
+  }
+ },
+ "any_verdict_changed": false
+}

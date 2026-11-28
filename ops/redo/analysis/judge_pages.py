@@ -2,12 +2,13 @@
 """判定問法離線測（2026-11-28，事後探索性）的共用件：讀該格 agent 抓過的凍結頁、解析表格列與內文句、值的比對與第二正規化器。
 規則見 ops/redo/audit/judge_v2v3_20261128/PLAN.md（呼叫前已提交）。"""
 from __future__ import annotations
-import hashlib, html as _html, json, pathlib, re, sys
+import functools, hashlib, html as _html, json, pathlib, re, sys
 from html.parser import HTMLParser
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO)); sys.path.insert(0, str(REPO / "ops" / "d2"))
 from ops.d2 import expT_metrics as M  # noqa: E402
 from vacant_network.trace import sources as SRC  # noqa: E402
+SRC._plain = functools.lru_cache(maxsize=256)(SRC._plain)
 
 AGE_RE = re.compile(r";?\s*\d+\s+years?\s+ago", re.I)
 TICK_RES = [re.compile(r"\b([A-Za-z]{2,10})\s*:\s*([A-Z0-9][A-Z0-9.\-]{0,9})\b"),
@@ -90,6 +91,7 @@ class _Tables(HTMLParser):
             self.cell[1].append(data)
 
 
+@functools.lru_cache(maxsize=256)
 def parse_tables(html: str):
     p = _Tables(); p.feed(html or "")
     return [[[(t, " ".join("".join(parts).split())) for t, parts in r] for r in tb if r] for tb in p.tables]
@@ -141,6 +143,7 @@ def row_locs(tables, val: str):
     return out
 
 
+@functools.lru_cache(maxsize=256)
 def sentences(plain: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?])\s+", plain) if s.strip()]
 
