@@ -1,12 +1,16 @@
 # trust-delivery-lift 結果報告
 
 **分支：** `research/trust-delivery-lift`  
-**模型（依回合）：** Qwen2.5-0.5B-Instruct CPU（invoice holdout 進行中）  
+**模型（依回合）：** Qwen2.5-0.5B-Instruct CPU（invoice holdout）；Qwen2.5-1.5B filing exploratory  
 **截止目標：** 2026-11-29 12:00 Asia/Taipei  
 
 ## English abstract
 
-**Pilot 1 (n=12):** null. **Confirmatory (complete):** **n=128** answerable tasks (`hold_022`–`hold_149`), **512** rows, `stopping_reason=confirmatory_complete`. **Primary (frozen):** exact McNemar **VACANT vs MAJ3** on `oracle_whole_success` — **b=0, c=1, p=1.0** (null; one discordant pair). Oracle rates: VACANT **96/128 (75.0%)**, MAJ3 **95/128 (74.2%)**, BLIND **95/128**, LPB3 **96/128**. **Not** a delivery lift claim. **Exploratory:** VACANT **P(oracle fail | visible pass)=32/128=25%** (Goodhart on visible gate); gating utility in `summary.json` (LPB3 gate metrics **invalid** pre-quarantine rows). **Costs** unequal: VACANT ~**3.1 s / 281 tok / 1.0 calls** vs BLIND ~**7.0 s / 568 tok / 2** vs Maj/LPB ~**11.6 s / ~858 tok / 3** — see `COST_PARITY_AUDIT.md`. **1.5B filing** online subset **running** (exploratory). Filing 9b remains **leaky dev upper bound** only. **Filing (9b / partial 0.5B):** **leaky dev upper bound only** — not evidence. **Accountability = honest coverage:** uncontested auto-PASS **20%** coverage, **0%** false-release on that slice (9b); **53.9%** contested → ESCALATE; consensus refuse-gate **invalid** as a win without coverage floor. **Scripted “independent” contract authors are us — not external authorship.** **Verdict:** judgment relocated + reproducible execution; **delivery lift TBD** from holdout McNemar.
+**Headline:** Pre-registered **primary** (fenced **untouched tail** n=**54**, hold_096–hold_149): **McNemar VACANT vs MAJ3 p=1.0** — **no 0.5B invoice delivery lift** over majority vote; mechanism was **greedy-1 vs vote-of-3** (**repair trigger 0%**, all VACANT `n_calls=1`). **Value shown:** release-safety semantics + replayable rows, not accuracy.
+
+**Contamination (disclosed):** Zombie harness kept writing `data/holdout_05b/` through **hold_095** during confirmatory; commit **`3240dc4a`** (**16:04Z**) predates primary seal (**~16:10Z**). **Sole primary** = tasks never in old-dir footprint: see `PREREG_HOLDOUT_FENCE_ADDENDUM_20261129.md`. **Secondary (contaminated):** hold_022–hold_149 sensitivity only.
+
+**Pilot 1 (n=12):** null. **Filing 9b:** leaky dev upper bound. **1.5B filing subset:** complete exploratory (220×6 rows). **Judgment relocation** + contract replay 100%; independent contract authors **not** external.
 
 ---
 
@@ -100,18 +104,36 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 - **1.5B:** tmux `filing-15b` — started after holdout gate (**exploratory**; not confirmatory delivery evidence).  
 - **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
 
-## 5. Invoice Round 2 — confirmatory primary + exploratory
+## 5. Invoice Round 2 — fenced primary + contamination
 
-**Population (primary):** answerable confirmatory tasks only (`pilot_excluded` hold_000–021 **excluded**; holdout_unanswerable **not evaluated** — no false-release claim there). Spec: `PREREG_HOLDOUT_PRIMARY_SEAL_20261129.md` + `data/holdout_05b_confirmatory/PRIMARY_SPEC_SHA256.json`.
+### Disclosure (2026-11-29 01:00 Taipei)
 
-| Arm | n | oracle success | Wilson 95% CI | visible pass | mean CPU-s | mean tokens | mean calls |
-|-----|---|----------------|---------------|--------------|------------|-------------|------------|
-| VACANT | 128 | 96 (75.0%) | [66.8%, 81.7%] | 100% | 3.09 | 281 | 1.0 |
-| MAJ3 | 128 | 95 (74.2%) | [66.0%, 81.0%] | 99.2% | 11.59 | 858 | 3.0 |
-| BLIND | 128 | 95 (74.2%) | [66.0%, 81.0%] | 99.2% | 7.01 | 568 | 2.0 |
-| LPB3 | 128 | 96 (75.0%) | [66.8%, 81.7%] | 100% | 11.74 | 859 | 3.0 |
+- Stopped all writers to `data/holdout_05b/` (zombie ran **hold_022–hold_095** in old dir with **broken checker**; artifacts leaked in **`3240dc4a`** before fence addendum).
+- **K=95**; **primary_confirmatory** = **hold_096–hold_149** (n=**54**) only — `FENCE_MANIFEST.json`.
+- Confirmatory **CPU-s treated as tainted** where dual harness overlapped; primary is least-exposed contiguous tail in fixed bank order.
 
-**Primary McNemar (VACANT vs MAJ3):** discordant **1** (VACANT + only), **p=1.0** two-sided — **no evidence** of difference at this n.
+### Primary (sole inferential)
+
+| Arm | n tasks | oracle success | McNemar vs MAJ3 |
+|-----|---------|----------------|-----------------|
+| VACANT | 54 | 40 (74.1%) | **b=0, c=1, p=1.0** |
+| MAJ3 | 54 | 39 (72.2%) | — |
+
+Source: `summary_fenced.json` · Spec: `PREREG_HOLDOUT_FENCE_ADDENDUM_20261129.md`.
+
+### Mechanism honesty (VACANT)
+
+| Metric | Primary tail (n=54) | Note |
+|--------|---------------------|------|
+| Repair trigger rate (`n_calls>1`) | **0%** | Greedy draft passes **visible** → no micro-repair |
+| `n_calls` histogram | **100% at 1** | Compare **1-shot** vs Maj3 **×3 full JSON**, not repair loop |
+| Draft oracle rate | 74.1% | Floor = final oracle rate here (no conditional repair gain) |
+
+### Secondary (contaminated / sensitivity — not primary)
+
+128 tasks hold_022–hold_149 McNemar VACANT vs MAJ3 / BLIND in `summary_fenced.json` — **peeked + CPU contention**; cite only as sensitivity.
+
+**Population scope:** **answerable** invoices only; unanswerable holdout **not** evaluated for false-release claims.
 
 **Exploratory gating** (`gating_exploratory` in `data/holdout_05b_confirmatory/summary.json`): VACANT coverage 100% with **silent failure 25%** when shipping on visible pass; BLIND/MAJ3 agreement gates lower coverage (~90%/80%) with similar silent-failure rates. **LPB3** row-level gated stats computed under **invalid τ** — quarantined; do not cite.
 

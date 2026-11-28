@@ -147,6 +147,22 @@ Record of external (Gemini) critiques and responses.
 
 **Verdict:** Proceed anatomy script + REPORT honesty; keep tmux filing alive.
 
+| 2026-11-29 ~00:18 Asia/Taipei | **Failure anatomy (exploratory)** | 32/32 VACANT oracle fails had **visible pass**; all **`vendor`** vs gold; 0 visible-fail unrepaired; false-release if gated 25%. |
+
+### PRE-RUN — Zombie holdout contamination (2026-11-29 01:00 Asia/Taipei) — **before confirmatory reads**
+
+**Objection:** Prior agent read `summary.json` after gate; extending fence post hoc without killing writers is cosmetic.
+
+**Confounds:** `3240dc4a` committed broken-checker rows **16:04Z** before primary seal **16:10Z**; dual harness + shared CPU; VACANT n_calls=1 may be greedy-pass not repair.
+
+**Falsifier:** If untouched-only primary McNemar still null at reduced n → honest; if only “all 128” looked null, primary was confounded.
+
+**Survival:** Kill **all** `harness_r2` → `holdout_05b` writers; freeze **task-ID list** in hashed addendum **from filesystem only**; primary = hold_(K+1)…end; secondary = hold_022…end labeled; disclose 3240dc4a; contention re-run rule frozen **before** opening confirmatory JSON.
+
+**Verdict:** Kill processes, audit K, seal addendum, disclose — no restart of clean confirmatory rows.
+
+| 2026-11-29 01:00 Asia/Taipei | **Supervisor VAC-1 URGENT** | Zombie `holdout_05b` run; extend fence; primary untouched IDs only. |
+
 ## Anticipated critic targets (pre-buttress)
 
 1. **Non-paired drafts in pilot v1** — Fixed in v2: `freeze_drafts.py` + `harness.py --drafts`.
