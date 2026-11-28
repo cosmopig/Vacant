@@ -1,0 +1,422 @@
+{
+ "note": "合成控制組；判同＝評分器會把值當成答案（判對）。",
+ "must_differ": [
+  {
+   "cat": "scale",
+   "value": "US$3 million",
+   "answer": "US$3 billion",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "scale",
+   "value": "3 thousand",
+   "answer": "3 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "scale",
+   "value": "€1.2 billion",
+   "answer": "€1.2 trillion",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "1.2",
+   "canon_a": "1.2"
+  },
+  {
+   "cat": "scale",
+   "value": "US$5 bn",
+   "answer": "US$5 m",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "5",
+   "canon_a": "5"
+  },
+  {
+   "cat": "sign",
+   "value": "−3",
+   "answer": "3",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "sign",
+   "value": "-3 million",
+   "answer": "3 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "sign",
+   "value": "US$(120) million",
+   "answer": "US$120 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "120",
+   "canon_a": "120"
+  },
+  {
+   "cat": "sign",
+   "value": "loss of US$5 million",
+   "answer": "US$5 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "5",
+   "canon_a": "5"
+  },
+  {
+   "cat": "percent",
+   "value": "10%",
+   "answer": "10",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "10",
+   "canon_a": "10"
+  },
+  {
+   "cat": "percent",
+   "value": "15%",
+   "answer": "15 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "15",
+   "canon_a": "15"
+  },
+  {
+   "cat": "percent",
+   "value": "2.5%",
+   "answer": "2.5",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "2.5",
+   "canon_a": "2.5"
+  },
+  {
+   "cat": "currency",
+   "value": "USD 10",
+   "answer": "JPY 10",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "10",
+   "canon_a": "10"
+  },
+  {
+   "cat": "currency",
+   "value": "€10 billion",
+   "answer": "US$10 billion",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "10",
+   "canon_a": "10"
+  },
+  {
+   "cat": "currency",
+   "value": "£3 million",
+   "answer": "US$3 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "currency",
+   "value": "CN¥8 billion",
+   "answer": "US$8 billion",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "8",
+   "canon_a": "8"
+  },
+  {
+   "cat": "period",
+   "value": "US$5 billion (2023)",
+   "answer": "US$5 billion (2024)",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "5|2023",
+   "canon_a": "5|2024"
+  },
+  {
+   "cat": "period",
+   "value": "US$5 billion (FY2023)",
+   "answer": "US$5 billion (Q3 2023)",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "5|2023",
+   "canon_a": "5|3|2023"
+  },
+  {
+   "cat": "period",
+   "value": "US$2 billion (2022)",
+   "answer": "US$2 billion",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "2|2022",
+   "canon_a": "2"
+  },
+  {
+   "cat": "unit",
+   "value": "10 km",
+   "answer": "10 mi",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "10",
+   "canon_a": "10"
+  },
+  {
+   "cat": "unit",
+   "value": "5 kg",
+   "answer": "5 lb",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "5",
+   "canon_a": "5"
+  },
+  {
+   "cat": "unit",
+   "value": "300 employees",
+   "answer": "300 stores",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "300",
+   "canon_a": "300"
+  },
+  {
+   "cat": "date",
+   "value": "March 1990",
+   "answer": "April 1990",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "1990",
+   "canon_a": "1990"
+  },
+  {
+   "cat": "date",
+   "value": "5 March 1990",
+   "answer": "3 May 1990",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "5|1990",
+   "canon_a": "3|1990"
+  },
+  {
+   "cat": "football_order",
+   "value": "12 (3)",
+   "answer": "3 (12)",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "12|3",
+   "canon_a": "3|12"
+  },
+  {
+   "cat": "football_partial",
+   "value": "12",
+   "answer": "12 (0)",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "12",
+   "canon_a": "12|0"
+  },
+  {
+   "cat": "football_partial",
+   "value": "(3)",
+   "answer": "12 (3)",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "3",
+   "canon_a": "12|3"
+  },
+  {
+   "cat": "decimal",
+   "value": "1.5",
+   "answer": "15",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "1.5",
+   "canon_a": "15"
+  },
+  {
+   "cat": "ticker",
+   "value": "NYSE: ABC",
+   "answer": "NYSE: ABD",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": null,
+   "canon_a": null
+  },
+  {
+   "cat": "ticker_exchange",
+   "value": "Nasdaq: ABC",
+   "answer": "NYSE: ABC",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": null,
+   "canon_a": null
+  }
+ ],
+ "should_match": [
+  {
+   "cat": "currency_form",
+   "value": "US$3 million",
+   "answer": "$3 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "currency_form",
+   "value": "USD 3 million",
+   "answer": "US$3 million",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "thousands_sep",
+   "value": "1,234",
+   "answer": "1234",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "1234",
+   "canon_a": "1234"
+  },
+  {
+   "cat": "scale_word_vs_digits",
+   "value": "US$3 million",
+   "answer": "US$3,000,000",
+   "canon_strict_same": false,
+   "second_same": false,
+   "canon_v": "3",
+   "canon_a": "3000000"
+  },
+  {
+   "cat": "scale_abbrev",
+   "value": "US$3.2 bn",
+   "answer": "US$3.2 billion",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3.2",
+   "canon_a": "3.2"
+  },
+  {
+   "cat": "minus_glyph",
+   "value": "−3",
+   "answer": "-3",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "3",
+   "canon_a": "3"
+  },
+  {
+   "cat": "percent_space",
+   "value": "10 %",
+   "answer": "10%",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "10",
+   "canon_a": "10"
+  },
+  {
+   "cat": "date_order",
+   "value": "March 5, 1990",
+   "answer": "5 March 1990",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "5|1990",
+   "canon_a": "5|1990"
+  },
+  {
+   "cat": "football_space",
+   "value": "12(3)",
+   "answer": "12 (3)",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "12|3",
+   "canon_a": "12|3"
+  },
+  {
+   "cat": "markdown",
+   "value": "**12 (3)**",
+   "answer": "12 (3)",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "12|3",
+   "canon_a": "12|3"
+  },
+  {
+   "cat": "year_paren",
+   "value": "US$1.2 billion (2023)",
+   "answer": "$1.2 billion (2023)",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "1.2|2023",
+   "canon_a": "1.2|2023"
+  },
+  {
+   "cat": "age_suffix",
+   "value": "1990",
+   "answer": "1990; 36 years ago",
+   "canon_strict_same": false,
+   "second_same": true,
+   "canon_v": "1990",
+   "canon_a": "1990|36"
+  },
+  {
+   "cat": "ticker_index",
+   "value": "NYSE: ABC",
+   "answer": "NYSE: ABC S&P 500 component",
+   "canon_strict_same": false,
+   "second_same": true,
+   "canon_v": null,
+   "canon_a": "500"
+  },
+  {
+   "cat": "trailing_dot",
+   "value": "1990.",
+   "answer": "1990",
+   "canon_strict_same": true,
+   "second_same": true,
+   "canon_v": "1990",
+   "canon_a": "1990"
+  }
+ ],
+ "summary": {
+  "must_differ_n": 29,
+  "should_match_n": 14,
+  "canon_strict": {
+   "false_pass(判同但該不同)": 19,
+   "false_block(判不同但該相同)": 3
+  },
+  "second": {
+   "false_pass": 19,
+   "false_block": 1
+  }
+ },
+ "false_pass_by_cat_canon_strict": [
+  "currency",
+  "date",
+  "percent",
+  "scale",
+  "sign",
+  "unit"
+ ],
+ "false_block_by_cat_canon_strict": [
+  "age_suffix",
+  "scale_word_vs_digits",
+  "ticker_index"
+ ],
+ "false_block_by_cat_second": [
+  "scale_word_vs_digits"
+ ]
+}

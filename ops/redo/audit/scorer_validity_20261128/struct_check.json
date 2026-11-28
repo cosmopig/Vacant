@@ -1,0 +1,79 @@
+{
+ "note": "足球有填初稿行；旗標＝值的整數少於 2 個。",
+ "football": {
+  "lines": 1112,
+  "wrong": 247,
+  "struct_half": {
+   "flagged_share": 0.08,
+   "err_in": 1.0,
+   "err_out": 0.1544,
+   "recall": 0.3603,
+   "n_flagged": 89
+  },
+  "judge_v1_p<0.5": {
+   "flagged_share": 0.1574,
+   "err_in": 0.84,
+   "err_out": 0.1067,
+   "recall": 0.5951,
+   "n_flagged": 175
+  },
+  "record_flag": {
+   "flagged_share": 0.1628,
+   "err_in": 0.7901,
+   "err_out": 0.1117,
+   "recall": 0.5789,
+   "n_flagged": 181
+  },
+  "consensus_flag": {
+   "flagged_share": 0.2464,
+   "err_in": 0.7956,
+   "err_out": 0.0346,
+   "recall": 0.8826,
+   "n_flagged": 274
+  },
+  "struct_OR_consensus": {
+   "flagged_share": 0.2464,
+   "err_in": 0.7956,
+   "err_out": 0.0346,
+   "recall": 0.8826,
+   "n_flagged": 274
+  },
+  "struct_OR_judge_v1": {
+   "flagged_share": 0.223,
+   "err_in": 0.8871,
+   "err_out": 0.0312,
+   "recall": 0.8907,
+   "n_flagged": 248
+  },
+  "struct_OR_consensus_OR_v1": {
+   "flagged_share": 0.2887,
+   "err_in": 0.7477,
+   "err_out": 0.0088,
+   "recall": 0.9717,
+   "n_flagged": 321
+  },
+  "struct_vs_R-部分": {
+   "R-部分_lines": 85,
+   "flagged_among_R-部分": 85,
+   "struct_flagged_not_R-部分": 4
+  }
+ },
+ "companies_multivalued_fields": {
+  "Formerly": {
+   "answer_keys_multivalued": 2,
+   "answer_keys_total": 3
+  },
+  "Founded": {
+   "answer_keys_multivalued": 2,
+   "answer_keys_total": 45
+  },
+  "ISIN": {
+   "answer_keys_multivalued": 2,
+   "answer_keys_total": 7
+  },
+  "Traded as": {
+   "answer_keys_multivalued": 6,
+   "answer_keys_total": 43
+  }
+ }
+}
