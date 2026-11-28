@@ -39,3 +39,14 @@ python3 ops/redo/analysis/expT_regrade_b48.py $D2_PRIVATE/expT_q9 ~/dev/ops/ctl/
 python3 ops/redo/analysis/answer_key_artifacts.py
 ```
 注意：`regrade_sensitivity.py` 對目標是 `expT_metrics.py` 本身時改呼叫已換過的模組的 `main()`（runpy 會另起命名空間、換不到；第一次跑因此 0 次換判，已修正後重跑）。
+
+## 不在 git 的輸出
+
+以下檔案僅保留於 `~/dev/ops/ctl/regrade_20261128/`，不放進 git：
+
+- `~/dev/ops/ctl/regrade_20261128/exp1cA_score_strict_regrade.json`：含 1,700 筆逐行評分與報告值欄（`rows[*].value`），不得進 git。
+- `~/dev/ops/ctl/regrade_20261128/exp1cA_flags_regrade_repro.json`：含 1,700 筆逐行標記明細（`rows`），非純摘要 JSON；合併摘要與有填行結果見本目錄 `exp1_combined_regrade_repro.json`、`exp1_combined_regrade_excl_missing.json`、`exp1_regrade_summary.json`、`exp1_filled_lines.json`。
+- `~/dev/ops/ctl/regrade_20261128/exp1cA_flags_regrade_b24.json`：含 1,700 筆逐行標記明細（`rows`），非純摘要 JSON；合併摘要與有填行結果見本目錄 `exp1_combined_regrade_b24.json`、`exp1_combined_regrade_excl_missing.json`、`exp1_regrade_summary.json`、`exp1_filled_lines.json`。
+- `~/dev/ops/ctl/regrade_20261128/escape_regrade/expT_agent_runs.jsonl`：`--out-dir escape_regrade` 輸出的逐次執行明細（449 筆 JSONL），非摘要型 JSON，且與重評無關、與 `ops/redo/audit/expT_exam37_20261128/expT/expT_agent_runs.jsonl` 逐位相同，不重複放進 git。
+- `~/dev/ops/ctl/regrade_20261128/escape_regrade/expT_escape_calls.jsonl`：`--out-dir escape_regrade` 輸出的逐筆越界呼叫明細（422 筆 JSONL，含相對目錄細節），非摘要型 JSON，且與重評無關、與 `ops/redo/audit/expT_exam37_20261128/expT/expT_escape_calls.jsonl` 逐位相同，不重複放進 git。
+- `~/dev/ops/ctl/regrade_20261128/escape_regrade.log`、`~/dev/ops/ctl/regrade_20261128/exp1cA_repro.log`、`~/dev/ops/ctl/regrade_20261128/exp1cA_b24.log`、`~/dev/ops/ctl/regrade_20261128/expT_metrics_regrade.err`：執行命令時重導的終端 stdout／stderr 紀錄（非摘要型 JSON，其中 `exp1cA_*.log` 為截斷的 3,000 字元終端印出），完整摘要已見本目錄對應 JSON。

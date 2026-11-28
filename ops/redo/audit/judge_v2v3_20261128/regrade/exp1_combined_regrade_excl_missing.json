@@ -1,0 +1,129 @@
+{
+ "note": "從重評敏感度 exp1_combine.py 輸出（~/dev/ops/ctl/regrade_20261128/exp1_combined_regrade_repro.json 與 _b24.json）原樣抽出之 combined_excl_missing、sc_excl_missing 兩塊。",
+ "sources": {
+  "repro": "~/dev/ops/ctl/regrade_20261128/exp1_combined_regrade_repro.json",
+  "b24": "~/dev/ops/ctl/regrade_20261128/exp1_combined_regrade_b24.json"
+ },
+ "repro": {
+  "combined_excl_missing": {
+   "units": 2300,
+   "sets": 25,
+   "flagged_share": 0.7030434782608695,
+   "errors": 772,
+   "error_rate": 0.3356521739130435,
+   "recall": 0.927461139896373,
+   "recall_lower95": 0.883495145631068,
+   "error_rate_flagged": 0.4427952999381571,
+   "error_rate_unflagged": 0.08199121522693997,
+   "rate_ratio": 5.400521247460023,
+   "verdict": "FAIL",
+   "errors_by_type": {
+    "fabricated|flagged": 415,
+    "stale|missed": 14,
+    "stale|flagged": 212,
+    "wrong_read|missed": 42,
+    "wrong_read|flagged": 89
+   },
+   "recall_by_type": {
+    "fabricated": 1.0,
+    "stale": 0.9380530973451328,
+    "wrong_read": 0.6793893129770993
+   },
+   "plain": {
+    "look_share": 0.7030434782608695,
+    "miss_share_of_errors": 0.07253886010362698,
+    "random_same_size_miss_share": 0.29695652173913045
+   }
+  },
+  "sc_excl_missing": {
+   "units": 1175,
+   "sets": 12,
+   "flagged_share": 0.5514893617021277,
+   "errors": 264,
+   "error_rate": 0.2246808510638298,
+   "recall": 0.8939393939393939,
+   "recall_lower95": 0.824,
+   "error_rate_flagged": 0.36419753086419754,
+   "error_rate_unflagged": 0.05313092979127135,
+   "rate_ratio": 6.854717813051146,
+   "verdict": "FAIL",
+   "errors_by_type": {
+    "fabricated|flagged": 79,
+    "stale|flagged": 157,
+    "wrong_read|missed": 28
+   },
+   "recall_by_type": {
+    "fabricated": 1.0,
+    "stale": 1.0,
+    "wrong_read": 0.0
+   },
+   "plain": {
+    "look_share": 0.5514893617021277,
+    "miss_share_of_errors": 0.10606060606060608,
+    "random_same_size_miss_share": 0.4485106382978723
+   }
+  }
+ },
+ "b24": {
+  "combined_excl_missing": {
+   "units": 2300,
+   "sets": 25,
+   "flagged_share": 0.5560869565217391,
+   "errors": 772,
+   "error_rate": 0.3356521739130435,
+   "recall": 0.8769430051813472,
+   "recall_lower95": 0.8031496062992126,
+   "error_rate_flagged": 0.5293197810789679,
+   "error_rate_unflagged": 0.0930460333006856,
+   "rate_ratio": 5.688794699806592,
+   "verdict": "UNRESOLVED",
+   "errors_by_type": {
+    "fabricated|missed": 3,
+    "fabricated|flagged": 412,
+    "stale|missed": 50,
+    "stale|flagged": 176,
+    "wrong_read|missed": 42,
+    "wrong_read|flagged": 89
+   },
+   "recall_by_type": {
+    "fabricated": 0.9927710843373494,
+    "stale": 0.7787610619469026,
+    "wrong_read": 0.6793893129770993
+   },
+   "plain": {
+    "look_share": 0.5560869565217391,
+    "miss_share_of_errors": 0.12305699481865284,
+    "random_same_size_miss_share": 0.4439130434782609
+   }
+  },
+  "sc_excl_missing": {
+   "units": 1175,
+   "sets": 12,
+   "flagged_share": 0.5404255319148936,
+   "errors": 264,
+   "error_rate": 0.2246808510638298,
+   "recall": 0.8825757575757576,
+   "recall_lower95": 0.8137651821862348,
+   "error_rate_flagged": 0.3669291338582677,
+   "error_rate_unflagged": 0.05740740740740741,
+   "rate_ratio": 6.3916687833375665,
+   "verdict": "FAIL",
+   "errors_by_type": {
+    "fabricated|missed": 3,
+    "fabricated|flagged": 76,
+    "stale|flagged": 157,
+    "wrong_read|missed": 28
+   },
+   "recall_by_type": {
+    "fabricated": 0.9620253164556962,
+    "stale": 1.0,
+    "wrong_read": 0.0
+   },
+   "plain": {
+    "look_share": 0.5404255319148936,
+    "miss_share_of_errors": 0.11742424242424243,
+    "random_same_size_miss_share": 0.4595744680851064
+   }
+  }
+ }
+}
