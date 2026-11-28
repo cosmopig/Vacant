@@ -1151,11 +1151,15 @@ machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacan
 
 **The right framing is "receiving desk", not "mandatory layer".** Enforcement happens at
 **acceptance time** — a delivery without a verifiable receipt is not accepted, and **getting
-past that check takes the signing key** (`vacant_network/receipt.py` + `controller.verify_delivery`
-recompute five sha256 digests, verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a
-receipt consumable exactly once). Enforcement does **not** happen at execution time: making
-Vacant the single exit on a machine takes containers, ACLs or egress policy, which is the
-deployment layer's job. Same pattern as in-toto / SLSA / Sigstore in supply-chain security.
+past that check takes the signing key** (assuming key custody: the honest boundary in
+`vacant_network/receipt.py` explicitly states "under key custody"; when the same OS user
+can read the key, this check does not stop programs on the same machine, and the deployment
+layer must separate the key from the agent with a sandbox or ACLs).
+`vacant_network/receipt.py` + `controller.verify_delivery` recompute five sha256 digests,
+verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a receipt consumable exactly
+once. Enforcement does **not** happen at execution time: making Vacant the single exit on a
+machine takes containers, ACLs or egress policy, which is the deployment layer's job. Same
+pattern as in-toto / SLSA / Sigstore in supply-chain security.
 
 Precisely: of Saltzer & Schroeder's (1975) three reference-monitor conditions, Vacant
 satisfies only **small enough to be verified**. It is **not tamper-proof**: the record is
@@ -1262,7 +1266,7 @@ All 19 above apply. The four that will bite you:
 | Reading a valid chain as "nothing is missing" | Publish heads or countersign | H-3: integrity != completeness. |
 | Using `seq` / an entry count as truncation protection | An exogenous length commitment (held elsewhere, or timestamped earlier) | `seq` is the count; a truncated prefix stays self-consistent. |
 | Treating `verify_run_receipts.py` reconciliation as an independent audit | Treat it as a same-origin self-check | Both sides are written by the same process: catches bugs, not malice. |
-| Calling Vacant a "mandatory layer" | "receiving desk": a delivery without a verifiable receipt is not accepted | It does not satisfy complete mediation; a machine-wide single exit is the deployment layer's job. |
+| Calling Vacant a "mandatory layer" | "receiving desk": a delivery without a verifiable receipt is not accepted (a receipt only proves the signer held that key and the record was unaltered afterward) | It does not satisfy complete mediation; a machine-wide single exit is the deployment layer's job. |
 | `pip install vacant` | `pip install vacant-network` | `vacant` on PyPI is an unrelated DNS tool. The **import** name is still `vacant`. |
 | Catching `ImportError` around `Executor.new(id).attest(...)` | Inject: `Executor.new(id, probe=...)` | H-5; the exception is `OpsRunnerUnavailable`. |
 | Shipping the last candidate on exhaustion | Refuse, and count it as a failure | It deletes the only thing the gate does. |
