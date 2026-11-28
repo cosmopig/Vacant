@@ -1,0 +1,232 @@
+{
+ "label": "efamily_formal",
+ "test_cell": "~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425",
+ "other_cell_used": "00132f3eca00f375e9952e2d",
+ "wrapper_sha256": "b87019e76f726faed43737f048742d9e7b0be420e57a4284c2ea8a88b2a3a995",
+ "tests": [
+  {
+   "name": "N1_ls_live_root",
+   "pass": true,
+   "rc": 0,
+   "detail": "entries=['nst_negctl_efamily_formal_1795834425']"
+  },
+  {
+   "name": "N2_find_live_root",
+   "pass": true,
+   "rc": 0,
+   "detail": "lines=6 non_own=[]"
+  },
+  {
+   "name": "N3_read_other_abs",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ~/dev/ops/d2_private_live/00132f3eca00f375e9952e2d/ws/report.md: No such file or directory"
+  },
+  {
+   "name": "N4_read_other_dotdot",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ../../00132f3eca00f375e9952e2d/ws/report.md: No such file or directory"
+  },
+  {
+   "name": "N5_read_wildcard",
+   "pass": true,
+   "rc": 0,
+   "detail": "own report"
+  },
+  {
+   "name": "N6a_ls_d2_private",
+   "pass": true,
+   "rc": 2,
+   "detail": "ls: cannot access '${D2_PRIVATE}': No such file or directory"
+  },
+  {
+   "name": "N6b_ls_future_revision",
+   "pass": true,
+   "rc": 2,
+   "detail": "ls: cannot access '${D2_PRIVATE}/realrev3_football/sets/s01/cycle_1/site': No such file or directory"
+  },
+  {
+   "name": "N6c_cat_manifest",
+   "pass": true,
+   "rc": 1,
+   "detail": "cat: ${D2_PRIVATE}/realrev3_companies/manifest.json: No such file or directory"
+  },
+  {
+   "name": "N7_mounts_match_allowlist",
+   "pass": true,
+   "rc": null,
+   "detail": "mounts=['/', '/dev', '/dev/full', '/dev/null', '/dev/pts', '/dev/random', '/dev/tty', '/dev/urandom', '/dev/zero', '/etc', '~', '~/.local/opt/node-v22.23.2-linux-x64', '~/.piinstall', '~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425', '~/dev/ops/d2v52_venv', '~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run', '/opt/expT/sockfwd.py', '/proc', '/tmp', '/usr'] bad=[] leaks=[]"
+  },
+  {
+   "name": "N8_mount_types_B52_4",
+   "pass": true,
+   "rc": null,
+   "detail": "tmpfs(/,/tmp,~)=True writable_persistent=['~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425', '~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run']"
+  }
+ ],
+ "allowlist": {
+  "allowed_mount_prefixes": [
+   "/",
+   "/dev",
+   "/etc",
+   "~",
+   "~/.local/opt/node-v22.23.2-linux-x64",
+   "~/.piinstall",
+   "~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425",
+   "~/dev/ops/d2v52_venv",
+   "~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run",
+   "/opt/expT/sockfwd.py",
+   "/proc",
+   "/tmp",
+   "/usr"
+  ],
+  "observed_mounts": [
+   "/",
+   "/dev",
+   "/dev/full",
+   "/dev/null",
+   "/dev/pts",
+   "/dev/random",
+   "/dev/tty",
+   "/dev/urandom",
+   "/dev/zero",
+   "/etc",
+   "~",
+   "~/.local/opt/node-v22.23.2-linux-x64",
+   "~/.piinstall",
+   "~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425",
+   "~/dev/ops/d2v52_venv",
+   "~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run",
+   "/opt/expT/sockfwd.py",
+   "/proc",
+   "/tmp",
+   "/usr"
+  ],
+  "mount_detail": [
+   {
+    "mount": "/",
+    "rw": "rw",
+    "fstype": "tmpfs",
+    "source": "tmpfs"
+   },
+   {
+    "mount": "/proc",
+    "rw": "rw",
+    "fstype": "proc",
+    "source": "proc"
+   },
+   {
+    "mount": "/dev",
+    "rw": "rw",
+    "fstype": "tmpfs",
+    "source": "tmpfs"
+   },
+   {
+    "mount": "/dev/null",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/zero",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/full",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/random",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/urandom",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/tty",
+    "rw": "rw",
+    "fstype": "devtmpfs",
+    "source": "udev"
+   },
+   {
+    "mount": "/dev/pts",
+    "rw": "rw",
+    "fstype": "devpts",
+    "source": "devpts"
+   },
+   {
+    "mount": "/tmp",
+    "rw": "rw",
+    "fstype": "tmpfs",
+    "source": "tmpfs"
+   },
+   {
+    "mount": "/usr",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "/etc",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "~",
+    "rw": "rw",
+    "fstype": "tmpfs",
+    "source": "tmpfs"
+   },
+   {
+    "mount": "~/.piinstall",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "~/.local/opt/node-v22.23.2-linux-x64",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "~/dev/ops/d2v52_venv",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "~/dev/ops/d2_private_live/nst_negctl_efamily_formal_1795834425",
+    "rw": "rw",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run",
+    "rw": "rw",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   },
+   {
+    "mount": "/opt/expT/sockfwd.py",
+    "rw": "ro",
+    "fstype": "ext4",
+    "source": "/dev/mapper/ubuntu--vg-ubuntu--lv"
+   }
+  ],
+  "formal_shape_outdir": "~/dev/ops/tmp_redo/negctl_runroot_efamily_formal_1795834425/cells/xx-s01/r1/T/round_1/run"
+ },
+ "allowlist_sha256": "3e9997bec479f324f386abe310a4e2df3b48a587e9653f60464de2345a149d93",
+ "all_pass": true
+}

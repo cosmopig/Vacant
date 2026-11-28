@@ -16,10 +16,14 @@ HERE = pathlib.Path(__file__).resolve().parent
 def main() -> int:
     ap = argparse.ArgumentParser(); ap.add_argument("--venv", required=True); ap.add_argument("--d2-private", required=True)
     ap.add_argument("--label", required=True); ap.add_argument("--out", required=True)
+    ap.add_argument("--formal-shape", action="store_true", help="B52(4)：輸出目錄放在暫時 run root 的 cells/<組>/r1/<臂>/round_1/run")
     a = ap.parse_args()
     H = pathlib.Path.home(); L = H / "dev" / "ops" / "d2_private_live"
     me = L / f"nst_negctl_{a.label}_{int(time.time())}"
-    for d in (me / "ws", me / "tmp", me / "vh", me / "cfg", me / "out"):
+    outdir = me / "out"
+    if a.formal_shape:
+        outdir = H / "dev" / "ops" / "tmp_redo" / f"negctl_runroot_{a.label}_{int(time.time())}" / "cells" / "xx-s01" / "r1" / "T" / "round_1" / "run"
+    for d in (me / "ws", me / "tmp", me / "vh", me / "cfg", outdir):
         d.mkdir(parents=True, exist_ok=True)
     (me / "ws" / "report.md").write_text("own report\n")
     others = [p for p in sorted(L.iterdir()) if p.is_dir() and not p.name.startswith("nst_") and (p / "ws").exists()][:3]
@@ -40,7 +44,7 @@ def main() -> int:
     script = "; ".join(f"echo '@@{n}'; ({c}) 2>&1; echo \"@@rc=$?\"" for n, c in tests)
     env = {k: v for k, v in os.environ.items() if "proxy" not in k.lower()}
     env["EXPT_NETNS_PROXY_PORT"] = "39999"          # 和正式執行同一條 netns 路徑（裡面起 tcp2unix；這裡不接上游）
-    r = subprocess.run([str(HERE / "bwrap_expT_agent.sh"), str(me), str(me / "out"), a.venv, "--", "/bin/sh", "-c", script],
+    r = subprocess.run([str(HERE / "bwrap_expT_agent.sh"), str(me), str(outdir), a.venv, "--", "/bin/sh", "-c", script],
                        env=env, capture_output=True, text=True, timeout=120)
     out = r.stdout + r.stderr
     parts = {}
@@ -74,14 +78,30 @@ def main() -> int:
         add(n, rcs.get(n, 0) != 0, body(n).strip()[:200])
     mounts = sorted({l.split()[4] for l in body("N7_mountinfo").splitlines() if len(l.split()) > 4})
     nodeinst = str(H / ".piinstall")
-    allowed_prefixes = ["/", "/proc", "/dev", "/tmp", "/usr", "/etc", str(H), nodeinst, str(me), str(me / "out"), a.venv, "/opt/expT/sockfwd.py"]
+    allowed_prefixes = ["/", "/proc", "/dev", "/tmp", "/usr", "/etc", str(H), nodeinst, str(me), str(outdir), a.venv, "/opt/expT/sockfwd.py"]
     node_root = os.path.dirname(os.path.dirname(os.path.realpath(H / ".local/bin/node")))
     allowed_prefixes.append(node_root)
     bad = [m for m in mounts if not any(m == p or m.startswith(p + "/") for p in allowed_prefixes if p != "/") and m != "/"
            and not m.startswith(("/dev/", "/proc/"))]
     leaks = [m for m in mounts if m.startswith(str(d2)) or (m.startswith(str(L)) and not m.startswith(str(me)))]
     add("N7_mounts_match_allowlist", not bad and not leaks, f"mounts={mounts} bad={bad} leaks={leaks}")
-    allow = {"allowed_mount_prefixes": sorted(set(allowed_prefixes)), "observed_mounts": mounts}
+    # B52(4)：每個掛載點的類型、來源、讀寫屬性；/、/tmp、~ 必須是 tmpfs；可寫的非 tmpfs／非特殊掛載只能是本格 live 與本次輸出目錄
+    detail = []
+    for l in body("N7_mountinfo").splitlines():
+        f = l.split()
+        if len(f) < 10 or "-" not in f:
+            continue
+        i = f.index("-"); mp, opts, fstype, src = f[4], f[5], f[i + 1], f[i + 2]
+        detail.append({"mount": mp, "rw": opts.split(",")[0], "fstype": fstype, "source": src})
+    by = {d_["mount"]: d_ for d_ in detail}
+    tmpfs_ok = all(by.get(m, {}).get("fstype") == "tmpfs" for m in ("/", "/tmp", str(H)))
+    special = ("tmpfs", "proc", "devtmpfs", "devpts", "mqueue", "sysfs")
+    writable_persistent = [d_["mount"] for d_ in detail if d_["rw"] == "rw" and d_["fstype"] not in special
+                           and not d_["mount"].startswith(("/dev/", "/proc"))]
+    w_ok = all(m in (str(me), str(outdir)) for m in writable_persistent)
+    add("N8_mount_types_B52_4", tmpfs_ok and w_ok, f"tmpfs(/,/tmp,~)={tmpfs_ok} writable_persistent={writable_persistent}")
+    allow = {"allowed_mount_prefixes": sorted(set(allowed_prefixes)), "observed_mounts": mounts, "mount_detail": detail,
+             "formal_shape_outdir": str(outdir) if a.formal_shape else None}
     rep = {"label": a.label, "test_cell": str(me).replace(str(H), "~"), "other_cell_used": other.name if other else None,
            "wrapper_sha256": hashlib.sha256((HERE / "bwrap_expT_agent.sh").read_bytes()).hexdigest(),
            "tests": res, "allowlist": allow, "allowlist_sha256": hashlib.sha256(json.dumps(allow, sort_keys=True).encode()).hexdigest(),
