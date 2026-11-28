@@ -1,0 +1,89 @@
+{
+ "note": "第二正規化器的規則是看資料後定的（事後）。抽查：每類隨機 20 行（種子 20261128），只列 HMAC 行鍵；無值。",
+ "equiv_audit_sample": {
+  "K-等值": {
+   "n_checked": 20,
+   "agree": 20,
+   "keys": [
+    "8f86a8608dd2c536fb1e",
+    "40c1f91e1984cc4c9255",
+    "c9e35133a50bc5916811",
+    "a037ff44b949d6ce5e50",
+    "29de4f10dde08d0df64e",
+    "0f65fcdc70e130245edf",
+    "f30e2c47d573afe3a9e9",
+    "1c9687efb059199b5a0d",
+    "883813d439869f768c3a",
+    "f8c52ac037e1ef493932",
+    "97914598c81033ddfaa1",
+    "dafbc2deda3163aafb56",
+    "a9b266e26d5e6570dd5b",
+    "ec90686c65774f2db06a",
+    "a84c6b79c9c5cf573e86",
+    "2bf8210f8f8cbc866be5",
+    "f09a779a24c73447f1a0",
+    "eb87eeb46963f8b9d389",
+    "ac62c8e49c6af8348ad2",
+    "9c3d77e01ab4fc102f25"
+   ]
+  },
+  "U-等值": {
+   "n_checked": 20,
+   "agree": 20,
+   "keys": [
+    "6ae7d550a50725c5b01c",
+    "cc15f01d5dad38d2e0df",
+    "6b8470d89125e0a7cff5",
+    "c8dae836df99e350b88f",
+    "3488d693997dfe5218e4",
+    "643e5ee6b70175d60822",
+    "e8056b6f30ea7a5f5c04",
+    "a9fe466c443db78efb32",
+    "007f0ea00e3a5cd61e42",
+    "55b78f4d18034d8fb229",
+    "89e95a1f3a3e9ddcd518",
+    "bc2dda20f8abf5f474d1",
+    "36a8b40216d3a902f2bf",
+    "dda72d849cd3d6826228",
+    "936e8d571d0f4f161dfb",
+    "8e90449ea67ffeaa431c",
+    "c1d473c544b0d7413d7e",
+    "89ed9ec74dab1851d7b7",
+    "49ec3e29af2bb6c0e07d",
+    "386e65cf8390e08b5c18"
+   ]
+  }
+ },
+ "U_not_equivalent_companies": [
+  {
+   "key": "eff6da5b4c70a2ddc152",
+   "set": "cc-s02",
+   "field": "Formerly",
+   "reason": "只寫一個舊名、答案有兩個並附年份"
+  },
+  {
+   "key": "d8c9600b246fbd0680a4",
+   "set": "cc-s02",
+   "field": "Traded as",
+   "reason": "只寫代號、缺交易所"
+  },
+  {
+   "key": "84ea5c57906667a697ff",
+   "set": "cc-s03",
+   "field": "Headquarters",
+   "reason": "只寫城市、缺街道"
+  },
+  {
+   "key": "c5252614fdfba8709dd2",
+   "set": "cc-s03",
+   "field": "Headquarters",
+   "reason": "只寫城市、缺街道"
+  },
+  {
+   "key": "6da81c6439b45ef6446a",
+   "set": "cc-s08",
+   "field": "Services",
+   "reason": "寫業務類別、非答案的子公司／品牌清單"
+  }
+ ]
+}
