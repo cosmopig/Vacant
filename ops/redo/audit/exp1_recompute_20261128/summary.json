@@ -1,0 +1,204 @@
+{
+ "note": "事後重算、非預註冊（2026-11-28）。重現版＝原程式原參數（--arms a、score_strict、主要定義）；b24 版＝F1 另用確認批次 B24 的封閉三項正規化。補回：實驗一的 F1 抓取內容取自步驟輸出（四個 root 全部還在），出口內容 798 筆全部可由 blob 或教材 sha 補回、0 筆補不回；所以 gc 不影響實驗一的旗標輸入。",
+ "original_sha256": "1d4b5c6f54ee1925355641ca171a6b66fff9d85417c83f2a3e333aa1a1e40500",
+ "original": {
+  "final_verdict": "UNRESOLVED",
+  "combined": {
+   "units": 3475,
+   "sets": 37,
+   "flagged_share": 0.8020143884892086,
+   "error_rate": 0.6474820143884892,
+   "recall": 0.8831111111111111,
+   "recall_lower95": 0.8235,
+   "error_rate_flagged": 0.7129529960531037,
+   "error_rate_unflagged": 0.38226744186046513,
+   "rate_ratio": 1.8650633508917693,
+   "verdict": "UNRESOLVED"
+  },
+  "software_plus_companies": {
+   "units": 1700,
+   "sets": 17,
+   "flagged_share": 0.6870588235294117,
+   "error_rate": 0.6423529411764706,
+   "recall": 0.7847985347985348,
+   "recall_lower95": 0.6777668952007836,
+   "error_rate_flagged": 0.7337328767123288,
+   "error_rate_unflagged": 0.4417293233082707,
+   "rate_ratio": 1.6610463421742931,
+   "verdict": "UNRESOLVED"
+  },
+  "by_domain": {
+   "companies (Wikipedia)": {
+    "units": 1000,
+    "sets": 10,
+    "flagged_share": 0.587,
+    "error_rate": 0.516,
+    "recall": 0.6608527131782945,
+    "recall_lower95": 0.5329087048832272,
+    "error_rate_flagged": 0.5809199318568995,
+    "error_rate_unflagged": 0.423728813559322,
+    "rate_ratio": 1.370971039182283,
+    "verdict": "UNRESOLVED"
+   },
+   "football biographies (Wikipedia)": {
+    "units": 1775,
+    "sets": 20,
+    "flagged_share": 0.9121126760563381,
+    "error_rate": 0.652394366197183,
+    "recall": 0.9758203799654577,
+    "recall_lower95": 0.9515463917525773,
+    "error_rate_flagged": 0.6979617047560223,
+    "error_rate_unflagged": 0.1794871794871795,
+    "rate_ratio": 3.8886437836406955,
+    "verdict": "FAIL"
+   },
+   "software (Wikipedia)": {
+    "units": 700,
+    "sets": 7,
+    "flagged_share": 0.83,
+    "error_rate": 0.8228571428571428,
+    "recall": 0.8958333333333334,
+    "recall_lower95": 0.767578125,
+    "error_rate_flagged": 0.8881239242685026,
+    "error_rate_unflagged": 0.5042016806722689,
+    "rate_ratio": 1.7614457831325303,
+    "verdict": "UNRESOLVED"
+   }
+  }
+ },
+ "reproduced": {
+  "final_verdict": "UNRESOLVED",
+  "combined": {
+   "units": 3475,
+   "sets": 37,
+   "flagged_share": 0.8020143884892086,
+   "error_rate": 0.6474820143884892,
+   "recall": 0.8831111111111111,
+   "recall_lower95": 0.8235,
+   "error_rate_flagged": 0.7129529960531037,
+   "error_rate_unflagged": 0.38226744186046513,
+   "rate_ratio": 1.8650633508917693,
+   "verdict": "UNRESOLVED"
+  },
+  "software_plus_companies": {
+   "units": 1700,
+   "sets": 17,
+   "flagged_share": 0.6870588235294117,
+   "error_rate": 0.6423529411764706,
+   "recall": 0.7847985347985348,
+   "recall_lower95": 0.6777668952007836,
+   "error_rate_flagged": 0.7337328767123288,
+   "error_rate_unflagged": 0.4417293233082707,
+   "rate_ratio": 1.6610463421742931,
+   "verdict": "UNRESOLVED"
+  },
+  "by_domain": {
+   "companies (Wikipedia)": {
+    "units": 1000,
+    "sets": 10,
+    "flagged_share": 0.587,
+    "error_rate": 0.516,
+    "recall": 0.6608527131782945,
+    "recall_lower95": 0.5329087048832272,
+    "error_rate_flagged": 0.5809199318568995,
+    "error_rate_unflagged": 0.423728813559322,
+    "rate_ratio": 1.370971039182283,
+    "verdict": "UNRESOLVED"
+   },
+   "football biographies (Wikipedia)": {
+    "units": 1775,
+    "sets": 20,
+    "flagged_share": 0.9121126760563381,
+    "error_rate": 0.652394366197183,
+    "recall": 0.9758203799654577,
+    "recall_lower95": 0.9515463917525773,
+    "error_rate_flagged": 0.6979617047560223,
+    "error_rate_unflagged": 0.1794871794871795,
+    "rate_ratio": 3.8886437836406955,
+    "verdict": "FAIL"
+   },
+   "software (Wikipedia)": {
+    "units": 700,
+    "sets": 7,
+    "flagged_share": 0.83,
+    "error_rate": 0.8228571428571428,
+    "recall": 0.8958333333333334,
+    "recall_lower95": 0.767578125,
+    "error_rate_flagged": 0.8881239242685026,
+    "error_rate_unflagged": 0.5042016806722689,
+    "rate_ratio": 1.7614457831325303,
+    "verdict": "UNRESOLVED"
+   }
+  }
+ },
+ "b24": {
+  "final_verdict": "UNRESOLVED",
+  "combined": {
+   "units": 3475,
+   "sets": 37,
+   "flagged_share": 0.704748201438849,
+   "error_rate": 0.6474820143884892,
+   "recall": 0.8635555555555555,
+   "recall_lower95": 0.8004739336492891,
+   "error_rate_flagged": 0.7933850551245406,
+   "error_rate_unflagged": 0.29922027290448344,
+   "rate_ratio": 2.6515083601230574,
+   "verdict": "UNRESOLVED"
+  },
+  "software_plus_companies": {
+   "units": 1700,
+   "sets": 17,
+   "flagged_share": 0.6794117647058824,
+   "error_rate": 0.6423529411764706,
+   "recall": 0.7774725274725275,
+   "recall_lower95": 0.6670010030090271,
+   "error_rate_flagged": 0.7350649350649351,
+   "error_rate_unflagged": 0.44587155963302755,
+   "rate_ratio": 1.6486024263802042,
+   "verdict": "UNRESOLVED"
+  },
+  "by_domain": {
+   "companies (Wikipedia)": {
+    "units": 1000,
+    "sets": 10,
+    "flagged_share": 0.587,
+    "error_rate": 0.516,
+    "recall": 0.6608527131782945,
+    "recall_lower95": 0.5329087048832272,
+    "error_rate_flagged": 0.5809199318568995,
+    "error_rate_unflagged": 0.423728813559322,
+    "rate_ratio": 1.370971039182283,
+    "verdict": "UNRESOLVED"
+   },
+   "football biographies (Wikipedia)": {
+    "units": 1775,
+    "sets": 20,
+    "flagged_share": 0.7290140845070423,
+    "error_rate": 0.652394366197183,
+    "recall": 0.9447322970639033,
+    "recall_lower95": 0.896361631753032,
+    "error_rate_flagged": 0.8454404945904173,
+    "error_rate_unflagged": 0.13305613305613306,
+    "rate_ratio": 6.354013717156104,
+    "verdict": "PASS"
+   },
+   "software (Wikipedia)": {
+    "units": 700,
+    "sets": 7,
+    "flagged_share": 0.8114285714285714,
+    "error_rate": 0.8228571428571428,
+    "recall": 0.8819444444444444,
+    "recall_lower95": 0.7429718875502008,
+    "error_rate_flagged": 0.8943661971830986,
+    "error_rate_unflagged": 0.5151515151515151,
+    "rate_ratio": 1.7361226180613092,
+    "verdict": "UNRESOLVED"
+   }
+  }
+ },
+ "reproduced_equals_original": true,
+ "rows_flag_changed_b24": {
+  "exp1cA": 13,
+  "exp1cB": 325
+ }
+}

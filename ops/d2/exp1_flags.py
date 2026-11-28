@@ -28,6 +28,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent))
 sys.path.insert(0, str(HERE))
+import expT_feedback as FB  # noqa: E402  (B24 封閉三項正規化)
 from vacant_network.trace import blame as B  # noqa: E402
 from vacant_network.trace import locate as L  # noqa: E402
 from vacant_network.trace import sources as S  # noqa: E402
@@ -99,6 +100,7 @@ def main() -> int:
     ap.add_argument("--boot", type=int, default=2000)
     ap.add_argument("--original-defs", action="store_true",
                     help="敏感度分析（原預註冊定義 9dff991ec）：F1 拿值比 HTML 原文（不轉純文字）")
+    ap.add_argument("--b24", action="store_true", help="事後重算（2026-11-28，非預註冊）：F1 另用 B24 封閉三項正規化")
     a = ap.parse_args()
     root = pathlib.Path(a.root).expanduser()
     mat = pathlib.Path(a.materials).expanduser()
@@ -156,7 +158,11 @@ def main() -> int:
                         f["F1"] = True          # 沒有值（沒填或被清掉）＝不可能「有出處」
                     else:
                         # 主要定義（預註冊修正 1，看過探索性資料、確認性資料還不存在時改的）：以來源轉成純文字後比對
-                        match = (lambda t: L.contains(t, v)) if a.original_defs else (lambda t: S.plain_contains(t, v))
+                        if a.b24:
+                            # 2026-11-28 事後重算（非預註冊）：純文字比對之外，再用確認批次 B24 的封閉三項正規化（去 *、反引號、括號旁空白）
+                            match = (lambda t: S.plain_contains(t, v) or S.plain_contains(FB.b24_norm(S._plain(t)), FB.b24_norm(v)))
+                        else:
+                            match = (lambda t: L.contains(t, v)) if a.original_defs else (lambda t: S.plain_contains(t, v))
                         carriers = [u for u in Uk if match(u["text"])]
                         f["F1"] = not carriers
                         latest: dict[str, str] = {}
