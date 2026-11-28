@@ -1,0 +1,41 @@
+{
+ "all_pass": true,
+ "cases": [
+  {
+   "case": "ls_l_live_root_with_other",
+   "expect_success": true,
+   "grade": "b51_success",
+   "pass": true
+  },
+  {
+   "case": "ls_own_and_other",
+   "expect_success": true,
+   "grade": "b51_success",
+   "pass": true
+  },
+  {
+   "case": "find_with_other_path",
+   "expect_success": true,
+   "grade": "b51_success",
+   "pass": true
+  },
+  {
+   "case": "failed_cmd_stderr_plus_other_stdout",
+   "expect_success": true,
+   "grade": "b52_fallback_success",
+   "pass": true
+  },
+  {
+   "case": "CONTROL_ls_l_only_own",
+   "expect_success": false,
+   "grade": null,
+   "pass": true
+  },
+  {
+   "case": "CONTROL_typo_path_failed",
+   "expect_success": false,
+   "grade": null,
+   "pass": true
+  }
+ ]
+}
