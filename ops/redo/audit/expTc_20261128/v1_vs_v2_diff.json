@@ -1,0 +1,75 @@
+{
+ "main_fields_identical": true,
+ "compared": [
+  "verdict",
+  "qualifiers",
+  "holm",
+  "pairs_valid",
+  "pairs_total",
+  "void_pairs_infra",
+  "start_check_failed",
+  "misaligned_G_T",
+  "blank_draft_pairs",
+  "selector",
+  "feedback.all",
+  "feedback.T_vs_G_aligned",
+  "feedback.nonblank_drafts",
+  "feedback.blank_drafts_only",
+  "per_arm"
+ ],
+ "changed_descriptive_fields": [
+  "b56_heuristic_descriptive",
+  "b59_descriptive",
+  "fb_runs",
+  "heuristic_success_pairs_descriptive",
+  "feedback.exclude_heuristic_success_pairs"
+ ],
+ "heuristic_by_arm_v1": {
+  "G": {
+   "attempt_calls": 221,
+   "heuristic_success_runs": 29,
+   "heuristic_success_pairs": 22
+  },
+  "T": {
+   "attempt_calls": 31,
+   "heuristic_success_runs": 3,
+   "heuristic_success_pairs": 3
+  },
+  "c0": {
+   "attempt_calls": 0,
+   "heuristic_success_runs": 57,
+   "heuristic_success_pairs": 57
+  },
+  "TB": {
+   "attempt_calls": 103,
+   "heuristic_success_runs": 21,
+   "heuristic_success_pairs": 16
+  }
+ },
+ "heuristic_by_arm_v2": {
+  "G": {
+   "attempt_calls": 221,
+   "heuristic_success_runs": 29,
+   "heuristic_success_pairs": 22
+  },
+  "T": {
+   "attempt_calls": 31,
+   "heuristic_success_runs": 3,
+   "heuristic_success_pairs": 3
+  },
+  "c0": {
+   "attempt_calls": 0,
+   "heuristic_success_runs": 0,
+   "heuristic_success_pairs": 0
+  },
+  "TB": {
+   "attempt_calls": 103,
+   "heuristic_success_runs": 21,
+   "heuristic_success_pairs": 16
+  }
+ },
+ "heuristic_pairs_v1": 60,
+ "heuristic_pairs_v2": 30,
+ "fb_runs_infra_v1": 58,
+ "fb_runs_infra_v2": 1
+}
