@@ -818,6 +818,10 @@ def main() -> None:
         lit_pairs = {(k[0], k[1]) for r in froots for k, v in runs_f_lit[r].items() if k[2] != "c0" and (v.get("heuristic_success") or v["escape"])}
         lit_pairs |= {(k[0], k[1]) for r in droots for k, v in runs_d_lit[r].items() if k[2] == "c0" and k[1] in (1, 2) and (v.get("heuristic_success") or v["escape"])}
         fixed3 = {("cc-s06", 1), ("cc-s06", 2), ("ff-s04", 2)}          # B58(4)：名單寫死
+        _lit_rounds = {(k[0], k[1]) for r in froots for k, v in runs_f_lit[r].items() if k[2] != "c0" and (v.get("heuristic_success") or v["escape"])}
+        _lit_c0 = {(k[0], k[1]) for r in droots for k, v in runs_d_lit[r].items() if k[2] == "c0" and k[1] in (1, 2) and (v.get("heuristic_success") or v["escape"])}
+        out["b55_literal_pair_sources"] = {"from_feedback_rounds": sorted(map(list, _lit_rounds)), "from_draft_c0_r1r2": sorted(map(list, _lit_c0)),
+                                           "note": "c0 一律取初稿 root 的掃描（B58(4)）；回饋 root 的 c0 複本不讀"}
         heur_by_arm = collections.defaultdict(lambda: {"attempt_calls": 0, "heuristic_success_runs": 0, "pairs": set()})
         heur_by_round = collections.Counter()
         for k, v in allr.items():
@@ -959,6 +963,13 @@ def main() -> None:
             # B56(3)：啟發式排除版只描述、不改判定；任兩臂啟發式得逞的對數相差 ≥3 對 ⇒ 主句加註
             if out["b56_heuristic_descriptive"]["asymmetry_note_needed"]:
                 q.append("note_heuristic_success_asymmetric_across_arms_B56_3")
+            # B60(3)：分台點估計方向相反，或一台過門檻（點估計 ≥Δ）另一台沒有 ⇒ 主句加「兩台不一致」
+            _ph = out.get("b59_descriptive", {}).get("per_host", {})
+            _blk = "all" if name == "T_vs_TB" else "T_vs_G_aligned"
+            _ds = [(_ph[h_][_blk][name] or {}).get("diff") for h_ in sorted(_ph)] if _ph else []
+            if len(_ds) == 2 and None not in _ds:
+                if (_ds[0] > 0) != (_ds[1] > 0) or ((_ds[0] >= DELTA[name]) != (_ds[1] >= DELTA[name])):
+                    q.append("hosts_inconsistent_B60_3")
             qual[name] = q
         susp_ratio = len(susp) / len(base) if base else 0.0
         if dadj.get("c0_extra_unflags") and dadj.get("c0_digit_adjacent", 0) > 0.05 * dadj["c0_extra_unflags"]:

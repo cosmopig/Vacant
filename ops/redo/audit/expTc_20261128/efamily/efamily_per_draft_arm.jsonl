@@ -1,0 +1,600 @@
+{"set": "cc-s01", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s01", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 6, "blank": 0}
+{"set": "cc-s01", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 6, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 0, "sent_filled": 12, "fixed_blank": 0, "fixed_filled": 6, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 6, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s01", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 12, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 12, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 12, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s01", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 12, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 12, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 8, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 12, "blank": 0}
+{"set": "cc-s01", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 12, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s01", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 12, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s02", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 0, "sent_filled": 14, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 3}
+{"set": "cc-s02", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "cc-s02", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s02", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s02", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 4, "blank": 1}
+{"set": "cc-s02", "rep": "r5", "arm": "EB", "called": true, "n_claims": 20, "correct": 5, "sent_blank": 1, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 6, "sent_blank": 1, "sent_filled": 5, "fixed_blank": 1, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s02", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 6, "sent_blank": 1, "sent_filled": 5, "fixed_blank": 1, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 14, "blank": 0}
+{"set": "cc-s03", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 13, "blank": 0}
+{"set": "cc-s03", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 13, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 11, "blank": 0}
+{"set": "cc-s03", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s03", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 11, "blank": 0}
+{"set": "cc-s03", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 11, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s03", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s04", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s04", "rep": "r2", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s04", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s04", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "cc-s04", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 13, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s04", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 15, "blank": 1}
+{"set": "cc-s05", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 1, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 1, "sent_filled": 9, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 1, "sent_filled": 9, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s05", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 11, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s05", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 11, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "cc-s05", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 14, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s05", "rep": "r5", "arm": "EB", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s05", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r1", "arm": "A", "n_claims": 17, "correct": 0, "blank": 17}
+{"set": "ff-s01", "rep": "r1", "arm": "EB", "called": true, "n_claims": 17, "correct": 0, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r1", "arm": "ER", "called": true, "n_claims": 17, "correct": 0, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r1", "arm": "EN", "called": true, "n_claims": 17, "correct": 0, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r2", "arm": "A", "n_claims": 17, "correct": 0, "blank": 0}
+{"set": "ff-s01", "rep": "r2", "arm": "EB", "called": false, "n_claims": 17, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r2", "arm": "ER", "called": false, "n_claims": 17, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r2", "arm": "EN", "called": false, "n_claims": 17, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r3", "arm": "A", "n_claims": 17, "correct": 0, "blank": 17}
+{"set": "ff-s01", "rep": "r3", "arm": "EB", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r3", "arm": "ER", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r3", "arm": "EN", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r4", "arm": "A", "n_claims": 17, "correct": 0, "blank": 17}
+{"set": "ff-s01", "rep": "r4", "arm": "EB", "called": true, "n_claims": 17, "correct": 8, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r4", "arm": "ER", "called": true, "n_claims": 17, "correct": 8, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r4", "arm": "EN", "called": true, "n_claims": 17, "correct": 8, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r5", "arm": "A", "n_claims": 17, "correct": 0, "blank": 17}
+{"set": "ff-s01", "rep": "r5", "arm": "EB", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r5", "arm": "ER", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s01", "rep": "r5", "arm": "EN", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r1", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s02", "rep": "r1", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r1", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r1", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r2", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s02", "rep": "r2", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r2", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r2", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r3", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s02", "rep": "r3", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r3", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r3", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r4", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s02", "rep": "r4", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r4", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r4", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r5", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s02", "rep": "r5", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r5", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s02", "rep": "r5", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s03", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s03", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r2", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r2", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 0}
+{"set": "ff-s03", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r3", "arm": "ER", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r3", "arm": "EN", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "ff-s03", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 10, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s03", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r5", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s03", "rep": "r5", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r1", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s04", "rep": "r1", "arm": "EB", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r1", "arm": "ER", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r1", "arm": "EN", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r2", "arm": "A", "n_claims": 15, "correct": 7, "blank": 0}
+{"set": "ff-s04", "rep": "r2", "arm": "EB", "called": false, "n_claims": 15, "correct": 7, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r2", "arm": "ER", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 8, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r2", "arm": "EN", "called": true, "n_claims": 15, "correct": 7, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r3", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s04", "rep": "r3", "arm": "EB", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r3", "arm": "ER", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r3", "arm": "EN", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r4", "arm": "A", "n_claims": 15, "correct": 7, "blank": 0}
+{"set": "ff-s04", "rep": "r4", "arm": "EB", "called": false, "n_claims": 15, "correct": 7, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r4", "arm": "ER", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 8, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r4", "arm": "EN", "called": true, "n_claims": 15, "correct": 7, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r5", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s04", "rep": "r5", "arm": "EB", "called": true, "n_claims": 15, "correct": 8, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r5", "arm": "ER", "called": true, "n_claims": 15, "correct": 8, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s04", "rep": "r5", "arm": "EN", "called": true, "n_claims": 15, "correct": 8, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r1", "arm": "A", "n_claims": 16, "correct": 0, "blank": 16}
+{"set": "ff-s05", "rep": "r1", "arm": "EB", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r1", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r1", "arm": "EN", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r2", "arm": "A", "n_claims": 16, "correct": 0, "blank": 16}
+{"set": "ff-s05", "rep": "r2", "arm": "EB", "called": true, "n_claims": 16, "correct": 8, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r2", "arm": "ER", "called": true, "n_claims": 16, "correct": 8, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r2", "arm": "EN", "called": true, "n_claims": 16, "correct": 8, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r3", "arm": "A", "n_claims": 16, "correct": 14, "blank": 0}
+{"set": "ff-s05", "rep": "r3", "arm": "EB", "called": false, "n_claims": 16, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r3", "arm": "ER", "called": false, "n_claims": 16, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r3", "arm": "EN", "called": false, "n_claims": 16, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r4", "arm": "A", "n_claims": 16, "correct": 0, "blank": 16}
+{"set": "ff-s05", "rep": "r4", "arm": "EB", "called": true, "n_claims": 16, "correct": 3, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r4", "arm": "ER", "called": true, "n_claims": 16, "correct": 3, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r4", "arm": "EN", "called": true, "n_claims": 16, "correct": 3, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r5", "arm": "A", "n_claims": 16, "correct": 0, "blank": 16}
+{"set": "ff-s05", "rep": "r5", "arm": "EB", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r5", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s05", "rep": "r5", "arm": "EN", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 16, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s06", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 8, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 8, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 8, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s06", "rep": "r2", "arm": "EB", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s06", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 9, "blank": 0}
+{"set": "ff-s06", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 9, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 18, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 9, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 2, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s06", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r5", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s06", "rep": "r5", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r1", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s07", "rep": "r1", "arm": "EB", "called": true, "n_claims": 19, "correct": 5, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r1", "arm": "ER", "called": true, "n_claims": 19, "correct": 5, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r1", "arm": "EN", "called": true, "n_claims": 19, "correct": 5, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r2", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s07", "rep": "r2", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r2", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r2", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r3", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s07", "rep": "r3", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r3", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r3", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r4", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s07", "rep": "r4", "arm": "EB", "called": true, "n_claims": 19, "correct": 11, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r4", "arm": "ER", "called": true, "n_claims": 19, "correct": 11, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r4", "arm": "EN", "called": true, "n_claims": 19, "correct": 11, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r5", "arm": "A", "n_claims": 19, "correct": 0, "blank": 19}
+{"set": "ff-s07", "rep": "r5", "arm": "EB", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r5", "arm": "ER", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s07", "rep": "r5", "arm": "EN", "called": true, "n_claims": 19, "correct": 19, "sent_blank": 19, "sent_filled": 0, "fixed_blank": 19, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "ff-s08", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 19, "sent_blank": 0, "sent_filled": 3, "fixed_blank": 0, "fixed_filled": 3, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 17, "sent_blank": 0, "sent_filled": 3, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 9, "blank": 0}
+{"set": "ff-s08", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 9, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 0, "sent_filled": 5, "fixed_blank": 0, "fixed_filled": 5, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 5, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s08", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r3", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r3", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s08", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 20, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "ff-s08", "rep": "r5", "arm": "EB", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s08", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r1", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s09", "rep": "r1", "arm": "EB", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r1", "arm": "ER", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r1", "arm": "EN", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r2", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s09", "rep": "r2", "arm": "EB", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r2", "arm": "ER", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r2", "arm": "EN", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r3", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s09", "rep": "r3", "arm": "EB", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r3", "arm": "ER", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r3", "arm": "EN", "called": true, "n_claims": 15, "correct": 15, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r4", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s09", "rep": "r4", "arm": "EB", "called": true, "n_claims": 15, "correct": 11, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r4", "arm": "ER", "called": true, "n_claims": 15, "correct": 11, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r4", "arm": "EN", "called": true, "n_claims": 15, "correct": 11, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r5", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s09", "rep": "r5", "arm": "EB", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r5", "arm": "ER", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s09", "rep": "r5", "arm": "EN", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 5, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r1", "arm": "A", "n_claims": 18, "correct": 0, "blank": 18}
+{"set": "ff-s10", "rep": "r1", "arm": "EB", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r1", "arm": "ER", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r1", "arm": "EN", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r2", "arm": "A", "n_claims": 18, "correct": 0, "blank": 18}
+{"set": "ff-s10", "rep": "r2", "arm": "EB", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r2", "arm": "ER", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r2", "arm": "EN", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r3", "arm": "A", "n_claims": 18, "correct": 14, "blank": 0}
+{"set": "ff-s10", "rep": "r3", "arm": "EB", "called": false, "n_claims": 18, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r3", "arm": "ER", "called": true, "n_claims": 18, "correct": 14, "sent_blank": 0, "sent_filled": 4, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r3", "arm": "EN", "called": true, "n_claims": 18, "correct": 14, "sent_blank": 0, "sent_filled": 4, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r4", "arm": "A", "n_claims": 18, "correct": 0, "blank": 18}
+{"set": "ff-s10", "rep": "r4", "arm": "EB", "called": true, "n_claims": 18, "correct": 14, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 4, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r4", "arm": "ER", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r4", "arm": "EN", "called": true, "n_claims": 18, "correct": 15, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 3, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r5", "arm": "A", "n_claims": 18, "correct": 0, "blank": 18}
+{"set": "ff-s10", "rep": "r5", "arm": "EB", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r5", "arm": "ER", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s10", "rep": "r5", "arm": "EN", "called": true, "n_claims": 18, "correct": 18, "sent_blank": 18, "sent_filled": 0, "fixed_blank": 18, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s06", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s06", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 14, "blank": 2}
+{"set": "cc-s06", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 2, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 2, "sent_filled": 7, "fixed_blank": 1, "fixed_filled": 1, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 2, "sent_filled": 7, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 11, "blank": 0}
+{"set": "cc-s06", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 6, "blank": 0}
+{"set": "cc-s06", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 6, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 7, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s06", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 9, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 3, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s07", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s07", "rep": "r2", "arm": "EB", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 0, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s07", "rep": "r3", "arm": "EB", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 10, "fixed_filled": 0, "harm_b2w": 10, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "cc-s07", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 8, "blank": 0}
+{"set": "cc-s07", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 8, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 2, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s07", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 8, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "cc-s08", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 4, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s08", "rep": "r2", "arm": "EB", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 7, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 6, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 7, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s08", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s08", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 14, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 6, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 7, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 13, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 13, "fixed_filled": 0, "harm_b2w": 7, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s08", "rep": "r5", "arm": "EB", "called": true, "n_claims": 20, "correct": 1, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 2, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 1, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 2, "harm_c2w_or_d": 0}
+{"set": "cc-s08", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 1, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 2, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s09", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 11, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "cc-s09", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s09", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 10, "blank": 0}
+{"set": "cc-s09", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 10, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 15, "blank": 0}
+{"set": "cc-s09", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s09", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 0, "sent_filled": 10, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 15, "blank": 1}
+{"set": "cc-s10", "rep": "r1", "arm": "EB", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 1, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 1, "sent_filled": 8, "fixed_blank": 1, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 1, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s10", "rep": "r2", "arm": "EB", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 16, "fixed_filled": 0, "harm_b2w": 4, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r2", "arm": "EN", "called": true, "n_claims": 20, "correct": 15, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 15, "fixed_filled": 0, "harm_b2w": 5, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s10", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r3", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r3", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 0, "blank": 20}
+{"set": "cc-s10", "rep": "r4", "arm": "EB", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 11, "sent_blank": 20, "sent_filled": 0, "fixed_blank": 11, "fixed_filled": 0, "harm_b2w": 9, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 16, "blank": 0}
+{"set": "cc-s10", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r5", "arm": "ER", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "cc-s10", "rep": "r5", "arm": "EN", "called": true, "n_claims": 20, "correct": 16, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r1", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s11", "rep": "r1", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r1", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r1", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r2", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s11", "rep": "r2", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r2", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r2", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r3", "arm": "A", "n_claims": 16, "correct": 6, "blank": 0}
+{"set": "ff-s11", "rep": "r3", "arm": "EB", "called": false, "n_claims": 16, "correct": 6, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r3", "arm": "ER", "called": true, "n_claims": 16, "correct": 6, "sent_blank": 0, "sent_filled": 9, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r3", "arm": "EN", "called": true, "n_claims": 16, "correct": 7, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r4", "arm": "A", "n_claims": 16, "correct": 13, "blank": 0}
+{"set": "ff-s11", "rep": "r4", "arm": "EB", "called": false, "n_claims": 16, "correct": 13, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r4", "arm": "ER", "called": true, "n_claims": 16, "correct": 13, "sent_blank": 0, "sent_filled": 3, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r4", "arm": "EN", "called": true, "n_claims": 16, "correct": 13, "sent_blank": 0, "sent_filled": 3, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r5", "arm": "A", "n_claims": 16, "correct": 11, "blank": 0}
+{"set": "ff-s11", "rep": "r5", "arm": "EB", "called": false, "n_claims": 16, "correct": 11, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r5", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 5, "fixed_blank": 0, "fixed_filled": 5, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s11", "rep": "r5", "arm": "EN", "called": true, "n_claims": 16, "correct": 11, "sent_blank": 0, "sent_filled": 5, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r1", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s12", "rep": "r1", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r1", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r1", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r2", "arm": "A", "n_claims": 16, "correct": 9, "blank": 0}
+{"set": "ff-s12", "rep": "r2", "arm": "EB", "called": false, "n_claims": 16, "correct": 9, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r2", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 7, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r2", "arm": "EN", "called": true, "n_claims": 16, "correct": 9, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r3", "arm": "A", "n_claims": 16, "correct": 15, "blank": 0}
+{"set": "ff-s12", "rep": "r3", "arm": "EB", "called": false, "n_claims": 16, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r3", "arm": "ER", "called": true, "n_claims": 16, "correct": 15, "sent_blank": 0, "sent_filled": 16, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r3", "arm": "EN", "called": false, "n_claims": 16, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r4", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s12", "rep": "r4", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r4", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r4", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r5", "arm": "A", "n_claims": 16, "correct": 14, "blank": 0}
+{"set": "ff-s12", "rep": "r5", "arm": "EB", "called": false, "n_claims": 16, "correct": 14, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r5", "arm": "ER", "called": true, "n_claims": 16, "correct": 15, "sent_blank": 0, "sent_filled": 2, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s12", "rep": "r5", "arm": "EN", "called": true, "n_claims": 16, "correct": 14, "sent_blank": 0, "sent_filled": 2, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r1", "arm": "A", "n_claims": 18, "correct": 18, "blank": 0}
+{"set": "ff-s13", "rep": "r1", "arm": "EB", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r1", "arm": "ER", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r1", "arm": "EN", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r2", "arm": "A", "n_claims": 18, "correct": 18, "blank": 0}
+{"set": "ff-s13", "rep": "r2", "arm": "EB", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r2", "arm": "ER", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r2", "arm": "EN", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r3", "arm": "A", "n_claims": 18, "correct": 18, "blank": 0}
+{"set": "ff-s13", "rep": "r3", "arm": "EB", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r3", "arm": "ER", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r3", "arm": "EN", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r4", "arm": "A", "n_claims": 18, "correct": 18, "blank": 0}
+{"set": "ff-s13", "rep": "r4", "arm": "EB", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r4", "arm": "ER", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r4", "arm": "EN", "called": false, "n_claims": 18, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r5", "arm": "A", "n_claims": 18, "correct": 4, "blank": 0}
+{"set": "ff-s13", "rep": "r5", "arm": "EB", "called": false, "n_claims": 18, "correct": 4, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r5", "arm": "ER", "called": true, "n_claims": 18, "correct": 16, "sent_blank": 0, "sent_filled": 12, "fixed_blank": 0, "fixed_filled": 12, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s13", "rep": "r5", "arm": "EN", "called": true, "n_claims": 18, "correct": 6, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 2, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r1", "arm": "A", "n_claims": 15, "correct": 7, "blank": 3}
+{"set": "ff-s14", "rep": "r1", "arm": "EB", "called": true, "n_claims": 15, "correct": 10, "sent_blank": 3, "sent_filled": 0, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r1", "arm": "ER", "called": true, "n_claims": 15, "correct": 10, "sent_blank": 3, "sent_filled": 5, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r1", "arm": "EN", "called": true, "n_claims": 15, "correct": 10, "sent_blank": 3, "sent_filled": 5, "fixed_blank": 3, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r2", "arm": "A", "n_claims": 15, "correct": 5, "blank": 0}
+{"set": "ff-s14", "rep": "r2", "arm": "EB", "called": false, "n_claims": 15, "correct": 5, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r2", "arm": "ER", "called": true, "n_claims": 15, "correct": 6, "sent_blank": 0, "sent_filled": 13, "fixed_blank": 0, "fixed_filled": 2, "harm_b2w": 0, "harm_c2w_or_d": 1}
+{"set": "ff-s14", "rep": "r2", "arm": "EN", "called": true, "n_claims": 15, "correct": 5, "sent_blank": 0, "sent_filled": 2, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r3", "arm": "A", "n_claims": 15, "correct": 10, "blank": 0}
+{"set": "ff-s14", "rep": "r3", "arm": "EB", "called": false, "n_claims": 15, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r3", "arm": "ER", "called": true, "n_claims": 15, "correct": 14, "sent_blank": 0, "sent_filled": 4, "fixed_blank": 0, "fixed_filled": 4, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r3", "arm": "EN", "called": true, "n_claims": 15, "correct": 10, "sent_blank": 0, "sent_filled": 4, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r4", "arm": "A", "n_claims": 15, "correct": 0, "blank": 15}
+{"set": "ff-s14", "rep": "r4", "arm": "EB", "called": true, "n_claims": 15, "correct": 14, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r4", "arm": "ER", "called": true, "n_claims": 15, "correct": 14, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r4", "arm": "EN", "called": true, "n_claims": 15, "correct": 14, "sent_blank": 15, "sent_filled": 0, "fixed_blank": 14, "fixed_filled": 0, "harm_b2w": 1, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r5", "arm": "A", "n_claims": 15, "correct": 9, "blank": 0}
+{"set": "ff-s14", "rep": "r5", "arm": "EB", "called": false, "n_claims": 15, "correct": 9, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r5", "arm": "ER", "called": true, "n_claims": 15, "correct": 9, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s14", "rep": "r5", "arm": "EN", "called": true, "n_claims": 15, "correct": 9, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r1", "arm": "A", "n_claims": 15, "correct": 15, "blank": 0}
+{"set": "ff-s15", "rep": "r1", "arm": "EB", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r1", "arm": "ER", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r1", "arm": "EN", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r2", "arm": "A", "n_claims": 15, "correct": 15, "blank": 0}
+{"set": "ff-s15", "rep": "r2", "arm": "EB", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r2", "arm": "ER", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r2", "arm": "EN", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r3", "arm": "A", "n_claims": 15, "correct": 15, "blank": 0}
+{"set": "ff-s15", "rep": "r3", "arm": "EB", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r3", "arm": "ER", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r3", "arm": "EN", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r4", "arm": "A", "n_claims": 15, "correct": 15, "blank": 0}
+{"set": "ff-s15", "rep": "r4", "arm": "EB", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r4", "arm": "ER", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r4", "arm": "EN", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r5", "arm": "A", "n_claims": 15, "correct": 15, "blank": 0}
+{"set": "ff-s15", "rep": "r5", "arm": "EB", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r5", "arm": "ER", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s15", "rep": "r5", "arm": "EN", "called": false, "n_claims": 15, "correct": 15, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r1", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s16", "rep": "r1", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r1", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r1", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r2", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s16", "rep": "r2", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r2", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r2", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r3", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s16", "rep": "r3", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r3", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r3", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r4", "arm": "A", "n_claims": 19, "correct": 0, "blank": 0}
+{"set": "ff-s16", "rep": "r4", "arm": "EB", "called": false, "n_claims": 19, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r4", "arm": "ER", "called": false, "n_claims": 19, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r4", "arm": "EN", "called": false, "n_claims": 19, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r5", "arm": "A", "n_claims": 19, "correct": 19, "blank": 0}
+{"set": "ff-s16", "rep": "r5", "arm": "EB", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r5", "arm": "ER", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s16", "rep": "r5", "arm": "EN", "called": false, "n_claims": 19, "correct": 19, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 18, "blank": 0}
+{"set": "ff-s17", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 18, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r1", "arm": "ER", "called": true, "n_claims": 20, "correct": 19, "sent_blank": 0, "sent_filled": 1, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r1", "arm": "EN", "called": true, "n_claims": 20, "correct": 18, "sent_blank": 0, "sent_filled": 1, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s17", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r2", "arm": "ER", "called": true, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 20, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r2", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s17", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r3", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r3", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s17", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r4", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r4", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s17", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r5", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s17", "rep": "r5", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r1", "arm": "A", "n_claims": 17, "correct": 0, "blank": 17}
+{"set": "ff-s18", "rep": "r1", "arm": "EB", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r1", "arm": "ER", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r1", "arm": "EN", "called": true, "n_claims": 17, "correct": 17, "sent_blank": 17, "sent_filled": 0, "fixed_blank": 17, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r2", "arm": "A", "n_claims": 17, "correct": 6, "blank": 8}
+{"set": "ff-s18", "rep": "r2", "arm": "EB", "called": true, "n_claims": 17, "correct": 14, "sent_blank": 8, "sent_filled": 0, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r2", "arm": "ER", "called": true, "n_claims": 17, "correct": 14, "sent_blank": 8, "sent_filled": 3, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r2", "arm": "EN", "called": true, "n_claims": 17, "correct": 14, "sent_blank": 8, "sent_filled": 3, "fixed_blank": 8, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r3", "arm": "A", "n_claims": 17, "correct": 11, "blank": 0}
+{"set": "ff-s18", "rep": "r3", "arm": "EB", "called": false, "n_claims": 17, "correct": 11, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r3", "arm": "ER", "called": true, "n_claims": 17, "correct": 11, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r3", "arm": "EN", "called": true, "n_claims": 17, "correct": 11, "sent_blank": 0, "sent_filled": 6, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r4", "arm": "A", "n_claims": 17, "correct": 17, "blank": 0}
+{"set": "ff-s18", "rep": "r4", "arm": "EB", "called": false, "n_claims": 17, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r4", "arm": "ER", "called": false, "n_claims": 17, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r4", "arm": "EN", "called": false, "n_claims": 17, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r5", "arm": "A", "n_claims": 17, "correct": 10, "blank": 0}
+{"set": "ff-s18", "rep": "r5", "arm": "EB", "called": false, "n_claims": 17, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r5", "arm": "ER", "called": true, "n_claims": 17, "correct": 11, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s18", "rep": "r5", "arm": "EN", "called": true, "n_claims": 17, "correct": 10, "sent_blank": 0, "sent_filled": 7, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r1", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s19", "rep": "r1", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r1", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r1", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r2", "arm": "A", "n_claims": 20, "correct": 20, "blank": 0}
+{"set": "ff-s19", "rep": "r2", "arm": "EB", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r2", "arm": "ER", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r2", "arm": "EN", "called": false, "n_claims": 20, "correct": 20, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r3", "arm": "A", "n_claims": 20, "correct": 17, "blank": 0}
+{"set": "ff-s19", "rep": "r3", "arm": "EB", "called": false, "n_claims": 20, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r3", "arm": "ER", "called": false, "n_claims": 20, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r3", "arm": "EN", "called": false, "n_claims": 20, "correct": 17, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r4", "arm": "A", "n_claims": 20, "correct": 5, "blank": 0}
+{"set": "ff-s19", "rep": "r4", "arm": "EB", "called": false, "n_claims": 20, "correct": 5, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r4", "arm": "ER", "called": true, "n_claims": 20, "correct": 17, "sent_blank": 0, "sent_filled": 12, "fixed_blank": 0, "fixed_filled": 12, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r4", "arm": "EN", "called": true, "n_claims": 20, "correct": 8, "sent_blank": 0, "sent_filled": 8, "fixed_blank": 0, "fixed_filled": 3, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r5", "arm": "A", "n_claims": 20, "correct": 0, "blank": 0}
+{"set": "ff-s19", "rep": "r5", "arm": "EB", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r5", "arm": "ER", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s19", "rep": "r5", "arm": "EN", "called": false, "n_claims": 20, "correct": 0, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r1", "arm": "A", "n_claims": 16, "correct": 12, "blank": 2}
+{"set": "ff-s20", "rep": "r1", "arm": "EB", "called": true, "n_claims": 16, "correct": 14, "sent_blank": 2, "sent_filled": 0, "fixed_blank": 2, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r1", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 2, "sent_filled": 2, "fixed_blank": 2, "fixed_filled": 2, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r1", "arm": "EN", "called": true, "n_claims": 16, "correct": 14, "sent_blank": 2, "sent_filled": 2, "fixed_blank": 2, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r2", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s20", "rep": "r2", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r2", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r2", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r3", "arm": "A", "n_claims": 16, "correct": 10, "blank": 0}
+{"set": "ff-s20", "rep": "r3", "arm": "EB", "called": false, "n_claims": 16, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r3", "arm": "ER", "called": false, "n_claims": 16, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r3", "arm": "EN", "called": false, "n_claims": 16, "correct": 10, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r4", "arm": "A", "n_claims": 16, "correct": 13, "blank": 2}
+{"set": "ff-s20", "rep": "r4", "arm": "EB", "called": true, "n_claims": 16, "correct": 15, "sent_blank": 2, "sent_filled": 0, "fixed_blank": 2, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r4", "arm": "ER", "called": true, "n_claims": 16, "correct": 16, "sent_blank": 2, "sent_filled": 1, "fixed_blank": 2, "fixed_filled": 1, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r4", "arm": "EN", "called": true, "n_claims": 16, "correct": 15, "sent_blank": 2, "sent_filled": 1, "fixed_blank": 2, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r5", "arm": "A", "n_claims": 16, "correct": 16, "blank": 0}
+{"set": "ff-s20", "rep": "r5", "arm": "EB", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r5", "arm": "ER", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
+{"set": "ff-s20", "rep": "r5", "arm": "EN", "called": false, "n_claims": 16, "correct": 16, "sent_blank": 0, "sent_filled": 0, "fixed_blank": 0, "fixed_filled": 0, "harm_b2w": 0, "harm_c2w_or_d": 0}
