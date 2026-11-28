@@ -928,6 +928,76 @@ def extra_scans(src: Src, esc_calls: list[dict], base_keep_bprime: set) -> dict:
     return R
 
 
+# ───────────────────────────── 補掃二：直連外網（等執行方名單）─────────────────────────────
+def network_fingerprint(src: Src, esc_calls: list[dict], bprime_excl: set) -> dict:
+    """包裡沒有工具呼叫參數 ⇒ 掃不了網址。改用 c0 的資料指紋找「來源沒被 egress 記到」的初稿：
+    有值的行幾乎全被紀錄標成『讀過的內容裡找不到』（≥80%）——若值來自 https 直連（不經代理、不進 egress），
+    紀錄就會這樣標。這只是候選名單，不是越界判定（也可能是那一格的 egress 紀錄缺漏）。"""
+    cells = src.json("expT/expT_cells.json")
+    lines = src.jsonl("expT/expT_lines.jsonl")
+    hk = {(h["set"], h["rep"]): h for h in src.jsonl("expT/expT_haiku.jsonl") if h["arm"] == "TE"}
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    LB: dict[tuple, list[dict]] = collections.defaultdict(list)
+    for x in lines:
+        LB[(x["set"], x["rep"], x["arm"])].append(x)
+    rows, cand = [], set()
+    ratio_hist = collections.Counter()
+    for s, r in pairs:
+        A = LB[(s, r, "A")]
+        V = [x for x in A if x["before_status"] != "missing"]
+        FV = [x for x in V if x["c0_flagged"]]
+        if V:
+            ratio_hist[round(len(FV) / len(V), 1)] += 1
+        if V and len(FV) / len(V) >= 0.8:
+            cand.add((s, r))
+            rows.append({"pair": f"{s}/r{r}", "valued": len(V), "valued_flagged": len(FV),
+                         "flagged_but_correct": sum(x["before_status"] == "correct" for x in FV),
+                         "flagged_and_wrong_fabricated": sum(x["before_status"] == "wrong" and x["before_etype"] == "fabricated" for x in FV),
+                         "pages_in_egress_for_c0": hk[(s, r)]["fetched_pages"] if (s, r) in hk and hk[(s, r)]["called"] else None,
+                         "T_c2w": C[(s, r, "T")]["harm_c2w_or_d"]})
+    R: dict[str, Any] = {"c0_flag_ratio_hist": dict(sorted(ratio_hist.items())), "candidates": rows, "n": len(cand),
+                         "share_of_flagged_correct_lines": round(sum(z["flagged_but_correct"] for z in rows) / 312, 3),
+                         "T_c2w_in_candidates": sum(z["T_c2w"] for z in rows), "T_c2w_total": sum(C[(s, r, "T")]["harm_c2w_or_d"] for s, r in pairs),
+                         "fabricated_in_candidates": sum(z["flagged_and_wrong_fabricated"] for z in rows)}
+
+    def prop(c: dict) -> float:
+        return c["final_correct"] / c["n_lines"]
+
+    def comp(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(prop(C[(s_, r_, t)]) - prop(C[(s_, r_, c)]))
+        out = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        out["pairs"] = sum(len(v) for v in d.values())
+        return out
+    empty = {(s, r) for s, r in pairs if C[(s, r, "A")]["c0_filled"] == 0}
+    allp = set(pairs)
+    vers = {"all_minus_fp": allp - cand, "b_prime_minus_fp": allp - bprime_excl - cand,
+            "b_prime_minus_fp_minus_empty": allp - bprime_excl - cand - empty, "only_fp": cand}
+    R["comparisons"] = {v: {f"{t}_vs_{c}": comp(t, c, k) for t, c in (("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"), ("T", "A"))}
+                        for v, k in vers.items()}
+    R["fp_in_b_prime_excluded"] = sorted(f"{s}/r{r}" for s, r in cand & bprime_excl)
+    R["c0_path_escapes_in_0dd266544"] = sum(1 for x in esc_calls if x["round"] == "c0")
+    # 回饋輪寫進的「捏造」值（錯、而且不在第 0 修訂任何頁面裡）＝線上現行版本值的候選上界；分臂（逐輪做不了：包裡只有最終值）
+    own_any = {(x["set"], x["rep"], x["arm"]) for x in esc_calls}
+    fab = {}
+    for a in ("G", "T", "TB", "TO"):
+        ks = [(s, r, a) for s, r in pairs]
+        ran = [k for k in ks if C[k]["rounds_run"] > 0]
+
+        def cnt(keys: list) -> int:
+            return sum(1 for k in keys for z in LB[k] if z["after_etype"] == "fabricated" and z["after_value_sha256"] != z["before_value_sha256"])
+        fab[a] = {"cells_with_rounds": len(ran), "rounds_total": sum(C[k]["rounds_run"] for k in ks),
+                  "new_fabricated_lines": cnt(ran),
+                  "new_fabricated_in_path_escape_cells": cnt([k for k in ran if k in own_any]),
+                  "new_fabricated_in_other_cells": cnt([k for k in ran if k not in own_any]),
+                  "cells_with_ge3_new_fabricated": sorted(f"{k[0]}/r{k[1]}" for k in ran if cnt([k]) >= 3)}
+    R["feedback_new_fabricated_by_arm"] = fab
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -1142,6 +1212,7 @@ def main() -> None:
             t_, r_ = x["detail"].split("/")[:2]
             _w.add((t_, int(r_[1:])))
     out["extra_scans"] = extra_scans(src, _calls, _pairs - _b - _bp - _w)
+    out["network_fingerprint"] = network_fingerprint(src, _calls, _b | _bp | _w)
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
