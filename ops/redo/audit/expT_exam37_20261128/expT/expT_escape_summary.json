@@ -1,0 +1,1506 @@
+{
+ "summary": {
+  "calls": 422,
+  "agent_runs_with_escape": 45,
+  "agent_runs_total": 449,
+  "by_kind_calls": {
+   "pair_site": 137,
+   "pair_flags": 9,
+   "pair_other": 10,
+   "other_flags": 3,
+   "mat_future": 102,
+   "other_site": 55,
+   "mat_cycle0": 95,
+   "other_cell": 11
+  },
+  "runs_by_arm": {
+   "G": 11,
+   "TB": 6,
+   "TO": 24,
+   "T": 4
+  },
+  "c0_runs_with_escape": 0,
+  "pairs_excluded_a_any": 35,
+  "pairs_excluded_b_flags_future": 17,
+  "pairs_excluded_by_arm_a": {
+   "G": 11,
+   "TB": 6,
+   "TO": 24,
+   "T": 4
+  },
+  "pairs_excluded_by_arm_b": {
+   "TB": 2,
+   "TO": 10,
+   "T": 2,
+   "G": 5
+  }
+ },
+ "excluded_pairs_a": [
+  [
+   "fb-s01",
+   1
+  ],
+  [
+   "fb-s04",
+   1
+  ],
+  [
+   "fb-s05",
+   1
+  ],
+  [
+   "fb-s05",
+   2
+  ],
+  [
+   "fb-s06",
+   2
+  ],
+  [
+   "fb-s08",
+   1
+  ],
+  [
+   "fb-s08",
+   2
+  ],
+  [
+   "fb-s11",
+   1
+  ],
+  [
+   "fb-s11",
+   2
+  ],
+  [
+   "fb-s12",
+   1
+  ],
+  [
+   "fb-s13",
+   1
+  ],
+  [
+   "fb-s18",
+   2
+  ],
+  [
+   "fb-s19",
+   1
+  ],
+  [
+   "fb-s20",
+   1
+  ],
+  [
+   "sc-s01",
+   1
+  ],
+  [
+   "sc-s01",
+   2
+  ],
+  [
+   "sc-s02",
+   1
+  ],
+  [
+   "sc-s03",
+   2
+  ],
+  [
+   "sc-s04",
+   1
+  ],
+  [
+   "sc-s04",
+   2
+  ],
+  [
+   "sc-s05",
+   1
+  ],
+  [
+   "sc-s06",
+   1
+  ],
+  [
+   "sc-s06",
+   2
+  ],
+  [
+   "sc-s07",
+   2
+  ],
+  [
+   "sc-s09",
+   1
+  ],
+  [
+   "sc-s10",
+   1
+  ],
+  [
+   "sc-s10",
+   2
+  ],
+  [
+   "sc-s11",
+   2
+  ],
+  [
+   "sc-s12",
+   1
+  ],
+  [
+   "sc-s12",
+   2
+  ],
+  [
+   "sc-s13",
+   1
+  ],
+  [
+   "sc-s13",
+   2
+  ],
+  [
+   "sc-s15",
+   1
+  ],
+  [
+   "sc-s15",
+   2
+  ],
+  [
+   "sc-s16",
+   1
+  ]
+ ],
+ "excluded_pairs_b": [
+  [
+   "fb-s01",
+   1
+  ],
+  [
+   "fb-s04",
+   1
+  ],
+  [
+   "fb-s05",
+   1
+  ],
+  [
+   "fb-s05",
+   2
+  ],
+  [
+   "fb-s06",
+   2
+  ],
+  [
+   "fb-s08",
+   2
+  ],
+  [
+   "fb-s11",
+   1
+  ],
+  [
+   "fb-s12",
+   1
+  ],
+  [
+   "fb-s18",
+   2
+  ],
+  [
+   "sc-s01",
+   2
+  ],
+  [
+   "sc-s04",
+   1
+  ],
+  [
+   "sc-s04",
+   2
+  ],
+  [
+   "sc-s06",
+   1
+  ],
+  [
+   "sc-s10",
+   1
+  ],
+  [
+   "sc-s10",
+   2
+  ],
+  [
+   "sc-s12",
+   1
+  ],
+  [
+   "sc-s13",
+   1
+  ]
+ ],
+ "sensitivity": {
+  "all": {
+   "T_vs_G": {
+    "treatment": "T",
+    "control": "G",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.1171,
+    "per_set_correct_prop_diff_ci95": [
+     0.0294,
+     0.2055
+    ],
+    "micro_correct_prop_diff": 0.1137,
+    "all_correct_ratio_diff": 0.1081,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.2297
+    ],
+    "per_set_filled_precision_diff": 0.0135,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0412,
+     0.0658
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0985,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0152,
+     0.1891
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": -0.0923,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.1621,
+     -0.0242
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0116,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0354,
+     0.0122
+    ],
+    "per_set_harm_total_rate_diff": -0.1039,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.1728,
+     -0.0343
+    ],
+    "treatment_harm_c2w_or_d": 64,
+    "control_harm_c2w_or_d": 186,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 39,
+    "treatment_harm_total_rate": 0.0633,
+    "control_harm_total_rate": 0.1619,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_TB": {
+    "treatment": "T",
+    "control": "TB",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0072,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0535,
+     0.0665
+    ],
+    "micro_correct_prop_diff": 0.005,
+    "all_correct_ratio_diff": 0.0676,
+    "all_correct_ratio_diff_ci95": [
+     -0.027,
+     0.1757
+    ],
+    "per_set_filled_precision_diff": 0.0301,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0032,
+     0.0687
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0225,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0647,
+     0.0205
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.044,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0176,
+     0.0804
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0238,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0599,
+     0.0064
+    ],
+    "per_set_harm_total_rate_diff": 0.0202,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0266,
+     0.0692
+    ],
+    "treatment_harm_c2w_or_d": 64,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 57,
+    "treatment_harm_total_rate": 0.0633,
+    "control_harm_total_rate": 0.041,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "T_vs_TO": {
+    "treatment": "T",
+    "control": "TO",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0371,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0947,
+     0.0223
+    ],
+    "micro_correct_prop_diff": -0.0381,
+    "all_correct_ratio_diff": -0.027,
+    "all_correct_ratio_diff_ci95": [
+     -0.1351,
+     0.0811
+    ],
+    "per_set_filled_precision_diff": -0.0196,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0508,
+     0.0133
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0548,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.097,
+     -0.017
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0382,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0101,
+     0.0757
+    ],
+    "per_set_harm_b2w_rate_diff": -0.002,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0236,
+     0.0196
+    ],
+    "per_set_harm_total_rate_diff": 0.0362,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0027,
+     0.0787
+    ],
+    "treatment_harm_c2w_or_d": 64,
+    "control_harm_c2w_or_d": 8,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 27,
+    "treatment_harm_total_rate": 0.0633,
+    "control_harm_total_rate": 0.0252,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TE_vs_TER": {
+    "treatment": "TE",
+    "control": "TER",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0044,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0329,
+     0.019
+    ],
+    "micro_correct_prop_diff": -0.0043,
+    "all_correct_ratio_diff": 0.0135,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0405
+    ],
+    "per_set_filled_precision_diff": 0.003,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0318,
+     0.0311
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0016,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0327,
+     0.0316
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": -0.0004,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.0125,
+     0.0113
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0007,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0047,
+     0.0027
+    ],
+    "per_set_harm_total_rate_diff": -0.001,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0139,
+     0.0113
+    ],
+    "treatment_harm_c2w_or_d": 182,
+    "control_harm_c2w_or_d": 183,
+    "treatment_harm_b2w": 31,
+    "control_harm_b2w": 32,
+    "treatment_harm_total_rate": 0.1532,
+    "control_harm_total_rate": 0.1547,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_A": {
+    "treatment": "T",
+    "control": "A",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0579,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0102,
+     0.1287
+    ],
+    "micro_correct_prop_diff": 0.0568,
+    "all_correct_ratio_diff": 0.0811,
+    "all_correct_ratio_diff_ci95": [
+     -0.0135,
+     0.1757
+    ],
+    "per_set_filled_precision_diff": 0.0147,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0132,
+     0.0484
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0225,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0647,
+     0.0205
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.044,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0176,
+     0.0804
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0162,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0027,
+     0.0345
+    ],
+    "per_set_harm_total_rate_diff": 0.0602,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0305,
+     0.0954
+    ],
+    "treatment_harm_c2w_or_d": 64,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0633,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "G_vs_A": {
+    "treatment": "G",
+    "control": "A",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0592,
+    "per_set_correct_prop_diff_ci95": [
+     -0.1387,
+     0.0186
+    ],
+    "micro_correct_prop_diff": -0.0568,
+    "all_correct_ratio_diff": -0.027,
+    "all_correct_ratio_diff_ci95": [
+     -0.0946,
+     0.0405
+    ],
+    "per_set_filled_precision_diff": 0.0168,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0326,
+     0.0706
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.121,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.2006,
+     -0.0499
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.1362,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0753,
+     0.1995
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0278,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0078,
+     0.0548
+    ],
+    "per_set_harm_total_rate_diff": 0.1641,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.1069,
+     0.2279
+    ],
+    "treatment_harm_c2w_or_d": 186,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 39,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.1619,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TB_vs_A": {
+    "treatment": "TB",
+    "control": "A",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0507,
+    "per_set_correct_prop_diff_ci95": [
+     0.014,
+     0.0985
+    ],
+    "micro_correct_prop_diff": 0.0518,
+    "all_correct_ratio_diff": 0.0135,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0405
+    ],
+    "per_set_filled_precision_diff": -0.0004,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0026,
+     0.0015
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_b2w_rate_diff": 0.04,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0135,
+     0.0736
+    ],
+    "per_set_harm_total_rate_diff": 0.04,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0122,
+     0.0723
+    ],
+    "treatment_harm_c2w_or_d": 0,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 57,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.041,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": false
+   },
+   "TO_vs_A": {
+    "treatment": "TO",
+    "control": "A",
+    "paired_cells": 74,
+    "paired_sets": 37,
+    "missing_pairs": 0,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.095,
+    "per_set_correct_prop_diff_ci95": [
+     0.0534,
+     0.1422
+    ],
+    "micro_correct_prop_diff": 0.095,
+    "all_correct_ratio_diff": 0.1081,
+    "all_correct_ratio_diff_ci95": [
+     0.0405,
+     0.1892
+    ],
+    "per_set_filled_precision_diff": 0.0334,
+    "per_set_filled_precision_diff_ci95": [
+     0.0029,
+     0.0671
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0323,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0033,
+     0.0642
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0057,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.0142
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0182,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0034,
+     0.0399
+    ],
+    "per_set_harm_total_rate_diff": 0.024,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0064,
+     0.0473
+    ],
+    "treatment_harm_c2w_or_d": 8,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 27,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0252,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   }
+  },
+  "a_exclude_any_escape_pairs": {
+   "T_vs_G": {
+    "treatment": "T",
+    "control": "G",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0276,
+    "per_set_correct_prop_diff_ci95": [
+     -0.1033,
+     0.1656
+    ],
+    "micro_correct_prop_diff": 0.0572,
+    "all_correct_ratio_diff": 0.0741,
+    "all_correct_ratio_diff_ci95": [
+     -0.0926,
+     0.2407
+    ],
+    "per_set_filled_precision_diff": -0.0033,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0856,
+     0.0661
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0587,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.049,
+     0.1756
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": -0.0939,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.1868,
+     -0.013
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0136,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0346,
+     0.0
+    ],
+    "per_set_harm_total_rate_diff": -0.1075,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.2009,
+     -0.0293
+    ],
+    "treatment_harm_c2w_or_d": 26,
+    "control_harm_c2w_or_d": 102,
+    "treatment_harm_b2w": 5,
+    "control_harm_b2w": 18,
+    "treatment_harm_total_rate": 0.0432,
+    "control_harm_total_rate": 0.1674,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_TB": {
+    "treatment": "T",
+    "control": "TB",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0064,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0546,
+     0.0458
+    ],
+    "micro_correct_prop_diff": 0.0,
+    "all_correct_ratio_diff": 0.0556,
+    "all_correct_ratio_diff_ci95": [
+     -0.0556,
+     0.1852
+    ],
+    "per_set_filled_precision_diff": 0.0317,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0062,
+     0.0793
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0101,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0539,
+     0.0346
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0333,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0102,
+     0.0602
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0148,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0463,
+     0.0037
+    ],
+    "per_set_harm_total_rate_diff": 0.0185,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0222,
+     0.0528
+    ],
+    "treatment_harm_c2w_or_d": 26,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 5,
+    "control_harm_b2w": 15,
+    "treatment_harm_total_rate": 0.0432,
+    "control_harm_total_rate": 0.0209,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "T_vs_TO": {
+    "treatment": "T",
+    "control": "TO",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0437,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0778,
+     -0.012
+    ],
+    "micro_correct_prop_diff": -0.046,
+    "all_correct_ratio_diff": 0.0,
+    "all_correct_ratio_diff_ci95": [
+     -0.1296,
+     0.1296
+    ],
+    "per_set_filled_precision_diff": -0.01,
+    "per_set_filled_precision_diff_ci95": [
+     -0.045,
+     0.0246
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0402,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0749,
+     -0.0078
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.031,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0079,
+     0.0583
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0194,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.062,
+     0.0046
+    ],
+    "per_set_harm_total_rate_diff": 0.0116,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0435,
+     0.0528
+    ],
+    "treatment_harm_c2w_or_d": 26,
+    "control_harm_c2w_or_d": 2,
+    "treatment_harm_b2w": 5,
+    "control_harm_b2w": 16,
+    "treatment_harm_total_rate": 0.0432,
+    "control_harm_total_rate": 0.0251,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TE_vs_TER": {
+    "treatment": "TE",
+    "control": "TER",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0019,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0422,
+     0.0333
+    ],
+    "micro_correct_prop_diff": -0.0084,
+    "all_correct_ratio_diff": 0.0185,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0556
+    ],
+    "per_set_filled_precision_diff": 0.0019,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0464,
+     0.0391
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0141,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0362,
+     0.0663
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": -0.0028,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.0204,
+     0.0161
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0009,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0028
+    ],
+    "per_set_harm_total_rate_diff": -0.0018,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0182,
+     0.0161
+    ],
+    "treatment_harm_c2w_or_d": 110,
+    "control_harm_c2w_or_d": 112,
+    "treatment_harm_b2w": 11,
+    "control_harm_b2w": 10,
+    "treatment_harm_total_rate": 0.1688,
+    "control_harm_total_rate": 0.1702,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_A": {
+    "treatment": "T",
+    "control": "A",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0074,
+    "per_set_correct_prop_diff_ci95": [
+     -0.037,
+     0.0604
+    ],
+    "micro_correct_prop_diff": 0.0126,
+    "all_correct_ratio_diff": 0.0741,
+    "all_correct_ratio_diff_ci95": [
+     -0.0185,
+     0.1852
+    ],
+    "per_set_filled_precision_diff": 0.0187,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0125,
+     0.0602
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0101,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0539,
+     0.0346
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0333,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0102,
+     0.0602
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0056,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0148
+    ],
+    "per_set_harm_total_rate_diff": 0.0389,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0167,
+     0.0648
+    ],
+    "treatment_harm_c2w_or_d": 26,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 5,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0432,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "G_vs_A": {
+    "treatment": "G",
+    "control": "A",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0202,
+    "per_set_correct_prop_diff_ci95": [
+     -0.1473,
+     0.1042
+    ],
+    "micro_correct_prop_diff": -0.0446,
+    "all_correct_ratio_diff": 0.0,
+    "all_correct_ratio_diff_ci95": [
+     -0.1296,
+     0.1481
+    ],
+    "per_set_filled_precision_diff": 0.0414,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0255,
+     0.1196
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0688,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.1761,
+     0.0275
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.1272,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0454,
+     0.2218
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0191,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0475
+    ],
+    "per_set_harm_total_rate_diff": 0.1464,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0667,
+     0.2391
+    ],
+    "treatment_harm_c2w_or_d": 102,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 18,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.1674,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TB_vs_A": {
+    "treatment": "TB",
+    "control": "A",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0137,
+    "per_set_correct_prop_diff_ci95": [
+     0.0009,
+     0.0343
+    ],
+    "micro_correct_prop_diff": 0.0126,
+    "all_correct_ratio_diff": 0.0185,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0741
+    ],
+    "per_set_filled_precision_diff": -0.0017,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0069,
+     0.002
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0204,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0537
+    ],
+    "per_set_harm_total_rate_diff": 0.0204,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0,
+     0.0537
+    ],
+    "treatment_harm_c2w_or_d": 0,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 15,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0209,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": false
+   },
+   "TO_vs_A": {
+    "treatment": "TO",
+    "control": "A",
+    "paired_cells": 39,
+    "paired_sets": 27,
+    "missing_pairs": 35,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0511,
+    "per_set_correct_prop_diff_ci95": [
+     0.0176,
+     0.0915
+    ],
+    "micro_correct_prop_diff": 0.0586,
+    "all_correct_ratio_diff": 0.0741,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.1667
+    ],
+    "per_set_filled_precision_diff": 0.03,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0016,
+     0.0695
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0301,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0044,
+     0.068
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0023,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.0069
+    ],
+    "per_set_harm_b2w_rate_diff": 0.025,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0704
+    ],
+    "per_set_harm_total_rate_diff": 0.0273,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0,
+     0.0727
+    ],
+    "treatment_harm_c2w_or_d": 2,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 16,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0251,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   }
+  },
+  "b_exclude_flags_future_pairs": {
+   "T_vs_G": {
+    "treatment": "T",
+    "control": "G",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.1252,
+    "per_set_correct_prop_diff_ci95": [
+     0.0339,
+     0.2165
+    ],
+    "micro_correct_prop_diff": 0.1181,
+    "all_correct_ratio_diff": 0.1324,
+    "all_correct_ratio_diff_ci95": [
+     0.0147,
+     0.2647
+    ],
+    "per_set_filled_precision_diff": 0.0183,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0445,
+     0.0726
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.08,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0025,
+     0.1578
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": -0.0889,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.147,
+     -0.0353
+    ],
+    "per_set_harm_b2w_rate_diff": -0.0049,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0265,
+     0.0191
+    ],
+    "per_set_harm_total_rate_diff": -0.0938,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.1567,
+     -0.0298
+    ],
+    "treatment_harm_c2w_or_d": 44,
+    "control_harm_c2w_or_d": 144,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 29,
+    "treatment_harm_total_rate": 0.0637,
+    "control_harm_total_rate": 0.1621,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_TB": {
+    "treatment": "T",
+    "control": "TB",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.025,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0233,
+     0.0778
+    ],
+    "micro_correct_prop_diff": 0.0225,
+    "all_correct_ratio_diff": 0.0882,
+    "all_correct_ratio_diff_ci95": [
+     -0.0147,
+     0.2059
+    ],
+    "per_set_filled_precision_diff": 0.0249,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0096,
+     0.0642
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0146,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0531,
+     0.0268
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0368,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0162,
+     0.061
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0029,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0154,
+     0.0243
+    ],
+    "per_set_harm_total_rate_diff": 0.0397,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0096,
+     0.0721
+    ],
+    "treatment_harm_c2w_or_d": 44,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 20,
+    "treatment_harm_total_rate": 0.0637,
+    "control_harm_total_rate": 0.0187,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "T_vs_TO": {
+    "treatment": "T",
+    "control": "TO",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.0183,
+    "per_set_correct_prop_diff_ci95": [
+     -0.078,
+     0.0603
+    ],
+    "micro_correct_prop_diff": -0.0375,
+    "all_correct_ratio_diff": 0.0147,
+    "all_correct_ratio_diff_ci95": [
+     -0.1029,
+     0.1471
+    ],
+    "per_set_filled_precision_diff": -0.0246,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0548,
+     0.0062
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0535,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.09,
+     -0.0199
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0342,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0125,
+     0.0596
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0015,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0221,
+     0.0243
+    ],
+    "per_set_harm_total_rate_diff": 0.0357,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0022,
+     0.0691
+    ],
+    "treatment_harm_c2w_or_d": 44,
+    "control_harm_c2w_or_d": 3,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 22,
+    "treatment_harm_total_rate": 0.0637,
+    "control_harm_total_rate": 0.0234,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TE_vs_TER": {
+    "treatment": "TE",
+    "control": "TER",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.011,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0429,
+     0.0173
+    ],
+    "micro_correct_prop_diff": -0.0066,
+    "all_correct_ratio_diff": 0.0147,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0441
+    ],
+    "per_set_filled_precision_diff": 0.0014,
+    "per_set_filled_precision_diff_ci95": [
+     -0.037,
+     0.0321
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0032,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0414,
+     0.031
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.005,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     -0.0104,
+     0.0224
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0007,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     -0.0015,
+     0.0029
+    ],
+    "per_set_harm_total_rate_diff": 0.0058,
+    "per_set_harm_total_rate_diff_ci95": [
+     -0.0108,
+     0.0244
+    ],
+    "treatment_harm_c2w_or_d": 149,
+    "control_harm_c2w_or_d": 150,
+    "treatment_harm_b2w": 22,
+    "control_harm_b2w": 21,
+    "treatment_harm_total_rate": 0.1603,
+    "control_harm_total_rate": 0.1603,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": true
+   },
+   "T_vs_A": {
+    "treatment": "T",
+    "control": "A",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0603,
+    "per_set_correct_prop_diff_ci95": [
+     -0.0055,
+     0.1381
+    ],
+    "micro_correct_prop_diff": 0.0553,
+    "all_correct_ratio_diff": 0.1029,
+    "all_correct_ratio_diff_ci95": [
+     0.0147,
+     0.2206
+    ],
+    "per_set_filled_precision_diff": 0.0159,
+    "per_set_filled_precision_diff_ci95": [
+     -0.014,
+     0.0549
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0146,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.0531,
+     0.0268
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0368,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0162,
+     0.061
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0176,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0037,
+     0.0382
+    ],
+    "per_set_harm_total_rate_diff": 0.0544,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0294,
+     0.0831
+    ],
+    "treatment_harm_c2w_or_d": 44,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 24,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0637,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "G_vs_A": {
+    "treatment": "G",
+    "control": "A",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": -0.065,
+    "per_set_correct_prop_diff_ci95": [
+     -0.1354,
+     0.0034
+    ],
+    "micro_correct_prop_diff": -0.0628,
+    "all_correct_ratio_diff": -0.0294,
+    "all_correct_ratio_diff_ci95": [
+     -0.1176,
+     0.0441
+    ],
+    "per_set_filled_precision_diff": 0.0132,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0432,
+     0.0793
+    ],
+    "per_set_c0_filled_correct_prop_diff": -0.0946,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     -0.1646,
+     -0.0297
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.1257,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0697,
+     0.1863
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0225,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0007,
+     0.0493
+    ],
+    "per_set_harm_total_rate_diff": 0.1482,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0866,
+     0.2083
+    ],
+    "treatment_harm_c2w_or_d": 144,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 29,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.1621,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   },
+   "TB_vs_A": {
+    "treatment": "TB",
+    "control": "A",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0353,
+    "per_set_correct_prop_diff_ci95": [
+     0.0043,
+     0.0769
+    ],
+    "micro_correct_prop_diff": 0.0328,
+    "all_correct_ratio_diff": 0.0147,
+    "all_correct_ratio_diff_ci95": [
+     0.0,
+     0.0441
+    ],
+    "per_set_filled_precision_diff": -0.0004,
+    "per_set_filled_precision_diff_ci95": [
+     -0.0028,
+     0.0016
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.0
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0147,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0,
+     0.0316
+    ],
+    "per_set_harm_total_rate_diff": 0.0147,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0,
+     0.0331
+    ],
+    "treatment_harm_c2w_or_d": 0,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 20,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0187,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": true,
+    "harm_not_more_than_control": false
+   },
+   "TO_vs_A": {
+    "treatment": "TO",
+    "control": "A",
+    "paired_cells": 57,
+    "paired_sets": 34,
+    "missing_pairs": 17,
+    "excluded_void_pairs": 0,
+    "per_set_correct_prop_diff": 0.0786,
+    "per_set_correct_prop_diff_ci95": [
+     0.0384,
+     0.1217
+    ],
+    "micro_correct_prop_diff": 0.0928,
+    "all_correct_ratio_diff": 0.0882,
+    "all_correct_ratio_diff_ci95": [
+     0.0294,
+     0.1618
+    ],
+    "per_set_filled_precision_diff": 0.0407,
+    "per_set_filled_precision_diff_ci95": [
+     0.0141,
+     0.0737
+    ],
+    "per_set_c0_filled_correct_prop_diff": 0.0389,
+    "per_set_c0_filled_correct_prop_diff_ci95": [
+     0.0127,
+     0.0712
+    ],
+    "per_set_harm_c2w_or_d_rate_diff": 0.0026,
+    "per_set_harm_c2w_or_d_rate_diff_ci95": [
+     0.0,
+     0.007
+    ],
+    "per_set_harm_b2w_rate_diff": 0.0162,
+    "per_set_harm_b2w_rate_diff_ci95": [
+     0.0007,
+     0.036
+    ],
+    "per_set_harm_total_rate_diff": 0.0188,
+    "per_set_harm_total_rate_diff_ci95": [
+     0.0044,
+     0.0404
+    ],
+    "treatment_harm_c2w_or_d": 3,
+    "control_harm_c2w_or_d": 0,
+    "treatment_harm_b2w": 22,
+    "control_harm_b2w": 0,
+    "treatment_harm_total_rate": 0.0234,
+    "control_harm_total_rate": 0.0,
+    "harm_c2w_not_more_than_control": false,
+    "harm_not_more_than_control": false
+   }
+  }
+ }
+}

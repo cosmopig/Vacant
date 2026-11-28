@@ -9,6 +9,7 @@
 - `expT_haiku.jsonl`：TE／TER 每格（148 格、120 次實際呼叫）的模型、prompt／回覆 sha256、token、花費、牆鐘、停止原因、送上去的行數、讀過的頁數。
 - `expT_metrics_report.txt`／`expT_metrics.json`：`python3 ops/d2/expT_metrics.py <root>`（預註冊指定）的輸出。
 - `expT_te_sensitivity_nonprereg.json`：`ops/d2/expT_te_sensitivity.py`，非預註冊。
+- `expT_escape_calls.jsonl`：agent 越界讀取的逐筆結果，422 次呼叫，路徑去識別（只留組、次、臂、輪、類別與教材內的相對位置）。`expT_escape_summary.json`：彙總、被排除的對、兩個版本的敏感度（`ops/d2/expT_escape.py`，非預註冊）。
 - 匯出腳本：`ops/d2/export_expT_audit.py`。計畫與預註冊：`ops/d2/plans/expT_qwen9b.json`（`prereg`）；修訂依據 `decisions/notes/NOTE_20261127_EXPERIMENT_T_N_CRITIQUE.md`。
 
 ### 結論數字對照（`decisions/conclusions/CONCLUSION_20261128_EXPT.md`）
@@ -21,6 +22,7 @@
 | 錯誤類型 | `expT_metrics_report.txt` 的 Error Breakdown；`expT_lines` 的 before_etype／after_etype | |
 | Haiku 花費、截斷 | `expT_haiku.jsonl` 的 cost_usd、stop_reason=max_tokens | |
 | 敏感度（保留原值、排除截斷） | `expT_te_sensitivity_nonprereg.json` | 全部行合計，非組平均 |
+| 越界讀取、排除後的敏感度 | `expT_escape_summary.json` | `summary`、`sensitivity.{all,a_exclude_any_escape_pairs,b_exclude_flags_future_pairs}` 的 `per_set_correct_prop_diff`／`_ci95` |
 | fb-s11/r1 受污染 | `expT_cells`：A 的 c0_correct≠final_correct 只有這一對 | |
 
 ## exam37/（外部考卷先導，Colab L4 E4B）

@@ -1,0 +1,158 @@
+{
+ "schema": "vacant.d2.expT.plan/2",
+ "id": "expTc_drafts_qwen9b",
+ "seed": 20261228,
+ "arms": [
+  "A"
+ ],
+ "reps": 5,
+ "max_rounds": 2,
+ "agent_timeout_s": 600,
+ "budget_s": 1800,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "haiku_full_root": null,
+ "escalation": {
+  "model": "claude-haiku-5-5",
+  "api_url": "https://api.anthropic.com/v1/messages",
+  "max_tokens": 1024,
+  "timeout_s": 120,
+  "price_per_mtok_in": 1.0,
+  "price_per_mtok_out": 5.0,
+  "ledger_path": "~/dev/ops/ctl/api_credit_ledger.jsonl"
+ },
+ "egress": {
+  "mode": "per-worker proxy, OS-assigned port"
+ },
+ "server": {
+  "port": 18264
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003q9",
+   "model": "qwen/qwen3.5-9b",
+   "thinking": "off (reasoning_effort none)",
+   "ctx": 131072,
+   "parallel": 2,
+   "jobs": 2,
+   "sets": [
+    "cc-s01",
+    "cc-s02",
+    "cc-s03",
+    "cc-s04",
+    "cc-s05",
+    "ff-s01",
+    "ff-s02",
+    "ff-s03",
+    "ff-s04",
+    "ff-s05",
+    "ff-s06",
+    "ff-s07",
+    "ff-s08",
+    "ff-s09",
+    "ff-s10"
+   ]
+  },
+  {
+   "name": "lms1004",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "thinking": "off (reasoning_effort none)",
+   "ctx": 131072,
+   "parallel": 2,
+   "jobs": 2,
+   "sets": [
+    "cc-s06",
+    "cc-s07",
+    "cc-s08",
+    "cc-s09",
+    "cc-s10",
+    "ff-s11",
+    "ff-s12",
+    "ff-s13",
+    "ff-s14",
+    "ff-s15",
+    "ff-s16",
+    "ff-s17",
+    "ff-s18",
+    "ff-s19",
+    "ff-s20"
+   ]
+  }
+ ],
+ "vacant_python": "~/dev/ops/d2v52_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v52",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v52_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo ae3db0086",
+  "wheel": "~/dev/ops/d2_release/ae3db0086/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "fccf569cd9cf75b8df595465c44c45e0a8d9a6a4604fbc9e9b9e0ba5ddbf554e",
+  "venv": "~/dev/ops/d2v52_venv (non-editable install)",
+  "hooks": "`vacant install --agents pi --mode observe` using d2v52_venv"
+ },
+ "materials": [
+  {
+   "prefix": "cc",
+   "dir": "${D2_PRIVATE}/realrev3_companies",
+   "manifest_sha256": "3a2a1d6dbdfb340d14ca998e578aeddfcf6ccb3bb283c4a4152e7525e95ea3a9",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10"
+   ]
+  },
+  {
+   "prefix": "ff",
+   "dir": "${D2_PRIVATE}/realrev3_football",
+   "manifest_sha256": "39e665bdda084cf16cb142fe8611262b8ac8d069ea54ae0b8d0fb323ccaa9a87",
+   "sets": [
+    "s01",
+    "s02",
+    "s03",
+    "s04",
+    "s05",
+    "s06",
+    "s07",
+    "s08",
+    "s09",
+    "s10",
+    "s11",
+    "s12",
+    "s13",
+    "s14",
+    "s15",
+    "s16",
+    "s17",
+    "s18",
+    "s19",
+    "s20"
+   ]
+  }
+ ],
+ "purpose": "Experiment T confirmation, part 1: 5 shared cycle-0 drafts (arm A) per set on 30 NEW realrev3 sets (10 companies + 20 football), qwen3.5-9b, bwrap sandbox, both hosts. Used for the pre-registered record-based draft selection and (reps 1-2) as the shared drafts of part 2.",
+ "prereg": {
+  "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
+  "code_sha256": {
+   "ops/d2/run_expT.py": "25a10424bb583d1443a98a37b5158624a69c9441023eb59c2806ccfe6fc446b9",
+   "ops/d2/bwrap_expT_agent.sh": "31676ca0720a5ee683b1176206f3974452106b2a2192d9f0c6d7c6f31633aaad",
+   "ops/d2/expT_metrics.py": "a73b5df5d5bbbe00050095d8ace4ec66c61c2ac1e2a17bd9e06eaa14b0a2057a",
+   "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
+   "ops/d2/expT_escape.py": "0ad66fcf955e32b659ac403f1c006fda6659f2b5dbda9edecd136165edb3946f"
+  }
+ },
+ "agent_sandbox": "bwrap"
+}

@@ -513,13 +513,21 @@ class ExpTRun:
                 argv += ["--max-turns", str(prov["max_turns"])]
             argv += ["--", prompt]
             return argv
-        return [
+        argv = [
             "pi", "-p", "--mode", "json",
             "--session-dir", str(out / "sessions"),
             "--provider", prov["provider"],
             "--model", prov["model"],
             prompt,
         ]
+        sandbox = self.plan.get("agent_sandbox")
+        if sandbox == "bwrap":
+            # 2026-11-28：探索批次的 agent 會讀到工作區外（教材目錄、別的格、c0/flags.json），確認批次一律關進 bwrap。
+            venv_dir = pathlib.Path(self.vacant_python()).parent.parent
+            argv = [str(HERE / "bwrap_expT_agent.sh"), str(live), str(out), str(venv_dir), "--", *argv]
+        elif sandbox not in (None, "none"):
+            raise SystemExit(f"unsupported agent_sandbox: {sandbox!r}")
+        return argv
 
     def _kill(self, pr: subprocess.Popen) -> None:
         if pr.poll() is not None:
