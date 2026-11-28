@@ -6,6 +6,8 @@ import re
 from datetime import datetime
 from typing import Any, Mapping
 
+from typed_value import typed_equal
+
 FIELDS = (
     "vendor",
     "invoice_date",
@@ -149,10 +151,13 @@ def oracle_whole(doc: Mapping[str, str], task: Mapping[str, Any]) -> bool:
             return False
         gv, dv = str(gold[f]).strip(), str(doc.get(f, "")).strip()
         if f == "currency":
-            if gv.upper() != dv.upper():
+            if not typed_equal("currency", dv, gv):
                 return False
         elif f in ("subtotal", "tax", "total"):
-            if _float(gv) != _float(dv):
+            cur = str(doc.get("currency") or gold.get("currency", "USD"))
+            got_m = f"{cur} {dv}" if cur else dv
+            exp_m = f"{cur} {gv}" if cur else gv
+            if not typed_equal("money", got_m, exp_m) and _float(gv) != _float(dv):
                 return False
         elif gv != dv:
             return False
