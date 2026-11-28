@@ -26,7 +26,7 @@
 
 名單核對（2e99dd9a1）：`list_v2_review` 讀新名單 `expT_escape_v2_runs.jsonl`、`expT_hmac_supplement/`（HMAC，只比相等）。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 | --dir D] [--out J]
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 --list-rev 2e99dd9a1 --list3-rev f1fdcfab3 | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -147,6 +147,32 @@ def cluster_summary(d: dict[str, float], scale: float = 100.0, seed: int = BOOT_
             "boot95": [round(scale * bs[int(0.025 * BOOT)], 2), round(scale * bs[int(0.975 * BOOT) - 1], 2)],
             "t95": [round(scale * (m - half), 2), round(scale * (m + half), 2)],
             "signflip_p": round((ge + 1) / (PERM + 1), 4)}
+
+
+def min_drop_exact(C: dict, pairs: list, keep: set, t: str, c: str, thr: float = 10.0) -> dict:
+    """拿掉最少幾對，T−c 的組平均點估計就低於 thr（只看 ≥thr 這一條；k≤2 窮舉，確定性）。
+    組平均下，拿掉一對會讓同組另一次的權重加倍，所以一對可以移動很多。"""
+    def point(kp: set) -> float:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in kp:
+            d[s_].append(C[(s_, r_, t)]["final_correct"] / C[(s_, r_, t)]["n_lines"] - C[(s_, r_, c)]["final_correct"] / C[(s_, r_, c)]["n_lines"])
+        return 100 * statistics.fmean(statistics.fmean(v) for v in d.values())
+    ks = sorted(keep)
+    if point(set(ks)) < thr:
+        return {"k": 0, "dropped": [], "point": round(point(set(ks)), 2)}
+    best1 = min(ks, key=lambda p_: (point(set(ks) - {p_}), p_))
+    v1 = point(set(ks) - {best1})
+    if v1 < thr:
+        return {"k": 1, "dropped": [f"{best1[0]}/r{best1[1]}"], "point": round(v1, 2)}
+    best2, v2 = None, 1e9
+    for i in range(len(ks)):
+        for j in range(i + 1, len(ks)):
+            v = point(set(ks) - {ks[i], ks[j]})
+            if v < v2:
+                best2, v2 = (ks[i], ks[j]), v
+    if v2 < thr:
+        return {"k": 2, "dropped": [f"{x[0]}/r{x[1]}" for x in best2], "point": round(v2, 2)}
+    return {"k": ">2", "best_two": [f"{x[0]}/r{x[1]}" for x in best2], "point_after_two": round(v2, 2)}
 
 
 # ───────────────────────────── 實驗 T ─────────────────────────────
@@ -622,6 +648,7 @@ def expT(src: Src) -> dict:
         "T_vs_G_drop_top4_T_favorable": worst_case_t_only("T", "G", 4),
         "T_vs_TB_drop_top4_T_favorable": worst_case_t_only("T", "TB", 4),
         "T_vs_G_min_pairs_to_lose_pass": min_k_flip("T", "G", 10.0),
+        "T_vs_G_min_drop_exact": min_drop_exact(C, pairs, set(pairs), "T", "G"),
         "agent_runs_recount": {"c0": len(pairs), **rounds, "total": agent_runs},
         "note": "稽核包沒有工具呼叫紀錄 ⇒ 46／8 對不上也否證不了；下面是最壞情況界",
         "T_vs_G_drop_top15": worst_case("T", "G", 15),
@@ -768,9 +795,11 @@ def escape_review(src: Src, esc_calls: list[dict], their_summary: dict) -> dict:
     COMPS = [("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"), ("T", "A"), ("G", "A"), ("TB", "A"), ("TO", "A")]
     R["comparisons"] = {v: {f"{t}_vs_{c}": comp(t, c, keep) for t, c in COMPS} for v, keep in versions.items()}
     # (b) 版本下，拿掉幾對 T 最有利的就不過
+    for v in ("all", "a", "b", "b_prime", "b_minus_empty"):
+        R[f"T_vs_G_{v}_min_drop_exact"] = min_drop_exact(C, pairs, versions[v], "T", "G")
     for v in ("b", "b_prime"):
         keep = versions[v]
-        ranked = sorted(keep, key=lambda p: -(prop(C[(*p, "T")]) - prop(C[(*p, "G")])))
+        ranked = sorted(sorted(keep), key=lambda p: -(prop(C[(*p, "T")]) - prop(C[(*p, "G")])))
         for kx in range(0, 25):
             r_ = comp("T", "G", keep - set(ranked[:kx]))
             if not (r_["diff"] >= 10 and r_["boot95"][0] > 0):
@@ -1009,7 +1038,8 @@ def network_fingerprint(src: Src, esc_calls: list[dict], bprime_excl: set) -> di
 
 
 # ───────────────────────────── 名單核對（2e99dd9a1）─────────────────────────────
-def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
+def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict], runs_file: str = "expT/expT_escape_v2_runs.jsonl",
+                   prev_runs: list[dict] | None = None, live_dir_strong: bool = False) -> dict:
     """新名單（expT_escape_v2_runs.jsonl，108 次）對我的名單（舊路徑命中 45 次 ∪ 網路紀錄裡非本對來源主機的指令）；
     直連分「指令」與「回傳像 HTML」；用新名單重算 (a)(b)(b′)＋拿掉空白初稿；HMAC 匯出做未來值對照（只比相等，不碰值）。"""
     cells = src_old.json("expT/expT_cells.json")
@@ -1019,7 +1049,7 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
     LB: dict[tuple, list[dict]] = collections.defaultdict(list)
     for x in lines:
         LB[(x["set"], x["rep"], x["arm"])].append(x)
-    V = src_new.jsonl("expT/expT_escape_v2_runs.jsonl")
+    V = src_new.jsonl(runs_file)
     N = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_net_calls.jsonl")
     LH = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_lines_hmac.jsonl")
     TH = src_new.jsonl_rel("ops/redo/audit/expT_exam37_20261128/expT_hmac_supplement/expT_truth_hmac.jsonl")
@@ -1032,7 +1062,7 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
     R["v2_rule_exceptions"] = [list(key(v)) + [sorted(v["escape_kinds"])] for v in V if rule(v) != v["escape"]]
     c0 = [v for v in V if v["round"] == "c0" and v["escape"]]
     R["c0_escape"] = [{"pair": f'{v["set"]}/r{v["rep"]}', "kinds": v["escape_kinds"], "unlogged_server_200": v["unlogged_server_200"],
-                       "server_200": v["server_200"]} for v in c0]
+                       "server_200": v.get("server_200")} for v in c0]
     # 我的名單
     old = {key(x) for x in esc_old}
     ext_any = {key(n) for n in N if not n["own_source_host"]}
@@ -1045,6 +1075,19 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
                             tuple(sorted(set(v["escape_kinds"]) - {"path_pattern"})) for v in V if key(v) in v2 - mine).items()},
                         "by_arm_round": dict(collections.Counter(f"{k[2]}/{k[3]}" for k in v2 - mine))}
     R["old45_subset_of_v2"] = old <= v2
+    if prev_runs is not None:
+        pv = {key(v) for v in prev_runs if v["escape"]}
+        pk = {key(v): v for v in prev_runs}
+        R["vs_prev_list"] = {"prev_runs": len(pv), "kept": len(pv & v2), "dropped": [list(k) + [pk[k]["escape_kinds"]] for k in sorted(pv - v2)],
+                             "added": len(v2 - pv),
+                             "added_by_kinds": dict(collections.Counter("+".join(sorted(set(v["escape_kinds"]) - {"path_pattern"})) for v in V if key(v) in v2 - pv)),
+                             "added_by_arm_round": dict(collections.Counter(f"{k[2]}/{k[3]}" for k in v2 - pv)),
+                             "pairs_prev": len({(k[0], k[1]) for k in pv}), "pairs_now": len({(k[0], k[1]) for k in v2})}
+    R["fields_present"] = sorted({k for v in V for k in v})
+    R["requested_fields_missing"] = [f for f in ("own_live_dir_hmac", "other_cell_page_revision") if f not in R["fields_present"]]
+    R["live_dir_runs"] = sum(1 for v in V if v["escape"] and "other_cell_live_dir" in v["escape_kinds"])
+    R["three_G_cells"] = {f"{a_}/r{b_}/G": [[v["round"], v["escape"], v["escape_kinds"]] for v in V if (v["set"], v["rep"], v["arm"]) == (a_, b_, "G")]
+                          for a_, b_ in (("fb-s01", 2), ("fb-s04", 1), ("fb-s13", 1))}
     pv2 = {(k[0], k[1]) for k in v2}
     pmine = {(k[0], k[1]) for k in mine}
     R["pairs"] = {"v2": len(pv2), "mine": len(pmine), "v2_not_mine": sorted(f"{s}/r{r}" for s, r in pv2 - pmine),
@@ -1088,6 +1131,7 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
         if x["tool"] == "write":
             t_, r_ = x["detail"].split("/")[:2]
             cross.add((t_, int(r_[1:])))
+    live_pairs = {(v["set"], v["rep"]) for v in V if v["escape"] and "other_cell_live_dir" in v["escape_kinds"]}
     excl = {"a_v2": pv2 | c0pairs,
             "b_v2": old_strong | ext_pairs | c0pairs,
             "b_v2_html_only": old_strong | ext_html_pairs | c0pairs,
@@ -1097,6 +1141,13 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
         "b_v2": "舊 (b)（flags.json／未來頁面／答案）∪ 有直連外站指令（非本對來源主機、沒進伺服器紀錄）的對 ∪ c0 那一對",
         "b_v2_html_only": "同上，但直連只算回傳像 HTML 的",
         "b_prime_v2": "b_v2 ∪ 讀同一對別臂（非 c0／A）產出 ∪ 被別格寫入的對"}
+    if live_dir_strong:
+        excl["b_v2_plus_live_dir"] = excl["b_v2"] | live_pairs
+        excl["b_prime_v2_plus_live_dir"] = excl["b_prime_v2"] | live_pairs
+        R["exclusion_definitions"]["b_v2_plus_live_dir"] = "b_v2 ∪ 讀別格 live 目錄的對（那些頁面的修訂不明，可能是未來版本）"
+        R["exclusion_definitions"]["b_prime_v2_plus_live_dir"] = "b′_v2 ∪ 讀別格 live 目錄的對"
+    R["c0_overlap"] = [{"pair": f"{s_}/r{r_}", "empty_c0": (s_, r_) in empty, "c0_filled": C[(s_, r_, "A")]["c0_filled"],
+                        "c0_correct": C[(s_, r_, "A")]["c0_correct"]} for s_, r_ in sorted(c0pairs)]
     R["excluded_counts"] = {k: len(v) for k, v in excl.items()}
     vers = {"all": set(pairs)}
     for k, v in excl.items():
@@ -1105,6 +1156,21 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
     COMPS = [("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"), ("T", "A"), ("TO", "A")]
     R["comparisons"] = {v: {f"{t}_vs_{c}": comp(t, c, k) for t, c in COMPS} for v, k in vers.items()}
     R["T_vs_G_pass_by_version"] = {v: (r["T_vs_G"]["diff"] >= 10 and r["T_vs_G"]["boot95"][0] > 0) for v, r in R["comparisons"].items()}
+    # 檢定力說明：區間半寬、以及 80% 檢定力下可偵測的最小差（群集 t 近似：(t_.975＋t_.80)×SE）
+    pw = {}
+    for v, keep in vers.items():
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s_, r_ in pairs:
+            if (s_, r_) in keep:
+                d[s_].append(prop(C[(s_, r_, "T")]) - prop(C[(s_, r_, "G")]))
+        xs = [statistics.fmean(v_) for v_ in d.values()]
+        n = len(xs)
+        if n > 2:
+            se = statistics.stdev(xs) / math.sqrt(n)
+            pw[v] = {"sets": n, "pairs": sum(len(v_) for v_ in d.values()), "se_pp": round(100 * se, 2),
+                     "ci_halfwidth_pp": round(100 * t_quantile(0.975, n - 1) * se, 2),
+                     "mde80_pp": round(100 * (t_quantile(0.975, n - 1) + t_quantile(0.80, n - 1)) * se, 2)}
+    R["T_vs_G_precision"] = pw
     R["fb_s10_r2_in_12_football_candidates"] = False  # 候選名單只有 fb-s10/r1（見 network_fingerprint）
     # HMAC 未來值對照
     T = {(t["set"], t["claim"], t["k"]): t["truth_hmac"] for t in TH}
@@ -1180,13 +1246,28 @@ def list_v2_review(src_old: Src, src_new: Src, esc_old: list[dict]) -> dict:
     # 各版本：拿掉 T−G 最大的幾對就不過
     mk = {}
     for v, keep in vers.items():
-        ranked = sorted(keep, key=lambda p_: -(prop(C[(*p_, "T")]) - prop(C[(*p_, "G")])))
+        ranked = sorted(sorted(keep), key=lambda p_: -(prop(C[(*p_, "T")]) - prop(C[(*p_, "G")])))
         for kx in range(0, 15):
             r_ = comp("T", "G", keep - set(ranked[:kx]))
             if not (r_["diff"] >= 10 and r_["boot95"][0] > 0):
                 mk[v] = {"k": kx, "dropped": [f"{s_}/r{r_2}" for s_, r_2 in ranked[:kx]], "diff": r_["diff"], "boot95": r_["boot95"]}
                 break
-    R["T_vs_G_min_pairs_to_lose_pass"] = mk
+    R["T_vs_G_min_pairs_to_lose_pass_greedy"] = mk
+    R["T_vs_G_min_drop_exact"] = {}
+    for v, keep in vers.items():
+        md = min_drop_exact(C, pairs, keep, "T", "G")
+        if md.get("dropped"):
+            dk = {(x.split("/")[0], int(x.split("/")[1][1:])) for x in md["dropped"]}
+            md["after"] = comp("T", "G", keep - dk)
+        R["T_vs_G_min_drop_exact"][v] = md
+    # (a) 剩下的對是什麼樣的對
+    akeep = vers.get("a_v2", set())
+    R["a_remaining_profile"] = {"pairs": len(akeep), "sets": len({s_ for s_, _ in akeep}),
+                                "T_sent_feedback": sum(C[(*k, "T")]["sent_back"] > 0 for k in akeep),
+                                "G_ran_rounds": sum(C[(*k, "G")]["rounds_run"] > 0 for k in akeep),
+                                "c0_correct_mean_pct": round(100 * statistics.fmean(C[(*k, "A")]["c0_correct"] / C[(*k, "A")]["n_lines"] for k in akeep), 1) if akeep else None,
+                                "T_eq_G_final": sum(C[(*k, "T")]["final_correct"] == C[(*k, "G")]["final_correct"] for k in akeep),
+                                "list": sorted(f"{s_}/r{r_}" for s_, r_ in akeep)}
     R["n_sets_by_version"] = {v: len({s_ for s_, _ in k}) for v, k in vers.items()}
     R["introduced_future_cells"] = sorted(
         [f"{s}/r{r}/{a}", n] for (s, r, a), n in collections.Counter(
@@ -1387,6 +1468,7 @@ def main() -> None:
     ap.add_argument("--out", default=DEFAULT_OUT)
     ap.add_argument("--escape-rev", default="0dd266544", help="越界逐筆結果所在的提交（新包）")
     ap.add_argument("--list-rev", default="2e99dd9a1", help="新越界名單＋HMAC 補充匯出所在的提交；空字串跳過")
+    ap.add_argument("--list3-rev", default="f1fdcfab3", help="第三版越界名單（expT_escape_v3_runs.jsonl）所在的提交；空字串跳過")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -1415,6 +1497,11 @@ def main() -> None:
         lsrc = Src(None if a.dir else a.list_rev, a.dir, repo)
         out["list_v2_review"] = list_v2_review(src, lsrc, _calls)
         out["source_list_v2"] = a.dir or f"git:{a.list_rev}"
+    if a.list3_rev:
+        l3 = Src(None if a.dir else a.list3_rev, a.dir, repo)
+        prev = Src(None if a.dir else a.list_rev, a.dir, repo).jsonl("expT/expT_escape_v2_runs.jsonl")
+        out["list_v3_review"] = list_v2_review(src, l3, _calls, runs_file="expT/expT_escape_v3_runs.jsonl", prev_runs=prev, live_dir_strong=True)
+        out["source_list_v3"] = a.dir or f"git:{a.list3_rev}"
     out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
         [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
