@@ -1,0 +1,31 @@
+# 實驗 T ＋ exam37 稽核包（2026-11-28）
+
+給獨立複核用（只讀推上去的檔）。不含家目錄路徑、主機位址、帳號；私有教材（維基百科修訂頁面、答案）不公開，只給 sha256。
+
+## expT/（實驗 T，37 組 × 2 × 7 臂＝518 格）
+- `expT_cells.csv`／`.json`：逐格。欄位有 set、rep、arm、host、ts（完成時間）、rounds_run、stop_reason、c0_flagged、sent_back、sent_back_fixed、n_lines、c0_correct、c0_filled、final_correct、final_filled、harm_c2w_or_d、harm_b2w、tokens、wall、haiku_*、chain_ok、報告的 sha256。
+- `expT_lines.jsonl`：逐行（9,730 行）。欄位有前後狀態、錯誤類型、位數分桶、是否被標、是否送回、傷害旗標、前後值的 sha256（不放值）。
+- `expT_chains/<組>__r<次>__<臂>/feedback_chain_hashed.ndjson`＋`feedback_chain.pub.json`：回饋鏈。每筆保留 seq、prev_hash、ts_ms、type、sig、entry_hash，payload 換成 `payload_sha256`（payload 含回饋文字，可能引用頁面值）。鏈的串接（prev_hash＝上一筆 entry_hash）可以公開驗；簽章要用私有原檔驗。`expT_chain_anchors.json` 列 stream_id、鏈頭、公鑰、`verify_chain`（518 條全部 true，在私有原檔上驗）。⚠ 每格用臨時金鑰。
+- `expT_haiku.jsonl`：TE／TER 每格（148 格、120 次實際呼叫）的模型、prompt／回覆 sha256、token、花費、牆鐘、停止原因、送上去的行數、讀過的頁數。
+- `expT_metrics_report.txt`／`expT_metrics.json`：`python3 ops/d2/expT_metrics.py <root>`（預註冊指定）的輸出。
+- `expT_te_sensitivity_nonprereg.json`：`ops/d2/expT_te_sensitivity.py`，非預註冊。
+- 匯出腳本：`ops/d2/export_expT_audit.py`。計畫與預註冊：`ops/d2/plans/expT_qwen9b.json`（`prereg`）；修訂依據 `decisions/notes/NOTE_20261127_EXPERIMENT_T_N_CRITIQUE.md`。
+
+### 結論數字對照（`decisions/conclusions/CONCLUSION_20261128_EXPT.md`）
+| 結論裡的數字 | 來源 | 欄位／算法 |
+|---|---|---|
+| 各臂 (a)／(b)／(c)、token、牆鐘 | `expT_metrics_report.txt` 的 Per-Arm 表（也在 `expT_metrics.json` 的 `by_arm`） | (a) 是組平均；也可用 `expT_cells` 的 final_correct／n_lines 依組平均重算 |
+| T 對 G／TB／TO、TE 對 TER 的差與區間 | `expT_metrics_report.txt` 的 Paired Comparisons；`expT_metrics.json` 的 `comparisons` | 以組為群集的 bootstrap，2,000 次，種子 20261127 |
+| 判定 | `expT_metrics.json` 的 `readout` | 照 `prereg.frozen_readout` |
+| 無法區分條件 | A 的 (a)；`expT_cells` 中 arm=T 且 sent_back>0 的格數（60/74） | |
+| 錯誤類型 | `expT_metrics_report.txt` 的 Error Breakdown；`expT_lines` 的 before_etype／after_etype | |
+| Haiku 花費、截斷 | `expT_haiku.jsonl` 的 cost_usd、stop_reason=max_tokens | |
+| 敏感度（保留原值、排除截斷） | `expT_te_sensitivity_nonprereg.json` | 全部行合計，非組平均 |
+| fb-s11/r1 受污染 | `expT_cells`：A 的 c0_correct≠final_correct 只有這一對 | |
+
+## exam37/（外部考卷先導，Colab L4 E4B）
+- `exam37_part1_cells.*`（A／N3／GT／XM）、`exam37_part2_cells.*`（XMV／PB／XMT）：逐格。每格附每次嘗試的驗收數、逾時、隱藏評分、token、時間。XM、PB、XMT、XMV 各少 1–2 格，是考卷沒建成的題。
+- `exam37_metrics.md`／`.json`：`python3 ops/redo/analysis/exam_metrics.py <part1> <part2> --reference-ok-json ops/redo/analysis/exam37_xm_reference_ok.json` 的輸出，和 `ops/redo/results/exam37/exam37_colab_e4b_summary.json` 一致（gt_minus_n3、verdict 相同）。
+- `exam37_colab_e4b_part{1,2}_*.json`：越界讀取掃描（`ops/redo/analysis/scan_redo_leak.py`），兩部分讀到隱藏測試或考卷的呼叫都是 0。
+- `*_token_timeout_by_arm_host.json`：token、逾時分臂（Colab 是單一 VM）。
+- 計畫：`ops/redo/plans/exam37_colab_e4b_part1.json`、`exam37_colab_e4b_part2.json`。結論：`decisions/conclusions/CONCLUSION_20261127_EXAM37_COLAB_E4B.md`。

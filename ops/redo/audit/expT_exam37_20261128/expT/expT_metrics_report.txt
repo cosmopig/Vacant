@@ -1,0 +1,47 @@
+Experiment T Metrics — plan=expT_qwen9b root=expT_q9 (sets=37, reps=2, boot=2000)
+Snapshot pin (revision 0): ok=True (checked=1820, mismatches=0)
+
+Per-Arm Strict-Scored Summary (Primary Metrics (a), (b), (c) side by side):
+  Arm  Cells  (a)Prop (b)FPrec (c)C->W/D (c)B->W  SentFix  Calls    Tokens  Wall(s)   Haiku$  Chains
+  A       74    55.6%    70.1%         0       0      n/a   19.3    444977    109.0        —   74/74
+  G       74    49.7%    71.7%       186      39      n/a   65.0   1272112    318.7        —   74/74
+  T       74    61.4%    71.9%        64      24    55.0%   45.9    994772    283.5        —   74/74
+  TB      74    60.7%    69.0%         0      57    26.8%   28.1    582971    159.3        —   74/74
+  TO      74    65.1%    74.1%         8      27    22.6%   62.6   1287224    339.4        —   74/74
+  TE      74    51.5%    73.2%       182      31    35.6%   20.1    465560    111.0  $0.0222   74/74
+  TER     74    51.9%    72.9%       183      32    37.7%   20.1    465511    110.9  $0.0220   74/74
+
+Error Breakdown (Before c0 -> After final):
+  A    before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=312 fabricated=133 wrong_read=184 stale=0 (tot=629)
+  G    before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=406 fabricated=153 wrong_read=149 stale=0 (tot=708)
+  T    before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=253 fabricated=97 wrong_read=200 stale=0 (tot=550)
+  TB   before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=183 fabricated=168 wrong_read=206 stale=0 (tot=557)
+  TO   before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=202 fabricated=111 wrong_read=184 stale=0 (tot=497)
+  TE   before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=447 fabricated=29 wrong_read=203 stale=0 (tot=679)
+  TER  before: missing=312 fabricated=135 wrong_read=185 stale=0 (tot=632) | after: missing=424 fabricated=71 wrong_read=178 stale=0 (tot=673)
+
+Paired Comparisons (set-cluster bootstrap 95% CI):
+  T_vs_G [PRIMARY]: (a)=+11.71pp 95%CI=[+2.94pp, +20.55pp] (b)fprec=+1.35pp harm_diff=-10.39pp (sets=37, pairs=74)
+  T_vs_TB [PRIMARY]: (a)=+0.72pp 95%CI=[-5.23pp, +6.91pp] (b)fprec=+3.01pp harm_diff=+2.02pp (sets=37, pairs=74)
+  T_vs_TO [PRIMARY]: (a)=-3.71pp 95%CI=[-9.38pp, +2.34pp] (b)fprec=-1.96pp harm_diff=+3.62pp (sets=37, pairs=74)
+  TE_vs_TER [PRIMARY]: (a)=-0.44pp 95%CI=[-3.50pp, +1.97pp] (b)fprec=+0.30pp harm_diff=-0.10pp (sets=37, pairs=74)
+  T_vs_A: (a)=+5.79pp 95%CI=[-0.66pp, +13.09pp] (b)fprec=+1.47pp harm_diff=+6.02pp (sets=37, pairs=74)
+  G_vs_A: (a)=-5.92pp 95%CI=[-14.29pp, +1.84pp] (b)fprec=+1.68pp harm_diff=+16.41pp (sets=37, pairs=74)
+  TB_vs_A: (a)=+5.07pp 95%CI=[+1.32pp, +9.70pp] (b)fprec=-0.04pp harm_diff=+4.00pp (sets=37, pairs=74)
+  TO_vs_A: (a)=+9.50pp 95%CI=[+5.19pp, +14.57pp] (b)fprec=+3.34pp harm_diff=+2.40pp (sets=37, pairs=74)
+  TE_vs_A: (a)=-4.10pp 95%CI=[-12.62pp, +4.17pp] (b)fprec=+2.92pp harm_diff=+15.67pp (sets=37, pairs=74)
+  TER_vs_A: (a)=-3.66pp 95%CI=[-12.85pp, +5.21pp] (b)fprec=+2.69pp harm_diff=+15.77pp (sets=37, pairs=74)
+
+Readout: T_beats_G_but_indistinguishable_from_TB
+  T vs G   : T_beats_G — T exceeds G by +11.71pp (>=10pp), 95% CI [+2.94pp, +20.55pp] > 0, harm_T <= harm_G
+  T vs TB  : record_does_not_add_value — record does not add value over blank-only control TB (T-TB=+0.72pp, 95% CI [-5.23pp, +6.91pp]; requires >=5pp and CI lower > 0)
+  TE vs TER: TE_does_not_beat_TER — record-guided escalation does not beat random escalation (TE-TER=-0.44pp, 95% CI [-3.50pp, +1.97pp]; requires >=10pp and CI lower > 0)
+  HARM WARNING (G): trading errors for fills (C->W/D=186, B->W=39)
+  HARM WARNING (T): trading errors for fills (C->W/D=64, B->W=24)
+  HARM WARNING (TB): trading errors for fills (C->W/D=0, B->W=57)
+  HARM WARNING (TE): trading errors for fills (C->W/D=182, B->W=31)
+  HARM WARNING (TER): trading errors for fills (C->W/D=183, B->W=32)
+  HARM WARNING (TO): trading errors for fills (C->W/D=8, B->W=27)
+  Prediction: Recorded prediction (vacant-cloud, marked as a prediction): T beats A but is indistinguishable from TB.
+
+Secondary Offline Draft Selection (sets=37, drafts/set=2.0): record_pick=0.6343 vs random_pick=0.5537 vs oracle_best=0.7211 (rec-rnd=0.0806, CI95=[0.0026, 0.1554])

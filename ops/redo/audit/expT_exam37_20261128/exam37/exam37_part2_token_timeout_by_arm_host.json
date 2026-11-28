@@ -1,0 +1,32 @@
+[
+ {
+  "arm": "PB",
+  "host": "colab",
+  "cells": 72,
+  "tokens": 1017132,
+  "timeouts": 0,
+  "attempts": 151,
+  "early_stop_pass_at_1": 24,
+  "tokens_per_cell": 14127
+ },
+ {
+  "arm": "XMT",
+  "host": "colab",
+  "cells": 72,
+  "tokens": 860579,
+  "timeouts": 1,
+  "attempts": 141,
+  "early_stop_pass_at_1": 30,
+  "tokens_per_cell": 11952
+ },
+ {
+  "arm": "XMV",
+  "host": "colab",
+  "cells": 73,
+  "tokens": 1015634,
+  "timeouts": 0,
+  "attempts": 151,
+  "early_stop_pass_at_1": 29,
+  "tokens_per_cell": 13913
+ }
+]
