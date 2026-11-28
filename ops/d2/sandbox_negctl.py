@@ -101,6 +101,7 @@ def main() -> int:
     w_ok = all(m in (str(me), str(outdir)) for m in writable_persistent)
     add("N8_mount_types_B52_4", tmpfs_ok and w_ok, f"tmpfs(/,/tmp,~)={tmpfs_ok} writable_persistent={writable_persistent}")
     allow = {"allowed_mount_prefixes": sorted(set(allowed_prefixes)), "observed_mounts": mounts, "mount_detail": detail,
+             "mountinfo_raw": body("N7_mountinfo"),          # B55(8)：/proc/self/mountinfo 原文（輸出時照樣遮罩路徑）
              "formal_shape_outdir": str(outdir) if a.formal_shape else None}
     rep = {"label": a.label, "test_cell": str(me).replace(str(H), "~"), "other_cell_used": other.name if other else None,
            "wrapper_sha256": hashlib.sha256((HERE / "bwrap_expT_agent.sh").read_bytes()).hexdigest(),

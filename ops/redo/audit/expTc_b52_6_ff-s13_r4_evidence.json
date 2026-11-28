@@ -1,0 +1,43 @@
+{
+ "window": "2026-11-28T02:35:00Z..02:38:59Z",
+ "runner_log_lines": {
+  "1003": [
+   "2026-11-28T02:35:28Z ff-s10 r3 c0 rc=0 wall=99.638s flagged=6/18\n",
+   "2026-11-28T02:35:28Z ff-s10 r3 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=99.638s\n",
+   "2026-11-28T02:35:36Z ff-s10 r4 c0 rc=0 wall=56.654s flagged=18/18\n",
+   "2026-11-28T02:35:36Z ff-s10 r4 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=56.654s\n",
+   "2026-11-28T02:36:27Z ff-s10 r5 c0 rc=0 wall=58.937s flagged=18/18\n",
+   "2026-11-28T02:36:27Z ff-s10 r5 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=58.937s\n",
+   "2026-11-28T02:36:27Z batch end; errors=[]; stopped=False\n"
+  ],
+  "1004": [
+   "2026-11-28T02:35:06Z ff-s15 r2 c0 rc=0 wall=60.388s flagged=0/15\n",
+   "2026-11-28T02:35:06Z ff-s15 r2 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=60.388s\n",
+   "2026-11-28T02:35:43Z ff-s15 r3 c0 rc=0 wall=36.867s flagged=0/15\n",
+   "2026-11-28T02:35:43Z ff-s15 r3 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=36.867s\n",
+   "2026-11-28T02:36:37Z ff-s15 r4 c0 rc=0 wall=53.677s flagged=0/15\n",
+   "2026-11-28T02:36:37Z ff-s15 r4 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=53.677s\n",
+   "2026-11-28T02:37:15Z ff-s15 r5 c0 rc=0 wall=38.229s flagged=0/15\n",
+   "2026-11-28T02:37:15Z ff-s15 r5 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=38.229s\n",
+   "2026-11-28T02:38:18Z ff-s16 r1 c0 rc=0 wall=62.721s flagged=19/19\n",
+   "2026-11-28T02:38:18Z ff-s16 r1 A rounds=0 stop=native_c0 sent=0 withheld=0 wall=62.721s\n"
+  ]
+ },
+ "lines_mentioning_ff-s13_r4": {
+  "1003": [],
+  "1004": []
+ },
+ "ff-s13_r4_c0": {
+  "done_json_chain_len": 40,
+  "chain_ndjson_entries": 40,
+  "head_seq": 40,
+  "prev_hash_links_ok": true,
+  "last_entry_hash_eq_head": true,
+  "mtime_utc": {
+   "done.json": "02:21:14Z",
+   "chain.ndjson": "02:21:14Z",
+   "head.json": "02:21:14Z"
+  }
+ },
+ "method": "vacant_network.logbook._entry_hash 逐筆重算 prev_hash 鏈；runner 紀錄原樣節錄（兩台初稿 log）"
+}
