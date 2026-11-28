@@ -83,7 +83,7 @@ Three blind compilers (`A_primary`, `B_independent`, `C_question_only`). **Agree
 ## 4. Filing online — small models (in progress)
 
 - **Pre-registered subset:** `subset_prereg_seed42.json` — **20 filings, 220 questions** (seed 42).  
-- **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). Progress tracked in repo; ETA CPU-bound.  
+- **0.5B (CPU, solo tmux):** `data/online_05b_seed42/` — **6 arms** × 220Q (append-only `rows.jsonl`). **Interim (~32% rows):** ~71 Q/arm; **0/6** filings with zero-wrong deliveries so far (0.5B capacity); see `online_05b_seed42_interim_summary.json` (updates as run continues).  
 - **1.5B:** tmux `filing-15b-queue` waits for 0.5B completion → `online_15b_seed42/`.  
 - **Metric:** filing-level **zero-wrong** (`recompute_filing.py`); costs per arm in summary JSON.
 
