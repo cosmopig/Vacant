@@ -38,7 +38,8 @@ def run_blind(task: dict[str, Any], lm: SmallLM, rng: random.Random) -> dict[str
     doc = parse_json_delivery(r2.text)
     vis, _ = visible_all_pass(doc, task)
     ora = oracle_whole(doc, task) if task.get("answerable", True) else False
-    return _row(task, "BLIND", parse_json_delivery(r1.text), doc, [r1, r2], vis, ora)
+    d1, d2 = parse_json_delivery(r1.text), parse_json_delivery(r2.text)
+    return _row(task, "BLIND", d1, doc, [r1, r2], vis, ora, draft_docs=[d1, d2])
 
 
 def run_one(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
@@ -62,7 +63,7 @@ def run_maj3(task: dict[str, Any], lm: SmallLM, rng: random.Random) -> dict[str,
         merged[f] = Counter(vals).most_common(1)[0][0] if vals else ""
     vis, _ = visible_all_pass(merged, task)
     ora = oracle_whole(merged, task) if task.get("answerable", True) else False
-    return _row(task, "MAJ3", docs[0], merged, rs, vis, ora)
+    return _row(task, "MAJ3", docs[0], merged, rs, vis, ora, draft_docs=docs)
 
 
 def run_lpb3(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
@@ -81,7 +82,7 @@ def run_lpb3(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
     doc = docs[best_i]
     vis, _ = visible_all_pass(doc, task)
     ora = oracle_whole(doc, task) if task.get("answerable", True) else False
-    return _row(task, "LPB3", docs[0], doc, rs, vis, ora)
+    return _row(task, "LPB3", docs[0], doc, rs, vis, ora, draft_docs=docs)
 
 
 def run_stitch(task: dict[str, Any], lm: SmallLM) -> dict[str, Any]:
@@ -143,6 +144,20 @@ def run_vacant(task: dict[str, Any], lm: SmallLM, max_micro: int = 4) -> dict[st
     return _row(task, "VACANT", parse_json_delivery(r1.text), doc, calls, vis, ora, extra={"locked_fields": sorted(locked), "visible_detail": {k: v[1] for k, v in per.items()}})
 
 
+def _gating_ship(arm: str, calls: list[GenResult], doc: dict, draft_docs: list[dict], visible_pass: bool) -> bool:
+    """Exploratory secondary gate (no extra model calls). LPB3_LOGPROB_TAU frozen in amendment."""
+    if arm == "VACANT":
+        return visible_pass
+    if arm == "BLIND" and len(draft_docs) >= 2:
+        return draft_docs[0] == draft_docs[1]
+    if arm == "MAJ3" and len(draft_docs) >= 3:
+        return draft_docs[0] == draft_docs[1] == draft_docs[2]
+    if arm == "LPB3" and calls:
+        lp = max((c.mean_logprob if c.mean_logprob is not None else -1e9) for c in calls)
+        return lp >= -12.5
+    return False
+
+
 def _row(
     task: dict,
     arm: str,
@@ -152,10 +167,16 @@ def _row(
     visible_pass: bool,
     oracle_pass: bool,
     extra: dict | None = None,
+    *,
+    draft_docs: list[dict] | None = None,
 ) -> dict:
     pt = sum(c.prompt_tokens for c in calls)
     ct = sum(c.completion_tokens for c in calls)
     cpu = sum(c.latency_s for c in calls)
+    c0 = parse_json_delivery(calls[0].text) if calls else {}
+    draft_vis, _ = visible_all_pass(c0, task) if calls else (False, {})
+    draft_ora = oracle_whole(c0, task) if calls and task.get("answerable", True) else False
+    gated = _gating_ship(arm, calls, final, draft_docs or [draft], visible_pass)
     row = {
         "task_id": task["task_id"],
         "template_id": task["template_id"],
@@ -170,6 +191,12 @@ def _row(
         "completion_tokens": ct,
         "cpu_seconds": cpu,
         "n_calls": len(calls),
+        "draft_visible_pass": draft_vis,
+        "draft_oracle_success": draft_ora,
+        "draft_prompt_tokens": calls[0].prompt_tokens if calls else 0,
+        "draft_completion_tokens": calls[0].completion_tokens if calls else 0,
+        "draft_cpu_seconds": calls[0].latency_s if calls else 0.0,
+        "gated_ship_exploratory": gated,
     }
     if extra:
         row.update(extra)
@@ -195,6 +222,7 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--exclude-ids", type=Path, help="JSON list of task_ids to skip (pilot_excluded)")
     args = ap.parse_args()
 
     bank = json.loads(args.bank.read_text(encoding="utf-8"))
@@ -202,6 +230,9 @@ def main() -> None:
         ids = bank["split"]["holdout_answerable_ids"] + bank["split"]["holdout_unanswerable_ids"]
     else:
         ids = bank["split"][args.split]
+    if args.exclude_ids and args.exclude_ids.is_file():
+        ex = set(json.loads(args.exclude_ids.read_text(encoding="utf-8"))["task_ids"])
+        ids = [i for i in ids if i not in ex]
     by_id = {t["task_id"]: t for t in bank["tasks"]}
     tasks = [by_id[i] for i in ids]
     if args.limit:

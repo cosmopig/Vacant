@@ -1,0 +1,29 @@
+{
+  "reason": "contaminated by broken visible checker (vendor unknown_field) before PREREG_HOLDOUT_AMENDMENT",
+  "task_ids": [
+    "hold_000",
+    "hold_001",
+    "hold_002",
+    "hold_003",
+    "hold_004",
+    "hold_005",
+    "hold_006",
+    "hold_007",
+    "hold_008",
+    "hold_009",
+    "hold_010",
+    "hold_011",
+    "hold_012",
+    "hold_013",
+    "hold_014",
+    "hold_015",
+    "hold_016",
+    "hold_017",
+    "hold_018",
+    "hold_019",
+    "hold_020",
+    "hold_021"
+  ],
+  "row_indices_excluded": "0-87",
+  "label": "pilot_excluded_exploratory_only"
+}

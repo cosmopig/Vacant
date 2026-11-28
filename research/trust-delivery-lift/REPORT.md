@@ -1,13 +1,12 @@
 # trust-delivery-lift 結果報告
 
 **分支：** `research/trust-delivery-lift`  
-**模型（依回合）：** Qwen2.5-0.5B-Instruct CPU；Filing 線另含 1.5B（進行中）  
+**模型（依回合）：** Qwen2.5-0.5B-Instruct CPU（invoice holdout 進行中）  
 **截止目標：** 2026-11-29 12:00 Asia/Taipei  
 
 ## English abstract
 
-**Pilot 1 (n=12):** EVR vs BLIND under paired 2-call budget → **null** (1/12 each).  
-**Filing checker validity (qwen3.5-9b C1, not small-model delivery):** requester **frozen contract** executed by fixed opcode table; quote-pass-wrong catch **74%**, false reject **~4.9%** (bootstrap CI crosses 5%). **Contract-author stress test fails pre-registered rule:** independent vs primary same ship/hold decision **48%** — lift cannot be attributed to “the contract” abstractly; judgment lives in **which clauses are frozen**. **Invoice Round 2 holdout** BLIND vs VACANT **running**. **Verdict:** accountability **relocates** judgment to requester + named ESCALATE owner; it does **not** eliminate residual risk or guarantee stable lift across contract authors.
+**Pilot 1 (n=12):** null. **Confirmatory (resumed 2026-11-28 post-amendment):** invoice holdout **n=150** answerable; **hold_000–hold_021** fenced (`pilot_excluded`, broken `vendor` checker — exploratory interim only). **Checks fixed** (`invoice.visible_checker/2`, dev gold 170/170). Fresh rows: `round2/data/holdout_05b_confirmatory/`. **VACANT vs MAJ3** McNemar unchanged; no peek until complete. **Filing (9b / partial 0.5B):** **leaky dev upper bound only** — not evidence. **Accountability = honest coverage:** uncontested auto-PASS **20%** coverage, **0%** false-release on that slice (9b); **53.9%** contested → ESCALATE; consensus refuse-gate **invalid** as a win without coverage floor. **Scripted “independent” contract authors are us — not external authorship.** **Verdict:** judgment relocated + reproducible execution; **delivery lift TBD** from holdout McNemar.
 
 ---
 

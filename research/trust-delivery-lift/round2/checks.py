@@ -86,8 +86,12 @@ def check_field(field: str, value: str | None, task: Mapping[str, Any], doc: Map
         return False, "missing"
     v = str(value).strip()
     src = task["source_text"]
-    if field == "vendor" and len(v) < 2:
-        return False, "vendor_short"
+    if field == "vendor":
+        if len(v) < 2:
+            return False, "vendor_short"
+        if not provenance_ok(v, src, field):
+            return False, "provenance"
+        return True, "ok"
     if field == "currency":
         if not ISO4217.match(v.upper()):
             return False, "bad_currency"

@@ -9,7 +9,7 @@ Record of external (Gemini) critiques and responses.
 | 2026-11-28 13:20 | *(awaiting first relay)* | Initial push: typed scorer + synthetic controls; equal 2-call arms; pilot v1 complete. Documented known design gap (non-paired call1 per arm) before v2 fix. |
 | 2026-11-28 13:35 | *(self-review / expected)* Speed over scale; 0.5B only | Confirmed no 7–9B; Colab notebook uses 0.5B CPU path only. |
 | 2026-11-28 13:35 | *(self-review)* Pairing & visible grader | v2 `freeze_drafts.py`, visible currency/city/source-digit checks; confirmatory held-out null. |
-| 2026-11-28 21:23 | **Gemini** (upload `ideas-20261128-2123`): (1) n=12 no power—need n≥120–200; (2) 8% Pass@1 floor—not accountability; (3) separate visible vs oracle 2×2; no credit for abstention; (4) 0.5B in-context editing paralysis—use harness merge not full JSON rewrite; (5) BLIND weak baseline—use Maj@3/logprob Bo3 matched CPU+tokens | **Pilot 1 kept as honest null.** Round 2: `PREREG_ROUND2.md`, invoice 8-field bank, field-locked VACANT + STITCH, Maj3/LPB3 baselines, n≥150 holdout, gating secondary Rank 4. |
+| 2026-11-28 21:23 Asia/Taipei | **Gemini** (upload `ideas-20261128-2123`): (1) n=12 no power—need n≥120–200; (2) 8% Pass@1 floor—not accountability; (3) separate visible vs oracle 2×2; no credit for abstention; (4) 0.5B in-context editing paralysis—use harness merge not full JSON rewrite; (5) BLIND weak baseline—use Maj@3/logprob Bo3 matched CPU+tokens | **Pilot 1 kept as honest null.** Round 2: `PREREG_ROUND2.md`, invoice 8-field bank, field-locked VACANT + STITCH, Maj3/LPB3 baselines, n≥150 holdout, gating secondary Rank 4. |
 | 2026-11-28 17:30 Asia/Taipei | **User + GAP_MAP** (`GAP_MAP_94bb.md`, `LINKS_5e63.md`): P0 typed extraction controls; round-2 primary = field-lock + **BLIND** as key baseline (Maj/BoN not contribution); Filing-Evidence offline typed audit + stop rule; binding avoid list §4; milestone ~06:00 Taipei = P0 + one real result | **Done:** `validate_controls.py` → 15/15 controls; **Filing offline** on HF qwen3.5-9b C1: catch **74.3%** on quote-pass-wrong (n=101), false reject **4.8%** (n=724), stop rule **pass** → online filing arms allowed. `PREREG_ROUND2.md` rewritten. Maj3 demoted to non-contribution baseline in prereg. |
 
 ### PRE-RUN self-critique (standing rule) — contract / zero-discretion reframe — 2026-11-28 ~21:37 UTC
@@ -82,6 +82,20 @@ Record of external (Gemini) critiques and responses.
 **Verdict:** Act per ranked list.
 
 | 2026-11-28 22:05 Asia/Taipei | **Supervisor VAC-1 (hourly)** | **(1)** Stop 0.5B filing (floor 0/6); **holdout first** BLIND/VACANT/**MAJ3**/**LPB3** n=150. **(2)** Equal-cost logging; McNemar VACANT vs MAJ3 frozen. **(3)** Filing = **leaky dev upper bound** (gold-evidence page stub). **(4)** 2×2 + U grid prereg; consensus needs coverage floor. **(5)** Timezone fix; scripted authors honest; 35→36 noted. |
+
+### PRE-RUN — Supervisor VAC-1 (2026-11-28 23:00 Asia/Taipei) — visible checker pause
+
+**Objection:** Resuming holdout before fixing checker repeats false V− on oracle-correct rows; any amendment after seeing 22-task interim risks tuning MAJ3/τ to interim discordance.
+
+**Confounds:** Rows 0–87 run under `unknown_field` on `vendor`; VACANT **n_calls≈2** is mostly **early visible-all-fail** stopping micro-repair, not cross-arm draft cache (each arm calls `lm.generate` independently).
+
+**Falsifier:** After `checks.py` fix, dev gold **170/170** visible+oracle pass — if holdout confirmatory still shows **100% V−**, checker still broken.
+
+**Survival:** Fence **hold_000–hold_021** as `pilot_excluded`; hashed `PREREG_HOLDOUT_AMENDMENT_20261128.md` + `checks.py` SHA256; resume only `holdout_05b_confirmatory/` with `--exclude-ids`; no peeking until confirmatory complete; exploratory interim logged (BLIND/VACANT 14/22 oracle, MAJ3 13/22, 1 VACANT–MAJ3 discordant); dropped post-hoc cost non-inferiority.
+
+**Verdict:** Fix checker on dev tests only; push amendment; resume confirmatory uninterrupted.
+
+| 2026-11-28 23:00 Asia/Taipei | **Supervisor VAC-1 (hourly)** | **Pause holdout** — `vendor` → `unknown_field`; fence 22 tasks; amendment + cost/draft logging + gating secondary exploratory; no post-hoc Pareto claim. |
 
 ## Anticipated critic targets (pre-buttress)
 
