@@ -22,7 +22,9 @@
   entry_hash 與簽章都覆蓋 payload 原文，在公開檔上**驗不了**。
 - 稽核包沒有 agent 紀錄（工具呼叫、讀檔路徑）⇒ 越界讀取在這裡**定位不了**；只能做「最壞情況」的排除界。
 
-用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a | --dir D] [--out J]
+補核（0dd266544）：讀新包的 `expT_escape_calls.jsonl` 自己判定越界的對，重算排除後的比較（`escape_review`）。
+
+用法：python3 ops/redo/analysis/expT_exam37_audit_recompute.py [--rev 3b60ef24a --escape-rev 0dd266544 | --dir D] [--out J]
 """
 from __future__ import annotations
 
@@ -687,6 +689,128 @@ def expT(src: Src) -> dict:
     return R
 
 
+# ───────────────────────────── 補核：越界（0dd266544）─────────────────────────────
+STRONG_B = {"pair_flags", "other_flags", "mat_future", "mat_answer"}  # 對方 (b) 的定義
+
+
+def escape_review(src: Src, esc_calls: list[dict], their_summary: dict) -> dict:
+    """用逐筆越界紀錄自己判定排除集合，重算四個預註冊比較；和對方 (a)／(b) 對照，再加兩個版本：
+    (b′)＝(b)＋讀了同一對別臂（非 c0／A）產出的對＋被別格寫入的對；以及各版本再拿掉 13 份空白初稿。"""
+    cells = src.json("expT/expT_cells.json")
+    C = {(c["set"], c["rep"], c["arm"]): c for c in cells}
+    pairs = sorted({(c["set"], c["rep"]) for c in cells})
+    R: dict[str, Any] = {}
+
+    def prop(c: dict) -> float:
+        return c["final_correct"] / c["n_lines"]
+
+    def comp(t: str, c: str, keep: set) -> dict:
+        d: dict[str, list[float]] = collections.defaultdict(list)
+        for s, r in pairs:
+            if (s, r) in keep:
+                d[s].append(prop(C[(s, r, t)]) - prop(C[(s, r, c)]))
+        out = cluster_summary({k: statistics.fmean(v) for k, v in d.items()})
+        out["pairs"] = sum(len(v) for v in d.values())
+        return out
+
+    runs: dict[tuple, set] = collections.defaultdict(set)
+    for x in esc_calls:
+        runs[(x["set"], x["rep"], x["arm"], x["round"])].add(x["kind"])
+    R["calls"] = len(esc_calls)
+    R["kinds"] = dict(collections.Counter(x["kind"] for x in esc_calls))
+    R["tools"] = dict(collections.Counter(x["tool"] for x in esc_calls))
+    R["runs_with_escape"] = len(runs)
+    R["runs_by_arm"] = dict(collections.Counter(k[2] for k in runs))
+    R["runs_by_round"] = dict(collections.Counter(k[3] for k in runs))
+    R["c0_runs"] = sum(1 for k in runs if k[3] == "c0")
+    R["writes"] = [x for x in esc_calls if x["tool"] == "write"]
+    R["cross_arm_reads"] = [x for x in esc_calls if x["kind"] in ("pair_other", "other_cell")]
+    excl_a = {(k[0], k[1]) for k in runs}
+    excl_b = {(k[0], k[1]) for k, v in runs.items() if v & STRONG_B}
+    extra = set()
+    for x in esc_calls:
+        if x["kind"] == "pair_other":
+            tarm = x["detail"].split("/")[2]
+            if tarm not in ("c0", "A"):
+                extra.add((x["set"], x["rep"]))
+        if x["tool"] == "write":
+            ts_, tr_ = x["detail"].split("/")[:2]
+            extra.add((ts_, int(tr_[1:])))
+    excl_bp = excl_b | extra
+    R["excluded"] = {"a": len(excl_a), "b": len(excl_b), "b_prime": len(excl_bp),
+                     "b_prime_added": sorted(f"{s}/r{r}" for s, r in excl_bp - excl_b),
+                     "match_theirs_a": sorted(map(tuple, their_summary["excluded_pairs_a"])) == sorted(excl_a),
+                     "match_theirs_b": sorted(map(tuple, their_summary["excluded_pairs_b"])) == sorted(excl_b),
+                     "by_arm_a": dict(collections.Counter(k[2] for k in runs)),
+                     "by_arm_b": dict(collections.Counter(k[2] for k, v in runs.items() if v & STRONG_B))}
+    empty = {(s, r) for s, r in pairs if C[(s, r, "A")]["c0_filled"] == 0}
+    watch = [("fb-s01", 1), ("fb-s06", 2)]
+    R["watch_pairs"] = {f"{s}/r{r}": {"in_a": (s, r) in excl_a, "in_b": (s, r) in excl_b,
+                                      "escapes": sorted([k[2], k[3], sorted(v)] for k, v in runs.items() if (k[0], k[1]) == (s, r))}
+                        for s, r in watch}
+    R["empty_c0_in_a"] = sorted(f"{s}/r{r}" for s, r in empty & excl_a)
+    R["empty_c0_in_b"] = sorted(f"{s}/r{r}" for s, r in empty & excl_b)
+    R["T_escape_runs"] = sorted([k[0], k[1], k[3], sorted(v)] for k, v in runs.items() if k[2] == "T")
+    versions = {"all": set(pairs), "a": set(pairs) - excl_a, "b": set(pairs) - excl_b, "b_prime": set(pairs) - excl_bp,
+                "a_minus_empty": set(pairs) - excl_a - empty, "b_minus_empty": set(pairs) - excl_b - empty,
+                "b_prime_minus_empty": set(pairs) - excl_bp - empty}
+    COMPS = [("T", "G"), ("T", "TB"), ("T", "TO"), ("TE", "TER"), ("T", "A"), ("G", "A"), ("TB", "A"), ("TO", "A")]
+    R["comparisons"] = {v: {f"{t}_vs_{c}": comp(t, c, keep) for t, c in COMPS} for v, keep in versions.items()}
+    # (b) 版本下，拿掉幾對 T 最有利的就不過
+    for v in ("b", "b_prime"):
+        keep = versions[v]
+        ranked = sorted(keep, key=lambda p: -(prop(C[(*p, "T")]) - prop(C[(*p, "G")])))
+        for kx in range(0, 25):
+            r_ = comp("T", "G", keep - set(ranked[:kx]))
+            if not (r_["diff"] >= 10 and r_["boot95"][0] > 0):
+                R[f"T_vs_G_{v}_min_pairs_to_lose_pass"] = {"k": kx, "dropped": [f"{s}/r{r}" for s, r in ranked[:kx]], **r_}
+                break
+        top = ranked[:5]
+        R[f"T_vs_G_{v}_top5_pairs"] = [(f"{s}/r{r}", round(100 * (prop(C[(s, r, "T")]) - prop(C[(s, r, "G")])), 1),
+                                        C[(s, r, "A")]["c0_filled"]) for s, r in top]
+    # 被排除的對是不是隨機的：比初稿與各臂特性（描述）
+    def describe(keys: set) -> dict:
+        ks = sorted(keys)
+        return {"pairs": len(ks),
+                "c0_correct_prop_mean": round(100 * statistics.fmean(C[(*k, "A")]["c0_correct"] / C[(*k, "A")]["n_lines"] for k in ks), 1),
+                "c0_empty": sum(k in empty for k in ks),
+                "fb_share": round(sum(k[0].startswith("fb") for k in ks) / len(ks), 2),
+                "T_rounds_mean": round(statistics.fmean(C[(*k, "T")]["rounds_run"] for k in ks), 2),
+                "TO_rounds_mean": round(statistics.fmean(C[(*k, "TO")]["rounds_run"] for k in ks), 2),
+                "c0_flagged_mean": round(statistics.fmean(C[(*k, "A")]["c0_flagged"] for k in ks), 1),
+                "host_1003_share": round(sum(C[(*k, "A")]["host"] == "lms1003q9" for k in ks) / len(ks), 2),
+                **{f"{a}_final_prop_mean": round(100 * statistics.fmean(prop(C[(*k, a)]) for k in ks), 1) for a in ("A", "G", "T", "TB", "TO")}}
+    R["selection"] = {"excluded_a": describe(excl_a), "kept_a": describe(set(pairs) - excl_a),
+                      "excluded_b": describe(excl_b), "kept_b": describe(set(pairs) - excl_b)}
+    # 同一格自己有越界時，該臂在該對的成績 vs 沒越界的對（描述）
+    arm_esc = collections.defaultdict(set)
+    for k in runs:
+        arm_esc[k[2]].add((k[0], k[1]))
+    own = {}
+    for a in ("G", "T", "TB", "TO"):
+        e = arm_esc[a]
+        if e:
+            own[a] = {"pairs_with_own_escape": len(e),
+                      "arm_minus_A_on_those_pp": round(100 * statistics.fmean(prop(C[(*k, a)]) - prop(C[(*k, "A")]) for k in e), 1),
+                      "arm_minus_A_elsewhere_pp": round(100 * statistics.fmean(prop(C[(*k, a)]) - prop(C[(*k, "A")]) for k in set(pairs) - e), 1),
+                      "rounds_on_those": round(statistics.fmean(C[(*k, a)]["rounds_run"] for k in e), 2),
+                      "rounds_elsewhere_where_ran": round(statistics.fmean([C[(*k, a)]["rounds_run"] for k in set(pairs) - e if C[(*k, a)]["rounds_run"] > 0] or [0]), 2)}
+    R["own_escape_vs_arm_result"] = own
+    # 他們的數字
+    th = their_summary["sensitivity"]
+    cmp_ = []
+    for v_m, v_t in (("all", "all"), ("a", "a_exclude_any_escape_pairs"), ("b", "b_exclude_flags_future_pairs")):
+        for name, x in th[v_t].items():
+            if name in R["comparisons"][v_m]:
+                mine = R["comparisons"][v_m][name]
+                cmp_.append({"version": v_m, "comp": name, "mine": [mine["diff"], *mine["boot95"]],
+                             "theirs": [round(100 * x["per_set_correct_prop_diff"], 2)] + [round(100 * y, 2) for y in x["per_set_correct_prop_diff_ci95"]],
+                             "pairs_mine": mine["pairs"], "pairs_theirs": x["paired_cells"],
+                             "ok_point": abs(mine["diff"] - 100 * x["per_set_correct_prop_diff"]) <= 0.06})
+    R["vs_theirs"] = cmp_
+    return R
+
+
 def compare_expT(R: dict, src: Src) -> list[dict]:
     """拿對方輸出比對；只列差異 > 容差的。"""
     theirs = src.json("expT/expT_metrics.json")
@@ -877,6 +1001,7 @@ def main() -> None:
     ap.add_argument("--rev", default="3b60ef24a")
     ap.add_argument("--dir")
     ap.add_argument("--out", default=DEFAULT_OUT)
+    ap.add_argument("--escape-rev", default="0dd266544", help="越界逐筆結果所在的提交（新包）")
     a = ap.parse_args()
     repo = pathlib.Path(__file__).resolve().parents[3]
     src = Src(None if a.dir else a.rev, a.dir, repo)
@@ -886,7 +1011,11 @@ def main() -> None:
     out["expT_vs_theirs"] = compare_expT(out["expT"], src)
     out["exam37"] = exam37(src)
     out["exam37_vs_theirs"] = compare_exam(out["exam37"], src)
-    out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]]
+    esrc = Src(None if a.dir else a.escape_rev, a.dir, repo)
+    out["escape_review"] = escape_review(src, esrc.jsonl("expT/expT_escape_calls.jsonl"), esrc.json("expT/expT_escape_summary.json"))
+    out["source_escape"] = a.dir or f"git:{a.escape_rev}:{PKG}"
+    out["mismatches"] = [x for x in out["expT_vs_theirs"] + out["exam37_vs_theirs"] if not x["ok"]] + \
+        [x for x in out["escape_review"]["vs_theirs"] if not x["ok_point"]]
     p = repo / a.out
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(out, ensure_ascii=False, indent=1, default=list) + "\n")
