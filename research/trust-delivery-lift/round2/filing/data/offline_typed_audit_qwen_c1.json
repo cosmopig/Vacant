@@ -1,0 +1,225 @@
+{
+  "dataset": "pramana-research/filing-evidence",
+  "model_answers": "qwen_c1_answers.jsonl",
+  "n_quote_pass": 825,
+  "n_pass_value_wrong": 101,
+  "n_pass_value_correct": 724,
+  "n_typed_catch_wrong": 75,
+  "n_typed_false_reject_correct": 35,
+  "catch_rate_among_quote_pass_wrong": 0.7425742574257426,
+  "false_reject_rate_among_quote_pass_correct": 0.04834254143646409,
+  "stop_rule_ineffective": false,
+  "stop_rule_detail": "ineffective if catch<30% on pass-but-wrong OR false_reject>5% on correct",
+  "examples": [
+    {
+      "id": "FE-0014",
+      "outcome": "missed",
+      "oracle_ok": false,
+      "typed_ok": false,
+      "reason": "not_found"
+    },
+    {
+      "id": "FE-0001",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0003",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0009",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0002",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0004",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0005",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0006",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0008",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0010",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0007",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0011",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0013",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0012",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0016",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0015",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0017",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0019",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0023",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0021",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0025",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0022",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0018",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0020",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0028",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0024",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0026",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0027",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0029",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    },
+    {
+      "id": "FE-0031",
+      "outcome": "correct",
+      "oracle_ok": true,
+      "typed_ok": true,
+      "reason": "ok"
+    }
+  ]
+}

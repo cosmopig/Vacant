@@ -1,66 +1,68 @@
-# PREREG — Round 2 (field-locked repair) — frozen before any holdout run
+# PREREG — Round 2 (GAP_MAP pivot) — frozen before holdout / filing online
 
 **Branch:** `research/trust-delivery-lift`  
-**Pilot 1:** preserved under `../data/` + `../REPORT.md` § Pilot 1 (honest null, n=12).
+**Pilot 1:** honest null (`../REPORT.md` § Pilot 1, n=12).  
+**Binding avoids:** GAP_MAP §4 — no plain retry-on-fail as main story, no self-judging, signed logs as research product, untrained advisor hints, history-trust routing, per-field averages as headline.
 
-## Primary hypothesis (Rank 1)
+## P0 (prerequisite, no model calls)
 
-On **6–8 field invoice/order extraction** with **runtime acceptance checks** (no oracle leakage), **VACANT field-locked repair** (harness merges per-field micro-prompts only when a field passes checks) improves **held-out whole-deliverable exact match** vs **equal token & CPU-second** baselines on **Qwen2.5-0.5B** or **1.5B** (chosen by dev Pass@1 ∈ [15%, 40%]).
+**Must-match / must-differ control suite** for extraction typing: scale (3M vs 3B), sign, currency, period/column, unit, required sets.
 
-## Task bank
+- Code: `typed_value.py` + `validate_controls.py` + legacy `../scorer.py` controls
+- Artifact: `data/control_extraction_results.json` (must pass before any round-2 scorer run counts)
 
-- Generator: `generate_bank.py` → `tasks_r2.json`
-- **dev_ids:** 20 (calibration only)
-- **holdout_ids:** ≥150 answerable (`answerable=true`)
-- **gating_ids:** holdout includes **25%** `answerable=false` (corrupted/contradictory); primary metrics use answerable subset only; secondary uses full mix.
-- **Clusters:** `template_id` ∈ {T1..T5}; McNemar clustered by template in `recompute_r2.py`.
+## Rank 1 — Field-locked repair (invoice bank; gap 2)
 
-## Runtime checks (visible; no gold)
+**Claim under test:** lock fields that pass runtime checks; re-ask only failing/missing fields; **harness merges** patches (not full-document rewrite). Untested at ≤1.5B on whole-deliverable in literature (GAP_MAP gap 2).
 
-Per field + global: JSON schema keys, ISO-4217 in allowlist from doc, ISO-8601 dates, `due_date >= invoice_date`, `|subtotal + tax - total| <= 0.01`, **provenance substring** of normalized value in source text, `order_id` alnum length 6–16.
+**Primary baseline (matched cost):** `BLIND` — blind full resample / second independent draft at matched token+CPU budget.  
+**Allowed baselines, not our contribution:** `MAJ3`, `BEST_OF_N`, `LPB3`, `ONE`.
 
-## Held-out oracle
+Task bank: `generate_bank.py` → `tasks_r2.json` (≥150 answerable holdout, template clusters).  
+Visible checks: `checks.py` (no gold). Oracle: exact normalized 8-field match post-run.
 
-Exact normalized match on all 8 fields (only after run).
+Arms (2-call parity where applicable; shared call-1 draft file when frozen):
 
-## Arms (primary; matched budget)
+| Arm | Role |
+|-----|------|
+| `BLIND` | **Primary baseline** — 2× full JSON, oracle pick is hidden; deliver second sample |
+| `VACANT` | Lock passing fields; micro-prompt per failing field; harness merge |
+| `STITCH` | 3× samples; zero-prompt per-field first check-passing stitch |
+| `MAJ3` | Baseline only — per-field majority, no checks |
 
-All arms track `prompt_tokens`, `completion_tokens`, `cpu_seconds`.
+**McNemar:** `VACANT` vs `BLIND` on holdout; clustered by `template_id`.
+
+## Rank 1b — Filing-Evidence flagship (gap 1; if P0 + offline stop rule pass)
+
+**Dataset:** [pramana-research/filing-evidence](https://huggingface.co/datasets/pramana-research/filing-evidence) (Apache-2.0; ~1k questions, 90 filings; gold carries value/scale/unit/period). Paper: [Show Your Work arXiv:2611.24990](https://arxiv.org/abs/2611.24990).
+
+### (a) Offline typed audit (zero model cost) — **DONE before online**
+
+On model answers with `failed_check is null` (quote check passed):
+
+- **Typed check:** value in cited span; header scale vs answer scale; no gold at runtime (`filing/typed_filing_check.py`).
+- **Stop rule:** ineffective if catch &lt;30% among quote-pass-but-value-wrong **or** false reject &gt;5% among quote-pass-and-value-correct.
+- **First result (qwen3.5-9b C1):** `filing/data/offline_typed_audit_qwen_c1.json` — catch **74.3%** (75/101), false reject **4.8%** (35/724) → **proceed** to bounded online CPU arms.
+
+### (b) Online CPU (if stop rule passes)
+
+Models: **Qwen2.5-0.5B** and **1.5B** on ~20 filings (~220 questions), ≤2 calls/question, shared first answer across arms:
 
 | Arm | Description |
 |-----|-------------|
-| `ONE` | 1× full JSON @ greedy |
-| `MAJ3` | 3× full JSON @ T=0.7; **per-field majority** (no checks) |
-| `LPB3` | 3× full JSON @ T=0.7; pick **entire JSON** with highest mean token logprob |
-| `VACANT` | 1× full JSON; lock passing fields; ≤`MAX_FIELD_RETRIES` micro-prompts per failing field; **harness patch** only if field check passes |
-| `STITCH` | 3× full JSON @ T=0.7; **zero-prompt** per-field first check-passing value across samples (deterministic order sample 0→2) |
+| A `PLAIN` | deliver first answer |
+| B `QUOTE_RETRY` | original quote check + retry (dataset-style; baseline, not contribution) |
+| C `BLIND` | blind resample; deliver second |
+| D `TYPED_REASK` | typed fail → targeted re-ask listing alternatives |
+| E `TYPED_REFUSE` | typed fail → not certified / no delivery |
 
-**Budget parity rule:** `VACANT` field micro-calls capped so mean total tokens/task ≤ mean(`MAJ3`) + 10% (reported; no post-hoc trim).
+**Main metric:** share of filings with **zero wrong** delivered answers; bootstrap CIs over whole filings.  
+**No-model rule baseline:** header scale + latest table column (`rule_baseline.py`).
 
-**Frozen baseline for McNemar:** `MAJ3` if whole-success rate highest among `ONE`,`MAJ3`,`LPB3` on dev; else `LPB3`.
+## Secondary (gating)
 
-## Success metrics
-
-- Whole-deliverable oracle success rate (all answerable holdout tasks in denominator; failures/timeouts count).
-- Paired `wrong→right` / `right→wrong` vs frozen baseline per task.
-- **McNemar exact** (primary: `VACANT` vs frozen baseline).
-- **2×2** per arm: visible all-fields-pass × oracle whole-success (logged per row).
-
-## Secondary (gating utility; same tasks)
-
-| Arm | Calls |
-|-----|-------|
-| `GATE_VACANT` | 1× + reject if any visible check fails |
-| `GATE_LOGPROB` | 1× + ship if mean logprob ≥ τ (τ from dev to match ~VACANT coverage) |
-| `GATE_SC2` | 2× @ T=0.7; ship if identical JSON string |
-| `GATE_SV` | 2×; call2 yes/no self-verify |
-
-Metrics: SFR = P(wrong|shipped), AURC on risk–coverage, U(λ) for λ∈{1,2,5}, at matched coverage vs `GATE_VACANT`.
-
-## Stopping
-
-One holdout pass per arm; no optional stopping.
+Unchanged intent: `GATE_*` on invoice bank only if Rank 1 holdout completes.
 
 ## SHA256
 
-Recorded in `data/r2/PREREG_SHA256.json` at freeze (before holdout).
+`data/r2/PREREG_SHA256.json` updated at holdout freeze (invoice). Filing offline prereg pinned by commit hash + answer file sha256 in audit JSON.
