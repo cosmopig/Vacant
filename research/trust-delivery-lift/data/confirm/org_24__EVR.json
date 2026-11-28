@@ -1,0 +1,124 @@
+{
+  "task_id": "org_24",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "1934",
+    "hq_city": "Hartford, Connecticut",
+    "premiums_fy2019": "8.9",
+    "loss_ratio": "62.3",
+    "employees": "19200"
+  },
+  "final": {
+    "founded_year": "1934",
+    "hq_city": "Hartford, Connecticut",
+    "premiums_fy2019": "8.9",
+    "loss_ratio": "62.3",
+    "employees": "19200"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1934",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Hartford, Connecticut",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "premiums_fy2019",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "8.9",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "loss_ratio",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "62.3",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "19200",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1934",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Hartford, Connecticut",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "premiums_fy2019",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "8.9",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "loss_ratio",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "62.3",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "19200",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 1934,\n  \"hq_city\": \"Hartford, Connecticut\",\n  \"premiums_fy2019\": 8.9,\n  \"loss_ratio\": 62.3,\n  \"employees\": 19200\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"1934\",\n  \"hq_city\": \"Hartford, Connecticut\",\n  \"premiums_fy2019\": \"8.9\",\n  \"loss_ratio\": \"62.3\",\n  \"employees\": \"19200\"\n}",
+      "prompt_tokens": 326,
+      "completion_tokens": 65,
+      "latency_s": 2.0297161769999548
+    }
+  ],
+  "prompt_tokens": 326,
+  "completion_tokens": 65,
+  "latency_s": 2.0303641499999685
+}

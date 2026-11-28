@@ -1,0 +1,124 @@
+{
+  "task_id": "org_20",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "2016",
+    "hq_city": "Manchester",
+    "revenue_fy2022": "GBP 140 million",
+    "churn_rate": "5.6%",
+    "employees": "920"
+  },
+  "final": {
+    "founded_year": "2016",
+    "hq_city": "Manchester",
+    "revenue_fy2022": "GBP 140 million",
+    "churn_rate": "5.6%",
+    "employees": "920"
+  },
+  "grade_draft": {
+    "whole_success": true,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2016",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Manchester",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "GBP 140 million",
+        "detail": "ok"
+      },
+      {
+        "id": "churn_rate",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "5.6%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "920",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": true,
+    "all_required_present": true,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2016",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "Manchester",
+        "detail": "ok"
+      },
+      {
+        "id": "revenue_fy2022",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "GBP 140 million",
+        "detail": "ok"
+      },
+      {
+        "id": "churn_rate",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "5.6%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "920",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": true,
+  "whole_success_final": true,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"2016\",\n  \"hq_city\": \"Manchester\",\n  \"revenue_fy2022\": \"GBP 140 million\",\n  \"churn_rate\": \"5.6%\",\n  \"employees\": \"920\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"2016\",\n    \"hq_city\": \"Manchester\",\n    \"revenue_fy2022\": \"GBP 140 million\",\n    \"churn_rate\": \"5.6%\",\n    \"employees\": \"920\"\n}",
+      "prompt_tokens": 179,
+      "completion_tokens": 62,
+      "latency_s": 1.7969164759999785
+    }
+  ],
+  "prompt_tokens": 179,
+  "completion_tokens": 62,
+  "latency_s": 1.7975346509999781
+}

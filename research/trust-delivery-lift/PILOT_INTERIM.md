@@ -13,4 +13,13 @@
 
 Net gain (draft→final): **0** on all arms — interventions did not flip paired outcomes because visible checks did not flag wrong-but-parseable values (e.g. `240` vs `USD 240 million`).
 
-**Decision:** v2 paired drafts + stronger **visible field contract** (currency, city-only, digit-in-source). Re-run before confirmatory claim.
+**Decision:** v2 paired drafts + stronger **visible field contract** (currency, city-only, digit-in-source).
+
+## Pilot v2 (paired, n=12)
+
+| Arm | Success | net_gain_pp |
+|-----|---------|-------------|
+| BLIND / BLANKS / EVR | 1/12 | 0 |
+| KEEP | 0/12 | −8.3 (1× right→wrong) |
+
+Confirmatory: **EVR = BLIND = 1/12** — frozen baseline **BLIND**, null lift.

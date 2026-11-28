@@ -1,0 +1,124 @@
+{
+  "task_id": "org_02",
+  "arm": "EVR",
+  "draft": {
+    "founded_year": "2005",
+    "hq_city": "Oslo, Norway",
+    "revenue_fy2023": "320000000",
+    "operating_margin": "12.5",
+    "employees": "8400"
+  },
+  "final": {
+    "founded_year": "2005",
+    "hq_city": "Oslo, Norway",
+    "revenue_fy2023": "320000000",
+    "operating_margin": "12.5%",
+    "employees": "8400"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2005",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Oslo, Norway",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "320000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "operating_margin",
+        "visible_ok": true,
+        "hidden_ok": false,
+        "got": "12.5",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "8400",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2005",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Oslo, Norway",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "320000000",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "operating_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "12.5%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "8400",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": 2005,\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": 320000000,\n  \"operating_margin\": 12.5,\n  \"employees\": 8400\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "EVR",
+      "text": "{\n  \"founded_year\": \"2005\",\n  \"hq_city\": \"Oslo, Norway\",\n  \"revenue_fy2023\": \"320000000\",\n  \"operating_margin\": \"12.5%\",\n  \"employees\": \"8400\"\n}",
+      "prompt_tokens": 388,
+      "completion_tokens": 70,
+      "latency_s": 2.138037456999996
+    }
+  ],
+  "prompt_tokens": 388,
+  "completion_tokens": 70,
+  "latency_s": 2.1386593070000117
+}

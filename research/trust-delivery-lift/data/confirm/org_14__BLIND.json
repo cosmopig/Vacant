@@ -1,0 +1,124 @@
+{
+  "task_id": "org_14",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "2003",
+    "hq_city": "San Diego, California",
+    "revenue_fy2024": "USD 310 million",
+    "net_margin": "4.5%",
+    "employees": "1,080"
+  },
+  "final": {
+    "founded_year": "2003",
+    "hq_city": "San Diego, California",
+    "revenue_fy2024": "USD 310 million",
+    "net_margin": "4.5%",
+    "employees": "1,080"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2003",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "San Diego, California",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2024",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 310 million",
+        "detail": "ok"
+      },
+      {
+        "id": "net_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "4.5%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1,080",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2003",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "San Diego, California",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2024",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 310 million",
+        "detail": "ok"
+      },
+      {
+        "id": "net_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "4.5%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "1,080",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"2003\",\n  \"hq_city\": \"San Diego, California\",\n  \"revenue_fy2024\": \"USD 310 million\",\n  \"net_margin\": \"4.5%\",\n  \"employees\": \"1,080\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"2003\",\n    \"hq_city\": \"San Diego, California\",\n    \"revenue_fy2024\": \"USD 310 million\",\n    \"net_margin\": \"4.5%\",\n    \"employees\": \"1,080\"\n}",
+      "prompt_tokens": 187,
+      "completion_tokens": 66,
+      "latency_s": 1.953163950999965
+    }
+  ],
+  "prompt_tokens": 187,
+  "completion_tokens": 66,
+  "latency_s": 1.9537497390000453
+}

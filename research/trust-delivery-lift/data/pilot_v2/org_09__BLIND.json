@@ -1,0 +1,124 @@
+{
+  "task_id": "org_09",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "2008",
+    "hq_city": "Austin, Texas",
+    "revenue_fy2023": "USD 88 million",
+    "op_margin": "6.5%",
+    "employees": "410"
+  },
+  "final": {
+    "founded_year": "2008",
+    "hq_city": "Austin, Texas",
+    "revenue_fy2023": "USD 88 million",
+    "op_margin": "6.5%",
+    "employees": "410"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2008",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Austin, Texas",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 88 million",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "6.5%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "410",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2008",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Austin, Texas",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "revenue_fy2023",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "USD 88 million",
+        "detail": "ok"
+      },
+      {
+        "id": "op_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "6.5%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "410",
+        "detail": "ok"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"2008\",\n  \"hq_city\": \"Austin, Texas\",\n  \"revenue_fy2023\": \"USD 88 million\",\n  \"op_margin\": \"6.5%\",\n  \"employees\": \"410\"\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"2008\",\n    \"hq_city\": \"Austin, Texas\",\n    \"revenue_fy2023\": \"USD 88 million\",\n    \"op_margin\": \"6.5%\",\n    \"employees\": \"410\"\n}",
+      "prompt_tokens": 179,
+      "completion_tokens": 62,
+      "latency_s": 1.8190708060000134
+    }
+  ],
+  "prompt_tokens": 179,
+  "completion_tokens": 62,
+  "latency_s": 1.819647332000045
+}

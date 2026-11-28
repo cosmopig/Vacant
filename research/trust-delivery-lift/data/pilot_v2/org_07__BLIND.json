@@ -1,0 +1,124 @@
+{
+  "task_id": "org_07",
+  "arm": "BLIND",
+  "draft": {
+    "founded_year": "2015",
+    "hq_city": "Berlin, Germany",
+    "arr_fy2024": "2024",
+    "gross_margin": "72%",
+    "employees": "890"
+  },
+  "final": {
+    "founded_year": "2015",
+    "hq_city": "Berlin, Germany",
+    "annual_recurring_income": "EUR 120 million",
+    "gross_margin": "72%",
+    "staff": "890"
+  },
+  "grade_draft": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2015",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Berlin, Germany",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "arr_fy2024",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "2024",
+        "detail": "money_missing_currency"
+      },
+      {
+        "id": "gross_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "72%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "890",
+        "detail": "ok"
+      }
+    ]
+  },
+  "grade_final": {
+    "whole_success": false,
+    "all_required_present": false,
+    "fields": [
+      {
+        "id": "founded_year",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "2015",
+        "detail": "ok"
+      },
+      {
+        "id": "hq_city",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": "Berlin, Germany",
+        "detail": "hq_city_must_be_city_only"
+      },
+      {
+        "id": "arr_fy2024",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": null,
+        "detail": "missing_or_empty"
+      },
+      {
+        "id": "gross_margin",
+        "visible_ok": true,
+        "hidden_ok": true,
+        "got": "72%",
+        "detail": "ok"
+      },
+      {
+        "id": "employees",
+        "visible_ok": false,
+        "hidden_ok": false,
+        "got": null,
+        "detail": "missing_or_empty"
+      }
+    ]
+  },
+  "whole_success_draft": false,
+  "whole_success_final": false,
+  "calls": [
+    {
+      "phase": "call1",
+      "arm": "BLIND",
+      "text": "{\n  \"founded_year\": \"2015\",\n  \"hq_city\": \"Berlin, Germany\",\n  \"arr_fy2024\": \"2024\",\n  \"gross_margin\": \"72%\",\n  \"employees\": 890\n}",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "latency_s": 0.0,
+      "frozen": true
+    },
+    {
+      "phase": "call2",
+      "arm": "BLIND",
+      "text": "{\n    \"founded_year\": \"2015\",\n    \"hq_city\": \"Berlin, Germany\",\n    \"annual_recurring_income\": \"EUR 120 million\",\n    \"gross_margin\": \"72%\",\n    \"staff\": \"890\"\n}",
+      "prompt_tokens": 176,
+      "completion_tokens": 58,
+      "latency_s": 1.716991875000076
+    }
+  ],
+  "prompt_tokens": 176,
+  "completion_tokens": 58,
+  "latency_s": 1.7175401619999775
+}
