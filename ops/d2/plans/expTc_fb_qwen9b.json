@@ -150,15 +150,18 @@
  "prereg": {
   "registered": "2026-11-28, frozen before any confirmation-batch model call (sandboxed). Full prereg: decisions/prereg/PREREG_20261128_EXPT_CONFIRM.md",
   "code_sha256": {
-   "ops/d2/run_expT.py": "fefa1d129e48ce009ad0c3ff3bcfdb289a1bd631f8d0a5226a83032e44bc24a3",
+   "ops/d2/run_expT.py": "684aa79ab466ccc9d8497c5e37f1f4768561247806f66c04b08cdd77af9c9327",
    "ops/d2/bwrap_expT_agent.sh": "abe82f415123a5f56dab02cd604f89103cfed6a38da74ead39d10fb9beaeeef7",
    "ops/d2/sockfwd.py": "ad4a932114d0712e307235db149948ee5900d9319ddc19f2efb580040b1e4b52",
    "ops/d2/netns_selftest.py": "09e0713ddfc99d10783272c777bb4d744562fd65e4fb100c9b93d5b152ae7b57",
-   "ops/d2/expT_metrics.py": "a73b5df5d5bbbe00050095d8ace4ec66c61c2ac1e2a17bd9e06eaa14b0a2057a",
+   "ops/d2/expT_feedback.py": "88f5aceb2a611653576193a19eef3d9cb478ab974d2d06057c57622ca66212ed",
+   "ops/d2/expT_reflag.py": "c83935d4b27bc9248b602ee36401e7a29bbaf06b99177a1470e627dfe5de9972",
+   "ops/d2/expT_metrics.py": "14948bac386c5668aba3c0237ae743c256698e7f1a9b9e03864661ad9cfa8fa0",
    "ops/d2/expTc_select.py": "88f743f4b8810a60547c936f43659f53eb11c0852be46ec5a91db93ee1328987",
-   "ops/d2/expTc_confirm_analysis.py": "350d3e58313a66da67d1b9544ae901d13495d9845f98e433045354aceb7eb86d"
+   "ops/d2/expTc_confirm_analysis.py": "568872913ca5eaa8fa1ca9c4e3b19baa77c55ade2153b2e60af50bf698a39f4b"
   },
-  "sandbox_note": "bwrap_netns (Appendix B supplement B13): --unshare-net; only the egress proxy port is forwarded in via a unix socket with a per-request allowlist (own source host:80, LM Studio inference paths). Self-test ops/d2/netns_selftest.py must pass before launch."
+  "sandbox_note": "bwrap_netns (Appendix B supplement B13): --unshare-net; only the egress proxy port is forwarded in via a unix socket with a per-request allowlist (own source host:80, LM Studio inference paths). Self-test ops/d2/netns_selftest.py must pass before launch.",
+  "hook_no_gc_note": "VACANT_HOOK_NO_GC=1 for every agent run of the fb plan (hook_no_gc: true); drafts plan ran without it (gc-deleted page contents are restored offline from revision-0 frozen pages by sha256, B25)."
  },
  "agent_sandbox": "bwrap_netns",
  "reuse_c0_from": {
@@ -169,6 +172,6 @@
   ]
  },
  "roots": "one root per host (…_1003, …_1004); analysis merges the two roots' cells (identical plan sha) — a runner holds a per-root lock, so two hosts cannot share one root concurrently.",
- "flag_matching": "n2db",
+ "flag_matching": "b24",
  "hook_no_gc": true
 }

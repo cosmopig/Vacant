@@ -3,7 +3,7 @@
 
 對 root 底下每一份 c0：開 c0/snapshot/vh 的紀錄，用和 c0 當時相同的邊界（done.json 的 chain_len）重算：
   1. literal 模式（舊行為）—— 檢查和原本的 flags.json 逐行相同（重現性）；
-  2. n2db 模式（`expT_feedback` 的修正：凍結頁按 sha256 補回被 gc 刪的內容＋去空白／`*`／反引號／`_` 的數字邊界比對）
+  2. 修正模式（預設 b24：凍結頁按 sha256 補回被 gc 刪的內容＋B24 封閉三項正規化；--mode n2db 只用來重現已棄用的寬規則）
      → 寫 c0/flags_v2.json，並記補回了幾頁、補不回的頁（sha256 不在凍結頁、或凍結頁 sha256 不符）。
 --regress：另外用答案鍵算回歸數字（只看 c0 初稿本身的被標行，不算任何臂的分數）：修正前後被標的有值行數、
   其中評為錯的比例（標記精確度），分組別；以及修正後仍被標、但寬鬆口徑（數字序列）判斷值在頁面裡的行數（要另查）。
@@ -41,7 +41,7 @@ def restore_stats(rec, c0: pathlib.Path):
 
 def main() -> None:
     ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--write", action="store_true")
-    ap.add_argument("--regress", action="store_true"); ap.add_argument("--json")
+    ap.add_argument("--regress", action="store_true"); ap.add_argument("--json"); ap.add_argument("--mode", default="b24", choices=["b24", "n2db"])
     a = ap.parse_args(); root = pathlib.Path(a.root)
     plan = json.loads((root / "RUN.json").read_text())["plan_body"]
     truth = M.load_manifests_with_truth(plan)
@@ -60,9 +60,9 @@ def main() -> None:
             out["literal_reproduces_original"] += 1
         else:
             out["literal_mismatch"].append(f"{sid}/r{rep}")
-        v2, rec = flags_for(c0, claims, "n2db")
+        v2, rec = flags_for(c0, claims, a.mode)
         restored, unrestorable = restore_stats(rec, c0)
-        v2["flag_matching"] = "n2db"; v2["restored_pages"] = restored; v2["unrestorable_pages"] = unrestorable
+        v2["flag_matching"] = a.mode; v2["restored_pages"] = restored; v2["unrestorable_pages"] = unrestorable
         if a.write:
             (c0 / "flags_v2.json").write_text(json.dumps(v2, ensure_ascii=False, indent=1))
         out["cells"].append({"set": sid, "rep": rep, "flagged_before": orig["flagged_count"], "flagged_after": v2["flagged_count"],

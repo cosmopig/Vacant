@@ -394,9 +394,14 @@ def fetch_universe(rec: Recorder) -> list[dict[str, Any]]:
 
 # ---------------------------------------------------------------------------------------------
 # 2026-11-28 量具修正（附錄 B 補充；診斷 ~/dev/ops/diag_c0_flags_20261128/DIAG.md）。預設 "literal"＝舊行為（探索批次可重現）。
-# "n2db"：(a) 出口紀錄的頁面內容被自動 gc 刪掉時，按 sha256 從這一格 revision 0 的凍結頁補回（sha256 必須相同）；
-#         (b) 值與頁面純文字兩邊都去掉空白、`*`、反引號、`_` 後做子字串比對（長度 ≥2），且命中處前後不能緊接數字（數字邊界）。
-# 規則在跑回歸之前凍結；不參考答案鍵或任何臂的結果。
+# "b24"（正式；附錄 B 補充 B24 的封閉清單）：
+#   (a) 出口紀錄的頁面內容被自動 gc 刪掉時，按 sha256 從這一格 revision 0 的凍結頁補回（sha256 必須與 site_snapshot_sha256.json 相同）；
+#   (b) literal 比對沒命中時，值與頁面純文字兩邊各做三項正規化後，再用**同一個** literal 比對（`sources.plain_contains`，
+#       含它原有的數字邊界處理）比一次。三項正規化（封閉清單）：去 `*`、去反引號、去括號內外緊鄰的空白
+#       （空白＝Python `\s`，含不換行空白等 Unicode 空白）。除此之外行為與 literal 逐行相同。
+# "n2db"（**已棄用**的寬規則，8c7cb7d2c）：去掉全部空白、`*`、反引號、`_` 再比，另加數字邊界。第一次回歸顯示多配
+#   （軟體／公司組只因去全部空白或 `_` 才配上的 36 行裡 15 行是錯的），依 B24 棄用；程式保留以便重現第一次回歸。
+# 規則在跑回歸之前以提交凍結；不參考答案鍵或任何臂的結果去挑規則。
 FLAG_MATCHING = "literal"
 FROZEN_FALLBACK: dict[str, str] = {}
 _N2 = re.compile(r"[\s*`_]+")
@@ -404,7 +409,7 @@ _N2 = re.compile(r"[\s*`_]+")
 
 def set_flag_matching(mode: str) -> None:
     global FLAG_MATCHING
-    if mode not in ("literal", "n2db"):
+    if mode not in ("literal", "n2db", "b24"):
         raise ValueError(f"unknown flag_matching {mode!r}")
     FLAG_MATCHING = mode
 
@@ -428,9 +433,19 @@ def add_frozen_fallback(site_frozen_dir: pathlib.Path, sha_json: pathlib.Path) -
 
 def _blob(rec: Recorder, sha: str | None) -> str | None:
     t = S._blob_text(rec, sha)
-    if t is None and FLAG_MATCHING == "n2db" and sha:
+    if t is None and FLAG_MATCHING in ("n2db", "b24") and sha:
         return FROZEN_FALLBACK.get(sha)
     return t
+
+
+_B24_MD = re.compile(r"[*`]")
+_B24_OPEN = re.compile(r"\s*\(\s*")
+_B24_CLOSE = re.compile(r"\s*\)\s*")
+
+
+def b24_norm(s: str) -> str:
+    """B24 的封閉三項正規化：去 `*`、去反引號、去括號內外緊鄰的空白。"""
+    return _B24_CLOSE.sub(")", _B24_OPEN.sub("(", _B24_MD.sub("", s or "")))
 
 
 def _n2(s: str) -> str:
@@ -520,6 +535,13 @@ def compute_line_flags(
             reasons.append(PROBLEM_MISSING)
         else:
             carriers = [u for u in uk if S.plain_contains(str(u.get("text") or ""), v)]
+            if not carriers and FLAG_MATCHING == "b24":
+                nv = b24_norm(v)
+                for u in uk:
+                    if "_b24plain" not in u:
+                        u["_b24plain"] = b24_norm(S._plain(str(u.get("text") or "")))
+                    if nv and S.plain_contains(u["_b24plain"], nv):
+                        carriers.append(u)
             if not carriers and FLAG_MATCHING == "n2db":
                 for u in uk:
                     if "_n2plain" not in u:
