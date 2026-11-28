@@ -1,0 +1,654 @@
+{
+ "drafts_total": 150,
+ "drafts_used": 150,
+ "excluded": [],
+ "budget_capped": 0,
+ "main": {
+  "ER_vs_A": {
+   "sets": 30,
+   "units": 150,
+   "diff": 0.282,
+   "ci95": [
+    0.1949,
+    0.3769
+   ],
+   "ci90": [
+    0.2083,
+    0.3619
+   ],
+   "perm_p": 0.0001,
+   "unit_weighted_diff": 0.282,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s02",
+     "ff-s10"
+    ],
+    "diff": 0.2378,
+    "ci95": [
+     0.171,
+     0.3165
+    ]
+   }
+  },
+  "ER_vs_EN": {
+   "sets": 23,
+   "units": 58,
+   "diff": 0.1314,
+   "ci95": [
+    0.058,
+    0.2137
+   ],
+   "ci90": [
+    0.0695,
+    0.2021
+   ],
+   "perm_p": 0.0012,
+   "unit_weighted_diff": 0.0811,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s13",
+     "ff-s04"
+    ],
+    "diff": 0.0921,
+    "ci95": [
+     0.0355,
+     0.1624
+    ]
+   }
+  },
+  "ER_vs_EB": {
+   "sets": 30,
+   "units": 150,
+   "diff": 0.041,
+   "ci95": [
+    0.0227,
+    0.0611
+   ],
+   "ci90": [
+    0.0255,
+    0.0577
+   ],
+   "perm_p": 0.0002,
+   "unit_weighted_diff": 0.041,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s04",
+     "ff-s13"
+    ],
+    "diff": 0.0315,
+    "ci95": [
+     0.0177,
+     0.0457
+    ]
+   }
+  }
+ },
+ "holm_family2": {
+  "ER_vs_A": 0.0003,
+  "ER_vs_EN": 0.0012,
+  "ER_vs_EB": 0.0004
+ },
+ "verdict": {
+  "ER_vs_A": "pass",
+  "ER_vs_A_stratum_B5": "stratum_undetermined",
+  "ER_vs_EN": "ER_better",
+  "ER_vs_EN_stratum_B5": "consistent_in_nonblank",
+  "ER_vs_EB": "no_difference_measured",
+  "ER_vs_A_harm": "trading_errors_for_fills"
+ },
+ "nonblank_B5": {
+  "ER_vs_A": {
+   "sets": 28,
+   "units": 96,
+   "diff": 0.0716,
+   "ci95": [
+    0.0356,
+    0.1159
+   ],
+   "ci90": [
+    0.0409,
+    0.1074
+   ],
+   "perm_p": 0.0003,
+   "unit_weighted_diff": 0.0698,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s04",
+     "ff-s06"
+    ],
+    "diff": 0.0479,
+    "ci95": [
+     0.0282,
+     0.0695
+    ]
+   }
+  },
+  "ER_vs_EN": {
+   "sets": 23,
+   "units": 58,
+   "diff": 0.1314,
+   "ci95": [
+    0.058,
+    0.2137
+   ],
+   "ci90": [
+    0.0695,
+    0.2021
+   ],
+   "perm_p": 0.0012,
+   "unit_weighted_diff": 0.0811,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s13",
+     "ff-s04"
+    ],
+    "diff": 0.0921,
+    "ci95": [
+     0.0355,
+     0.1624
+    ]
+   }
+  },
+  "ER_vs_EB": {
+   "sets": 28,
+   "units": 96,
+   "diff": 0.0623,
+   "ci95": [
+    0.0277,
+    0.1069
+   ],
+   "ci90": [
+    0.0326,
+    0.0992
+   ],
+   "perm_p": 0.0003,
+   "unit_weighted_diff": 0.0586,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s04",
+     "ff-s06"
+    ],
+    "diff": 0.0379,
+    "ci95": [
+     0.0191,
+     0.0571
+    ]
+   }
+  }
+ },
+ "harm_vs_A": {
+  "EB": {
+   "sets": 30,
+   "units": 150,
+   "diff": 0.0296,
+   "ci95": [
+    0.014,
+    0.0469
+   ],
+   "ci90": [
+    0.0159,
+    0.0444
+   ],
+   "perm_p": 0.0009,
+   "unit_weighted_diff": 0.0296,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "cc-s04",
+     "cc-s10"
+    ],
+    "diff": 0.021,
+    "ci95": [
+     0.0091,
+     0.0345
+    ]
+   }
+  },
+  "ER": {
+   "sets": 30,
+   "units": 150,
+   "diff": 0.0286,
+   "ci95": [
+    0.0126,
+    0.0468
+   ],
+   "ci90": [
+    0.0149,
+    0.0436
+   ],
+   "perm_p": 0.0017,
+   "unit_weighted_diff": 0.0286,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "cc-s04",
+     "cc-s02"
+    ],
+    "diff": 0.0195,
+    "ci95": [
+     0.0077,
+     0.033
+    ]
+   }
+  },
+  "EN": {
+   "sets": 30,
+   "units": 150,
+   "diff": 0.0289,
+   "ci95": [
+    0.0134,
+    0.0459
+   ],
+   "ci90": [
+    0.0153,
+    0.0434
+   ],
+   "perm_p": 0.0009,
+   "unit_weighted_diff": 0.0289,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "cc-s04",
+     "cc-s08"
+    ],
+    "diff": 0.0206,
+    "ci95": [
+     0.0087,
+     0.0344
+    ]
+   }
+  }
+ },
+ "strata_B35": {
+  "company": {
+   "ER_vs_A": {
+    "sets": 10,
+    "units": 50,
+    "diff": 0.184,
+    "ci95": [
+     0.122,
+     0.242
+    ],
+    "ci90": [
+     0.132,
+     0.234
+    ],
+    "perm_p": 0.0045,
+    "unit_weighted_diff": 0.184,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "cc-s01",
+      "cc-s04"
+     ],
+     "diff": 0.155,
+     "ci95": [
+      0.0938,
+      0.2188
+     ]
+    }
+   },
+   "ER_vs_EN": {
+    "sets": 10,
+    "units": 32,
+    "diff": 0.0013,
+    "ci95": [
+     -0.0262,
+     0.0304
+    ],
+    "ci90": [
+     -0.0225,
+     0.0263
+    ],
+    "perm_p": 0.9693,
+    "unit_weighted_diff": 0.0031,
+    "equivalent_within_delta": true,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "cc-s01",
+      "cc-s07"
+     ],
+     "diff": -0.0151,
+     "ci95": [
+      -0.0375,
+      0.0026
+     ]
+    }
+   },
+   "ER_vs_EB": {
+    "sets": 10,
+    "units": 50,
+    "diff": 0.016,
+    "ci95": [
+     0.001,
+     0.032
+    ],
+    "ci90": [
+     0.003,
+     0.03
+    ],
+    "perm_p": 0.12249,
+    "unit_weighted_diff": 0.016,
+    "equivalent_within_delta": true,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "cc-s10",
+      "cc-s01"
+     ],
+     "diff": 0.005,
+     "ci95": [
+      -0.005,
+      0.015
+     ]
+    }
+   }
+  },
+  "football": {
+   "ER_vs_A": {
+    "sets": 20,
+    "units": 100,
+    "diff": 0.331,
+    "ci95": [
+     0.211,
+     0.4607
+    ],
+    "ci90": [
+     0.229,
+     0.4371
+    ],
+    "perm_p": 0.0001,
+    "unit_weighted_diff": 0.331,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "ff-s02",
+      "ff-s10"
+     ],
+     "diff": 0.2677,
+     "ci95": [
+      0.173,
+      0.3662
+     ]
+    }
+   },
+   "ER_vs_EN": {
+    "sets": 13,
+    "units": 26,
+    "diff": 0.2316,
+    "ci95": [
+     0.1217,
+     0.3444
+    ],
+    "ci90": [
+     0.1394,
+     0.3252
+    ],
+    "perm_p": 0.0005,
+    "unit_weighted_diff": 0.177,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "ff-s13",
+      "ff-s04"
+     ],
+     "diff": 0.1747,
+     "ci95": [
+      0.0795,
+      0.2798
+     ]
+    }
+   },
+   "ER_vs_EB": {
+    "sets": 20,
+    "units": 100,
+    "diff": 0.0535,
+    "ci95": [
+     0.0286,
+     0.0797
+    ],
+    "ci90": [
+     0.0325,
+     0.0749
+    ],
+    "perm_p": 0.0001,
+    "unit_weighted_diff": 0.0535,
+    "equivalent_within_delta": false,
+    "drop_top2_sets": {
+     "unit": "set",
+     "dropped": [
+      "ff-s04",
+      "ff-s13"
+     ],
+     "diff": 0.0402,
+     "ci95": [
+      0.0223,
+      0.0608
+     ]
+    }
+   }
+  }
+ },
+ "exclude_b27": {
+  "ER_vs_A": {
+   "sets": 30,
+   "units": 137,
+   "diff": 0.3003,
+   "ci95": [
+    0.2088,
+    0.3984
+   ],
+   "ci90": [
+    0.2239,
+    0.3823
+   ],
+   "perm_p": 0.0001,
+   "unit_weighted_diff": 0.299,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s02",
+     "ff-s10"
+    ],
+    "diff": 0.2575,
+    "ci95": [
+     0.1837,
+     0.3372
+    ]
+   }
+  },
+  "ER_vs_EN": {
+   "sets": 22,
+   "units": 53,
+   "diff": 0.137,
+   "ci95": [
+    0.0605,
+    0.2254
+   ],
+   "ci90": [
+    0.0714,
+    0.2087
+   ],
+   "perm_p": 0.0013,
+   "unit_weighted_diff": 0.0853,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s13",
+     "ff-s04"
+    ],
+    "diff": 0.0963,
+    "ci95": [
+     0.035,
+     0.1708
+    ]
+   }
+  },
+  "ER_vs_EB": {
+   "sets": 30,
+   "units": 137,
+   "diff": 0.0433,
+   "ci95": [
+    0.0227,
+    0.0653
+   ],
+   "ci90": [
+    0.0255,
+    0.062
+   ],
+   "perm_p": 0.0002,
+   "unit_weighted_diff": 0.0421,
+   "equivalent_within_delta": false,
+   "drop_top2_sets": {
+    "unit": "set",
+    "dropped": [
+     "ff-s04",
+     "ff-s19"
+    ],
+    "diff": 0.0316,
+    "ci95": [
+     0.0167,
+     0.0479
+    ]
+   }
+  }
+ },
+ "ER_vs_EN_exclude_shortfall": {
+  "sets": 19,
+  "units": 42,
+  "diff": 0.0853,
+  "ci95": [
+   0.0287,
+   0.156
+  ],
+  "ci90": [
+   0.0366,
+   0.1398
+  ],
+  "perm_p": 0.0068,
+  "unit_weighted_diff": 0.0589,
+  "equivalent_within_delta": false,
+  "drop_top2_sets": {
+   "unit": "set",
+   "dropped": [
+    "ff-s03",
+    "ff-s06"
+   ],
+   "diff": 0.0454,
+   "ci95": [
+    0.0117,
+    0.0844
+   ]
+  }
+ },
+ "EB_on_blank_drafts": {
+  "sets": 21,
+  "units": 54,
+  "diff": 0.6519,
+  "ci95": [
+   0.5614,
+   0.7473
+  ],
+  "ci90": [
+   0.5749,
+   0.7325
+  ],
+  "perm_p": 0.0001,
+  "unit_weighted_diff": 0.6496,
+  "equivalent_within_delta": false,
+  "drop_top2_sets": {
+   "unit": "set",
+   "dropped": [
+    "ff-s02",
+    "ff-s03"
+   ],
+   "diff": 0.6152,
+   "ci95": [
+    0.5241,
+    0.7064
+   ]
+  }
+ },
+ "filled_only_fix_harm_C6": {
+  "ER": {
+   "fixed": 104,
+   "harmed": 4
+  },
+  "EN": {
+   "fixed": 18
+  }
+ },
+ "company_ER_sent_filled_orig_correct": {
+  "sent": 293,
+  "orig_correct": 207
+ },
+ "cost": {
+  "ER": {
+   "usd": 4.464155,
+   "in": 4066945,
+   "out": 79442,
+   "calls": 112,
+   "truncated": 0,
+   "whole_truncated_eq_draft": 0
+  },
+  "EN": {
+   "usd": 4.350444000000001,
+   "in": 4032084,
+   "out": 63672,
+   "calls": 110,
+   "truncated": 0,
+   "whole_truncated_eq_draft": 0
+  },
+  "EB": {
+   "usd": 2.0946269999999996,
+   "in": 1893307,
+   "out": 40264,
+   "calls": 62,
+   "truncated": 0,
+   "whole_truncated_eq_draft": 0
+  }
+ },
+ "usd_per_extra_correct_line_ER": 0.00582,
+ "future_revision_match_lines": {
+  "EB": 3,
+  "EN": 3,
+  "ER": 2
+ },
+ "corrected_value_in_given_pages": {
+  "ER|False": 89,
+  "ER|True": 678,
+  "EB|False": 53,
+  "EB|True": 600,
+  "EN|False": 56,
+  "EN|True": 619
+ },
+ "ER_EN_overlap_all_lines_mean": 0.3791,
+ "HP": {
+  "sets": 30,
+  "mean_correct_prop": 0.8544,
+  "cost": {
+   "usd": 1.1537649999999997,
+   "calls": 30
+  },
+  "future_revision_match_lines": 0,
+  "note": "整份交給 Haiku、而且把全部頁面直接給它時的參考；沒有找頁成本；不進 Holm；不是 Haiku agent 對 9B agent（C10）"
+ }
+}

@@ -1,0 +1,1 @@
+{"drafts_used": 150, "budget_capped": 0, "verdict": {"ER_vs_A": "pass", "ER_vs_A_stratum_B5": "stratum_undetermined", "ER_vs_EN": "ER_better", "ER_vs_EN_stratum_B5": "consistent_in_nonblank", "ER_vs_EB": "no_difference_measured", "ER_vs_A_harm": "trading_errors_for_fills"}, "holm_family2": {"ER_vs_A": 0.0003, "ER_vs_EN": 0.0012, "ER_vs_EB": 0.0004}}
