@@ -122,6 +122,44 @@ def mcnemar_pair(rows: list[dict], arm_a: str, arm_b: str) -> dict:
     return {"arm_a": arm_a, "arm_b": arm_b, "b_a_fail_b_ok": b, "c_a_ok_b_fail": c, "mcnemar_p": mcnemar_exact(b, c)}
 
 
+def gating_exploratory_summary(rows: list[dict]) -> dict:
+    """Amendment 20261128: ship if gated_ship_exploratory; costs from full row."""
+    by_arm: dict[str, list[dict]] = defaultdict(list)
+    for r in rows:
+        by_arm[r["arm"]].append(r)
+    out: dict[str, dict] = {}
+    for arm, rs in sorted(by_arm.items()):
+        n = len(rs)
+        ship = [r for r in rs if r.get("gated_ship_exploratory")]
+        cov = len(ship) / n if n else 0.0
+        wrong = sum(1 for r in ship if not r.get("oracle_whole_success"))
+        sfr = wrong / len(ship) if ship else float("nan")
+        draft_ok = sum(1 for r in rs if r.get("draft_oracle_success"))
+        grid = {}
+        for lam in (1, 3, 10):
+            for cpen in (0, 0.5):
+                cpu_mean = sum(r["cpu_seconds"] for r in rs) / n if n else 0
+                u = 0.0
+                for r in rs:
+                    if not r.get("gated_ship_exploratory"):
+                        u -= cpen
+                        continue
+                    rel_c = 1.0 if r.get("oracle_whole_success") else 0.0
+                    u += rel_c - lam * (1.0 - rel_c) - cpen
+                grid[f"lambda_{lam}_c_{cpen}"] = u / n if n else 0.0
+        out[arm] = {
+            "n": n,
+            "gated_coverage": cov,
+            "gated_silent_failure_rate": sfr,
+            "draft_oracle_success": draft_ok,
+            "draft_oracle_rate": draft_ok / n if n else 0.0,
+            "mean_cpu_s": sum(r["cpu_seconds"] for r in rs) / n if n else 0,
+            "mean_tokens": sum(r["prompt_tokens"] + r["completion_tokens"] for r in rs) / n if n else 0,
+            "utility_gated": grid,
+        }
+    return out
+
+
 def gating_summary(rows: list[dict]) -> dict:
     by_arm: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
@@ -154,6 +192,7 @@ def main() -> None:
     ap.add_argument("--baseline", default="MAJ3")
     ap.add_argument("--primary-arm", default="VACANT")
     ap.add_argument("--gating", action="store_true")
+    ap.add_argument("--meta", type=Path, help="Optional JSON (stopping_reason, target_n, prereg)")
     args = ap.parse_args()
     rows = load_rows(args.rows)
     if args.gating:
@@ -164,12 +203,16 @@ def main() -> None:
             "primary": primary,
             "selective_2x2": selective_2x2(rows),
             "utility_grid_vacant": utility_grid(rows, args.primary_arm),
+            "gating_exploratory": gating_exploratory_summary(rows),
             "mcnemar_vacant_vs_maj3": mcnemar_pair(rows, args.primary_arm, "MAJ3"),
             "mcnemar_vacant_vs_blind": mcnemar_pair(rows, args.primary_arm, "BLIND"),
             "mcnemar_vacant_vs_lpb3": mcnemar_pair(rows, args.primary_arm, "LPB3"),
             "mcnemar_primary_frozen": mcnemar_pair(rows, args.primary_arm, args.baseline),
             "cost_means": _cost_means(rows),
+            "n_rows": len(rows),
         }
+        if args.meta and args.meta.is_file():
+            summary["meta"] = json.loads(args.meta.read_text(encoding="utf-8"))
     args.out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
 

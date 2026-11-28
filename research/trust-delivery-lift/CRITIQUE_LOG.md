@@ -97,6 +97,20 @@ Record of external (Gemini) critiques and responses.
 
 | 2026-11-28 23:00 Asia/Taipei | **Supervisor VAC-1 (hourly)** | **Pause holdout** — `vendor` → `unknown_field`; fence 22 tasks; amendment + cost/draft logging + gating secondary exploratory; no post-hoc Pareto claim. |
 
+### PRE-RUN — overnight watch + recompute + 1.5B (2026-11-28 23:01 Asia/Taipei)
+
+**Objection:** Polling tmux then running `recompute_r2.py` mid-flight breaks “no peek”; starting 1.5B before holdout gate wastes CPU; interim at 10:30 without fixed n invites threshold shopping on partial McNemar.
+
+**Confounds:** Confirmatory may finish **after** 10:30 Taipei (~5 h at ~40 s/row); 1.5B filing same contract stack as stopped 0.5B — still not confirmatory delivery evidence.
+
+**Falsifier:** If confirmatory completes with oracle rates flat vs BLIND → primary null stands even with full n.
+
+**Survival:** Peek only **row counts** until 512 rows OR clock **≥11:30 Taipei** (interim stop **10:30** if rate projects miss); recompute **only** `holdout_05b_confirmatory/rows.jsonl`; 1.5B **after** holdout gate; REPORT labels exploratory gating + any partial confirmatory with **stopping reason**; no post-hoc Pareto.
+
+**Verdict:** Proceed with count-only polling; batch analysis at gate.
+
+| 2026-11-28 23:47 Asia/Taipei | **Owner** (push cadence) | Commit locally during long runs; **push ≤1 / ~3h** + final REPORT before 12:00 Taipei — reduce PR email noise. |
+
 ## Anticipated critic targets (pre-buttress)
 
 1. **Non-paired drafts in pilot v1** — Fixed in v2: `freeze_drafts.py` + `harness.py --drafts`.
