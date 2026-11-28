@@ -1,0 +1,800 @@
+{
+ "schema": "vacant.redo.judge_types_offline/1",
+ "post_hoc": true,
+ "ref": "origin/auto/redo",
+ "ref_commit": "78bb2a34c2924c1c992b1f3b4976068c6a789051",
+ "seed": 20261128,
+ "bootstrap": 10000,
+ "tests": [
+  {
+   "judge": "題目測試（可見那一半；R 臂，失敗就重開）",
+   "batch": "ctl12_q9",
+   "unit": "格",
+   "Pf": 0.361,
+   "V_reject_given_fail": 0.538,
+   "precision_reject": 1.0,
+   "false_accept_given_accepted": 0.207,
+   "false_reject_given_rejected": 0.0,
+   "C_convert_given_rejected_fail": 0.429,
+   "harm_rate": 0.0,
+   "accounting_pp": 8.3,
+   "gain": {
+    "what": "R 最終 − R 第 1 次（同格配對）",
+    "pp": 8.3,
+    "ci95_cluster": [
+     0.0,
+     16.7
+    ],
+    "newcombe95": [
+     -2.3,
+     18.9
+    ]
+   },
+   "gain_selection_equal_cost": {
+    "what": "三臂第 1 次重建：依可見挑 − 隨機取一份",
+    "pp": 6.5,
+    "ci95_cluster": [
+     0.9,
+     13.0
+    ],
+    "ceiling_oracle_minus_random_pp": 19.4
+   }
+  },
+  {
+   "judge": "題目測試（可見那一半；R 臂，失敗就重開）",
+   "batch": "ctl12_colab_e4b",
+   "unit": "格",
+   "Pf": 0.806,
+   "V_reject_given_fail": 0.793,
+   "precision_reject": 1.0,
+   "false_accept_given_accepted": 0.462,
+   "false_reject_given_rejected": 0.0,
+   "C_convert_given_rejected_fail": 0.13,
+   "harm_rate": 0.0,
+   "accounting_pp": 8.3,
+   "gain": {
+    "what": "R 最終 − R 第 1 次（同格配對）",
+    "pp": 8.3,
+    "ci95_cluster": [
+     0.0,
+     16.7
+    ],
+    "newcombe95": [
+     -2.6,
+     19.8
+    ]
+   },
+   "gain_selection_equal_cost": {
+    "what": "三臂第 1 次重建：依可見挑 − 隨機取一份",
+    "pp": 7.4,
+    "ci95_cluster": [
+     0.0,
+     15.7
+    ],
+    "ceiling_oracle_minus_random_pp": 12.0
+   }
+  },
+  {
+   "judge": "題目測試（可見那一半；R 臂，失敗就重開）",
+   "batch": "ctl34_g12",
+   "unit": "格",
+   "Pf": 0.588,
+   "V_reject_given_fail": 0.775,
+   "precision_reject": 0.939,
+   "false_accept_given_accepted": 0.257,
+   "false_reject_given_rejected": 0.061,
+   "C_convert_given_rejected_fail": 0.161,
+   "harm_rate": 0.0,
+   "accounting_pp": 7.4,
+   "gain": {
+    "what": "R 最終 − R 第 1 次（同格配對）",
+    "pp": 7.4,
+    "ci95_cluster": [
+     1.5,
+     16.2
+    ],
+    "newcombe95": [
+     0.6,
+     13.9
+    ]
+   },
+   "gain_selection_equal_cost": {
+    "what": "三臂第 1 次重建：依可見挑 − 隨機取一份",
+    "pp": 6.1,
+    "ci95_cluster": [
+     1.5,
+     11.6
+    ],
+    "ceiling_oracle_minus_random_pp": 6.1
+   }
+  },
+  {
+   "judge": "題目測試（可見那一半；R 臂，失敗就重開）",
+   "batch": "haiku_cchard",
+   "unit": "格",
+   "Pf": 0.051,
+   "V_reject_given_fail": 0.667,
+   "precision_reject": 1.0,
+   "false_accept_given_accepted": 0.018,
+   "false_reject_given_rejected": 0.0,
+   "C_convert_given_rejected_fail": 0.75,
+   "harm_rate": 0.0,
+   "accounting_pp": 2.6,
+   "gain": {
+    "what": "R 最終 − R 第 1 次（同格配對）",
+    "pp": 2.6,
+    "ci95_cluster": [
+     0.0,
+     6.8
+    ],
+    "newcombe95": [
+     -1.3,
+     7.4
+    ]
+   },
+   "gain_selection_equal_cost": {
+    "what": "三臂第 1 次重建：依可見挑 − 隨機取一份",
+    "pp": 3.0,
+    "ci95_cluster": [
+     0.3,
+     6.4
+    ],
+    "ceiling_oracle_minus_random_pp": 4.3
+   }
+  },
+  {
+   "judge": "題目測試（可見那一半；R 臂，失敗就重開）",
+   "batch": "devin_cchard16",
+   "unit": "格",
+   "Pf": 0.844,
+   "V_reject_given_fail": 1.0,
+   "precision_reject": 1.0,
+   "false_accept_given_accepted": 0.0,
+   "false_reject_given_rejected": 0.0,
+   "C_convert_given_rejected_fail": 0.074,
+   "harm_rate": 0.0,
+   "accounting_pp": 6.2,
+   "gain": {
+    "what": "R 最終 − R 第 1 次（同格配對）",
+    "pp": 6.2,
+    "ci95_cluster": [
+     0.0,
+     15.6
+    ],
+    "newcombe95": [
+     -5.1,
+     18.6
+    ]
+   },
+   "gain_selection_equal_cost": {
+    "what": "三臂第 1 次重建：依可見挑 − 隨機取一份",
+    "pp": 5.2,
+    "ci95_cluster": [
+     0.0,
+     11.5
+    ],
+    "ceiling_oracle_minus_random_pp": 5.2
+   }
+  }
+ ],
+ "exam37": [
+  {
+   "judge": "題目測試（gate_visible，工作區沒有測試）",
+   "batch": "exam37 GT",
+   "unit": "格",
+   "Pf": 0.662,
+   "V_reject_given_fail": 0.98,
+   "precision_reject": 0.941,
+   "false_accept_given_accepted": 0.043,
+   "false_reject_given_rejected": 0.059,
+   "C_convert_given_rejected_fail": 0.188,
+   "harm_rate": 0.0,
+   "accounting_pp": 12.2,
+   "gain": {
+    "what": "最終 − 第 1 次（同格；含失敗回饋的重開）",
+    "pp": 12.2,
+    "ci95_cluster": [
+     5.4,
+     20.3
+    ]
+   },
+   "gain_vs_N3": {
+    "what": "GT − N3（同 (題,重複)；N3＝同工作區續做、只給『再檢查』提示）",
+    "pp": 6.8,
+    "ci95_cluster": [
+     -1.4,
+     14.9
+    ]
+   },
+   "_accept_derivation_mismatch_single_attempt_cells": 0
+  },
+  {
+   "judge": "AI 出的考卷 XM",
+   "batch": "exam37 XM",
+   "unit": "格",
+   "Pf": 0.736,
+   "V_reject_given_fail": 0.792,
+   "precision_reject": 0.955,
+   "false_accept_given_accepted": 0.393,
+   "false_reject_given_rejected": 0.045,
+   "C_convert_given_rejected_fail": 0.286,
+   "harm_rate": 0.014,
+   "accounting_pp": 15.3,
+   "gain": {
+    "what": "最終 − 第 1 次（同格；含失敗回饋的重開）",
+    "pp": 15.3,
+    "ci95_cluster": [
+     6.9,
+     23.6
+    ]
+   },
+   "gain_vs_N3": {
+    "what": "XM − N3（同 (題,重複)；N3＝同工作區續做、只給『再檢查』提示）",
+    "pp": 1.4,
+    "ci95_cluster": [
+     -9.7,
+     12.5
+    ]
+   },
+   "_accept_derivation_mismatch_single_attempt_cells": 0
+  },
+  {
+   "judge": "性質檢查 PB",
+   "batch": "exam37 PB",
+   "unit": "格",
+   "Pf": 0.736,
+   "V_reject_given_fail": 0.868,
+   "precision_reject": 0.958,
+   "false_accept_given_accepted": 0.292,
+   "false_reject_given_rejected": 0.042,
+   "C_convert_given_rejected_fail": 0.326,
+   "harm_rate": 0.0,
+   "accounting_pp": 20.8,
+   "gain": {
+    "what": "最終 − 第 1 次（同格；含失敗回饋的重開）",
+    "pp": 20.8,
+    "ci95_cluster": [
+     9.7,
+     31.9
+    ]
+   },
+   "gain_vs_N3": {
+    "what": "PB − N3（同 (題,重複)；N3＝同工作區續做、只給『再檢查』提示）",
+    "pp": 6.9,
+    "ci95_cluster": [
+     -5.6,
+     19.4
+    ]
+   },
+   "_accept_derivation_mismatch_single_attempt_cells": 0
+  },
+  {
+   "judge": "AI 考卷 XMT（通過比例 ≥0.85 即放行）",
+   "batch": "exam37 XMT",
+   "unit": "格",
+   "Pf": 0.736,
+   "V_reject_given_fail": 0.792,
+   "precision_reject": 1.0,
+   "false_accept_given_accepted": 0.367,
+   "false_reject_given_rejected": 0.0,
+   "C_convert_given_rejected_fail": 0.238,
+   "harm_rate": 0.0,
+   "accounting_pp": 13.9,
+   "gain": {
+    "what": "最終 − 第 1 次（同格；含失敗回饋的重開）",
+    "pp": 13.9,
+    "ci95_cluster": [
+     6.9,
+     22.2
+    ]
+   },
+   "gain_vs_N3": {
+    "what": "XMT − N3（同 (題,重複)；N3＝同工作區續做、只給『再檢查』提示）",
+    "pp": 0.0,
+    "ci95_cluster": [
+     -12.5,
+     12.5
+    ]
+   },
+   "_accept_derivation_mismatch_single_attempt_cells": 0
+  },
+  {
+   "judge": "AI 考卷 XMV（驗證過的版本）",
+   "batch": "exam37 XMV",
+   "unit": "格",
+   "Pf": 0.726,
+   "V_reject_given_fail": 0.755,
+   "precision_reject": 0.909,
+   "false_accept_given_accepted": 0.448,
+   "false_reject_given_rejected": 0.091,
+   "C_convert_given_rejected_fail": 0.275,
+   "harm_rate": 0.027,
+   "accounting_pp": 12.3,
+   "gain": {
+    "what": "最終 − 第 1 次（同格；含失敗回饋的重開）",
+    "pp": 12.3,
+    "ci95_cluster": [
+     2.8,
+     22.2
+    ]
+   },
+   "gain_vs_N3": {
+    "what": "XMV − N3（同 (題,重複)；N3＝同工作區續做、只給『再檢查』提示）",
+    "pp": 0.0,
+    "ci95_cluster": [
+     -12.3,
+     11.3
+    ]
+   },
+   "_accept_derivation_mismatch_single_attempt_cells": 0
+  },
+  {
+   "judge": "沒有判定（N3：續做＋『再檢查』提示）",
+   "batch": "exam37 N3",
+   "unit": "格",
+   "Pf": 0.743,
+   "gain": {
+    "what": "N3 最終 − N3 第 1 次（同格）",
+    "pp": 13.5,
+    "ci95_cluster": [
+     4.1,
+     23.0
+    ]
+   },
+   "first_attempt_pass": 19,
+   "final_pass": 29,
+   "cells": 74
+  }
+ ],
+ "expTc": [
+  {
+   "judge": "紀錄出處比對（T：退回沒根據的行＋空白行，附頁面清單）",
+   "batch": "expTc 回饋（全部）",
+   "unit": "行",
+   "Pf": 0.508,
+   "V_reject_given_fail": 0.855,
+   "precision_reject": 0.804,
+   "C_convert_given_rejected_fail": 0.255,
+   "harm_rate": 0.095,
+   "loss_rate_correct_to_wrong_or_deleted": 0.032,
+   "accounting_pp": 7.9,
+   "gain": {
+    "what": "T − A（組平均正確行比例；以組為群集）",
+    "pp": 8.9,
+    "ci95_cluster": [
+     1.8,
+     17.5
+    ],
+    "sets": 30
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "只查空白（TB：只退回空白行）",
+   "batch": "expTc 回饋（全部）",
+   "unit": "行",
+   "Pf": 0.508,
+   "V_reject_given_fail": 0.713,
+   "precision_reject": 1.0,
+   "C_convert_given_rejected_fail": 0.095,
+   "harm_rate": 0.005,
+   "loss_rate_correct_to_wrong_or_deleted": 0.0,
+   "accounting_pp": 3.4,
+   "gain": {
+    "what": "TB − A（組平均正確行比例；以組為群集）",
+    "pp": 3.3,
+    "ci95_cluster": [
+     0.2,
+     7.5
+    ],
+    "sets": 30
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "籠統再檢查（G：不指出哪一行）",
+   "batch": "expTc 回饋（全部）",
+   "unit": "行",
+   "Pf": 0.508,
+   "V_reject_given_fail": 0.0,
+   "precision_reject": null,
+   "C_convert_given_rejected_fail": null,
+   "harm_rate": 0.091,
+   "loss_rate_correct_to_wrong_or_deleted": 0.054,
+   "accounting_pp": null,
+   "gain": {
+    "what": "G − A（組平均正確行比例；以組為群集）",
+    "pp": 0.1,
+    "ci95_cluster": [
+     -6.3,
+     5.8
+    ],
+    "sets": 30
+   },
+   "note": "G 不送行，V／精確度／C 不適用"
+  },
+  {
+   "judge": "紀錄出處比對（T：退回沒根據的行＋空白行，附頁面清單）",
+   "batch": "expTc 回饋（公司）",
+   "unit": "行",
+   "Pf": 0.535,
+   "V_reject_given_fail": 0.738,
+   "precision_reject": 0.627,
+   "C_convert_given_rejected_fail": 0.247,
+   "harm_rate": 0.125,
+   "loss_rate_correct_to_wrong_or_deleted": 0.075,
+   "accounting_pp": 2.3,
+   "gain": {
+    "what": "T − A（組平均正確行比例；以組為群集）",
+    "pp": 2.2,
+    "ci95_cluster": [
+     -9.2,
+     14.5
+    ],
+    "sets": 10
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "只查空白（TB：只退回空白行）",
+   "batch": "expTc 回饋（公司）",
+   "unit": "行",
+   "Pf": 0.535,
+   "V_reject_given_fail": 0.57,
+   "precision_reject": 1.0,
+   "C_convert_given_rejected_fail": 0.27,
+   "harm_rate": 0.015,
+   "loss_rate_correct_to_wrong_or_deleted": 0.0,
+   "accounting_pp": 8.2,
+   "gain": {
+    "what": "TB − A（組平均正確行比例；以組為群集）",
+    "pp": 8.2,
+    "ci95_cluster": [
+     0.0,
+     20.0
+    ],
+    "sets": 10
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "籠統再檢查（G：不指出哪一行）",
+   "batch": "expTc 回饋（公司）",
+   "unit": "行",
+   "Pf": 0.535,
+   "V_reject_given_fail": 0.0,
+   "precision_reject": null,
+   "C_convert_given_rejected_fail": null,
+   "harm_rate": 0.138,
+   "loss_rate_correct_to_wrong_or_deleted": 0.085,
+   "accounting_pp": null,
+   "gain": {
+    "what": "G − A（組平均正確行比例；以組為群集）",
+    "pp": -4.5,
+    "ci95_cluster": [
+     -16.2,
+     7.0
+    ],
+    "sets": 10
+   },
+   "note": "G 不送行，V／精確度／C 不適用"
+  },
+  {
+   "judge": "紀錄出處比對（T：退回沒根據的行＋空白行，附頁面清單）",
+   "batch": "expTc 回饋（足球）",
+   "unit": "行",
+   "Pf": 0.493,
+   "V_reject_given_fail": 0.928,
+   "precision_reject": 0.933,
+   "C_convert_given_rejected_fail": 0.259,
+   "harm_rate": 0.078,
+   "loss_rate_correct_to_wrong_or_deleted": 0.007,
+   "accounting_pp": 11.1,
+   "gain": {
+    "what": "T − A（組平均正確行比例；以組為群集）",
+    "pp": 12.2,
+    "ci95_cluster": [
+     4.3,
+     23.4
+    ],
+    "sets": 20
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "只查空白（TB：只退回空白行）",
+   "batch": "expTc 回饋（足球）",
+   "unit": "行",
+   "Pf": 0.493,
+   "V_reject_given_fail": 0.801,
+   "precision_reject": 1.0,
+   "C_convert_given_rejected_fail": 0.018,
+   "harm_rate": 0.0,
+   "loss_rate_correct_to_wrong_or_deleted": 0.0,
+   "accounting_pp": 0.7,
+   "gain": {
+    "what": "TB − A（組平均正確行比例；以組為群集）",
+    "pp": 0.8,
+    "ci95_cluster": [
+     0.0,
+     2.1
+    ],
+    "sets": 20
+   },
+   "note": "sent_back_* 為輸出欄位（跨輪合計）"
+  },
+  {
+   "judge": "籠統再檢查（G：不指出哪一行）",
+   "batch": "expTc 回饋（足球）",
+   "unit": "行",
+   "Pf": 0.493,
+   "V_reject_given_fail": 0.0,
+   "precision_reject": null,
+   "C_convert_given_rejected_fail": null,
+   "harm_rate": 0.064,
+   "loss_rate_correct_to_wrong_or_deleted": 0.036,
+   "accounting_pp": null,
+   "gain": {
+    "what": "G − A（組平均正確行比例；以組為群集）",
+    "pp": 2.4,
+    "ci95_cluster": [
+     -4.5,
+     8.0
+    ],
+    "sets": 20
+   },
+   "note": "G 不送行，V／精確度／C 不適用"
+  },
+  {
+   "judge": "紀錄分數挑初稿",
+   "batch": "expTc 選擇器（30 組 × 5 份）",
+   "unit": "份",
+   "gain": {
+    "what": "record − random（組平均；以組為群集）",
+    "pp": 27.5,
+    "ci95_cluster": [
+     17.7,
+     37.1
+    ]
+   },
+   "ceiling_oracle_minus_random_pp": 33.0,
+   "blank_drafts": 54
+  },
+  {
+   "judge": "只數填了幾行挑初稿",
+   "batch": "expTc 選擇器（30 組 × 5 份）",
+   "unit": "份",
+   "gain": {
+    "what": "nonblank − random（組平均；以組為群集）",
+    "pp": 26.4,
+    "ci95_cluster": [
+     18.5,
+     34.5
+    ]
+   },
+   "ceiling_oracle_minus_random_pp": 33.0,
+   "blank_drafts": 54
+  },
+  {
+   "judge": "紀錄分數 − 只數填了幾行",
+   "batch": "expTc 選擇器",
+   "unit": "份",
+   "gain": {
+    "what": "record − nonblank",
+    "pp": 1.1,
+    "ci95_cluster": [
+     -6.6,
+     8.7
+    ]
+   }
+  }
+ ],
+ "efamily": [
+  {
+   "batch": "expTc E 家族（全部；Haiku 依標記重寫）",
+   "unit": "行",
+   "Pf": 0.535,
+   "blank_share_of_wrong": 0.684,
+   "flag_precision_filled": 0.482,
+   "unflagged_filled_wrong_rate": 0.187,
+   "flag_recall_of_wrong_filled": 0.489,
+   "enrichment": 2.58,
+   "EB": {
+    "gain_vs_A_pp": 24.1,
+    "ci95_cluster": [
+     16.0,
+     33.3
+    ],
+    "sent_blank": 1008,
+    "sent_filled": 0,
+    "fixed_blank": 653,
+    "fixed_filled": 0,
+    "harm_b2w": 145,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.648
+   },
+   "ER": {
+    "gain_vs_A_pp": 28.2,
+    "ci95_cluster": [
+     19.9,
+     37.3
+    ],
+    "sent_blank": 1008,
+    "sent_filled": 473,
+    "fixed_blank": 664,
+    "fixed_filled": 103,
+    "harm_b2w": 134,
+    "harm_c2w_or_d": 4,
+    "C_blank": 0.659
+   },
+   "EN": {
+    "gain_vs_A_pp": 24.9,
+    "ci95_cluster": [
+     16.7,
+     33.9
+    ],
+    "sent_blank": 1008,
+    "sent_filled": 378,
+    "fixed_blank": 657,
+    "fixed_filled": 18,
+    "harm_b2w": 140,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.652
+   },
+   "ER_fixed_filled_over_flagged_wrong": 0.452
+  },
+  {
+   "batch": "expTc E 家族（公司；Haiku 依標記重寫）",
+   "unit": "行",
+   "Pf": 0.584,
+   "blank_share_of_wrong": 0.625,
+   "flag_precision_filled": 0.291,
+   "unflagged_filled_wrong_rate": 0.391,
+   "flag_recall_of_wrong_filled": 0.388,
+   "enrichment": 0.745,
+   "EB": {
+    "gain_vs_A_pp": 16.8,
+    "ci95_cluster": [
+     11.2,
+     22.3
+    ],
+    "sent_blank": 365,
+    "sent_filled": 0,
+    "fixed_blank": 168,
+    "fixed_filled": 0,
+    "harm_b2w": 140,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.46
+   },
+   "ER": {
+    "gain_vs_A_pp": 18.4,
+    "ci95_cluster": [
+     12.3,
+     24.5
+    ],
+    "sent_blank": 365,
+    "sent_filled": 292,
+    "fixed_blank": 175,
+    "fixed_filled": 12,
+    "harm_b2w": 133,
+    "harm_c2w_or_d": 3,
+    "C_blank": 0.479
+   },
+   "EN": {
+    "gain_vs_A_pp": 17.9,
+    "ci95_cluster": [
+     11.9,
+     23.7
+    ],
+    "sent_blank": 365,
+    "sent_filled": 258,
+    "fixed_blank": 171,
+    "fixed_filled": 8,
+    "harm_b2w": 136,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.468
+   },
+   "ER_fixed_filled_over_flagged_wrong": 0.141
+  },
+  {
+   "batch": "expTc E 家族（足球；Haiku 依標記重寫）",
+   "unit": "行",
+   "Pf": 0.507,
+   "blank_share_of_wrong": 0.722,
+   "flag_precision_filled": 0.79,
+   "unflagged_filled_wrong_rate": 0.112,
+   "flag_recall_of_wrong_filled": 0.579,
+   "enrichment": 7.073,
+   "EB": {
+    "gain_vs_A_pp": 27.7,
+    "ci95_cluster": [
+     16.1,
+     40.6
+    ],
+    "sent_blank": 643,
+    "sent_filled": 0,
+    "fixed_blank": 485,
+    "fixed_filled": 0,
+    "harm_b2w": 5,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.754
+   },
+   "ER": {
+    "gain_vs_A_pp": 33.1,
+    "ci95_cluster": [
+     21.3,
+     45.8
+    ],
+    "sent_blank": 643,
+    "sent_filled": 181,
+    "fixed_blank": 489,
+    "fixed_filled": 91,
+    "harm_b2w": 1,
+    "harm_c2w_or_d": 1,
+    "C_blank": 0.76
+   },
+   "EN": {
+    "gain_vs_A_pp": 28.3,
+    "ci95_cluster": [
+     16.9,
+     41.1
+    ],
+    "sent_blank": 643,
+    "sent_filled": 120,
+    "fixed_blank": 486,
+    "fixed_filled": 10,
+    "harm_b2w": 4,
+    "harm_c2w_or_d": 0,
+    "C_blank": 0.756
+   },
+   "ER_fixed_filled_over_flagged_wrong": 0.636
+  }
+ ],
+ "zero_config": [
+  {
+   "judge": "零設定：說做完卻沒寫要求的檔 ⇒ 退回（v3.7）",
+   "batch": "Colab DABstep 77×3、15 回合（CONCLUSION_20261002_COLAB_DABSTEP_V37）",
+   "unit": "格",
+   "A_correct": "97/231",
+   "A_failures": 134,
+   "visible_failures_missing_at_done": 42,
+   "V_reject_given_fail": 0.313,
+   "V_among_failures_at_done": 0.656,
+   "false_accept_given_accepted_at_done": 0.185,
+   "false_reject": "0（缺檔不可能是對的）",
+   "C": "C37 被退回 43 格，退回後答對 34（含 failed_step 13 次）≈0.79",
+   "harm": "0 次",
+   "gain": {
+    "what": "C37 − A（每題平均差；Wilcoxon，預註冊）",
+    "pp": 11.3,
+    "p": 0.0028,
+    "ci95": "取不到（結論只給 p）"
+   }
+  },
+  {
+   "judge": "同上（v3.6.1；不設回合上限）",
+   "batch": "u274：100 題 DABstep hard（CONCLUSION_20260928_NOCAP_UNSEEN_U274）",
+   "unit": "格",
+   "V_reject_given_fail": "取不到",
+   "C": "缺檔退回 31 跑之後 0 對（一半是模型出錯後被叫回來）",
+   "gain": {
+    "what": "C − A",
+    "pp": "9 對 10（答對題數）",
+    "p": 1.0,
+    "ci95": "取不到"
+   }
+  },
+  {
+   "judge": "零設定初版（五類退回）",
+   "batch": "DABstep 77 題正式批次（CONCLUSION_20260925_ZERO_CONFIG_DABSTEP；CLAUDE.md）",
+   "unit": "格",
+   "false_reject": "8 次退回全是誤報，其中 7 次退回的是對的答案",
+   "gain": {
+    "what": "C − A",
+    "pp": "沒有量到差別",
+    "p": "0.21／0.29（gemma／qwen）",
+    "ci95": "取不到"
+   }
+  }
+ ]
+}

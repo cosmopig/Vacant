@@ -19,7 +19,7 @@
 > - `build_apps_pool.py`、`bwrap_agent_netns.sh`、`netns_selftest_redo.py`。
 > - 這些的 sha256 在發射前補進來；**對抗審查沒結束，就不發射**。
 >
-> 來歷：設計出自 `decisions/notes/NOTE_20261129_ACCEPTANCE_SIGNAL_OFFLINE.md` 第 5 節（事後分析）。門檻與檢定力是用 `ctl34_g12` 的嘗試池（polyglot 題）模擬定的（附錄 A）。撰寫時看過 ctl12、ctl34、E4B、Haiku×cchard、Devin×cchard16 五批的結果；**本批的 APPS 題還沒選、也還沒跑**，撰寫者沒有看過任何模型在這些題上的結果。
+> 來歷：設計出自 `decisions/notes/NOTE_20261128_ACCEPTANCE_SIGNAL_OFFLINE.md` 第 5 節（事後分析）。門檻與檢定力是用 `ctl34_g12` 的嘗試池（polyglot 題）模擬定的（附錄 A）。撰寫時看過 ctl12、ctl34、E4B、Haiku×cchard、Devin×cchard16 五批的結果；**本批的 APPS 題還沒選、也還沒跑**，撰寫者沒有看過任何模型在這些題上的結果。
 >
 > 「證明」一詞只留給本批次的結果。本檔只寫事前規則。
 
@@ -199,7 +199,7 @@
   - pi 的 `contextWindow`、`maxTokens`、思考開關；
   - LM Studio 的載入參數：context length、parallel、量化檔、GPU offload；
   - 模型檔 sha256、pi 版本、harness sha。
-- 發射前由 preflight 從兩台實際讀出來，和計畫檔逐欄比對，結果存檔附 sha256。（ctl34 的教訓：分台差異不能再混入設定差。）
+- 發射前由 preflight 從兩台實際讀出來，和計畫檔逐欄比對，結果存檔附 sha256。（避免分台差異混入設定差；ctl34 兩台事後確認設定相同，主機差異仍無法歸因。）
 
 **沙箱**（計畫層級 `sandbox: "netns"`）：
 - `--unshare-net`，只放行該次嘗試用的那一個模型端點與推論路徑。
