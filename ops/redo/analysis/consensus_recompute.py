@@ -692,8 +692,175 @@ def part4(root, rows):
     return out
 
 
+# ---------- 第五節：95% 上界、一致度 AUC、selfcheck、COMMANDS、實驗一 cA 重評 ----------
+def bino_upper(n, alpha):
+    """0/n 的精確單尾上界（Clopper-Pearson）：1−alpha^(1/n)。"""
+    return 1 - alpha ** (1 / n)
+
+
+def hyper_p0(N, n, M):
+    pr = 1.0
+    for i in range(n):
+        pr *= max(0, (N - M - i)) / (N - i)
+    return pr
+
+
+def exp1_check(blk):
+    """由報告的比例反推整數計數，檢查各比例是否互洽；再用 exp1_combine.summarize 的判定規則重判（recall_lower95 取報告值，需逐組資料才能重抽）。"""
+    n = blk["units"]; F = round(blk["flagged_share"] * n); E = blk.get("errors") or round(blk["error_rate"] * n)
+    TP = round(blk["error_rate_flagged"] * F); fs = F / n; er = E / n
+    rc = TP / E; inn = TP / F; out = (E - TP) / (n - F); ratio = inn / out if out else None
+    ok = {"flagged_share": abs(fs - blk["flagged_share"]) < 1e-9, "error_rate": abs(er - blk["error_rate"]) < 1e-9, "recall": abs(rc - blk["recall"]) < 1e-9,
+          "err_out": abs(out - blk["error_rate_unflagged"]) < 1e-9, "ratio": abs(ratio - blk["rate_ratio"]) < 1e-9}
+    lo = blk["recall_lower95"]
+    if rc < 0.5 or fs > max(0.5, er + 0.25):
+        v = "FAIL"
+    elif rc >= 0.7 and (lo or 0) >= 0.6 and (ratio is None or ratio >= 3) and fs <= max(0.3, er + 0.15):
+        v = "PASS"
+    else:
+        v = "UNRESOLVED"
+    return {"units": n, "flagged": F, "errors": E, "errors_in_flagged": TP, "flagged_share": round(fs, 4), "error_rate": round(er, 4), "recall": round(rc, 4),
+            "recall_lower95_reported": round(lo, 4), "rate_ratio": round(ratio, 3), "fail_threshold_flagged_share": round(max(0.5, er + 0.25), 4),
+            "pass_threshold_flagged_share": round(max(0.3, er + 0.15), 4), "ratios_consistent_with_counts": ok, "verdict_recomputed": v, "verdict_reported": blk["verdict"],
+            "verdict_match": v == blk["verdict"], "_n_F_E_TP": (n, F, E, TP)}
+
+
+def part5(root, rows, per_draft, ctx4=None):
+    d = root / AUD / "judge_v2v3_20261128"; ld = lambda p: json.loads(p.read_text()); out = {}
+    # 1. 上界
+    out["upper_bounds_0_of_20"] = {
+        "population": {"K-等值": 131, "U-等值": 53}, "sample_per_stratum": 20,
+        "binomial_one_sided_95": {"rate": round(bino_upper(20, 0.05), 4), "K": round(bino_upper(20, 0.05) * 131, 1), "U": round(bino_upper(20, 0.05) * 53, 1)},
+        "binomial_two_sided_95(alpha/2)": {"rate": round(bino_upper(20, 0.025), 4), "K": round(bino_upper(20, 0.025) * 131, 1), "U": round(bino_upper(20, 0.025) * 53, 1)},
+        "hypergeometric_one_sided_95": {"K": max(M for M in range(132) if hyper_p0(131, 20, M) >= 0.05), "U": max(M for M in range(54) if hyper_p0(53, 20, M) >= 0.05)},
+        "stratified_joint_hypergeometric_total_184": None, "pooled_srs_hypergeometric_40_of_184_(INVALID_for_stratified_design)": max(M for M in range(185) if hyper_p0(184, 40, M) >= 0.05)}
+    best = 0
+    for T in range(185):
+        if max(hyper_p0(131, 20, a) * hyper_p0(53, 20, T - a) for a in range(max(0, T - 53), min(131, T) + 1)) >= 0.05:
+            best = T
+    ub = out["upper_bounds_0_of_20"]; ub["stratified_joint_hypergeometric_total_184"] = best
+    ub["sum_of_separate_hypergeometric"] = ub["hypergeometric_one_sided_95"]["K"] + ub["hypergeometric_one_sided_95"]["U"]
+    ub["sum_of_separate_binomial"] = int(ub["binomial_one_sided_95"]["K"]) + int(ub["binomial_one_sided_95"]["U"])
+    A_ = ld(d / "equiv_audit.json"); E_ = [json.loads(l) for l in (d / "err_taxonomy_lines.jsonl").read_text().splitlines()]
+    cl = {e["key"]: e for e in E_}; lo = A_.get("looseness", {})
+    out["looseness_reported"] = {"month_name_differs": lo.get("month_name_differs"), "ticker_partial": lo.get("ticker_value_subset_of_several_listings"),
+                                 "ticker_partial_keys_classes": [[cl[k]["class"], cl[k]["equiv_rule"]] if k in cl else None for k in lo.get("ticker_partial_keys", [])],
+                                 "ticker_partial_keys_in_audit_sample": [k in set(A_["equiv_audit_sample"]["K-等值"]["keys"]) | set(A_["equiv_audit_sample"]["U-等值"]["keys"]) for k in lo.get("ticker_partial_keys", [])],
+                                 "verifiable_from_git": "只能核：兩個行鍵在步驟 0 的等值集合內（U-等值／ticker）、不在抽樣內；『月名不同 0 行』需要值與答案，git 沒有"}
+    out["reported_upper_bound_block"] = A_.get("upper_bound_95")
+    # 2. 一致度 AUC 兩種算法（取第三節輸出）
+    # 3. selfcheck 與逐臂交叉
+    sc = ld(d / "regrade/selfcheck_all_outputs.json")
+    cells = ld(root / AUD / "expTc_20261128/expTc_confirm_analysis_20261128_v4_b61.json")["per_pair_arm_cells"]
+    byarm = collections.Counter()
+    for k, x in cells.items():
+        s, r, arm = k.split("/")
+        if not x.get("infra_void"):
+            byarm[arm] += x["final_filled"] - x["correct_after"]
+    out["selfcheck"] = {"reports": sc["reports"], "reports_expected": 150 + 60 * 4 + 150 * 3, "agree": sc["agree"], "agree_sum_by_arm": sum(sc["by_arm"].values()), "disagree": sc["disagree"],
+                        "c0_agree_equals_wrong_filled_lines_466": sc["by_arm"]["c0|agree"] == sum(1 for r in rows if r["wrong"]),
+                        "feedback_arms_agree_vs_final_filled_minus_correct_after_(original)": {a: [sc["by_arm"][f"{a}|agree"], byarm[a]] for a in ("A", "G", "T", "TB")},
+                        "note": "agree 計的是『原評分判非對、有值』的行，兩版判定相同（含雙方都判不等值）；A／G／T／TB 的數目應接近 final_filled−correct_after 的合計（A 多 1＝cc-s10 r1 c09 的 filled 多算；G 差 2 未解釋），E 臂無對應欄位無法交叉"}
+    # COMMANDS.md 靜態核對
+    txt = (d / "regrade/COMMANDS.md").read_text(); code = re.search(r"```bash\n(.*?)```", txt, re.S).group(1)
+    cmds = []; cur = ""
+    for ln in code.splitlines():
+        if ln.strip().startswith("#") and not cur:
+            continue
+        cur += " " + ln.strip().rstrip("\\").strip()
+        if not ln.rstrip().endswith("\\"):
+            cmds.append(cur.strip()); cur = ""
+    chk = []
+    for c in cmds:
+        toks = c.split()
+        if not toks or toks[0] != "python3":
+            continue
+        script = toks[1]; pth = root / script
+        ent = {"script": script, "exists": pth.is_file()}
+        if pth.is_file():
+            src = pth.read_text(); rest = toks[2:]
+            if script.endswith("regrade_sensitivity.py") and "--" in rest and not rest[0].startswith("--selfcheck"):
+                target = rest[0]; rest = rest[rest.index("--") + 1:]; tp = root / target; ent["target"] = target; ent["target_exists"] = tp.is_file()
+                src = tp.read_text() if tp.is_file() else ""
+            flags = sorted({t for t in rest if t.startswith("--") and t != "--"})
+            ent["flags_checked"] = {f: (f'"{f}"' in src or f"'{f}'" in src) for f in flags}
+            if script.endswith("exp1_regrade_score.py") or script.endswith("regrade_selfcheck_all.py"):
+                ent["flags_checked"] = {}
+        chk.append(ent)
+    out["commands_md"] = {"commands": len(chk), "all_scripts_exist": all(c["exists"] and c.get("target_exists", True) for c in chk),
+                          "flags_not_found": [(c["script"], f) for c in chk for f, ok in c["flags_checked"].items() if not ok],
+                          "uses_private_paths": ["$D2_PRIVATE", "~/dev/ops"], "reproducible_from_git_alone": False,
+                          "outputs_referenced_missing_from_git": [x for x in ("exp1cA_flags_regrade_repro.json", "exp1cA_flags_regrade_b24.json", "exp1_combined_regrade_repro.json", "exp1_combined_regrade_b24.json", "exp1cA_score_strict_regrade.json")
+                                                                    if not list((d / "regrade").glob(x))]}
+    # 4. 實驗一 cA 重評
+    S1 = ld(d / "regrade/exp1_regrade_summary.json"); e1 = {}
+    for ver in ("original_prereg_defs", "regraded_prereg_defs", "b24_original", "b24_regraded"):
+        b = S1[ver]; e1[ver] = {"combined": exp1_check(b["combined"]), "software_plus_companies": exp1_check(b["software_plus_companies"]),
+                                "by_domain": {k: exp1_check(v) for k, v in b["by_domain"].items()}}
+        comb = e1[ver]["combined"]["_n_F_E_TP"]; parts = [e1[ver]["software_plus_companies"]["_n_F_E_TP"], e1[ver]["by_domain"]["football biographies (Wikipedia)"]["_n_F_E_TP"]]
+        e1[ver]["additive_sc_plus_football_equals_combined"] = all(sum(p[i] for p in parts) == comb[i] for i in range(4))
+        sc_ = e1[ver]["software_plus_companies"]["_n_F_E_TP"]; dd = [e1[ver]["by_domain"][k]["_n_F_E_TP"] for k in ("companies (Wikipedia)", "software (Wikipedia)")]
+        e1[ver]["additive_companies_plus_software_equals_sc"] = all(sum(p[i] for p in dd) == sc_[i] for i in range(4))
+        e1[ver]["final_recomputed"] = ("FAIL" if (e1[ver]["combined"]["verdict_recomputed"] == "PASS" and e1[ver]["software_plus_companies"]["verdict_recomputed"] != "PASS") else e1[ver]["combined"]["verdict_recomputed"])
+        e1[ver]["final_reported"] = b.get("final_verdict", S1[ver].get("final_verdict"))
+        for blk in [e1[ver]["combined"], e1[ver]["software_plus_companies"]] + list(e1[ver]["by_domain"].values()):
+            blk.pop("_n_F_E_TP", None)
+    fl = S1["flips_cA_rows"]
+    e1["flips"] = {"total": sum(fl.values()), "age": sum(v for k, v in fl.items() if "|age|" in k), "ticker": sum(v for k, v in fl.items() if "|ticker|" in k),
+                   "missing_status_flips": sum(v for k, v in fl.items() if k.startswith("missing")),
+                   "errors_drop_original_to_regraded_combined": round(S1["original_prereg_defs"]["combined"]["error_rate"] * 3475) - S1["regraded_prereg_defs"]["combined"]["errors"]}
+    e1["filled_only_version"] = {"computable_from_git": False,
+                                 "why": "需要逐行（status、flagged、set）；git 只有彙總。exp1_combine.py 的輸出已含 combined_excl_missing／sc_excl_missing（排除 status＝missing），但重評那次的這兩塊沒進 git",
+                                 "caveat": "status＝missing 是『canon_strict 解不出』，包含寫了解析不出的值，不等於空白；排除它與排除空白不同"}
+    out["exp1_cA"] = e1
+    return out
+
+
+def part6(root, exam37_json=None):
+    """探索批次（expT）重評：只能核對彙總（regrade/ 沒有逐格的重評欄）；並列原評分與重評；若給 --exam37-json（原評分稽核腳本輸出）則抽出各版本原評分數字。"""
+    d = root / AUD / "judge_v2v3_20261128/regrade"; P = root / AUD / "expT_exam37_20261128/expT"; ld = lambda p: json.loads(p.read_text()); out = {}
+    R = ld(d / "expT_metrics_regrade.json"); O = ld(P / "expT_metrics.json"); Re = ld(d / "escape_regrade/expT_escape_summary.json"); Oe = ld(P / "expT_escape_summary.json")
+    pp = lambda x: None if x is None else round(100 * x, 2)
+    cmpx = {}
+    for k in ("T_vs_G", "T_vs_TB", "TE_vs_TER", "T_vs_A", "G_vs_A", "TB_vs_A", "TO_vs_A", "T_vs_TO"):
+        cmpx[k] = {"original_pp": pp(O["comparisons"][k]["per_set_correct_prop_diff"]), "original_ci95_pp": [pp(v) for v in O["comparisons"][k]["per_set_correct_prop_diff_ci95"]],
+                   "regraded_pp": pp(R["comparisons"][k]["per_set_correct_prop_diff"]), "regraded_ci95_pp": [pp(v) for v in R["comparisons"][k]["per_set_correct_prop_diff_ci95"]]}
+    out["comparisons_all_pairs"] = cmpx
+    sens = {}
+    for v in ("all", "a_exclude_any_escape_pairs", "b_exclude_flags_future_pairs"):
+        for k in ("T_vs_G", "T_vs_TB", "TE_vs_TER"):
+            o, r = Oe["sensitivity"][v][k], Re["sensitivity"][v][k]
+            sens[f"{v}|{k}"] = {"pairs": [o["paired_cells"], r["paired_cells"]], "original_pp": pp(o["per_set_correct_prop_diff"]), "original_ci95_pp": [pp(x) for x in o["per_set_correct_prop_diff_ci95"]],
+                                "regraded_pp": pp(r["per_set_correct_prop_diff"]), "regraded_ci95_pp": [pp(x) for x in r["per_set_correct_prop_diff_ci95"]]}
+    out["escape_list_v1_sensitivity"] = sens
+    out["escape_lists_identical_original_vs_regrade"] = {"a": Oe["excluded_pairs_a"] == Re["excluded_pairs_a"], "b": Oe["excluded_pairs_b"] == Re["excluded_pairs_b"]}
+    b = ld(d / "expT_b48_regrade.json")
+    out["b48_literal_v4"] = {"excluded_pairs": b["excluded_pairs"], "remaining_pairs": b["versions"]["original"]["T_vs_G"]["pairs"], "original_equals_regraded": b["versions"]["original"] == b["versions"]["regraded"],
+                             "T_vs_G": b["versions"]["regraded"]["T_vs_G"], "note": "10 對全對（兩臂每行都對）時，重評不可能改變差；不是『沒有效果』，是無法判讀"}
+    out["flipped_correct_lines_by_arm"] = {a: R["by_arm"][a]["correct_lines_after_total"] - O["by_arm"][a]["correct_lines_after_total"] for a in R["by_arm"]}
+    out["flipped_c0_lines"] = R["by_arm"]["A"]["correct_lines_before_total"] - O["by_arm"]["A"]["correct_lines_before_total"]
+    out["verdicts"] = {k: [O["readout"][k].get("verdict"), R["readout"][k].get("verdict")] for k in ("T_vs_G", "T_vs_TB", "TE_vs_TER")}
+    out["per_pair_regraded_available_in_git"] = False
+    out["missing_for_requested_variants"] = ("逐格重評後的 final_correct／c0_correct／final_filled（expT_cells）與逐行狀態（expT_lines）；regrade/ 只有彙總。"
+                                             "(b′)、加抄寫兩對、(b) 拿掉空白初稿、(b) 加讀別格報告的對、B48 字面 v4 的非全對版本、最少拿掉幾對的窮舉，都以『每一對』的重評正確率為輸入，無法由彙總還原。")
+    if exam37_json:
+        e = ld(pathlib.Path(exam37_json)); er = e["escape_review"]; l4 = e["list_v4_review"]; w = e["who_read_review"]["versions"]
+        def pick(c):
+            return {"pairs": c["pairs"], "diff_pp": c["diff"], "boot95_pp": c["boot95"]}
+        out["original_scoring_variants_T_vs_G"] = {
+            "all": pick(er["comparisons"]["all"]["T_vs_G"]), "a": pick(er["comparisons"]["a"]["T_vs_G"]), "b": pick(er["comparisons"]["b"]["T_vs_G"]),
+            "b_prime(=b+2抄寫對)": pick(er["comparisons"]["b_prime"]["T_vs_G"]), "b_minus_empty_drafts": pick(er["comparisons"]["b_minus_empty"]["T_vs_G"]),
+            "b_prime_minus_empty_drafts": pick(er["comparisons"]["b_prime_minus_empty"]["T_vs_G"]),
+            "b_plus_report_readers(v4)": pick(w["b_v4_plus_report_readers"]["T_vs_G"]), "b_prime_plus_report_readers(v4)": pick(w["b_prime_v4_plus_report_readers"]["T_vs_G"]),
+            "B48_literal_v4_a": pick(l4["comparisons"]["a_v2"]["T_vs_G"]), "B48_literal_v4_b": pick(l4["comparisons"]["b_v2"]["T_vs_G"]), "B48_literal_v4_b_prime": pick(l4["comparisons"]["b_prime_v2"]["T_vs_G"]),
+            "min_drop_exact_all": er["T_vs_G_all_min_drop_exact"], "min_drop_exact_b": er["T_vs_G_b_min_drop_exact"], "min_drop_exact_b_prime": er["T_vs_G_b_prime_min_drop_exact"],
+            "min_drop_exact_v4_b": {k: l4["T_vs_G_min_drop_exact"]["b_v2"][k] for k in ("k", "dropped", "point")},
+            "source": "expT_exam37_audit_recompute.py 預設參數，原評分（3b60ef24a 稽核包）"}
+    return out
+
+
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--out", required=True); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--out", required=True); ap.add_argument("--exam37-json"); a = ap.parse_args()
     per_draft, pools, rep = load(a.root)
     res = {"note": "只用已提交資料；逐行多數決／逐行 oracle／一致度旗標無法由提交資料重算（見 not_recomputable）。",
            "seed": SEED, "bootstrap": f"組群集，{NB} 次，percentile [int(.025*B), int(.975*B)-1]", "recomputed": {}, "vs_reported": []}
@@ -750,6 +917,8 @@ def main():
     res["r1_r5_lines"] = part2(pathlib.Path(a.root), per_draft, rep, ctx)
     res["judge_v2v3_taxonomy"] = part3(pathlib.Path(a.root), ctx.get("rows"))
     res["regrade_sensitivity"] = part4(pathlib.Path(a.root), ctx.get("rows"))
+    res["exp1_and_bounds"] = part5(pathlib.Path(a.root), ctx.get("rows"), per_draft)
+    res["expT_regrade"] = part6(pathlib.Path(a.root), a.exam37_json)
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     (out / "consensus_recompute.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
     bad = [r for r in res["vs_reported"] if not r["match"]]
